@@ -106,6 +106,7 @@ MyObjectCounter::MyObjectCounter(const edm::ParameterSet& iConfig):
   _trigger( iConfig.getParameter< edm::InputTag >( "trigger" ) ),
   _triggerEvent( iConfig.getParameter< edm::InputTag >( "triggerEvent" ) ),
   _matcherName( iConfig.getParameter< std::string >( "matcherName" ) )
+
 {  
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", true);
  
@@ -202,18 +203,6 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
   edm::Handle< TriggerObjectCollection > triggerObjects;
   bool with_TriggerObjects = iEvent.getByLabel( _trigger, triggerObjects );
- 
-
-  if(!with_TriggerEvent || !with_TriggerObjects)
-    {
-      std::cout << "I can not do trigger matching without trigger objects or"
-		" trigger events" << std::endl;
-      return;
-    }
-
-  // PAT trigger helper for trigger matching information
-  const pat::helper::TriggerMatchHelper matchHelper;
-  const TriggerObjectMatch * triggerMatch( triggerEvent->triggerObjectMatchResult( _matcherName ) );
 
 
   // Start to fill the main root branches
@@ -230,6 +219,33 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   bool hasPho = iEvent.getByLabel(_phoLabel,   PhotonHandle);
 
   if(hasPho){
+    
+    // first do photon trigger matching if information 
+    // is available
+    if(with_TriggerEvent && with_TriggerObjects)
+      {
+	// PAT trigger helper for trigger matching information
+	const pat::helper::TriggerMatchHelper matchHelper;
+	const TriggerObjectMatch * triggerMatch( triggerEvent->triggerObjectMatchResult( _matcherName ) );
+
+	for ( size_t iPhoton = 0; iPhoton < PhotonHandle->size(); ++iPhoton ){	 
+	  const reco::CandidateBaseRef candBaseRef( PhotonRef( PhotonHandle, iPhoton ) );
+	  const TriggerObjectRef trigRef( matchHelper.triggerMatchObject( candBaseRef, triggerMatch, iEvent, *triggerEvent ) );
+	  // fill histograms
+	  if ( trigRef.isAvailable() ) { 
+	    std::cout << candBaseRef->pt() << "\t" << trigRef->pt() << std::endl;
+	  }
+	}// loop over pat::photons
+
+      }
+    else
+      {
+	std::cout << "I can not do trigger matching without"
+	  "trigger objects or trigger events" << std::endl;
+      }
+  
+
+
     // initialize the variables of ntuples
     PhoInfo.Initialize();
     memset(&PhoInfo,0x00,sizeof(PhoInfo));
@@ -280,13 +296,6 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       } // check generator-level matches
 	
 
-      const reco::CandidateBaseRef candBaseRef( PhotonRef( PhotonHandle, PhoInfo.Size ) );
-      const TriggerObjectRef trigRef( matchHelper.triggerMatchObject( candBaseRef, triggerMatch, iEvent, *triggerEvent ) );
-      // fill histograms
-      if ( trigRef.isAvailable() ) { 
-	std::cout << candBaseRef->pt() << "\t" << trigRef->pt() << "\t" << 
-	  it_ph->pt() << std::endl;
-      }
       PhoInfo.Size++;
     }
   } // if there are photons
