@@ -208,7 +208,7 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   // Start to fill the main root branches
   // initialize the variables of ntuples
   EvtInfo.Initialize();  
-  memset(&EvtInfo,0x00,sizeof(EvtInfo));
+
   
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
@@ -248,7 +248,7 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
     // initialize the variables of ntuples
     PhoInfo.Initialize();
-    memset(&PhoInfo,0x00,sizeof(PhoInfo));
+
 
   
     for( std::vector<pat::Photon>::const_iterator it_ph = PhotonHandle->begin(); 
@@ -313,7 +313,7 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   // initialize the variables of ntuples
   if(hasMuo || hasEle){
     LepInfo.Initialize();
-    memset(&LepInfo,0x00,sizeof(LepInfo));
+
   
     for( std::vector<pat::Muon>::const_iterator it_mu = MuonHandle->begin(); 
 	 it_mu != MuonHandle->end(); it_mu++ ) {
@@ -360,7 +360,8 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       LepInfo.Phi        [LepInfo.Size] = it_el->phi();
       LepInfo.TrackIso   [LepInfo.Size] = it_el->trackIso();
       LepInfo.EcalIso    [LepInfo.Size] = it_el->ecalIso();
-      LepInfo.HcalIso    [LepInfo.Size] = it_el->hcalIso();				LepInfo.Size++;
+      LepInfo.HcalIso    [LepInfo.Size] = it_el->hcalIso();				
+      LepInfo.Size++;
 
       HistoInfo.h_leppt -> Fill(it_el->pt());
       HistoInfo.h_lepeta-> Fill(it_el->eta());
