@@ -1,6 +1,7 @@
 #include "NtupleClasses.hh"
 
 ClassImp(SY_NT::PhoObj);
+ClassImp(SY_NT::GenObj);
 
 #define dummy -9999
 
