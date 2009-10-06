@@ -6,7 +6,8 @@
 #include <TFile.h>
 
 using namespace std;
-void read_Wg(std::string inputfile, double totalxsec)
+
+void read_Wg(std::string inputfile, double totalxsec, int baur=0)
 {
   // Booking histograms
   int ntotal=0;
@@ -162,7 +163,7 @@ void read_Wg(std::string inputfile, double totalxsec)
   fin.open(name);
   cout << "Opening " << name << endl;
   
-  const int NCOL=16; // photon, charged lepton, neutral lepton
+  const int NCOL=baur == 1? 17: 16; // photon, charged lepton, neutral lepton
   double cl[NCOL];
 
   for(int j=0;j<NCOL;j++)
@@ -176,12 +177,14 @@ void read_Wg(std::string inputfile, double totalxsec)
     TLorentzVector nlepton(cl[8],cl[9],cl[10],cl[11]);
     TLorentzVector gamma_FSR(cl[12],cl[13],cl[14],cl[15]);
 
+    double weight = baur==1? cl[NCOL] : 1.0;
+    
     double mW = (clepton+nlepton).M();
     double mWg= (clepton+nlepton+gamma).M();
     double dR = gamma.DeltaR(clepton);
     double gpt  =gamma.Pt();
     double geta =gamma.Eta();
-
+    
 
     double mWg_FSR  = (clepton+nlepton+gamma_FSR).M();
     double dR_FSR   = gamma_FSR.DeltaR(clepton);
@@ -210,6 +213,9 @@ void read_Wg(std::string inputfile, double totalxsec)
 			   0,
 			   gamma_FSR.Pt());
 
+
+    
+
     double mT = (met_lv+lep_lv).M();
     double mT3_ISR = (met_lv+lep_lv + gISR_lv).M();
     double mT3_FSR = (met_lv+lep_lv + gFSR_lv).M();
@@ -237,48 +243,48 @@ void read_Wg(std::string inputfile, double totalxsec)
     nsubtotal++;
     
     if(hasISR){
-      h_mW->Fill(mW);
-      h_mWg->Fill(mWg);
-      h_mW3->Fill(mW,mWg);
-      h_dR->Fill(dR);
+      h_mW->Fill(mW, weight);
+      h_mWg->Fill(mWg, weight);
+      h_mW3->Fill(mW,mWg, weight);
+      h_dR->Fill(dR, weight);
 
-      hISR_mW->Fill(mW);
-      hISR_mWg->Fill(mWg);
-      hISR_mW3->Fill(mW,mWg);
-      hISR_dR->Fill(dR);
+      hISR_mW->Fill(mW, weight);
+      hISR_mWg->Fill(mWg, weight);
+      hISR_mW3->Fill(mW,mWg, weight);
+      hISR_dR->Fill(dR, weight);
 
-      h_gptb->Fill(gpt);
-      h_lptb->Fill(lpt);
-      h_nptb->Fill(npt);
+      h_gptb->Fill(gpt, weight);
+      h_lptb->Fill(lpt, weight);
+      h_nptb->Fill(npt, weight);
 
-      h_getab->Fill(geta);
-      h_letab->Fill(leta);
-      h_netab->Fill(neta);
+      h_getab->Fill(geta, weight);
+      h_letab->Fill(leta, weight);
+      h_netab->Fill(neta, weight);
 
-      hISR_gptb->Fill(gpt);
+      hISR_gptb->Fill(gpt, weight);
 
-      hmT_ISRb->Fill(mT);
-      hmT3_ISRb->Fill(mT3_ISR);
-      hmT3mT_ISRb->Fill(mT,mT3_ISR);
+      hmT_ISRb->Fill(mT, weight);
+      hmT3_ISRb->Fill(mT3_ISR, weight);
+      hmT3mT_ISRb->Fill(mT,mT3_ISR, weight);
       
       if(leadIsISR){
-	hlead_mW->Fill(mW);
-	hlead_mWg->Fill(mWg);
-	hlead_mW3->Fill(mW,mWg);
-	hlead_dR->Fill(dR);
+	hlead_mW->Fill(mW, weight);
+	hlead_mWg->Fill(mWg, weight);
+	hlead_mW3->Fill(mW,mWg, weight);
+	hlead_dR->Fill(dR, weight);
 
-	hleadISR_mW->Fill(mW);
-	hleadISR_mWg->Fill(mWg);
-	hleadISR_mW3->Fill(mW,mWg);
-	hleadISR_dR->Fill(dR);
+	hleadISR_mW->Fill(mW, weight);
+	hleadISR_mWg->Fill(mWg, weight);
+	hleadISR_mW3->Fill(mW,mWg, weight);
+	hleadISR_dR->Fill(dR, weight);
 
-	hlead_gptb->Fill(gpt);
-	hlead_lptb->Fill(lpt);
-	hlead_nptb->Fill(npt);
+	hlead_gptb->Fill(gpt, weight);
+	hlead_lptb->Fill(lpt, weight);
+	hlead_nptb->Fill(npt, weight);
 
-	hlead_getab->Fill(geta);
-	hlead_letab->Fill(leta);
-	hlead_netab->Fill(neta);
+	hlead_getab->Fill(geta, weight);
+	hlead_letab->Fill(leta, weight);
+	hlead_netab->Fill(neta, weight);
       }
 
     }
@@ -286,59 +292,59 @@ void read_Wg(std::string inputfile, double totalxsec)
     if(hasFSR)
       {
 
-	h_mW->Fill(mW);
-	h_mWg->Fill(mWg_FSR);
-	h_mW3->Fill(mW,mWg_FSR);
-	h_dR->Fill(dR_FSR);
+	h_mW->Fill(mW, weight);
+	h_mWg->Fill(mWg_FSR, weight);
+	h_mW3->Fill(mW,mWg_FSR, weight);
+	h_dR->Fill(dR_FSR, weight);
 
-	hFSR_mW->Fill(mW);
-	hFSR_mWg->Fill(mWg_FSR);
-	hFSR_mW3->Fill(mW,mWg_FSR);
-	hFSR_dR->Fill(dR_FSR);
+	hFSR_mW->Fill(mW, weight);
+	hFSR_mWg->Fill(mWg_FSR, weight);
+	hFSR_mW3->Fill(mW,mWg_FSR, weight);
+	hFSR_dR->Fill(dR_FSR, weight);
 
-	h_gptb->Fill(gpt_FSR);
-	h_lptb->Fill(lpt);
-	h_nptb->Fill(npt);
+	h_gptb->Fill(gpt_FSR, weight);
+	h_lptb->Fill(lpt, weight);
+	h_nptb->Fill(npt, weight);
 
-	h_getab->Fill(geta_FSR);
-	h_letab->Fill(leta);
-	h_netab->Fill(neta);
+	h_getab->Fill(geta_FSR, weight);
+	h_letab->Fill(leta, weight);
+	h_netab->Fill(neta, weight);
 
-	hFSR_gptb->Fill(gpt_FSR);
+	hFSR_gptb->Fill(gpt_FSR, weight);
 
-	hmT_FSRb->Fill(mT);
-	hmT3_FSRb->Fill(mT3_FSR);
-	hmT3mT_FSRb->Fill(mT,mT3_FSR);
+	hmT_FSRb->Fill(mT, weight);
+	hmT3_FSRb->Fill(mT3_FSR, weight);
+	hmT3mT_FSRb->Fill(mT,mT3_FSR, weight);
 
 	if(leadIsFSR){
-	  hlead_mW->Fill(mW);
-	  hlead_mWg->Fill(mWg_FSR);
-	  hlead_mW3->Fill(mW,mWg_FSR);
-	  hlead_dR->Fill(dR_FSR);
+	  hlead_mW->Fill(mW, weight);
+	  hlead_mWg->Fill(mWg_FSR, weight);
+	  hlead_mW3->Fill(mW,mWg_FSR, weight);
+	  hlead_dR->Fill(dR_FSR, weight);
 
-	  hleadFSR_mW->Fill(mW);
-	  hleadFSR_mWg->Fill(mWg_FSR);
-	  hleadFSR_mW3->Fill(mW,mWg_FSR);
-	  hleadFSR_dR->Fill(dR_FSR);
+	  hleadFSR_mW->Fill(mW, weight);
+	  hleadFSR_mWg->Fill(mWg_FSR, weight);
+	  hleadFSR_mW3->Fill(mW,mWg_FSR, weight);
+	  hleadFSR_dR->Fill(dR_FSR, weight);
 
-	  hlead_gptb->Fill(gpt_FSR);
-	  hlead_lptb->Fill(lpt);
-	  hlead_nptb->Fill(npt);
+	  hlead_gptb->Fill(gpt_FSR, weight);
+	  hlead_lptb->Fill(lpt, weight);
+	  hlead_nptb->Fill(npt, weight);
 
-	  hlead_getab->Fill(geta_FSR);
-	  hlead_letab->Fill(leta);
-	  hlead_netab->Fill(neta);
+	  hlead_getab->Fill(geta_FSR, weight);
+	  hlead_letab->Fill(leta, weight);
+	  hlead_netab->Fill(neta, weight);
 	}
 
       }
           
-    if(hasFSR && hasISR)h_diff->Fill(gpt-gpt_FSR);
+//     if(hasFSR && hasISR)h_diff->Fill(gpt-gpt_FSR, weight);
 
-    // muon channel LSP's cuts
+//     // muon channel LSP's cuts
 //     bool photonCut_ISR = gpt>10.0 && fabs(geta)<2.7;
 //     bool photonCut_FSR = gpt_FSR > 10.0 && fabs(geta_FSR)<2.7;
-//     if(!photonCut_ISR && !photonCut_FSR)continue;
-//     //     if(!photonCut_ISR)continue;
+// //     if(!photonCut_ISR && !photonCut_FSR)continue;
+//     if(!photonCut_ISR)continue;
 //     if(lpt<5.0)continue;
 //     if(npt<20.0)continue;
 //     if(fabs(leta)>2.7)continue;
@@ -347,11 +353,11 @@ void read_Wg(std::string inputfile, double totalxsec)
     
 //     bool photonCut_ISR = gpt>20.0 && fabs(geta)<2.7 && dR>1.1;
 //     bool photonCut_FSR = gpt_FSR > 20.0 && fabs(geta_FSR)<2.7 && dR_FSR>1.1;
-//     if(!photonCut_ISR && !photonCut_FSR)continue;
-//     //     if(!photonCut_ISR)continue;
+// //      if(!photonCut_ISR && !photonCut_FSR)continue;
+//     if(!photonCut_ISR)continue;
 //     if(lpt<15.0)continue;
 //     if(fabs(leta)>2.7)continue;
-//     if(mT < 60 || mT > 110)continue;
+//     if(mT < 60)continue;
 //     if(npt<20.0)continue;
 
 
@@ -367,115 +373,115 @@ void read_Wg(std::string inputfile, double totalxsec)
 
 
     // CDF cuts
-    bool photonCut_ISR = gpt> 7.0 && dR>0.7;
-    bool photonCut_FSR = gpt_FSR > 7.0 && dR_FSR>0.7;
-    if(!photonCut_ISR && !photonCut_FSR)continue;
-//     if(!photonCut_ISR)continue;
+     bool photonCut_ISR = gpt> 7.0 && dR>0.7;
+     bool photonCut_FSR = gpt_FSR > 7.0 && dR_FSR>0.7;
+     if(!photonCut_ISR && !photonCut_FSR)continue;
+//      if(!photonCut_ISR)continue;
 
 
     npass++;
     
     if(hasISR){
-      h_gpta->Fill(gpt);
-      h_lpta->Fill(lpt);
-      h_npta->Fill(npt);
+      h_gpta->Fill(gpt, weight);
+      h_lpta->Fill(lpt, weight);
+      h_npta->Fill(npt, weight);
 
-      h_getaa->Fill(geta);
-      h_letaa->Fill(leta);
-      h_netaa->Fill(neta);
+      h_getaa->Fill(geta, weight);
+      h_letaa->Fill(leta, weight);
+      h_netaa->Fill(neta, weight);
     
 
-      h_mW2->Fill(mW);
-      h_mWg2->Fill(mWg);
-      h_mW32->Fill(mW,mWg);
-      h_dR2->Fill(dR);
+      h_mW2->Fill(mW, weight);
+      h_mWg2->Fill(mWg, weight);
+      h_mW32->Fill(mW,mWg, weight);
+      h_dR2->Fill(dR, weight);
 
       
       if(photonCut_ISR){
-	hISR_mW2->Fill(mW);
-	hISR_mWg2->Fill(mWg);
-	hISR_mW32->Fill(mW,mWg);
-	hISR_dR2->Fill(dR);
-	hISR_gpta->Fill(gpt);
-	hmT_ISRa->Fill(mT);
-	hmT3_ISRa->Fill(mT3_ISR);
-	hmT3mT_ISRa->Fill(mT,mT3_ISR);
+	hISR_mW2->Fill(mW, weight);
+	hISR_mWg2->Fill(mWg, weight);
+	hISR_mW32->Fill(mW,mWg, weight);
+	hISR_dR2->Fill(dR, weight);
+	hISR_gpta->Fill(gpt, weight);
+	hmT_ISRa->Fill(mT, weight);
+ 	hmT3_ISRa->Fill(mT3_ISR, weight);
+	hmT3mT_ISRa->Fill(mT,mT3_ISR, weight);
       }
 
 
       if(leadIsISR && photonCut_ISR){
-	hlead_gpta->Fill(gpt);
-	hlead_lpta->Fill(lpt);
-	hlead_npta->Fill(npt);
+	hlead_gpta->Fill(gpt, weight);
+	hlead_lpta->Fill(lpt, weight);
+	hlead_npta->Fill(npt, weight);
 
-	hlead_getaa->Fill(geta);
-	hlead_letaa->Fill(leta);
-	hlead_netaa->Fill(neta);
+	hlead_getaa->Fill(geta, weight);
+	hlead_letaa->Fill(leta, weight);
+	hlead_netaa->Fill(neta, weight);
     
 
-	hlead_mW2->Fill(mW);
-	hlead_mWg2->Fill(mWg);
-	hlead_mW32->Fill(mW,mWg);
-	hlead_dR2->Fill(dR);
+	hlead_mW2->Fill(mW, weight);
+	hlead_mWg2->Fill(mWg, weight);
+	hlead_mW32->Fill(mW,mWg, weight);
+	hlead_dR2->Fill(dR, weight);
 
-	hleadISR_mW2->Fill(mW);
-	hleadISR_mWg2->Fill(mWg);
-	hleadISR_mW32->Fill(mW,mWg);
-	hleadISR_dR2->Fill(dR);
+	hleadISR_mW2->Fill(mW, weight);
+	hleadISR_mWg2->Fill(mWg, weight);
+	hleadISR_mW32->Fill(mW,mWg, weight);
+	hleadISR_dR2->Fill(dR, weight);
       }
 
     }
 
    if(hasFSR)
       {
-	h_mW2->Fill(mW);
-	h_mWg2->Fill(mWg_FSR);
-	h_mW32->Fill(mW,mWg_FSR);
-	h_dR2->Fill(dR_FSR);
+	h_mW2->Fill(mW, weight);
+	h_mWg2->Fill(mWg_FSR, weight);
+	h_mW32->Fill(mW,mWg_FSR, weight);
+	h_dR2->Fill(dR_FSR, weight);
 
-	h_gpta->Fill(gpt_FSR);
-	h_lpta->Fill(lpt);
-	h_npta->Fill(npt);
+	h_gpta->Fill(gpt_FSR, weight);
+	h_lpta->Fill(lpt, weight);
+	h_npta->Fill(npt, weight);
 
-	h_getaa->Fill(geta_FSR);
-	h_letaa->Fill(leta);
-	h_netaa->Fill(neta);
+	h_getaa->Fill(geta_FSR, weight);
+	h_letaa->Fill(leta, weight);
+	h_netaa->Fill(neta, weight);
 
 	if(photonCut_FSR){
-	  hFSR_mW2->Fill(mW);
-	  hFSR_mWg2->Fill(mWg_FSR);
-	  hFSR_mW32->Fill(mW,mWg_FSR);
-	  hFSR_dR2->Fill(dR_FSR);
-	  hFSR_gpta->Fill(gpt_FSR);
-	  hmT_FSRa->Fill(mT);
-	  hmT3_FSRa->Fill(mT3_FSR);
-	  hmT3mT_FSRa->Fill(mT,mT3_FSR);
+	  hFSR_mW2->Fill(mW, weight);
+	  hFSR_mWg2->Fill(mWg_FSR, weight);
+	  hFSR_mW32->Fill(mW,mWg_FSR, weight);
+	  hFSR_dR2->Fill(dR_FSR, weight);
+	  hFSR_gpta->Fill(gpt_FSR, weight);
+	  hmT_FSRa->Fill(mT, weight);
+	  hmT3_FSRa->Fill(mT3_FSR, weight);
+	  hmT3mT_FSRa->Fill(mT,mT3_FSR, weight);
 	}
 
 	if(leadIsFSR && photonCut_FSR){
-	  hlead_mW2->Fill(mW);
-	  hlead_mWg2->Fill(mWg_FSR);
-	  hlead_mW32->Fill(mW,mWg_FSR);
-	  hlead_dR2->Fill(dR_FSR);
+	  hlead_mW2->Fill(mW, weight);
+	  hlead_mWg2->Fill(mWg_FSR, weight);
+	  hlead_mW32->Fill(mW,mWg_FSR, weight);
+	  hlead_dR2->Fill(dR_FSR, weight);
 
-	  hleadFSR_mW2->Fill(mW);
-	  hleadFSR_mWg2->Fill(mWg_FSR);
-	  hleadFSR_mW32->Fill(mW,mWg_FSR);
-	  hleadFSR_dR2->Fill(dR_FSR);
+	  hleadFSR_mW2->Fill(mW, weight);
+	  hleadFSR_mWg2->Fill(mWg_FSR, weight);
+	  hleadFSR_mW32->Fill(mW,mWg_FSR, weight);
+	  hleadFSR_dR2->Fill(dR_FSR, weight);
 
-	  hlead_gpta->Fill(gpt_FSR);
-	  hlead_lpta->Fill(lpt);
-	  hlead_npta->Fill(npt);
+	  hlead_gpta->Fill(gpt_FSR, weight);
+	  hlead_lpta->Fill(lpt, weight);
+	  hlead_npta->Fill(npt, weight);
 
-	  hlead_getaa->Fill(geta_FSR);
-	  hlead_letaa->Fill(leta);
-	  hlead_netaa->Fill(neta);
+	  hlead_getaa->Fill(geta_FSR, weight);
+	  hlead_letaa->Fill(leta, weight);
+	  hlead_netaa->Fill(neta, weight);
 
 	}
 
       }
 
-    if(hasFSR && hasISR)h_diff2->Fill(gpt-gpt_FSR);
+   if(hasFSR && hasISR)h_diff2->Fill(gpt-gpt_FSR, weight);
 
 
   }
