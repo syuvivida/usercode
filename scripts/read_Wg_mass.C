@@ -23,7 +23,8 @@ double ClusterMass(TLorentzVector& gamma, TLorentzVector& electron,
 
 using namespace std;
 // here, only leading photon is required
-void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
+void read_Wg_mass(std::string inputfile, double totalxsec=1.890E-08, int baur=0)
+//void read_Wg_mass(std::string inputfile, double totalxsec=1.069E-07, int baur=0)
 {
   // Booking histograms
   int ntotal=0;
@@ -36,13 +37,23 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
   float etamin=-5.0;
   float etamax=5.0;
   
-  int ndRbin=200;
+  int ndRbin=100;
   float dRmin=0;
   float dRmax=10.0;
 
   char name[300];
   sprintf(name,"%s%s",inputfile.data(),"_masshisto.root");  
   TFile* outFile = new TFile(name,"recreate");
+
+  TH2F* hFSR_dRgpt = new TH2F("hFSR_dRgpt","#Delta R (lepton,#gamma) vs. "
+			      " E_{T}(#gamma)",netbin,etmin,etmax,ndRbin,dRmin,dRmax);
+  TH2F* hISR_dRgpt = new TH2F("hISR_dRgpt","#Delta R (lepton,#gamma) vs. "
+			      " E_{T}(#gamma)",netbin,etmin,etmax,ndRbin,dRmin,dRmax);
+  TH2F* hFSR_lptgpt = new TH2F("hFSR_lptgpt","E_{T}(e) vs. "
+			       " E_{T}(#gamma)",netbin,etmin,etmax,netbin,etmin,etmax);
+  TH2F* hISR_lptgpt = new TH2F("hISR_lptgpt","E_{T}(e) vs. "
+			       " E_{T}(#gamma)",netbin,etmin,etmax,netbin,etmin,etmax);
+
 
   TH1F* h_dR = new TH1F("h_dR","#Delta R (lepton,#gamma)",ndRbin,dRmin,dRmax);
   TH1F* h_mW = new TH1F("h_mW","Mass of W boson",netbin,etmin,etmax);  
@@ -102,6 +113,9 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
   TH1F* hmT_ISRb = new TH1F("hmT_ISRb","M_{T}(W) before cuts", netbin, etmin, etmax);
   TH1F* hmT_ISRa = new TH1F("hmT_ISRa","M_{T}(W) after cuts", netbin, etmin, etmax);
 
+
+  TH1F* hmT3 = new TH1F("hmT3","M_{T}(W#gamma)", netbin, etmin, etmax);
+ 
 
   TH1F* hmT3_FSRb = new TH1F("hmT3_FSRb","M_{T}(W#gamma) before cuts", netbin, etmin, etmax);
   TH1F* hmT3_FSRa = new TH1F("hmT3_FSRa","M_{T}(W#gamma) after cuts", netbin, etmin, etmax);
@@ -183,6 +197,10 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
     double npt  =nlepton.Pt();
     double neta =nlepton.Eta();
 
+    double gy = gamma_lead.Rapidity();
+    double ly = clepton.Rapidity();
+    double ny = nlepton.Rapidity();
+
     for(int j=0;j<NCOL;j++)
       fin >> cl[j];
 
@@ -199,6 +217,9 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
       h_mW3->Fill(mW,mWg, weight);
       h_dR->Fill(dR, weight);
 
+      hISR_dRgpt->Fill(gpt,dR);
+      hISR_lptgpt->Fill(gpt,lpt);
+
       hISR_mW->Fill(mW, weight);
       hISR_mWg->Fill(mWg, weight);
       hISR_mW3->Fill(mW,mWg, weight);
@@ -208,8 +229,8 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
       h_lptb->Fill(lpt, weight);
       h_nptb->Fill(npt, weight);
 
-      h_getab->Fill(geta, weight);
-      h_letab->Fill(leta, weight);
+      h_getab->Fill(gy, weight);
+      h_letab->Fill(ly, weight);
       h_netab->Fill(neta, weight);
 
       hISR_gptb->Fill(gpt, weight);
@@ -233,12 +254,16 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
 	hFSR_mW3->Fill(mW,mWg, weight);
 	hFSR_dR->Fill(dR, weight);
 
+	hFSR_dRgpt->Fill(gpt,dR,weight);
+	hFSR_lptgpt->Fill(gpt,lpt,weight);
+
+
 	h_gptb->Fill(gpt, weight);
 	h_lptb->Fill(lpt, weight);
 	h_nptb->Fill(npt, weight);
 
-	h_getab->Fill(geta, weight);
-	h_letab->Fill(leta, weight);
+	h_getab->Fill(gy, weight);
+	h_letab->Fill(ly, weight);
 	h_netab->Fill(neta, weight);
 
 	hFSR_gptb->Fill(gpt, weight);
@@ -273,29 +298,31 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
 
     // ATLAS Zhijun's cuts
 
-//     bool photonCut_ISR = gpt>10.0 && fabs(geta)<2.5 && dR>0.7;
-//     bool photonCut_FSR = gpt_FSR > 10.0 && fabs(geta_FSR)<2.5 && dR_FSR>0.7;
-
-//     if(!photonCut_ISR && !photonCut_FSR)continue;
-//     //   if(!photonCut_ISR)continue;
-//     if(lpt<10.0)continue;
-//     if(fabs(leta)>2.5)continue;
+//      bool photonCut_ISR = gpt>10.0 && fabs(geta)<2.5 && dR>0.7;
+//      if(!photonCut_ISR)continue;
+//      if(lpt<10.0)continue;
+//      if(fabs(leta)>2.5)continue;
 
 
     // CDF cuts
-     bool photonCut_ISR = gpt> 7.0 && dR>0.7;
-     if(!photonCut_ISR)continue;
+    bool photonCut_ISR = gpt> 7.0 && dR>0.7;
+    if(!photonCut_ISR)continue;
+
+//      bool photonCut_ISR = gpt> 5.0 && dR>0.1 && mT3 > 90.;
+//      if(!photonCut_ISR)continue;
 
 
     npass++;
+
+    hmT3->Fill(mT3);
     
     if(hasISR){
       h_gpta->Fill(gpt, weight);
       h_lpta->Fill(lpt, weight);
       h_npta->Fill(npt, weight);
 
-      h_getaa->Fill(geta, weight);
-      h_letaa->Fill(leta, weight);
+      h_getaa->Fill(gy, weight);
+      h_letaa->Fill(ly, weight);
       h_netaa->Fill(neta, weight);
     
 
@@ -328,8 +355,8 @@ void read_Wg_mass(std::string inputfile, double totalxsec, int baur=0)
 	h_lpta->Fill(lpt, weight);
 	h_npta->Fill(npt, weight);
 
-	h_getaa->Fill(geta, weight);
-	h_letaa->Fill(leta, weight);
+	h_getaa->Fill(gy, weight);
+	h_letaa->Fill(ly, weight);
 	h_netaa->Fill(neta, weight);
 
 	hFSR_mW2->Fill(mW, weight);

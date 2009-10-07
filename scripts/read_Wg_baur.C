@@ -36,13 +36,23 @@ void read_Wg_baur(std::string inputfile)
   float etamin=-5.0;
   float etamax=5.0;
   
-  int ndRbin=200;
+  int ndRbin=100;
   float dRmin=0;
   float dRmax=10.0;
 
   char name[300];
   sprintf(name,"%s%s",inputfile.data(),"_baur.root");  
   TFile* outFile = new TFile(name,"recreate");
+
+  TH2F* hFSR_dRgpt = new TH2F("hFSR_dRgpt","#Delta R (lepton,#gamma) vs. "
+			      " E_{T}(#gamma)",netbin,etmin,etmax,ndRbin,dRmin,dRmax);
+  TH2F* hISR_dRgpt = new TH2F("hISR_dRgpt","#Delta R (lepton,#gamma) vs. "
+			      " E_{T}(#gamma)",netbin,etmin,etmax,ndRbin,dRmin,dRmax);
+  TH2F* hFSR_lptgpt = new TH2F("hFSR_lptgpt","E_{T}(e) vs. "
+			       " E_{T}(#gamma)",netbin,etmin,etmax,netbin,etmin,etmax);
+  TH2F* hISR_lptgpt = new TH2F("hISR_lptgpt","E_{T}(e) vs. "
+			       " E_{T}(#gamma)",netbin,etmin,etmax,netbin,etmin,etmax);
+
 
   TH1F* h_dR = new TH1F("h_dR","#Delta R (lepton,#gamma)",ndRbin,dRmin,dRmax);
   TH1F* h_mW = new TH1F("h_mW","Mass of W boson",netbin,etmin,etmax);  
@@ -102,6 +112,8 @@ void read_Wg_baur(std::string inputfile)
   TH1F* hmT_ISRb = new TH1F("hmT_ISRb","M_{T}(W) before cuts", netbin, etmin, etmax);
   TH1F* hmT_ISRa = new TH1F("hmT_ISRa","M_{T}(W) after cuts", netbin, etmin, etmax);
 
+  TH1F* hmT3 = new TH1F("hmT3","M_{T}(W#gamma)", netbin, etmin, etmax);
+ 
 
   TH1F* hmT3_FSRb = new TH1F("hmT3_FSRb","M_{T}(W#gamma) before cuts", netbin, etmin, etmax);
   TH1F* hmT3_FSRa = new TH1F("hmT3_FSRa","M_{T}(W#gamma) after cuts", netbin, etmin, etmax);
@@ -153,15 +165,18 @@ void read_Wg_baur(std::string inputfile)
 
     double mT3 = ClusterMass(gamma_lead,clepton,nlepton);
 
-    bool hasFSR= mT3 < 90.0;
-    bool hasISR= mT3 > 90.0;
-
     double mW = (clepton+nlepton).M();
     double mWg= (clepton+nlepton+gamma_lead).M();
     double dR = gamma_lead.DeltaR(clepton);
     double gpt  =gamma_lead.Pt();
     double geta =gamma_lead.Eta();
     
+    bool hasFSR= mT3 < 90.0;
+    bool hasISR= mT3 > 90.0;
+//     bool hasFSR= mWg < 90.0;
+//     bool hasISR= mWg > 90.0;
+
+
 
     TLorentzVector met_lv(nlepton.Px(),                    
 			  nlepton.Py(),
@@ -187,6 +202,11 @@ void read_Wg_baur(std::string inputfile)
     double npt  =nlepton.Pt();
     double neta =nlepton.Eta();
 
+    double gy = gamma_lead.Rapidity();
+    double ly = clepton.Rapidity();
+    double ny = nlepton.Rapidity();
+
+
     for(int j=0;j<NCOL_INT;j++)
       fin >> code[j];
     for(int j=0;j<NCOL_SPIN;j++)
@@ -207,6 +227,9 @@ void read_Wg_baur(std::string inputfile)
       h_mW3->Fill(mW,mWg);
       h_dR->Fill(dR);
 
+      hISR_dRgpt->Fill(gpt,dR);
+      hISR_lptgpt->Fill(gpt,lpt);
+
       hISR_mW->Fill(mW);
       hISR_mWg->Fill(mWg);
       hISR_mW3->Fill(mW,mWg);
@@ -216,8 +239,8 @@ void read_Wg_baur(std::string inputfile)
       h_lptb->Fill(lpt);
       h_nptb->Fill(npt);
 
-      h_getab->Fill(geta);
-      h_letab->Fill(leta);
+      h_getab->Fill(gy);
+      h_letab->Fill(ly);
       h_netab->Fill(neta);
 
       hISR_gptb->Fill(gpt);
@@ -236,6 +259,9 @@ void read_Wg_baur(std::string inputfile)
 	h_mW3->Fill(mW,mWg);
 	h_dR->Fill(dR);
 
+	hFSR_dRgpt->Fill(gpt,dR);
+	hFSR_lptgpt->Fill(gpt,lpt);
+
 	hFSR_mW->Fill(mW);
 	hFSR_mWg->Fill(mWg);
 	hFSR_mW3->Fill(mW,mWg);
@@ -245,8 +271,8 @@ void read_Wg_baur(std::string inputfile)
 	h_lptb->Fill(lpt);
 	h_nptb->Fill(npt);
 
-	h_getab->Fill(geta);
-	h_letab->Fill(leta);
+	h_getab->Fill(gy);
+	h_letab->Fill(ly);
 	h_netab->Fill(neta);
 
 	hFSR_gptb->Fill(gpt);
@@ -260,8 +286,6 @@ void read_Wg_baur(std::string inputfile)
 
 //     // muon channel LSP's cuts
 //     bool photonCut_ISR = gpt>10.0 && fabs(geta)<2.7;
-//     bool photonCut_FSR = gpt_FSR > 10.0 && fabs(geta_FSR)<2.7;
-// //     if(!photonCut_ISR && !photonCut_FSR)continue;
 //     if(!photonCut_ISR)continue;
 //     if(lpt<5.0)continue;
 //     if(npt<20.0)continue;
@@ -269,41 +293,48 @@ void read_Wg_baur(std::string inputfile)
 
     // Poter's cuts, supposedly
     
-//     bool photonCut_ISR = gpt>20.0 && fabs(geta)<2.7 && dR>1.1;
-//     bool photonCut_FSR = gpt_FSR > 20.0 && fabs(geta_FSR)<2.7 && dR_FSR>1.1;
-// //      if(!photonCut_ISR && !photonCut_FSR)continue;
-//     if(!photonCut_ISR)continue;
-//     if(lpt<15.0)continue;
-//     if(fabs(leta)>2.7)continue;
-//     if(mT < 60)continue;
-//     if(npt<20.0)continue;
+//      bool photonCut_ISR = gpt>20.0 && fabs(geta)<2.7 && dR>1.1;
+//      if(!photonCut_ISR)continue;
+//      if(lpt<15.0)continue;
+//      if(fabs(leta)>2.7)continue;
+//      if(mT < 60)continue;
+//      if(npt<20.0)continue;
+
+//      bool photonCut_ISR = gpt>20.0 && fabs(geta)<2.7;
+//      if(!photonCut_ISR)continue;
+//      if(lpt<15.0)continue;
+//      if(fabs(leta)>2.7)continue;
+//      if(mT < 30 || mT>120)continue;
+//      if(npt<20.0)continue;
 
 
     // ATLAS Zhijun's cuts
 
-//     bool photonCut_ISR = gpt>10.0 && fabs(geta)<2.5 && dR>0.7;
-//     bool photonCut_FSR = gpt_FSR > 10.0 && fabs(geta_FSR)<2.5 && dR_FSR>0.7;
+     bool photonCut_ISR = gpt>10.0 && fabs(geta)<2.5 && dR>0.7;
 
-//     if(!photonCut_ISR && !photonCut_FSR)continue;
-//     //   if(!photonCut_ISR)continue;
-//     if(lpt<10.0)continue;
-//     if(fabs(leta)>2.5)continue;
+        if(!photonCut_ISR)continue;
+     if(lpt<10.0)continue;
+     if(fabs(leta)>2.5)continue;
 
 
     // CDF cuts
-     bool photonCut_ISR = gpt> 7.0 && dR>0.7;
-     if(!photonCut_ISR)continue;
+//     bool photonCut_ISR = gpt> 7.0 && dR>0.7;
+//     if(!photonCut_ISR)continue;
+//       if(mT3 < 90)continue;
 
 
     npass++;
+    
+    hmT3->Fill(mT3);
+
     
     if(hasISR){
       h_gpta->Fill(gpt);
       h_lpta->Fill(lpt);
       h_npta->Fill(npt);
 
-      h_getaa->Fill(geta);
-      h_letaa->Fill(leta);
+      h_getaa->Fill(gy);
+      h_letaa->Fill(ly);
       h_netaa->Fill(neta);
     
 
@@ -336,8 +367,8 @@ void read_Wg_baur(std::string inputfile)
 	h_lpta->Fill(lpt);
 	h_npta->Fill(npt);
 
-	h_getaa->Fill(geta);
-	h_letaa->Fill(leta);
+	h_getaa->Fill(gy);
+	h_letaa->Fill(ly);
 	h_netaa->Fill(neta);
 
 	hFSR_mW2->Fill(mW);
