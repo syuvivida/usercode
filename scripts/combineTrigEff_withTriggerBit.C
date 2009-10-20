@@ -29,12 +29,10 @@ void combineTrigEff_withTriggerBit()
 
   ifstream fin;
   fin.open("InputFile");
-  fin >> dirname[0];  
-  NFILES++;
   while(!fin.eof())
     {
       fin >> dirname[NFILES];
-      NFILES++;
+      if(!fin.eof())NFILES++;
     }
 
   cout << "NFILES = " << NFILES << endl;
@@ -46,12 +44,12 @@ void combineTrigEff_withTriggerBit()
   TH1D* hdeno;
   TH1D* hnumr;
 
-  TFile* histoFile[10];
+  TFile* histoFile[NFILES];
   
   // assign files
   for(int i=0; i < NFILES; i++)
     {     
-      std::string fileName = dirname[i] + "_histo.root";
+      std::string fileName = dirname[i] + "_HLT15L1RtoL1EG5.root";
       histoFile[i] = TFile::Open(fileName.data());
     }
   
@@ -60,8 +58,8 @@ void combineTrigEff_withTriggerBit()
   for(int i=0; i< NFILES; i++)
     {
 
-      horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_getdeno"));
-      horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_getnumr"));
+      horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_recgetdeno"));
+      horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_recgetnumr"));
 //       horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_gengetdeno"));
 //       horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_gengetnumr"));
 
@@ -86,7 +84,7 @@ void combineTrigEff_withTriggerBit()
 
 	  sprintf(name,"hscale%d%d",i,k);
 	  hscale[i][k]->SetName(name);
-//      	  hscale[i][k]->Scale(scale);
+//       	  hscale[i][k]->Scale(scale);
 
 	}
 

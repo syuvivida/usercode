@@ -143,7 +143,8 @@ void TrigEff_withTriggerBit(std::string dirname)
 	    
 
 	// denominator
-	if(hasLoosePhoton && passL1EGTrigger)
+// 	if(hasLoosePhoton && passL1EGTrigger)
+	if(hasLoosePhoton && passMuonTrigger)
 	  {
 	    h_recgetdeno->Fill(thisEt);
 	    if(isMatched)
@@ -151,19 +152,19 @@ void TrigEff_withTriggerBit(std::string dirname)
 	    if(gen_pho.E()>0)
 	      h_gengetdeno->Fill(gen_pho.Et());
 
-	  }
-	    
-	// numerator
-	if(hasLoosePhoton && passPhotonTrigger)
-	  {
-	    h_recgetnumr->Fill(thisEt);
-	    if(isMatched)
-	      h_getnumr->Fill(thisEt);
-	    if(gen_pho.E()>0)
-	      h_gengetnumr->Fill(gen_pho.Et());
-	  }
+	    // numerator
+	    if(passPhotonTrigger)
+	      {
+		h_recgetnumr->Fill(thisEt);
+		if(isMatched)
+		  h_getnumr->Fill(thisEt);
+		if(gen_pho.E()>0)
+		  h_gengetnumr->Fill(gen_pho.Et());
+	      }
 
-	break;
+	    break;
+	  
+	  } // if there is a loose photon that passes base trigger	    
 	
       } // end of loop over photon objects
 
