@@ -12,8 +12,48 @@
 #include <TBranch.h>
 #include <TLeaf.h>
 #include <vector>
+#include <iostream>
+
+#define NTrigPath 102
 
 namespace SY_NT{
+
+  // Event Objects
+  
+  class EvtObj: public TObject {
+  public:
+    EvtObj();
+    ~EvtObj() {;}
+
+    // Setters 
+    void SetRun(int value)                    {_Run = value;}
+    void SetEvt(int value)                    {_Evt = value;}
+    void SetMET(double value)                 {_MET = value;}
+    void SetMETPhi(double value)              {_METPhi = value;}
+    void SetHLT(int index, int value)             
+    {if(index<0 || index> NTrigPath-1)
+	std::cout << "Index is out of range 0~101!" << std::endl;
+      else _HLT[index] = value;}
+
+    // Getters
+    
+    int Run()                                 {return _Run;}
+    int Evt()                                 {return _Evt;}
+    double MET()                              {return _MET;}
+    double METPhi()                           {return _METPhi;}
+    int* HLT()                                {return _HLT;}
+
+  private:
+    int   _Run;
+    int   _Evt;
+    double _MET;
+    double _METPhi;
+    int   _HLT[NTrigPath];    
+
+   ClassDef(EvtObj,1)
+
+  };
+
   
   // photon objects
   class PhoObj: public TObject{
@@ -176,6 +216,18 @@ namespace SY_NT{
 } // end of SY_NT name space
 
 // load ntuples
+
+void LoadEvt(TChain* ch, SY_NT::EvtObj & thisEvt)
+{
+  thisEvt.SetRun((int)ch->GetBranch("run")->GetLeaf("run")->GetValue());
+  thisEvt.SetEvt((int)ch->GetBranch("event")->GetLeaf("event")->GetValue());
+  thisEvt.SetMET(ch->GetBranch("MET")->GetLeaf("MET")->GetValue());
+  thisEvt.SetMETPhi(ch->GetBranch("METPhi")->GetLeaf("METPhi")->GetValue());
+  for(int i=0; i<NTrigPath; i++)
+    thisEvt.SetHLT(i,
+		   (int)ch->GetBranch("HLT")->GetLeaf("HLT")->GetValue(i));
+
+}
 
 void LoadPhos(TChain *ch, std::vector<SY_NT::PhoObj> & PhoVect)
 {
