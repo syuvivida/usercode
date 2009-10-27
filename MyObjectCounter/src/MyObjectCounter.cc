@@ -95,6 +95,8 @@ private:
   edm::InputTag    _triggerEvent;
   std::string      _matcherName;
   bool             _dumpHEP;
+  int              _nIn;
+  int              _nOut;
 
 };
 
@@ -105,7 +107,8 @@ MyObjectCounter::MyObjectCounter(const edm::ParameterSet& iConfig):
   _eleLabel(iConfig.getParameter< edm::InputTag >( "eleLabel" ) ),
   _trigger( iConfig.getParameter< edm::InputTag >( "trigger" ) ),
   _triggerEvent( iConfig.getParameter< edm::InputTag >( "triggerEvent" ) ),
-  _matcherName( iConfig.getParameter< std::string >( "matcherName" ) )
+  _matcherName( iConfig.getParameter< std::string >( "matcherName" ) ),
+  _nIn(0), _nOut(0)
 
 {  
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", true);
@@ -126,15 +129,15 @@ void MyObjectCounter::beginJob(const edm::EventSetup&)
   EvtInfo.Register(root);  
   PhoInfo.Register(root);
   LepInfo.Register(root);
-
-
   EvtInfo.Initialize();  
   PhoInfo.Initialize();
   LepInfo.Initialize();
+  _nIn= _nOut = 0;
 }
 
 void MyObjectCounter::endJob() 
 {
+  std::cout << "MyObjectCounter has " << _nIn << " input events and " << _nOut  << " events" << endl;
 }
 
 // dump generator-level information
@@ -179,6 +182,7 @@ void MyObjectCounter::dumpGenInfo(const edm::Event& iEvent)
 void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
+  _nIn++;
   if(_dumpHEP)
     dumpGenInfo(iEvent);
 
@@ -190,12 +194,24 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     TriggerNames TrgNames( *TrgResultsHandle );   
     unsigned int TrgIdx1 = TrgNames.triggerIndex( "HLT_Photon10_L1R" );
     unsigned int TrgIdx2 = TrgNames.triggerIndex( "HLT_Photon15_L1R" );
+    std::cout << "HLT_Photon10_L1R index = " << TrgIdx1 << std::endl;
+    std::cout << "HLT_Photon15_L1R index = " << TrgIdx2 << std::endl;
+    std::cout << "HLT_Mu3          index = " << 
+      TrgNames.triggerIndex( "HLT_L1MuOpen" ) << std::endl;
+    std::cout << "HLT_L2Mu9        index = " << 
+      TrgNames.triggerIndex( "HLT_L1Mu" ) << std::endl;
+
+    vector<string> hlNames_ = TrgNames.triggerNames();
+    for (size_t i=0; i<TrgNames.size(); ++i) {
+      cout<<"HLT bit = "<<i<<"   "<<hlNames_[i]<<endl;
+    }
+ 
+
 	
     if (!TrgResultsHandle->accept(TrgIdx1) &&
 	!TrgResultsHandle->accept(TrgIdx2)) return; 	
   }
-  else
-    std::cout << "TriggerResults::HLT not found" << std::endl;
+
    
  // PAT trigger information
   edm::Handle< TriggerEvent > triggerEvent;
@@ -238,11 +254,6 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	}// loop over pat::photons
 
       }
-    else
-      {
-	std::cout << "I can not do trigger matching without"
-	  "trigger objects or trigger events" << std::endl;
-      }
   
 
 
@@ -270,9 +281,6 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       PhoInfo.Eta  [PhoInfo.Size] 	 = it_ph->eta();    
       PhoInfo.Phi  [PhoInfo.Size] 	 = it_ph->phi();    
       PhoInfo.R9   [PhoInfo.Size] 	 = it_ph->r9();     
-      PhoInfo.TrkIso[PhoInfo.Size]       = it_ph->trackIso();
-      PhoInfo.EcalIso[PhoInfo.Size]      = it_ph->ecalIso();
-      PhoInfo.HcalIso[PhoInfo.Size]      = it_ph->hcalIso();
       PhoInfo.HoverE[PhoInfo.Size]       = it_ph->hadronicOverEm();
 	
       PhoInfo.SCE[PhoInfo.Size]          = it_ph->superCluster()->energy();
@@ -284,8 +292,11 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       float et = it_ph->superCluster()->energy()/cosh(it_ph->superCluster()->eta());
       PhoInfo.SCEt[PhoInfo.Size]       = et;
 
+      PhoInfo.SCNCrystal[PhoInfo.Size] = it_ph->superCluster()->size();
+
       if(it_ph->genPhoton()){
 	  
+	PhoInfo.GenPID[PhoInfo.Size]       = 22;
 	if(it_ph->genPhoton()->mother()){
 	  PhoInfo.GenMomPID[PhoInfo.Size]  = it_ph->genPhoton()->mother()->pdgId();
 	  PhoInfo.GenMomPt[PhoInfo.Size]   = it_ph->genPhoton()->mother()->pt();
@@ -294,7 +305,10 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	}
      
       } // check generator-level matches
+      else
 	
+	PhoInfo.GenPID[PhoInfo.Size]       = -1;
+      
 
       PhoInfo.Size++;
     }
@@ -314,7 +328,7 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   if(hasMuo || hasEle){
     LepInfo.Initialize();
 
-  
+    if(hasMuo){
     for( std::vector<pat::Muon>::const_iterator it_mu = MuonHandle->begin(); 
 	 it_mu != MuonHandle->end(); it_mu++ ) {
        
@@ -339,8 +353,9 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       LepInfo.HcalIso    [LepInfo.Size] = it_mu->hcalIso();	  
       LepInfo.Size++;
     }
-
-  
+    }
+    
+    if(hasEle){
     for( std::vector<pat::Electron>::const_iterator it_el = ElectronHandle->begin(); 
 	 it_el != ElectronHandle->end(); it_el++ ) {
        
@@ -367,11 +382,13 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       HistoInfo.h_lepeta-> Fill(it_el->eta());
 
     }
+    }
   } // if there are muons or electrons
 
 
   
   root->Fill();
+  _nOut++;
   
 }
 
