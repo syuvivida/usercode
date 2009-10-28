@@ -54,6 +54,7 @@ public:
   int	Size; 
   int   Index[MAX_PHOTONS];
   int   IsLoose[MAX_PHOTONS];
+  int   Trig[MAX_PHOTONS];
   float E[MAX_PHOTONS];
   float Et[MAX_PHOTONS];
   float Pz[MAX_PHOTONS];
@@ -85,6 +86,7 @@ public:
 
       Index[i]     =dummy;
       IsLoose[i]   =dummy;
+      Trig[i]      =0;
       E[i]    	   =dummy;
       Et[i]   	   =dummy;
       Pz[i]   	   =dummy;
@@ -117,6 +119,7 @@ public:
 	root->Branch("PhoInfo.Size"	  , &Size	   , "PhoInfo.Size/I"			  );
 	root->Branch("PhoInfo.Index"	  , &Index[0]	   , "PhoInfo.Index[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.IsLoose"	  , &IsLoose[0]	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.Trig"	  , &Trig[0]	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.E"          , &E[0]          , "PhoInfo.E[PhoInfo.Size]/F"          );
 	root->Branch("PhoInfo.Et"         , &Et[0]         , "PhoInfo.Et[PhoInfo.Size]/F"         );
 	root->Branch("PhoInfo.Pz"         , &Pz[0]         , "PhoInfo.Pz[PhoInfo.Size]/F"         );
