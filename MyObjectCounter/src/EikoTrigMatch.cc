@@ -62,10 +62,25 @@ public:
   TH1F* h_dRL18;
   TH1F* h_dRHLT15;
 
+  TH1F* h_allgetdeno;
+  TH1F* h_allgetnumr;
+  TH1F* h_25allgetdeno;
+  TH1F* h_25allgetnumr;
+  TH1F* h_isoallgetdeno;
+  TH1F* h_isoallgetnumr;
   TH1F* h_getdeno;
   TH1F* h_getnumr;
+  TH1F* h_25getdeno;
+  TH1F* h_25getnumr;
+  TH1F* h_isogetdeno;
+  TH1F* h_isogetnumr;
   TH1F* h_jetgetdeno;
   TH1F* h_jetgetnumr;
+  TH1F* h_25jetgetdeno;
+  TH1F* h_25jetgetnumr;
+  TH1F* h_isojetgetdeno;
+  TH1F* h_isojetgetnumr;
+
   TH1F* h_qgetdeno;
   TH1F* h_qgetnumr;
   TH1F* h_ggetdeno;
@@ -99,10 +114,37 @@ public:
 			       "Et before loose photon cuts", nbin,xmin,xmax);
     h_debug2 = fo->make<TH1F>("h_debug2","Reconstructed photon "
 			       "Et before loose photon cuts", nbin,xmin,xmax);
+    h_allgetdeno = fo->make<TH1F>("h_allgetdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+    h_allgetnumr = fo->make<TH1F>("h_allgetnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+    h_25allgetdeno = fo->make<TH1F>("h_25allgetdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+    h_25allgetnumr = fo->make<TH1F>("h_25allgetnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+    h_isoallgetdeno = fo->make<TH1F>("h_isoallgetdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+    h_isoallgetnumr = fo->make<TH1F>("h_isoallgetnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+
     h_getdeno = fo->make<TH1F>("h_getdeno","Reconstructed and matched photon "
 			       "Et before photon trigger cuts", nbin,xmin,xmax);
     h_getnumr = fo->make<TH1F>("h_getnumr","Reconstructed and matched photon "
 			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+    h_25getdeno = fo->make<TH1F>("h_25getdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+    h_25getnumr = fo->make<TH1F>("h_25getnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+    h_isogetdeno = fo->make<TH1F>("h_isogetdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+    h_isogetnumr = fo->make<TH1F>("h_isogetnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
 
     h_jetgetdeno = fo->make<TH1F>("h_jetgetdeno","Reconstructed and jet photon"
 				  " Et before photon trigger cuts", 
@@ -110,6 +152,21 @@ public:
     h_jetgetnumr = fo->make<TH1F>("h_jetgetnumr","Reconstructed and jet photon"
 				  " Et after photon trigger cuts", 
 				  nbin,xmin,xmax);
+
+
+    h_25jetgetdeno = fo->make<TH1F>("h_25jetgetdeno","Reconstructed and jet photon"
+				  " Et before photon trigger cuts", 
+				  nbin,xmin,xmax);
+    h_25jetgetnumr = fo->make<TH1F>("h_25jetgetnumr","Reconstructed and jet photon"
+				  " Et after photon trigger cuts", 
+				  nbin,xmin,xmax);
+
+    h_isojetgetdeno = fo->make<TH1F>("h_isojetgetdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+    h_isojetgetnumr = fo->make<TH1F>("h_isojetgetnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+
     h_qgetdeno   = fo->make<TH1F>("h_qgetdeno","Reconstructed and quark photon"
 				  " Et before photon trigger cuts", 
 				  nbin,xmin,xmax);
@@ -299,27 +356,40 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   std::vector< edm::Ref<l1extra::L1EmParticleCollection> > L1Trig8Cands;
   std::vector< edm::Ref<l1extra::L1EmParticleCollection> > tempL1Trig5Cands;
   std::vector< edm::Ref<l1extra::L1EmParticleCollection> > tempL1Trig8Cands;
-  std::vector< edm::Ref<reco::RecoEcalCandidateCollection> > HLTTrigCands;
+  std::vector< edm::Ref<reco::RecoEcalCandidateCollection> > HLTTrig15NoIsoCands;
+  std::vector< edm::Ref<reco::RecoEcalCandidateCollection> > HLTTrig15IsoCands;
+  std::vector< edm::Ref<reco::RecoEcalCandidateCollection> > HLTTrig25NoIsoCands;
 
-//   const edm::InputTag trig1("hltL1NonIsoHLTLEITISinglePhotonEt25EtFilter"
+
   const edm::InputTag trigL15("hltL1sRelaxedSingleEgammaEt5", "", "HLT");
   const edm::InputTag trigL18("hltL1sRelaxedSingleEgammaEt8", "", "HLT");
-  const edm::InputTag trigHLT15("hltL1NonIsoSinglePhotonEt15LEIEtFilter","", "HLT");
+  const edm::InputTag trigHLT15NoIso("hltL1NonIsoSinglePhotonEt15LEIEtFilter","", "HLT");
+  const edm::InputTag trigHLT15Iso("hltL1NonIsoSinglePhotonEt15HTITrackIsolFilter","", "HLT");
+  const edm::InputTag trigHLT25NoIso("hltL1NonIsoHLTLEITISinglePhotonEt25EtFilter","", "HLT");
   
   bool hasL15   = false;
   bool hasL18   = false;
-  bool hasHLT15 = false;
+  bool hasHLT15NoIso = false;
+  bool hasHLT15Iso = false;
+  bool hasHLT25NoIso = false;
     
   if ( triggerObj->filterIndex(trigL15)<triggerObj->size())hasL15=true;
   if ( triggerObj->filterIndex(trigL18)<triggerObj->size())hasL18=true;
-  if ( triggerObj->filterIndex(trigHLT15)<triggerObj->size())hasHLT15=true;
+  if ( triggerObj->filterIndex(trigHLT15NoIso)<triggerObj->size())
+    hasHLT15NoIso=true;
+  if ( triggerObj->filterIndex(trigHLT15Iso)<triggerObj->size())
+    hasHLT15Iso=true;
+  if ( triggerObj->filterIndex(trigHLT25NoIso)<triggerObj->size())
+    hasHLT25NoIso=true;
 
 
-  int typeL15= trigger::TriggerL1NoIsoEG;
-  int temptypeL15= trigger::TriggerL1IsoEG;
-  int typeL18= trigger::TriggerL1NoIsoEG;
-  int temptypeL18= trigger::TriggerL1IsoEG;
-  int typeHLT15 = trigger::TriggerCluster;
+  int typeL15        = trigger::TriggerL1NoIsoEG;
+  int temptypeL15    = trigger::TriggerL1IsoEG;
+  int typeL18        = trigger::TriggerL1NoIsoEG;
+  int temptypeL18    = trigger::TriggerL1IsoEG;
+  int typeHLT15NoIso = trigger::TriggerCluster;
+  int typeHLT15Iso   = trigger::TriggerPhoton;
+  int typeHLT25NoIso = trigger::TriggerCluster;
 
 
   ////////////////////////////////////////////////////////////
@@ -350,14 +420,24 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
      
     }
 
-  if(hasHLT15)
-    triggerObj->getObjects(triggerObj->filterIndex(trigHLT15),typeHLT15,
-			   HLTTrigCands);
+  if(hasHLT15NoIso)
+    triggerObj->getObjects(triggerObj->filterIndex(trigHLT15NoIso),
+			   typeHLT15NoIso,
+			   HLTTrig15NoIsoCands);
 
+  if(hasHLT15Iso)
+    triggerObj->getObjects(triggerObj->filterIndex(trigHLT15Iso),
+			   typeHLT15Iso,
+			   HLTTrig15IsoCands);
+
+  if(hasHLT25NoIso)
+    triggerObj->getObjects(triggerObj->filterIndex(trigHLT25NoIso),
+			   typeHLT25NoIso,
+			   HLTTrig25NoIsoCands);
 
 //   cout << hasL15 << "\t" << hasL18 << "\t" << hasHLT15 << endl;
 //   cout << L1Trig5Cands.size() << "\t" << L1Trig8Cands.size() << "\t"
-//        << HLTTrigCands.size() << endl;
+//        << HLTTrig15NoIsoCands.size() << endl;
 
   // Start to fill the main root branches
   // initialize the variables of ntuples
@@ -386,7 +466,7 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     float et = it_gen->et();
     float eta = it_gen->eta();
     
-    if(it_gen->pdgId()!=22 || it_gen->status()!=1)continue;
+    if((it_gen->pdgId()!=22 && abs(it_gen->pdgId())!=11) || it_gen->status()!=1)continue;
     if(et < 2)continue;
     if(fabs(eta)>2.5)continue;
     if(fabs(eta)>1.44 && fabs(eta)<1.56)continue;
@@ -438,11 +518,11 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     }
     if(closestEcalCandIndex >=0)trigMatchCode |= TRIGGER::HLT_L1SingleEG8;
 
-      // start doing HLT trigger matching
+      // start doing HLT trigger 15 NonIso matching
     closestDeltaR = 0.5;
     closestEcalCandIndex = -1;
-    for (unsigned int j=0; j< HLTTrigCands.size(); j++) {
-      float deltaR = reco::deltaR(HLTTrigCands[j]->momentum(),
+    for (unsigned int j=0; j< HLTTrig15NoIsoCands.size(); j++) {
+      float deltaR = reco::deltaR(HLTTrig15NoIsoCands[j]->momentum(),
 				  it_gen->momentum());
       
       HistoInfo.h_dRHLT15->Fill(deltaR);
@@ -454,7 +534,38 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       }
     }
     if(closestEcalCandIndex >=0)trigMatchCode |= TRIGGER::HLT_Photon15_L1R;
+
+
+      // start doing HLT trigger 15 Iso matching
+    closestDeltaR = 0.5;
+    closestEcalCandIndex = -1;
+    for (unsigned int j=0; j< HLTTrig15IsoCands.size(); j++) {
+      float deltaR = reco::deltaR(HLTTrig15IsoCands[j]->momentum(),
+				  it_gen->momentum());
+      
+      if (deltaR < closestDeltaR) {
+	closestDeltaR = deltaR;
+	closestEcalCandIndex = j;
+	break;
+      }
+    }
+    if(closestEcalCandIndex >=0)trigMatchCode |= TRIGGER::HLT_Photon15_TrackIso_L1R;
     
+
+      // start doing HLT trigger 15 NonIso matching
+    closestDeltaR = 0.5;
+    closestEcalCandIndex = -1;
+    for (unsigned int j=0; j< HLTTrig25NoIsoCands.size(); j++) {
+      float deltaR = reco::deltaR(HLTTrig25NoIsoCands[j]->momentum(),
+				  it_gen->momentum());
+      
+      if (deltaR < closestDeltaR) {
+	closestDeltaR = deltaR;
+	closestEcalCandIndex = j;
+	break;
+      }
+    }
+    if(closestEcalCandIndex >=0)trigMatchCode |= TRIGGER::HLT_Photon25_L1R;
       
 
     PhoInfo.Trig[PhoInfo.Size] = trigMatchCode;
@@ -499,18 +610,52 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     if((trigMatchCode & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
       {
 	_isFilled=true;
-	if(isFromHardScattering)
-	  HistoInfo.h_getdeno->Fill(et);
+	HistoInfo.h_allgetdeno->Fill(et);
+	HistoInfo.h_25allgetdeno->Fill(et);
+	HistoInfo.h_isoallgetdeno->Fill(et);
+
+	if(isFromHardScattering)	  
+	  {
+	    HistoInfo.h_getdeno->Fill(et);
+	    HistoInfo.h_isogetdeno->Fill(et);
+	    HistoInfo.h_25getdeno->Fill(et);
+	  }
 	else if(isFromJet)
-	  HistoInfo.h_jetgetdeno->Fill(et);
+	  {
+	    HistoInfo.h_jetgetdeno->Fill(et);
+	    HistoInfo.h_isojetgetdeno->Fill(et);
+	    HistoInfo.h_25jetgetdeno->Fill(et);
+	  }
+
 	else if(isFromQuark)
 	  HistoInfo.h_qgetdeno->Fill(et);
 	else if(isFromGluon)
 	  HistoInfo.h_ggetdeno->Fill(et);
+
+
+	if(trigMatchCode & TRIGGER::HLT_Photon15_TrackIso_L1R)
+	  {
+	    HistoInfo.h_isoallgetnumr->Fill(et);
+	    if(isFromHardScattering)
+	      HistoInfo.h_isogetnumr->Fill(et);	
+	    else if(isFromJet)
+	      HistoInfo.h_isojetgetnumr->Fill(et);
+	  }
+	  
+	if(trigMatchCode & TRIGGER::HLT_Photon25_L1R)
+	  {
+	    HistoInfo.h_25allgetnumr->Fill(et);
+	    if(isFromHardScattering)
+	      HistoInfo.h_25getnumr->Fill(et);	
+	    else if(isFromJet)
+	      HistoInfo.h_25jetgetnumr->Fill(et);
+	  }
 	  
 	if(trigMatchCode & TRIGGER::HLT_Photon15_L1R)
 	  {
-	    if(isFromHardScattering)	      
+	    HistoInfo.h_allgetnumr->Fill(et);
+
+	    if(isFromHardScattering)
 	      HistoInfo.h_getnumr->Fill(et);
 	    else if(isFromJet)
 	      HistoInfo.h_jetgetnumr->Fill(et);
