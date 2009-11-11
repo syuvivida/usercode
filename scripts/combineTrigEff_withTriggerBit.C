@@ -14,7 +14,6 @@
 #include <TF1.h>
 #include <vector>
 #include <TLorentzVector.h>
-#include "NCUNtupleClasses.hh"
 #include "TrigEff_AsymmetryErrors.C"
 #include <TGraphAsymmErrors.h>
 
@@ -51,6 +50,7 @@ void combineTrigEff_withTriggerBit()
     {     
       std::string fileName = dirname[i] + "_HLT15L1RtoL1EG5.root";
       histoFile[i] = TFile::Open(fileName.data());
+      cout << "Opened " << fileName << endl;
     }
   
   char name[300];
@@ -58,21 +58,22 @@ void combineTrigEff_withTriggerBit()
   for(int i=0; i< NFILES; i++)
     {
 
-      horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_recgetdeno"));
-      horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_recgetnumr"));
-//       horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_gengetdeno"));
-//       horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_gengetnumr"));
+       horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_recgetdeno"));
+       horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_recgetnumr"));
+//        horiginal[i][0] = (TH1D*)(histoFile[i]->Get("h_getdeno"));
+//        horiginal[i][1] = (TH1D*)(histoFile[i]->Get("h_getnumr"));
 
       ifstream fin;
-      double xsec, ngen;
+      double xsec, ngen, filtereff;
       std::string location="/mc/NCUHEP/" + dirname[i] + "/geninfo";
       fin.open(location.data());
-      fin >> xsec >> ngen;
+      fin >> xsec >> ngen >> filtereff;
       fin.close();
      
-      double scale = 50.0*xsec/ngen;
+      double scale = 50.0*xsec*filtereff/ngen;
 
-      cout << dirname[i] << " : " << xsec << "\t" << ngen << endl;
+      cout << dirname[i] << " : " << xsec << "\t" << ngen << 
+	"\t" << filtereff << endl;
       
       for(int k=0; k < 2; k++)	
 	{
@@ -88,10 +89,16 @@ void combineTrigEff_withTriggerBit()
 
 	}
 
+      cout << "File " << i << " has " << scale*horiginal[i][0]->Integral() << 
+	" denominator events in 50/pb of 10 TeV data" << endl;
+
+      cout << "File " << i << " has " << scale*horiginal[i][1]->Integral() << 
+	" numerator events in 50/pb of 10 TeV data" << endl;
+
     }
 
 
-
+  
 
    hdeno = (TH1D*)hscale[0][0]->Clone();
    hdeno->SetName("hdeno");
@@ -106,12 +113,13 @@ void combineTrigEff_withTriggerBit()
        hnumr->Add(hscale[i][1]);
      }
   
-
- TGraphAsymmErrors *heff = MyDivide(hdeno,hnumr);  
- heff->GetXaxis()->SetTitle("Offline photon E_{T} [GeV]");
- heff->GetYaxis()->SetTitle("Trigger efficiency");                               
- heff->SetTitle("");
- heff->Draw("ap");
+   hnumr->Draw();
+   
+   TGraphAsymmErrors *heff = MyDivide(hdeno,hnumr);  
+   heff->GetXaxis()->SetTitle("Offline photon E_{T} [GeV]");
+   heff->GetYaxis()->SetTitle("Trigger efficiency");                               
+   heff->SetTitle("");
+   heff->Draw("ap");
 
 
 }
