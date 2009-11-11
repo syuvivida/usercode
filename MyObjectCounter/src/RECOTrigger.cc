@@ -30,16 +30,10 @@
 #include "DataFormats/Candidate/interface/Particle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
-#include "DataFormats/PatCandidates/interface/Particle.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
-#include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
-#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
-#include "DataFormats/PatCandidates/interface/TriggerObject.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 
@@ -56,7 +50,7 @@
 using namespace edm;
 using namespace reco;
 using namespace std;
-using namespace pat;
+using namespace trigger;
 using namespace math;
 using namespace ROOT;
 
@@ -64,6 +58,10 @@ using namespace ROOT;
 class Histo_struct {
 
 public:
+
+  TH1F* h_dRL15;
+  TH1F* h_dRL18;
+  TH1F* h_dRHLT15;
 
   TH1F* h_getdeno;
   TH1F* h_getnumr;
@@ -79,6 +77,8 @@ public:
   TH1F* h_ggetnumr;
   TH1F* h_debug1;
   TH1F* h_debug2;
+  TH1F* h_debug3;
+  TH1F* h_debug4;
   TH1F* h_eta1;
   TH1F* h_eta2;
   TH1F* h_mugetdeno;
@@ -87,6 +87,14 @@ public:
 
   void BookHistograms(edm::Service<TFileService> fo)
   {
+
+    h_dRL15  = fo->make<TH1F>("h_dRL15","#Delta R between photons and"
+			      "trigger L1EG5", 100,0,10);
+    h_dRL18  = fo->make<TH1F>("h_dRL18","#Delta R between photons and"
+			      "trigger L1EG8", 100,0,10);
+    h_dRHLT15= fo->make<TH1F>("h_dRHLT15","#Delta R between photons and"
+			      "trigger HLT15", 100,0,10);
+
     
     int nbin=100;
     double xmin=0.0;
@@ -101,6 +109,10 @@ public:
 			       "Et before loose photon cuts", nbin,xmin,xmax);
     h_debug2 = fo->make<TH1F>("h_debug2","Reconstructed photon "
 			       "Et before loose photon cuts", nbin,xmin,xmax);
+    h_debug3 = fo->make<TH1F>("h_debug3","Reconstructed photon "
+			      "Et before loose photon cuts", nbin,-10,10);
+    h_debug4 = fo->make<TH1F>("h_debug4","Reconstructed photon "
+			      "Et before loose photon cuts", nbin,-0.5,99.5);
     h_getdeno = fo->make<TH1F>("h_getdeno","Reconstructed and matched photon "
 			       "Et before photon trigger cuts", nbin,xmin,xmax);
     h_getnumr = fo->make<TH1F>("h_getnumr","Reconstructed and matched photon "
@@ -159,6 +171,12 @@ private:
   EvtInfoBranches  EvtInfo;
   PhoInfoBranches  PhoInfo;
   Histo_struct     HistoInfo;
+  vector<trigger::TriggerObject> HLTL1EG5_L3Obj;
+  vector<trigger::TriggerObject> HLTL1EG8_L3Obj;
+  vector<trigger::TriggerObject> HLT15_L3Obj;
+  vector<trigger::TriggerObject> HLTMu5_L3Obj;
+  vector<trigger::TriggerObject> HLT20Iso_L3Obj;
+  vector<trigger::TriggerObject> HLT25_L3Obj;
 
   bool             _dumpHEP;
   int              _nIn;
@@ -171,7 +189,7 @@ RECOTrigger::RECOTrigger(const edm::ParameterSet& iConfig):
   _nIn(0), _nOut(0)
 
 {  
-  _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", true);
+  _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
  
 }
 
@@ -211,16 +229,35 @@ void RECOTrigger::dumpGenInfo(const edm::Event& iEvent)
     " ============================= " << std::endl << std::endl;
 
   int genIndex = 0;
+
+  printf("GenIndex  ");
+  printf("PDG  ");
+  printf("Status ");
+  printf("Mother PID");
+  printf("   ");
+  printf("Mass ");
+  printf("Energy ");
+  printf("Pt");
+  printf("\n");
+
+
   for( std::vector<GenParticle>::const_iterator it_gen = GenHandle->begin(); 
        it_gen != GenHandle->end(); it_gen++ ) {
 
     printf("%4i", genIndex);
     printf("%7i", it_gen->pdgId());
     printf("%6i", it_gen->status());
+    if(it_gen->mother())
+      printf("%7i", it_gen->mother()->pdgId());
+    else
+      printf("%7i", -1);
     printf("   ");
     printf("%9.3f",it_gen->p4().mass());
     printf("%9.3f",it_gen->energy());
     printf("%9.3f",it_gen->pt());
+    printf("%9.3f",it_gen->vx());
+    printf("%9.3f",it_gen->vy());
+    printf("%9.3f",it_gen->vz());
     printf("\n");
     genIndex ++;
   }
@@ -239,17 +276,125 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 {
 
   _nIn++;
-  if(_dumpHEP)
+  
+   if(_dumpHEP)
     dumpGenInfo(iEvent);
+
+   HLTL1EG5_L3Obj.clear();
+   HLTL1EG8_L3Obj.clear();
+   HLT15_L3Obj.clear();
+   HLTMu5_L3Obj.clear();
+   HLT20Iso_L3Obj.clear();
+   HLT25_L3Obj.clear();
 
   edm::Handle<reco::GenParticleCollection> GenHandle;  
   bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle);
 
   int thisEvent_trigger =0;
+ 
+
+  edm::Handle<trigger::TriggerEvent> trgEvent;
+  bool has1E31TrigInfo=
+    iEvent.getByLabel(InputTag("hltTriggerSummaryAOD","","HLT"), trgEvent);    
+
+  edm::Handle<trigger::TriggerEvent> trgEvent8E29;
+  bool has8E29TrigInfo=
+    iEvent.getByLabel(InputTag("hltTriggerSummaryAOD","","HLT8E29"), trgEvent8E29);    
+
+  if(has1E31TrigInfo){
+    const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
+    // HLT_15L1R
+    const edm::InputTag myLastFilter15 = edm::InputTag("hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter","","HLT");
+    if ( trgEvent->filterIndex(myLastFilter15) < trgEvent->sizeFilters() ) {
+      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter15) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC[hltf]);
+	HLT15_L3Obj.push_back(L3obj);
+      } // end of loop over trigger objects
+    } // if there is this filter
+
+
+    // HLT_25L1R
+    const edm::InputTag myLastFilter25 = edm::InputTag("hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter","","HLT");
+    if ( trgEvent->filterIndex(myLastFilter25) < trgEvent->sizeFilters() ) {
+      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter25) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC[hltf]);
+	HLT25_L3Obj.push_back(L3obj);
+      } // end of loop over trigger objects
+    } // if there is this filter
+
+
+    // HLT_20IsoL1R
+    const edm::InputTag myLastFilter20 = edm::InputTag("hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter","","HLT");
+    if ( trgEvent->filterIndex(myLastFilter20) < trgEvent->sizeFilters() ) {
+      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter20) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC[hltf]);
+	HLT20Iso_L3Obj.push_back(L3obj);
+      } // end of loop over trigger objects
+    } // if there is this filter
+
+
+
+    // HLT_MU5
+    const edm::InputTag myLastFilterMU5 = edm::InputTag("hltSingleMu5L3Filtered5","","HLT");
+    if ( trgEvent->filterIndex(myLastFilterMU5) < trgEvent->sizeFilters() ) {
+      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilterMU5) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC[hltf]);
+	HLTMu5_L3Obj.push_back(L3obj);
+      } // end of loop over trigger objects
+    } // if there is this filter
+
+    // HLT_L1EG5
+    const edm::InputTag myLastFilterL1EG5 = edm::InputTag("hltPreL1SingleEG5","","HLT");
+    if ( trgEvent->filterIndex(myLastFilterL1EG5) < trgEvent->sizeFilters()) {
+      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilterL1EG5) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC[hltf]);
+	HLTL1EG5_L3Obj.push_back(L3obj);
+      } // end of loop over trigger objects
+    } // if there is this filter
+
+  }
+
+  // HLT_L1EG8
+  if(has8E29TrigInfo){
+    const trigger::TriggerObjectCollection& TOC8E29(trgEvent8E29->getObjects());
+    const edm::InputTag myLastFilterL1EG8 = edm::InputTag("hltPreL1SingleEG8","","HLT8E29");
+    if ( trgEvent8E29->filterIndex(myLastFilterL1EG8) < trgEvent8E29->sizeFilters()) {
+      const trigger::Keys& keys( trgEvent8E29->filterKeys( trgEvent8E29->filterIndex(myLastFilterL1EG8) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC8E29[hltf]);
+	HLTL1EG8_L3Obj.push_back(L3obj);
+      } // end of loop over trigger objects
+    } // if there is this filter
+  }
+
+  if(_nIn < 3)
+    {
+      cout << "HLTL1EG5_L3Obj.size() ="  << HLTL1EG5_L3Obj.size() << endl;
+      cout << "HLTL1EG8_L3Obj.size() ="  << HLTL1EG8_L3Obj.size() << endl;
+      cout << "HLT15_L3Obj.size() =" << HLT15_L3Obj.size() << endl;
+      cout << "HLTMu5_L3Obj.size() =" << HLTMu5_L3Obj.size() << endl;
+      cout << "HLT20Iso_L3Obj.size() =" << HLT20Iso_L3Obj.size() << endl;
+      cout << "HLT25_L3Obj.size() = " << HLT25_L3Obj.size() << endl;
+    }
 
   // filter trigger path
   edm::Handle<TriggerResults> TrgResultsHandle;
-  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
+  //1E31
+  //  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
+  // 8E29
+  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT8E29"),TrgResultsHandle);
+   
   if (with_TriggerResults) {
   
     TriggerNames TrgNames( *TrgResultsHandle );   
@@ -304,7 +449,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   }
 
-   
+ 
 
   // Start to fill the main root branches
   // initialize the variables of ntuples
@@ -340,7 +485,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     PhoInfo.Initialize();
     bool _isFilled = false;
     bool _isFilled_Mu = false;
-
+   
     for (unsigned int ey=0; ey < allSortedPhotons.size(); ey++){
     
       if (PhoInfo.Size>=MAX_PHOTONS) {
@@ -380,15 +525,19 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       // started doing MC-reconstruction matching
 
       float genpt   = -999;
+      float genmompt = -999;
       int genMomPID = 0;
-
+      int thisGenIndex=-1;
+	
 
       if(hasGenParticle){
 
+	int GenIndex=-1;
 	for( std::vector<GenParticle>::const_iterator it_gen = 
 	       GenHandle->begin(); 
 	     it_gen != GenHandle->end(); it_gen++ ) {
 
+	  GenIndex ++;
 	  if(it_gen->pdgId()!=22 || it_gen->status()!=1)continue;
 	  if(it_gen->pt() < 5)continue;
 
@@ -397,10 +546,12 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	  if(dR<0.2 && relPt < 1.0)
 	  {
-	    PhoInfo.GenPID[PhoInfo.Size]       = 22;
+ 	    PhoInfo.GenPID[PhoInfo.Size]       = 22;
+	    thisGenIndex                       = GenIndex;
 	    genpt = it_gen->pt();
 	    PhoInfo.GenPt[PhoInfo.Size]        = genpt;
 	    if(it_gen->mother()){
+	      genmompt  = it_gen->mother()->pt();
 	      genMomPID = it_gen->mother()->pdgId();
 	      PhoInfo.GenMomPID[PhoInfo.Size]  = genMomPID;
 	      PhoInfo.GenMomPt[PhoInfo.Size]   = it_gen->mother()->pt();
@@ -418,7 +569,143 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       bool passOffline = isLoosePhoton(it_ph);
 
       PhoInfo.IsLoose[PhoInfo.Size] = passOffline? 1: 0;
-   
+  
+      // check trigger match
+
+      int trigMatchCode=0;
+      float l3pt=-999;
+
+      // L1EG5
+      float closestDeltaR = 0.5;
+      float closestEcalCandIndex = -1;
+      for (unsigned int itrig=0; itrig < HLTL1EG5_L3Obj.size(); itrig++)
+	{
+	  const trigger::TriggerObject& L3obj = HLTL1EG5_L3Obj[itrig];	  
+	  l3pt = L3obj.pt();
+
+	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				      it_ph.eta(), it_ph.phi());
+	  HistoInfo.h_dRL15->Fill(deltaR);
+
+	  if (deltaR < closestDeltaR) {
+	    closestDeltaR = deltaR;
+	    closestEcalCandIndex = itrig;
+	    break;
+	  }
+	} // end of trigger container
+      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_L1SingleEG5;
+
+      // L1EG8
+      closestDeltaR = 0.5;
+      closestEcalCandIndex = -1;
+
+      for (unsigned int itrig=0; itrig < HLTL1EG8_L3Obj.size(); itrig++)
+	{
+	  const trigger::TriggerObject& L3obj = HLTL1EG8_L3Obj[itrig];
+	  l3pt = L3obj.pt();
+	  
+	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				      it_ph.eta(), it_ph.phi());
+	  HistoInfo.h_dRL18->Fill(deltaR);
+
+	  if (deltaR < closestDeltaR) {
+	    closestDeltaR = deltaR;
+	    closestEcalCandIndex = itrig;
+	    break;
+	  }
+	} // end of trigger container
+      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_L1SingleEG8;
+
+
+      // HLT_15_L1R
+      closestDeltaR = 0.5;
+      closestEcalCandIndex = -1;
+
+      for (unsigned int itrig=0; itrig < HLT15_L3Obj.size(); itrig++)
+	{
+	  const trigger::TriggerObject& L3obj = HLT15_L3Obj[itrig];
+// 	  cout << "L3obj " << itrig << " pt = " << L3obj.pt() << endl;
+	  l3pt = L3obj.pt();
+	  
+	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				      it_ph.eta(), it_ph.phi());
+	  HistoInfo.h_dRHLT15->Fill(deltaR);
+
+	  if (deltaR < closestDeltaR) {
+	    closestDeltaR = deltaR;
+	    closestEcalCandIndex = itrig;
+// 	    cout << "L3obj2 pt = " << L3obj.pt() << endl;
+	    break;
+	  }
+	} // end of trigger container
+      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_Photon15_L1R;
+
+      // HLT_20Iso
+      closestDeltaR = 0.5;
+      closestEcalCandIndex = -1;
+
+      for (unsigned int itrig=0; itrig < HLT20Iso_L3Obj.size(); itrig++)
+	{
+	  const trigger::TriggerObject& L3obj = HLT20Iso_L3Obj[itrig];
+	  l3pt = L3obj.pt();
+	  
+	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				      it_ph.eta(), it_ph.phi());
+	  if (deltaR < closestDeltaR) {
+	    closestDeltaR = deltaR;
+	    closestEcalCandIndex = itrig;
+	    break;
+	  }
+	} // end of trigger container
+      if(closestEcalCandIndex>=0)
+	trigMatchCode |= TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R;
+
+      // HLT_25_L1R
+      closestDeltaR = 0.5;
+      closestEcalCandIndex = -1;
+
+      for (unsigned int itrig=0; itrig < HLT25_L3Obj.size(); itrig++)
+	{
+	  const trigger::TriggerObject& L3obj = HLT25_L3Obj[itrig];
+	  l3pt = L3obj.pt();
+	  
+	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				      it_ph.eta(), it_ph.phi());
+	  if (deltaR < closestDeltaR) {
+	    closestDeltaR = deltaR;
+	    closestEcalCandIndex = itrig;
+	    break;
+	  }
+	} // end of trigger container
+      if(closestEcalCandIndex>=0)
+	trigMatchCode |= TRIGGER::HLT_Photon25_L1R;
+
+
+
+      // HLT_MU5
+      closestDeltaR = 0.5;
+      closestEcalCandIndex = -1;
+
+      for (unsigned int itrig=0; itrig < HLTMu5_L3Obj.size(); itrig++)
+	{
+	  const trigger::TriggerObject& L3obj = HLTMu5_L3Obj[itrig];
+	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				      it_ph.eta(), it_ph.phi());
+	  if (deltaR < closestDeltaR) {
+	    closestDeltaR = deltaR;
+	    closestEcalCandIndex = itrig;
+	    break;
+	  }
+	} // end of trigger container
+      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_Mu5;
+
+
+
+
+
+      PhoInfo.Trig[PhoInfo.Size] = trigMatchCode;
+      PhoInfo.L3Pt[PhoInfo.Size] = l3pt;     
+
       PhoInfo.Size++;
 
       // need to pass the following cuts to be loose photons
@@ -457,9 +744,21 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
  	  else if(isFromJet)
  	    HistoInfo.h_jetgetdeno->Fill(et);
  	  else if(isFromQuark)
- 	    HistoInfo.h_qgetdeno->Fill(et);
+	    {
+	      HistoInfo.h_qgetdeno->Fill(et);
+// 	      cout << "Quark radiation GenIndex = " << thisGenIndex << "\t" << 
+// 		"Genpt = " << genpt << "\t" << "Mother pt = " << genmompt << 
+// 		endl;
+// 	      dumpGenInfo(iEvent);
+	    }
  	  else if(isFromGluon)
- 	    HistoInfo.h_ggetdeno->Fill(et);
+	    {
+	      HistoInfo.h_ggetdeno->Fill(et);
+// 	      cout << "Gluon radiation GenIndex = " << thisGenIndex << "\t" << 
+// 		"Genpt = " << genpt << "\t" << "Mother pt = " << genmompt << 
+// 		endl;
+// 	      dumpGenInfo(iEvent);
+	    }
 	  
 	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
 	    {
@@ -493,10 +792,13 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     } // if number of photons > 0
+    
+    
   } // if there are photon info
     
   
   root->Fill();
+ 
   _nOut++;
   
 }
