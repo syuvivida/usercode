@@ -18,9 +18,9 @@ namespace TRIGGER{
 
     HLT_Photon15_LooseEcalIso_L1R                  = 0x1 << 7,
 
-    HLT_Photon20_LooseEcalIso_TrackIso_L1R         = 0x1 << 8, // 32
+    HLT_Photon20_LooseEcalIso_TrackIso_L1R         = 0x1 << 8, 
 
-    HLT_Photon25_L1R                               = 0x1 << 9, // 64
+    HLT_Photon25_L1R                               = 0x1 << 9, 
 
     HLT_Mu5                                        = 0x1 << 10                   
   };
@@ -55,6 +55,7 @@ public:
   int   Index[MAX_PHOTONS];
   int   IsLoose[MAX_PHOTONS];
   int   Trig[MAX_PHOTONS];
+  float L3Pt[MAX_PHOTONS];
   float E[MAX_PHOTONS];
   float Et[MAX_PHOTONS];
   float Pz[MAX_PHOTONS];
@@ -87,6 +88,7 @@ public:
       Index[i]     =dummy;
       IsLoose[i]   =dummy;
       Trig[i]      =0;
+      L3Pt[i]      =dummy;
       E[i]    	   =dummy;
       Et[i]   	   =dummy;
       Pz[i]   	   =dummy;
@@ -120,6 +122,7 @@ public:
 	root->Branch("PhoInfo.Index"	  , &Index[0]	   , "PhoInfo.Index[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.IsLoose"	  , &IsLoose[0]	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.Trig"	  , &Trig[0]	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.L3Pt"	  , &L3Pt[0]	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
 	root->Branch("PhoInfo.E"          , &E[0]          , "PhoInfo.E[PhoInfo.Size]/F"          );
 	root->Branch("PhoInfo.Et"         , &Et[0]         , "PhoInfo.Et[PhoInfo.Size]/F"         );
 	root->Branch("PhoInfo.Pz"         , &Pz[0]         , "PhoInfo.Pz[PhoInfo.Size]/F"         );
