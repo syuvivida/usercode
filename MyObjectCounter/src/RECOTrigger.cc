@@ -165,7 +165,7 @@ private:
   virtual void dumpGenInfo(const edm::Event&); 
   virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
   virtual void endJob() ;
-  bool isLoosePhoton(reco::Photon it_ph);
+  bool isLoosePhoton(reco::Photon& it_ph);
   
   TTree *root;
   EvtInfoBranches  EvtInfo;
@@ -173,11 +173,27 @@ private:
   Histo_struct     HistoInfo;
   vector<trigger::TriggerObject> HLTL1EG5_L3Obj;
   vector<trigger::TriggerObject> HLTL1EG8_L3Obj;
+  vector<trigger::TriggerObject> HLT10_L3Obj;
   vector<trigger::TriggerObject> HLT15_L3Obj;
-  vector<trigger::TriggerObject> HLTMu5_L3Obj;
   vector<trigger::TriggerObject> HLT20Iso_L3Obj;
   vector<trigger::TriggerObject> HLT25_L3Obj;
+  vector<trigger::TriggerObject> HLTMu5_L3Obj;
 
+  edm::Handle<trigger::TriggerEvent> trgEvent;
+  edm::Handle<TriggerResults> TrgResultsHandle;
+  void InsertL3Object(std::string trgPath,
+		      std::string tag,
+		      vector<trigger::TriggerObject>& l3ObjBin);
+
+  void TurnOnHLTBit(std::string trgPath, 
+		    int         trgCode);
+
+  void TurnOnMatchBit(reco::Photon& it_ph,
+		      vector<trigger::TriggerObject>& l3ObjBin,
+		      int trgCode,
+		      int& matchBit, float& l3pt);
+  
+  int              _thisEvent_trigger;
   bool             _dumpHEP;
   int              _nIn;
   int              _nOut;
@@ -186,7 +202,7 @@ private:
 
 
 RECOTrigger::RECOTrigger(const edm::ParameterSet& iConfig):
-  _nIn(0), _nOut(0)
+  _nIn(0), _nOut(0), _thisEvent_trigger(0)
 
 {  
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
@@ -208,7 +224,7 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
   PhoInfo.Register(root);
   EvtInfo.Initialize();  
   PhoInfo.Initialize();
-  _nIn= _nOut = 0;
+//   _nIn= _nOut = _thisEvent_trigger = 0;
 }
 
 void RECOTrigger::endJob() 
@@ -276,12 +292,14 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 {
 
   _nIn++;
+  _thisEvent_trigger = 0;
   
    if(_dumpHEP)
     dumpGenInfo(iEvent);
 
    HLTL1EG5_L3Obj.clear();
    HLTL1EG8_L3Obj.clear();
+   HLT10_L3Obj.clear();
    HLT15_L3Obj.clear();
    HLTMu5_L3Obj.clear();
    HLT20Iso_L3Obj.clear();
@@ -290,93 +308,48 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<reco::GenParticleCollection> GenHandle;  
   bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle);
 
-  int thisEvent_trigger =0;
  
 
-  edm::Handle<trigger::TriggerEvent> trgEvent;
   bool has1E31TrigInfo=
     iEvent.getByLabel(InputTag("hltTriggerSummaryAOD","","HLT"), trgEvent);    
 
-  edm::Handle<trigger::TriggerEvent> trgEvent8E29;
-  bool has8E29TrigInfo=
-    iEvent.getByLabel(InputTag("hltTriggerSummaryAOD","","HLT8E29"), trgEvent8E29);    
-
   if(has1E31TrigInfo){
-    const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
-    // HLT_15L1R
-    const edm::InputTag myLastFilter15 = edm::InputTag("hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter","","HLT");
-    if ( trgEvent->filterIndex(myLastFilter15) < trgEvent->sizeFilters() ) {
-      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter15) ) );
-      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-	size_type hltf = keys[hlto];
-	const trigger::TriggerObject& L3obj(TOC[hltf]);
-	HLT15_L3Obj.push_back(L3obj);
-      } // end of loop over trigger objects
-    } // if there is this filter
 
+    // HLT_10L1R
+    InsertL3Object("hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
+ 		   "HLT",HLT10_L3Obj);
+    
+    // HLT_15L1R
+    InsertL3Object("hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
+		   "HLT",HLT15_L3Obj);
 
     // HLT_25L1R
-    const edm::InputTag myLastFilter25 = edm::InputTag("hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter","","HLT");
-    if ( trgEvent->filterIndex(myLastFilter25) < trgEvent->sizeFilters() ) {
-      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter25) ) );
-      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-	size_type hltf = keys[hlto];
-	const trigger::TriggerObject& L3obj(TOC[hltf]);
-	HLT25_L3Obj.push_back(L3obj);
-      } // end of loop over trigger objects
-    } // if there is this filter
-
+    InsertL3Object("hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
+		   "HLT",HLT25_L3Obj);
 
     // HLT_20IsoL1R
-    const edm::InputTag myLastFilter20 = edm::InputTag("hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter","","HLT");
-    if ( trgEvent->filterIndex(myLastFilter20) < trgEvent->sizeFilters() ) {
-      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter20) ) );
-      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-	size_type hltf = keys[hlto];
-	const trigger::TriggerObject& L3obj(TOC[hltf]);
-	HLT20Iso_L3Obj.push_back(L3obj);
-      } // end of loop over trigger objects
-    } // if there is this filter
-
-
+    InsertL3Object("hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
+		   "HLT",HLT20Iso_L3Obj);
 
     // HLT_MU5
-    const edm::InputTag myLastFilterMU5 = edm::InputTag("hltSingleMu5L3Filtered5","","HLT");
-    if ( trgEvent->filterIndex(myLastFilterMU5) < trgEvent->sizeFilters() ) {
-      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilterMU5) ) );
-      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-	size_type hltf = keys[hlto];
-	const trigger::TriggerObject& L3obj(TOC[hltf]);
-	HLTMu5_L3Obj.push_back(L3obj);
-      } // end of loop over trigger objects
-    } // if there is this filter
+    InsertL3Object("hltSingleMu5L3Filtered5",
+		   "HLT",HLTMu5_L3Obj);
 
     // HLT_L1EG5
-    const edm::InputTag myLastFilterL1EG5 = edm::InputTag("hltPreL1SingleEG5","","HLT");
-    if ( trgEvent->filterIndex(myLastFilterL1EG5) < trgEvent->sizeFilters()) {
-      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilterL1EG5) ) );
-      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-	size_type hltf = keys[hlto];
-	const trigger::TriggerObject& L3obj(TOC[hltf]);
-	HLTL1EG5_L3Obj.push_back(L3obj);
-      } // end of loop over trigger objects
-    } // if there is this filter
+    InsertL3Object("hltPreL1SingleEG5",
+		   "HLT",HLTL1EG5_L3Obj);
 
-  }
+  } // if there are 1E31 information
 
   // HLT_L1EG8
+  bool has8E29TrigInfo=
+    iEvent.getByLabel(InputTag("hltTriggerSummaryAOD","","HLT8E29"), trgEvent);    
   if(has8E29TrigInfo){
-    const trigger::TriggerObjectCollection& TOC8E29(trgEvent8E29->getObjects());
-    const edm::InputTag myLastFilterL1EG8 = edm::InputTag("hltPreL1SingleEG8","","HLT8E29");
-    if ( trgEvent8E29->filterIndex(myLastFilterL1EG8) < trgEvent8E29->sizeFilters()) {
-      const trigger::Keys& keys( trgEvent8E29->filterKeys( trgEvent8E29->filterIndex(myLastFilterL1EG8) ) );
-      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-	size_type hltf = keys[hlto];
-	const trigger::TriggerObject& L3obj(TOC8E29[hltf]);
-	HLTL1EG8_L3Obj.push_back(L3obj);
-      } // end of loop over trigger objects
-    } // if there is this filter
-  }
+
+    InsertL3Object("hltPreL1SingleEG8",
+		   "HLT8E29",HLTL1EG8_L3Obj);
+  } // if there is this filter
+
 
   if(_nIn < 3)
     {
@@ -389,12 +362,12 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
   // filter trigger path
-  edm::Handle<TriggerResults> TrgResultsHandle;
   //1E31
-  //  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
+  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
   // 8E29
-  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT8E29"),TrgResultsHandle);
-   
+//   bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT8E29"),TrgResultsHandle);
+  
+
   if (with_TriggerResults) {
   
     TriggerNames TrgNames( *TrgResultsHandle );   
@@ -405,49 +378,28 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	cout<<"HLT bit = "<<i<<"   "<<hlNames_[i]<<endl;
       }
 
-    int NTrigger = TrgNames.size();
+    TurnOnHLTBit("HLT_L1SingleEG5",TRIGGER::HLT_L1SingleEG5);
 
-    int tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_L1SingleEG5"); 
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_L1SingleEG5;
+    TurnOnHLTBit("HLT_L1SingleEG8",TRIGGER::HLT_L1SingleEG8);
+
+    TurnOnHLTBit("HLT_Photon10_L1R",TRIGGER::HLT_Photon10_L1R);
+
+    TurnOnHLTBit("HLT_Photon10_LooseEcalIso_TrackIso_L1R",
+		 TRIGGER::HLT_Photon10_LooseEcalIso_TrackIso_L1R);
     
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_L1SingleEG8");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_L1SingleEG8;
-
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon10_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon10_L1R;
-
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon10_LooseEcalIso_TrackIso_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon10_LooseEcalIso_TrackIso_L1R;
+    TurnOnHLTBit("HLT_Photon15_L1R",TRIGGER::HLT_Photon15_L1R);
     
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon15_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon15_L1R;
+    TurnOnHLTBit("HLT_Photon15_TrackIso_L1R",TRIGGER::HLT_Photon15_TrackIso_L1R);
 
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon15_TrackIso_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon15_TrackIso_L1R;
+    TurnOnHLTBit("HLT_Photon15_LooseEcalIso_L1R",TRIGGER::HLT_Photon15_LooseEcalIso_L1R);
 
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon15_LooseEcalIso_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon15_LooseEcalIso_L1R;
-    
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon20_LooseEcalIso_TrackIso_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R;
+    TurnOnHLTBit("HLT_Photon20_LooseEcalIso_TrackIso_L1R",TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R);
 
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Photon25_L1R");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Photon25_L1R;
+    TurnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
 
-    tempIndex = (unsigned int)TrgNames.triggerIndex( "HLT_Mu5");
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      thisEvent_trigger |= TRIGGER::HLT_Mu5;
+    TurnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
 
-  }
+  } // there's trigger results
 
  
 
@@ -458,7 +410,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
-  EvtInfo.HLT    = thisEvent_trigger;
+  EvtInfo.HLT    = _thisEvent_trigger;
   
   // look for photons
   Handle<reco::PhotonCollection> photonColl;
@@ -522,14 +474,15 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
       PhoInfo.SCNCrystal[PhoInfo.Size] = it_ph.superCluster()->size();
 
+      // ==================================================
       // started doing MC-reconstruction matching
+      // ==================================================
 
       float genpt   = -999;
       float genmompt = -999;
       int genMomPID = 0;
       int thisGenIndex=-1;
 	
-
       if(hasGenParticle){
 
 	int GenIndex=-1;
@@ -563,148 +516,63 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  } // if find a match
      
 	} // check generator-level matches
-      }
+      } // end of if hasGenParticle
 
+      bool isFromHardScattering = (genMomPID ==22);
 
-      bool passOffline = isLoosePhoton(it_ph);
+      bool isFromJet   = (abs(genMomPID)> 50);
+   
+      bool isFromQuark = (abs(genMomPID)< 10) && genMomPID!=0;
+   
+      bool isFromGluon = (abs(genMomPID)==21);
 
-      PhoInfo.IsLoose[PhoInfo.Size] = passOffline? 1: 0;
-  
+      // ==================================================
       // check trigger match
+      // ==================================================
 
       int trigMatchCode=0;
       float l3pt=-999;
 
-      // L1EG5
-      float closestDeltaR = 0.5;
-      float closestEcalCandIndex = -1;
-      for (unsigned int itrig=0; itrig < HLTL1EG5_L3Obj.size(); itrig++)
-	{
-	  const trigger::TriggerObject& L3obj = HLTL1EG5_L3Obj[itrig];	  
-	  l3pt = L3obj.pt();
-
-	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				      it_ph.eta(), it_ph.phi());
-	  HistoInfo.h_dRL15->Fill(deltaR);
-
-	  if (deltaR < closestDeltaR) {
-	    closestDeltaR = deltaR;
-	    closestEcalCandIndex = itrig;
-	    break;
-	  }
-	} // end of trigger container
-      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_L1SingleEG5;
-
-      // L1EG8
-      closestDeltaR = 0.5;
-      closestEcalCandIndex = -1;
-
-      for (unsigned int itrig=0; itrig < HLTL1EG8_L3Obj.size(); itrig++)
-	{
-	  const trigger::TriggerObject& L3obj = HLTL1EG8_L3Obj[itrig];
-	  l3pt = L3obj.pt();
-	  
-	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				      it_ph.eta(), it_ph.phi());
-	  HistoInfo.h_dRL18->Fill(deltaR);
-
-	  if (deltaR < closestDeltaR) {
-	    closestDeltaR = deltaR;
-	    closestEcalCandIndex = itrig;
-	    break;
-	  }
-	} // end of trigger container
-      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_L1SingleEG8;
-
-
-      // HLT_15_L1R
-      closestDeltaR = 0.5;
-      closestEcalCandIndex = -1;
-
-      for (unsigned int itrig=0; itrig < HLT15_L3Obj.size(); itrig++)
-	{
-	  const trigger::TriggerObject& L3obj = HLT15_L3Obj[itrig];
-// 	  cout << "L3obj " << itrig << " pt = " << L3obj.pt() << endl;
-	  l3pt = L3obj.pt();
-	  
-	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				      it_ph.eta(), it_ph.phi());
-	  HistoInfo.h_dRHLT15->Fill(deltaR);
-
-	  if (deltaR < closestDeltaR) {
-	    closestDeltaR = deltaR;
-	    closestEcalCandIndex = itrig;
-// 	    cout << "L3obj2 pt = " << L3obj.pt() << endl;
-	    break;
-	  }
-	} // end of trigger container
-      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_Photon15_L1R;
-
-      // HLT_20Iso
-      closestDeltaR = 0.5;
-      closestEcalCandIndex = -1;
-
-      for (unsigned int itrig=0; itrig < HLT20Iso_L3Obj.size(); itrig++)
-	{
-	  const trigger::TriggerObject& L3obj = HLT20Iso_L3Obj[itrig];
-	  l3pt = L3obj.pt();
-	  
-	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				      it_ph.eta(), it_ph.phi());
-	  if (deltaR < closestDeltaR) {
-	    closestDeltaR = deltaR;
-	    closestEcalCandIndex = itrig;
-	    break;
-	  }
-	} // end of trigger container
-      if(closestEcalCandIndex>=0)
-	trigMatchCode |= TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R;
-
-      // HLT_25_L1R
-      closestDeltaR = 0.5;
-      closestEcalCandIndex = -1;
-
-      for (unsigned int itrig=0; itrig < HLT25_L3Obj.size(); itrig++)
-	{
-	  const trigger::TriggerObject& L3obj = HLT25_L3Obj[itrig];
-	  l3pt = L3obj.pt();
-	  
-	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				      it_ph.eta(), it_ph.phi());
-	  if (deltaR < closestDeltaR) {
-	    closestDeltaR = deltaR;
-	    closestEcalCandIndex = itrig;
-	    break;
-	  }
-	} // end of trigger container
-      if(closestEcalCandIndex>=0)
-	trigMatchCode |= TRIGGER::HLT_Photon25_L1R;
-
-
 
       // HLT_MU5
-      closestDeltaR = 0.5;
-      closestEcalCandIndex = -1;
 
-      for (unsigned int itrig=0; itrig < HLTMu5_L3Obj.size(); itrig++)
-	{
-	  const trigger::TriggerObject& L3obj = HLTMu5_L3Obj[itrig];
-	  float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				      it_ph.eta(), it_ph.phi());
-	  if (deltaR < closestDeltaR) {
-	    closestDeltaR = deltaR;
-	    closestEcalCandIndex = itrig;
-	    break;
-	  }
-	} // end of trigger container
-      if(closestEcalCandIndex>=0)trigMatchCode |= TRIGGER::HLT_Mu5;
+      TurnOnMatchBit(it_ph, HLTMu5_L3Obj, TRIGGER::HLT_Mu5,
+		     trigMatchCode, l3pt);
 
 
+      // L1EG5
+      TurnOnMatchBit(it_ph, HLTL1EG5_L3Obj, TRIGGER::HLT_L1SingleEG5,
+		     trigMatchCode, l3pt);
+
+      // L1EG8
+      TurnOnMatchBit(it_ph, HLTL1EG8_L3Obj, TRIGGER::HLT_L1SingleEG8,
+		     trigMatchCode, l3pt);
+
+      // HLT_10_L1R
+      TurnOnMatchBit(it_ph, HLT10_L3Obj, TRIGGER::HLT_Photon10_L1R,
+		     trigMatchCode, l3pt);
+
+      // HLT_15_L1R
+      TurnOnMatchBit(it_ph, HLT15_L3Obj, TRIGGER::HLT_Photon15_L1R,
+		     trigMatchCode, l3pt);
+
+      // HLT_20Iso
+      TurnOnMatchBit(it_ph, HLT20Iso_L3Obj, 
+		     TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R,
+		     trigMatchCode, l3pt);
+
+      // HLT_25_L1R
+      TurnOnMatchBit(it_ph, HLT25_L3Obj,
+		     TRIGGER::HLT_Photon25_L1R,
+		     trigMatchCode, l3pt);
 
 
 
       PhoInfo.Trig[PhoInfo.Size] = trigMatchCode;
       PhoInfo.L3Pt[PhoInfo.Size] = l3pt;     
+
+      bool passOffline = isLoosePhoton(it_ph);
+      PhoInfo.IsLoose[PhoInfo.Size] = passOffline? 1: 0;
 
       PhoInfo.Size++;
 
@@ -722,17 +590,9 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       HistoInfo.h_debug2->Fill(et);
       HistoInfo.h_eta2  ->Fill(eta);
 
-      bool isFromHardScattering = (genMomPID ==22);
-
-      bool isFromJet   = (abs(genMomPID)> 50);
-   
-      bool isFromQuark = (abs(genMomPID)< 10) && genMomPID!=0;
-   
-      bool isFromGluon = (abs(genMomPID)==21);
-
       // Use SingleEG5 as the denominator
 
-      if((thisEvent_trigger & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
+      if((_thisEvent_trigger & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
 	{
 	  _isFilled=true;
 	  HistoInfo.h_recgetdeno->Fill(et);
@@ -760,7 +620,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 // 	      dumpGenInfo(iEvent);
 	    }
 	  
-	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
+	  if(_thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
 	    {
 	      HistoInfo.h_recgetnumr->Fill(et);
 	      if(isFromHardScattering)
@@ -780,12 +640,12 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
       // Use Muon trigger as the denominator
 
-      if((thisEvent_trigger & TRIGGER::HLT_Mu5) && !_isFilled_Mu)
+      if((_thisEvent_trigger & TRIGGER::HLT_Mu5) && !_isFilled_Mu)
 	{
 	  _isFilled_Mu=true;
 	  HistoInfo.h_mugetdeno->Fill(et);
 
-	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)	    
+	  if(_thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)	    
 	    HistoInfo.h_mugetnumr->Fill(et);
 
 	} // if passing muon trigger
@@ -803,8 +663,72 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   
 }
 
+void RECOTrigger::InsertL3Object(std::string trgPath,
+				 std::string tag,
+				 vector<trigger::TriggerObject>& l3ObjBin)
+{
+   const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
 
-bool RECOTrigger::isLoosePhoton(reco::Photon it_ph)
+    // HLT_10L1R
+   const edm::InputTag myLastFilter = edm::InputTag(trgPath,"",tag);
+   if ( trgEvent->filterIndex(myLastFilter) < trgEvent->sizeFilters() ) {
+      const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter) ) );
+      for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
+	size_type hltf = keys[hlto];
+	const trigger::TriggerObject& L3obj(TOC[hltf]);
+	l3ObjBin.push_back(L3obj);
+      } // end of loop over trigger objects
+   } // if there is this filter
+
+   return;
+}
+
+void RECOTrigger::TurnOnHLTBit(std::string trgPath, 
+			       int         trgCode)
+{
+    TriggerNames trgName( *TrgResultsHandle);   
+    int NTrigger = trgName.size();
+    int tempIndex = (unsigned int)trgName.triggerIndex( trgPath); 
+    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
+      _thisEvent_trigger |= trgCode;
+    return;
+}
+
+
+void RECOTrigger::TurnOnMatchBit(reco::Photon& it_ph,
+				 vector<trigger::TriggerObject>& l3ObjBin,
+				 int trgCode, int& matchBit, float& l3pt)
+{
+  float closestDeltaR = 0.5;
+  float closestEcalCandIndex = -1;
+  for (unsigned int itrig=0; itrig < l3ObjBin.size(); itrig++)
+    {
+      const trigger::TriggerObject& L3obj = l3ObjBin[itrig];	  
+      l3pt = L3obj.pt();
+
+      float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
+				  it_ph.eta(), it_ph.phi());
+
+      if(trgCode == TRIGGER::HLT_L1SingleEG5)
+	HistoInfo.h_dRL15->Fill(deltaR);
+      else if(trgCode == TRIGGER::HLT_L1SingleEG8)
+	HistoInfo.h_dRL18->Fill(deltaR);
+      else if(trgCode == TRIGGER::HLT_Photon15_L1R)
+	HistoInfo.h_dRHLT15->Fill(deltaR);
+
+      if (deltaR < closestDeltaR) {
+	closestDeltaR = deltaR;
+	closestEcalCandIndex = itrig;
+	break;
+      }
+    } // end of trigger container
+  if(closestEcalCandIndex>=0) matchBit |= trgCode;
+  return;
+
+}
+
+
+bool RECOTrigger::isLoosePhoton(reco::Photon& it_ph)
 {
   float et = it_ph.et();
   float eta = it_ph.eta();
