@@ -397,7 +397,8 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
     TurnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
 
-    TurnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
+//     TurnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
+    TurnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
 
   } // there's trigger results
 

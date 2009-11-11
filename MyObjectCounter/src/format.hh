@@ -53,6 +53,7 @@ class PhoInfoBranches {
 public:
   int	Size; 
   int   Index[MAX_PHOTONS];
+  int   Location[MAX_PHOTONS];
   int   IsLoose[MAX_PHOTONS];
   int   Trig[MAX_PHOTONS];
   float L3Pt[MAX_PHOTONS];
@@ -87,6 +88,7 @@ public:
 
       Index[i]     =dummy;
       IsLoose[i]   =dummy;
+      Location[i]  =dummy;
       Trig[i]      =0;
       L3Pt[i]      =dummy;
       E[i]    	   =dummy;
@@ -120,6 +122,7 @@ public:
   void Register(TTree *root) {
 	root->Branch("PhoInfo.Size"	  , &Size	   , "PhoInfo.Size/I"			  );
 	root->Branch("PhoInfo.Index"	  , &Index[0]	   , "PhoInfo.Index[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.Location"	  , &Location[0]   , "PhoInfo.Location[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.IsLoose"	  , &IsLoose[0]	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.Trig"	  , &Trig[0]	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.L3Pt"	  , &L3Pt[0]	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
