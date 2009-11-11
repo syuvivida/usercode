@@ -13,11 +13,11 @@
 #include <TF1.h>
 #include <vector>
 #include <TLorentzVector.h>
-#include "format.h"
+#include "oldformat.h"
 
 using namespace std;
 
-void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
+void TrigEff_withTriggerBit(std::string dirname, bool applyR9, bool isQCD)
 {
   int nbin=200;
   float xmin=0.0;
@@ -87,10 +87,14 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
   TH1F* h_get10deno = new TH1F("h_get10deno","",nbin,xmin,xmax);
   TH1F* h_get10numr = new TH1F("h_get10numr","",nbin,xmin,xmax);
 
+  // L1EG5 / reconstructed photon
+  TH1F* h_get5deno = new TH1F("h_get5deno","",nbin,xmin,xmax);
+  TH1F* h_get5numr = new TH1F("h_get5numr","",nbin,xmin,xmax);
 
-  // HLT_Photon15_L1R / HLT_Photon10_L1R
-  TH1F* h_get15to10deno = new TH1F("h_get15to10deno","",nbin,xmin,xmax);
-  TH1F* h_get15to10numr = new TH1F("h_get15to10numr","",nbin,xmin,xmax);
+  // L1EG5 / reconstructed jet photon
+  TH1F* h_jetget5deno = new TH1F("h_jetget5deno","",nbin,xmin,xmax);
+  TH1F* h_jetget5numr = new TH1F("h_jetget5numr","",nbin,xmin,xmax);
+
 
 
   // chain in all the ncu ntuples in the same directory
@@ -140,7 +144,7 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
     bool isFilled_mu    =false;
     bool isFilled_25    = false;
     bool isFilled_10    = false;
-    bool isFilled_15to10= false;
+    bool isFilled_5     = false;
     
     for(int i=0; i<PhoInfo.Size; i++)
       {
@@ -151,7 +155,7 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
   	int HLT = EvtInfo.HLT;
 
 	bool passMuonTrigger = HLT & TRIGGER::HLT_Mu5;
-   	bool passL1EG5Trigger = HLT & TRIGGER::HLT_L1SingleEG5;
+    	bool passL1EG5Trigger = HLT & TRIGGER::HLT_L1SingleEG5;
    	bool passL1EG8Trigger = HLT & TRIGGER::HLT_L1SingleEG8;
 	bool passPhoton10Trigger = HLT & TRIGGER::HLT_Photon10_L1R;
   	bool passPhoton15Trigger = HLT & TRIGGER::HLT_Photon15_L1R;
@@ -285,7 +289,8 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
 
 
 	// Photon_10_R relative to L1EG5
-	if(hasLoosePhoton && passL1EG5Trigger && !isFilled_10 && isFromHard)
+	if(hasLoosePhoton && passL1EG5Trigger && !isFilled_10 && 
+	   ( (isFromHard && !isQCD) || (isFromJet && isQCD)))
 	  {
 	    isFilled_10=true;
 	    h_get10deno->Fill(thisEt);
@@ -294,18 +299,23 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
 	      h_get10numr->Fill(thisEt);
 	  }
 
-
-	// Photon_15_R relative to Photon_10_R
-	if(hasLoosePhoton && passPhoton10Trigger && !isFilled_15to10 
-	   && isFromHard)
+	
+	// L1EG5 relative to reconstructed photon
+	if(hasLoosePhoton && !isFilled_5)
 	  {
-	    isFilled_15to10=true;
-	    h_get15to10deno->Fill(thisEt);
-	    
-	    if(passPhoton15Trigger)
-	      h_get15to10numr->Fill(thisEt);
-	  }
+	    isFilled_5=true;
 
+	    if(isFromHard)
+	      h_get5deno->Fill(thisEt);
+	    if(isFromHard && passL1EG5Trigger)
+	      h_get5numr->Fill(thisEt);
+
+	    if(isFromJet)
+	      h_jetget5deno->Fill(thisEt);
+	    if(isFromJet && passL1EG5Trigger)
+	      h_jetget5numr->Fill(thisEt);
+
+	  }
 
 
 
@@ -316,8 +326,8 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
     
   } // end of loop over event entries
 
-  std::string histoFile = outerDir + dirname + "/" + dirname + "_debug2_default.root";
-  if(applyR9) histoFile = outerDir + dirname + "/" + dirname + "_debug2_R9.root";
+  std::string histoFile = outerDir + dirname + "/" + dirname + "_new_default.root";
+  if(applyR9) histoFile = outerDir + dirname + "/" + dirname + "_new_R9.root";
 
   TFile* outFile = new TFile(histoFile.data(),"recreate");
 
@@ -357,8 +367,11 @@ void TrigEff_withTriggerBit(std::string dirname, bool applyR9)
   h_get10deno->Write();
   h_get10numr->Write();
 
-  h_get15to10deno ->Write();
-  h_get15to10numr ->Write();
+  h_get5deno->Write();
+  h_get5numr->Write();
+
+  h_jetget5deno->Write();
+  h_jetget5numr->Write();
 
   outFile->Close();
   
