@@ -54,21 +54,6 @@ using namespace math;
 using namespace ROOT;
 
 
-class Histo_struct {
-
-public:
-  TH1F* h_leppt;
-  TH1F* h_lepeta;
-  TH1F* h_get;
-  void BookHistograms(edm::Service<TFileService> fo)
-  {
-    h_leppt  = fo->make<TH1F>("h_leppt","",50,0,200);
-    h_lepeta = fo->make<TH1F>("h_lepeta","",24,-6.0,6.0);
-    h_get    = fo->make<TH1F>("h_get", "", 50,0,200);
-  }
-
-};
-
 
 class MyObjectCounter : public edm::EDAnalyzer {
 public:
@@ -86,7 +71,6 @@ private:
   EvtInfoBranches  EvtInfo;
   PhoInfoBranches  PhoInfo;
   LepInfoBranches  LepInfo;
-  Histo_struct     HistoInfo;
 
   edm::InputTag    _phoLabel;
   edm::InputTag    _muoLabel;
@@ -97,6 +81,12 @@ private:
   bool             _dumpHEP;
   int              _nIn;
   int              _nOut;
+
+  // histograms
+  TH1F* h_leppt;
+  TH1F* h_lepeta;
+  TH1F* h_get;
+
 
 };
 
@@ -124,7 +114,12 @@ void MyObjectCounter::beginJob(const edm::EventSetup&)
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("MyObjectCounter") );
-  HistoInfo.BookHistograms(fs);
+
+  h_leppt  = fs->make<TH1F>("h_leppt","",50,0,200);
+  h_lepeta = fs->make<TH1F>("h_lepeta","",24,-6.0,6.0);
+  h_get    = fs->make<TH1F>("h_get", "", 50,0,200);
+
+
   root = new TTree("root","root");
   EvtInfo.Register(root);  
   PhoInfo.Register(root);
@@ -272,7 +267,7 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
 
 	
-      HistoInfo.h_get->Fill(it_ph->et());
+      h_get->Fill(it_ph->et());
 	
       PhoInfo.Index[PhoInfo.Size]        = PhoInfo.Size;  
       PhoInfo.E    [PhoInfo.Size] 	 = it_ph->energy(); 
@@ -378,8 +373,8 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       LepInfo.HcalIso    [LepInfo.Size] = it_el->hcalIso();				
       LepInfo.Size++;
 
-      HistoInfo.h_leppt -> Fill(it_el->pt());
-      HistoInfo.h_lepeta-> Fill(it_el->eta());
+      h_leppt -> Fill(it_el->pt());
+      h_lepeta-> Fill(it_el->eta());
 
     }
     }

@@ -54,12 +54,35 @@ using namespace math;
 using namespace ROOT;
 
 
-class Histo_struct {
-
+class TriggerBitCounter : public edm::EDAnalyzer {
 public:
+  explicit TriggerBitCounter(const edm::ParameterSet&) ;
+  ~TriggerBitCounter();  
 
-//   TH1F* h_leppt;
-//   TH1F* h_lepeta;
+    
+private:
+  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void dumpGenInfo(const edm::Event&); 
+  virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
+  virtual void endJob() ;
+  bool IsLoosePhoton(reco::Photon it_ph);
+  
+  TTree *root;
+  EvtInfoBranches  EvtInfo;
+  PhoInfoBranches  PhoInfo;
+  LepInfoBranches  LepInfo;
+
+  edm::InputTag    _phoLabel;
+  edm::InputTag    _muoLabel;
+  edm::InputTag    _eleLabel;
+  edm::InputTag    _trigger;
+  edm::InputTag    _triggerEvent;
+  std::string      _matcherName;
+  bool             _dumpHEP;
+  int              _nIn;
+  int              _nOut;
+
+  // histograms
   TH1F* h_getdeno;
   TH1F* h_getnumr;
   TH1F* h_recgetdeno;
@@ -80,93 +103,6 @@ public:
   TH1F* h_mugetnumr;
 
 
-  void BookHistograms(edm::Service<TFileService> fo)
-  {
-//     h_leppt  = fo->make<TH1F>("h_leppt","",50,0,200);
-//     h_lepeta = fo->make<TH1F>("h_lepeta","",24,-6.0,6.0);
-    
-    int nbin=100;
-    double xmin=0.0;
-    double xmax=200.0;
-
-    h_eta1  = fo->make<TH1F>("h_eta1","#eta of photons "
-				"before loose photon cuts", 60,-3.0,3.0);
-    h_eta2  = fo->make<TH1F>("h_eta2","#eta of photons "
-				"after loose photon cuts", 60,-3.0,3.0);
-
-    h_debug1  = fo->make<TH1F>("h_debug1","Reconstructed photon "
-			       "Et before loose photon cuts", nbin,xmin,xmax);
-    h_debug2 = fo->make<TH1F>("h_debug2","Reconstructed photon "
-			       "Et before loose photon cuts", nbin,xmin,xmax);
-    h_getdeno = fo->make<TH1F>("h_getdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_getnumr = fo->make<TH1F>("h_getnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-    h_recgetdeno = fo->make<TH1F>("h_recgetdeno","Reconstructed photon Et "
-				  "before photon trigger cuts", nbin,xmin,xmax);
-    h_recgetnumr = fo->make<TH1F>("h_recgetnumr","Reconstructed photon Et "
-				  "after photon trigger cuts", nbin,xmin,xmax);
-    h_gengetdeno = fo->make<TH1F>("h_gengetdeno","Generated photon Et before "
-				  "photon trigger cuts", nbin,xmin,xmax);
-    h_gengetnumr = fo->make<TH1F>("h_gengetnumr","Generated photon Et after "
-				  "photon trigger cuts", nbin,xmin,xmax);
-    h_jetgetdeno = fo->make<TH1F>("h_jetgetdeno","Reconstructed and jet photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_jetgetnumr = fo->make<TH1F>("h_jetgetnumr","Reconstructed and jet photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_qgetdeno   = fo->make<TH1F>("h_qgetdeno","Reconstructed and quark photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_qgetnumr   = fo->make<TH1F>("h_qgetnumr","Reconstructed and quark photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_ggetdeno   = fo->make<TH1F>("h_ggetdeno","Reconstructed and gluon photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_ggetnumr   = fo->make<TH1F>("h_ggetnumr","Reconstructed and gluon photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-
-    h_mugetdeno = fo->make<TH1F>("h_mugetdeno","Reconstructed photon Et "
-				  "before photon trigger cuts", nbin,xmin,xmax);
-    h_mugetnumr = fo->make<TH1F>("h_mugetnumr","Reconstructed photon Et "
-				  "after photon trigger cuts", nbin,xmin,xmax);
-
-  }
-
-};
-
-
-class TriggerBitCounter : public edm::EDAnalyzer {
-public:
-  explicit TriggerBitCounter(const edm::ParameterSet&) ;
-  ~TriggerBitCounter();  
-
-    
-private:
-  virtual void beginJob(const edm::EventSetup&) ;
-  virtual void dumpGenInfo(const edm::Event&); 
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
-  virtual void endJob() ;
-  bool IsLoosePhoton(reco::Photon it_ph);
-  
-  TTree *root;
-  EvtInfoBranches  EvtInfo;
-  PhoInfoBranches  PhoInfo;
-  LepInfoBranches  LepInfo;
-  Histo_struct     HistoInfo;
-
-  edm::InputTag    _phoLabel;
-  edm::InputTag    _muoLabel;
-  edm::InputTag    _eleLabel;
-  edm::InputTag    _trigger;
-  edm::InputTag    _triggerEvent;
-  std::string      _matcherName;
-  bool             _dumpHEP;
-  int              _nIn;
-  int              _nOut;
 
 };
 
@@ -194,7 +130,56 @@ void TriggerBitCounter::beginJob(const edm::EventSetup&)
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("TriggerBitCounter") );
-  HistoInfo.BookHistograms(fs);
+
+  int nbin=100;
+  double xmin=0.0;
+  double xmax=200.0;
+
+  h_eta1  = fs->make<TH1F>("h_eta1","#eta of photons "
+			   "before loose photon cuts", 60,-3.0,3.0);
+  h_eta2  = fs->make<TH1F>("h_eta2","#eta of photons "
+			   "after loose photon cuts", 60,-3.0,3.0);
+
+  h_debug1  = fs->make<TH1F>("h_debug1","Reconstructed photon "
+			     "Et before loose photon cuts", nbin,xmin,xmax);
+  h_debug2 = fs->make<TH1F>("h_debug2","Reconstructed photon "
+			    "Et before loose photon cuts", nbin,xmin,xmax);
+  h_getdeno = fs->make<TH1F>("h_getdeno","Reconstructed and matched photon "
+			     "Et before photon trigger cuts", nbin,xmin,xmax);
+  h_getnumr = fs->make<TH1F>("h_getnumr","Reconstructed and matched photon "
+			     "Et after photon trigger cuts", nbin,xmin,xmax);
+  h_recgetdeno = fs->make<TH1F>("h_recgetdeno","Reconstructed photon Et "
+				"before photon trigger cuts", nbin,xmin,xmax);
+  h_recgetnumr = fs->make<TH1F>("h_recgetnumr","Reconstructed photon Et "
+				"after photon trigger cuts", nbin,xmin,xmax);
+  h_gengetdeno = fs->make<TH1F>("h_gengetdeno","Generated photon Et before "
+				"photon trigger cuts", nbin,xmin,xmax);
+  h_gengetnumr = fs->make<TH1F>("h_gengetnumr","Generated photon Et after "
+				"photon trigger cuts", nbin,xmin,xmax);
+  h_jetgetdeno = fs->make<TH1F>("h_jetgetdeno","Reconstructed and jet photon"
+				" Et before photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_jetgetnumr = fs->make<TH1F>("h_jetgetnumr","Reconstructed and jet photon"
+				" Et after photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_qgetdeno   = fs->make<TH1F>("h_qgetdeno","Reconstructed and quark photon"
+				" Et before photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_qgetnumr   = fs->make<TH1F>("h_qgetnumr","Reconstructed and quark photon"
+				" Et after photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_ggetdeno   = fs->make<TH1F>("h_ggetdeno","Reconstructed and gluon photon"
+				" Et before photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_ggetnumr   = fs->make<TH1F>("h_ggetnumr","Reconstructed and gluon photon"
+				" Et after photon trigger cuts", 
+				nbin,xmin,xmax);
+
+  h_mugetdeno = fs->make<TH1F>("h_mugetdeno","Reconstructed photon Et "
+			       "before photon trigger cuts", nbin,xmin,xmax);
+  h_mugetnumr = fs->make<TH1F>("h_mugetnumr","Reconstructed photon Et "
+			       "after photon trigger cuts", nbin,xmin,xmax);
+
   root = new TTree("root","root");
   EvtInfo.Register(root);  
   PhoInfo.Register(root);
@@ -430,15 +415,15 @@ void TriggerBitCounter::analyze(const edm::Event& iEvent, const edm::EventSetup&
       float eta = it_ph->eta();
       float genpt = it_ph->genPhoton()? it_ph->genPhoton()->pt():-999;
 
-      HistoInfo.h_debug1->Fill(et);
-      HistoInfo.h_eta1  ->Fill(eta);
+      h_debug1->Fill(et);
+      h_eta1  ->Fill(eta);
  
       // loose photon EB
 
       if(!passOffline)continue;
       
-      HistoInfo.h_debug2->Fill(et);
-      HistoInfo.h_eta2  ->Fill(eta);
+      h_debug2->Fill(et);
+      h_eta2  ->Fill(eta);
 
       int genMomPID = it_ph->genPhoton() && it_ph->genPhoton()->mother()? 
 	it_ph->genPhoton()->mother()->pdgId(): 0;
@@ -456,33 +441,33 @@ void TriggerBitCounter::analyze(const edm::Event& iEvent, const edm::EventSetup&
       if((thisEvent_trigger & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
 	{
 	  _isFilled=true;
-	  HistoInfo.h_recgetdeno->Fill(et);
+	  h_recgetdeno->Fill(et);
 	  if(isFromHardScattering)
 	    {
-	      HistoInfo.h_getdeno->Fill(et);
-	      HistoInfo.h_gengetdeno->Fill(genpt);
+	      h_getdeno->Fill(et);
+	      h_gengetdeno->Fill(genpt);
 	    }
 	  else if(isFromJet)
-	    HistoInfo.h_jetgetdeno->Fill(et);
+	    h_jetgetdeno->Fill(et);
 	  else if(isFromQuark)
-	    HistoInfo.h_qgetdeno->Fill(et);
+	    h_qgetdeno->Fill(et);
 	  else if(isFromGluon)
-	    HistoInfo.h_ggetdeno->Fill(et);
+	    h_ggetdeno->Fill(et);
 	  
 	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
 	    {
-	      HistoInfo.h_recgetnumr->Fill(et);
+	      h_recgetnumr->Fill(et);
 	      if(isFromHardScattering)
 		{
-		  HistoInfo.h_getnumr->Fill(et);
-		  HistoInfo.h_gengetnumr->Fill(genpt);
+		  h_getnumr->Fill(et);
+		  h_gengetnumr->Fill(genpt);
 		}
 	      else if(isFromJet)
-		HistoInfo.h_jetgetnumr->Fill(et);
+		h_jetgetnumr->Fill(et);
 	      else if(isFromQuark)
-		HistoInfo.h_qgetnumr->Fill(et);
+		h_qgetnumr->Fill(et);
 	      else if(isFromGluon)
-		HistoInfo.h_ggetnumr->Fill(et);
+		h_ggetnumr->Fill(et);
 	    } // if pass 15 trigger
 	} // if pass L1EG5 trigger
 
@@ -492,10 +477,10 @@ void TriggerBitCounter::analyze(const edm::Event& iEvent, const edm::EventSetup&
       if((thisEvent_trigger & TRIGGER::HLT_Mu5) && !_isFilled_Mu)
 	{
 	  _isFilled_Mu=true;
-  	  HistoInfo.h_mugetdeno->Fill(et);
+  	  h_mugetdeno->Fill(et);
 
  	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)	    
-	    {HistoInfo.h_mugetnumr->Fill(et);}
+	    {h_mugetnumr->Fill(et);}
 
 	} // if passing muon trigger
 
@@ -567,8 +552,8 @@ void TriggerBitCounter::analyze(const edm::Event& iEvent, const edm::EventSetup&
       LepInfo.HcalIso    [LepInfo.Size] = it_el->hcalIso();				
       LepInfo.Size++;
 
-//       HistoInfo.h_leppt -> Fill(it_el->pt());
-//       HistoInfo.h_lepeta-> Fill(it_el->eta());
+//       h_leppt -> Fill(it_el->pt());
+//       h_lepeta-> Fill(it_el->eta());
 
     }
     }

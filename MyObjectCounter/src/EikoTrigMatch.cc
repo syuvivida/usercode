@@ -54,10 +54,28 @@ using namespace math;
 using namespace ROOT;
 
 
-class Histo_struct {
 
+class EikoTrigMatch : public edm::EDAnalyzer {
 public:
+  explicit EikoTrigMatch(const edm::ParameterSet&) ;
+  ~EikoTrigMatch();  
 
+    
+private:
+  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void dumpGenInfo(const edm::Event&); 
+  virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
+  virtual void endJob() ;
+  
+  TTree *root;
+  EvtInfoBranches  EvtInfo;
+  PhoInfoBranches  PhoInfo;
+
+  bool             _dumpHEP;
+  int              _nIn;
+  int              _nOut;
+
+  // histograms
   TH1F* h_dRL15;
   TH1F* h_dRL18;
   TH1F* h_dRHLT15;
@@ -91,120 +109,6 @@ public:
   TH1F* h_eta2;
 
 
-  void BookHistograms(edm::Service<TFileService> fo)
-  {
-    
-    int nbin=100;
-    double xmin=0.0;
-    double xmax=200.0;
-
-    h_dRL15  = fo->make<TH1F>("h_dRL15","#Delta R between photons and"
-			      "trigger L1EG5", 100,0,10);
-    h_dRL18  = fo->make<TH1F>("h_dRL18","#Delta R between photons and"
-			      "trigger L1EG8", 100,0,10);
-    h_dRHLT15= fo->make<TH1F>("h_dRHLT15","#Delta R between photons and"
-			      "trigger HLT15", 100,0,10);
-
-    h_eta1  = fo->make<TH1F>("h_eta1","#eta of photons "
-				"before loose photon cuts", 60,-3.0,3.0);
-    h_eta2  = fo->make<TH1F>("h_eta2","#eta of photons "
-				"after loose photon cuts", 60,-3.0,3.0);
-
-    h_debug1  = fo->make<TH1F>("h_debug1","Reconstructed photon "
-			       "Et before loose photon cuts", nbin,xmin,xmax);
-    h_debug2 = fo->make<TH1F>("h_debug2","Reconstructed photon "
-			       "Et before loose photon cuts", nbin,xmin,xmax);
-    h_allgetdeno = fo->make<TH1F>("h_allgetdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_allgetnumr = fo->make<TH1F>("h_allgetnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-    h_25allgetdeno = fo->make<TH1F>("h_25allgetdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_25allgetnumr = fo->make<TH1F>("h_25allgetnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-    h_isoallgetdeno = fo->make<TH1F>("h_isoallgetdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_isoallgetnumr = fo->make<TH1F>("h_isoallgetnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-
-    h_getdeno = fo->make<TH1F>("h_getdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_getnumr = fo->make<TH1F>("h_getnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-    h_25getdeno = fo->make<TH1F>("h_25getdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_25getnumr = fo->make<TH1F>("h_25getnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-    h_isogetdeno = fo->make<TH1F>("h_isogetdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_isogetnumr = fo->make<TH1F>("h_isogetnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-
-    h_jetgetdeno = fo->make<TH1F>("h_jetgetdeno","Reconstructed and jet photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_jetgetnumr = fo->make<TH1F>("h_jetgetnumr","Reconstructed and jet photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-
-
-    h_25jetgetdeno = fo->make<TH1F>("h_25jetgetdeno","Reconstructed and jet photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_25jetgetnumr = fo->make<TH1F>("h_25jetgetnumr","Reconstructed and jet photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-
-    h_isojetgetdeno = fo->make<TH1F>("h_isojetgetdeno","Reconstructed and matched photon "
-			       "Et before photon trigger cuts", nbin,xmin,xmax);
-    h_isojetgetnumr = fo->make<TH1F>("h_isojetgetnumr","Reconstructed and matched photon "
-			       "Et after photon trigger cuts", nbin,xmin,xmax);
-
-
-    h_qgetdeno   = fo->make<TH1F>("h_qgetdeno","Reconstructed and quark photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_qgetnumr   = fo->make<TH1F>("h_qgetnumr","Reconstructed and quark photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_ggetdeno   = fo->make<TH1F>("h_ggetdeno","Reconstructed and gluon photon"
-				  " Et before photon trigger cuts", 
-				  nbin,xmin,xmax);
-    h_ggetnumr   = fo->make<TH1F>("h_ggetnumr","Reconstructed and gluon photon"
-				  " Et after photon trigger cuts", 
-				  nbin,xmin,xmax);
-
-  }
-
-};
-
-
-class EikoTrigMatch : public edm::EDAnalyzer {
-public:
-  explicit EikoTrigMatch(const edm::ParameterSet&) ;
-  ~EikoTrigMatch();  
-
-    
-private:
-  virtual void beginJob(const edm::EventSetup&) ;
-  virtual void dumpGenInfo(const edm::Event&); 
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
-  virtual void endJob() ;
-  
-  TTree *root;
-  EvtInfoBranches  EvtInfo;
-  PhoInfoBranches  PhoInfo;
-  Histo_struct     HistoInfo;
-
-  bool             _dumpHEP;
-  int              _nIn;
-  int              _nOut;
 
 };
 
@@ -226,7 +130,92 @@ void EikoTrigMatch::beginJob(const edm::EventSetup&)
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("EikoTrigMatch") );
-  HistoInfo.BookHistograms(fs);
+  int nbin=200;
+  double xmin=0.0;
+  double xmax=200.0;
+
+  h_dRL15  = fs->make<TH1F>("h_dRL15","#Delta R between photons and"
+			    "trigger L1EG5", 100,0,10);
+  h_dRL18  = fs->make<TH1F>("h_dRL18","#Delta R between photons and"
+			    "trigger L1EG8", 100,0,10);
+  h_dRHLT15= fs->make<TH1F>("h_dRHLT15","#Delta R between photons and"
+			    "trigger HLT15", 100,0,10);
+
+  h_eta1  = fs->make<TH1F>("h_eta1","#eta of photons "
+			   "before loose photon cuts", 60,-3.0,3.0);
+  h_eta2  = fs->make<TH1F>("h_eta2","#eta of photons "
+			   "after loose photon cuts", 60,-3.0,3.0);
+
+  h_debug1  = fs->make<TH1F>("h_debug1","Reconstructed photon "
+			     "Et before loose photon cuts", nbin,xmin,xmax);
+  h_debug2 = fs->make<TH1F>("h_debug2","Reconstructed photon "
+			    "Et before loose photon cuts", nbin,xmin,xmax);
+  h_allgetdeno = fs->make<TH1F>("h_allgetdeno","Reconstructed and matched photon "
+				"Et before photon trigger cuts", nbin,xmin,xmax);
+  h_allgetnumr = fs->make<TH1F>("h_allgetnumr","Reconstructed and matched photon "
+				"Et after photon trigger cuts", nbin,xmin,xmax);
+
+  h_25allgetdeno = fs->make<TH1F>("h_25allgetdeno","Reconstructed and matched photon "
+				  "Et before photon trigger cuts", nbin,xmin,xmax);
+  h_25allgetnumr = fs->make<TH1F>("h_25allgetnumr","Reconstructed and matched photon "
+				  "Et after photon trigger cuts", nbin,xmin,xmax);
+
+  h_isoallgetdeno = fs->make<TH1F>("h_isoallgetdeno","Reconstructed and matched photon "
+				   "Et before photon trigger cuts", nbin,xmin,xmax);
+  h_isoallgetnumr = fs->make<TH1F>("h_isoallgetnumr","Reconstructed and matched photon "
+				   "Et after photon trigger cuts", nbin,xmin,xmax);
+
+
+  h_getdeno = fs->make<TH1F>("h_getdeno","Reconstructed and matched photon "
+			     "Et before photon trigger cuts", nbin,xmin,xmax);
+  h_getnumr = fs->make<TH1F>("h_getnumr","Reconstructed and matched photon "
+			     "Et after photon trigger cuts", nbin,xmin,xmax);
+
+  h_25getdeno = fs->make<TH1F>("h_25getdeno","Reconstructed and matched photon "
+			       "Et before photon trigger cuts", nbin,xmin,xmax);
+  h_25getnumr = fs->make<TH1F>("h_25getnumr","Reconstructed and matched photon "
+			       "Et after photon trigger cuts", nbin,xmin,xmax);
+
+  h_isogetdeno = fs->make<TH1F>("h_isogetdeno","Reconstructed and matched photon "
+				"Et before photon trigger cuts", nbin,xmin,xmax);
+  h_isogetnumr = fs->make<TH1F>("h_isogetnumr","Reconstructed and matched photon "
+				"Et after photon trigger cuts", nbin,xmin,xmax);
+
+
+  h_jetgetdeno = fs->make<TH1F>("h_jetgetdeno","Reconstructed and jet photon"
+				" Et before photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_jetgetnumr = fs->make<TH1F>("h_jetgetnumr","Reconstructed and jet photon"
+				" Et after photon trigger cuts", 
+				nbin,xmin,xmax);
+
+
+  h_25jetgetdeno = fs->make<TH1F>("h_25jetgetdeno","Reconstructed and jet photon"
+				  " Et before photon trigger cuts", 
+				  nbin,xmin,xmax);
+  h_25jetgetnumr = fs->make<TH1F>("h_25jetgetnumr","Reconstructed and jet photon"
+				  " Et after photon trigger cuts", 
+				  nbin,xmin,xmax);
+
+  h_isojetgetdeno = fs->make<TH1F>("h_isojetgetdeno","Reconstructed and matched photon "
+				   "Et before photon trigger cuts", nbin,xmin,xmax);
+  h_isojetgetnumr = fs->make<TH1F>("h_isojetgetnumr","Reconstructed and matched photon "
+				   "Et after photon trigger cuts", nbin,xmin,xmax);
+
+
+  h_qgetdeno   = fs->make<TH1F>("h_qgetdeno","Reconstructed and quark photon"
+				" Et before photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_qgetnumr   = fs->make<TH1F>("h_qgetnumr","Reconstructed and quark photon"
+				" Et after photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_ggetdeno   = fs->make<TH1F>("h_ggetdeno","Reconstructed and gluon photon"
+				" Et before photon trigger cuts", 
+				nbin,xmin,xmax);
+  h_ggetnumr   = fs->make<TH1F>("h_ggetnumr","Reconstructed and gluon photon"
+				" Et after photon trigger cuts", 
+				nbin,xmin,xmax);
+
   root = new TTree("root","root");
   EvtInfo.Register(root);  
   PhoInfo.Register(root);
@@ -467,13 +456,14 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     float eta = it_gen->eta();
     
     if((it_gen->pdgId()!=22 && abs(it_gen->pdgId())!=11) || it_gen->status()!=1)continue;
-    if(et < 2)continue;
+    if(et < 2.)continue;
     if(fabs(eta)>2.5)continue;
     if(fabs(eta)>1.44 && fabs(eta)<1.56)continue;
 
     if (PhoInfo.Size>=MAX_PHOTONS) {
-      fprintf(stderr,"ERROR: number of photons exceeds the size of array.\n");
-      exit(1);
+//       fprintf(stderr,"ERROR: number of photons exceeds the size of array.\n");
+//       exit(1);
+      return;
     }
     
     PhoInfo.Index[PhoInfo.Size]          = PhoInfo.Size;  
@@ -492,7 +482,7 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       float deltaR = reco::deltaR(L1Trig5Cands[j]->momentum(),
 				  it_gen->momentum());
 //       cout << "deltaR L1EG5 : " << deltaR << endl;
-      HistoInfo.h_dRL15->Fill(deltaR);
+      h_dRL15->Fill(deltaR);
 
       if (deltaR < closestDeltaR) {
 	closestDeltaR = deltaR;
@@ -508,7 +498,7 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       float deltaR = reco::deltaR(L1Trig8Cands[j]->momentum(),
 				  it_gen->momentum());
       
-      HistoInfo.h_dRL18->Fill(deltaR);
+      h_dRL18->Fill(deltaR);
 //       cout << "deltaR L1EG8 : " << deltaR << endl;
       if (deltaR < closestDeltaR) {
 	closestDeltaR = deltaR;
@@ -525,7 +515,7 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       float deltaR = reco::deltaR(HLTTrig15NoIsoCands[j]->momentum(),
 				  it_gen->momentum());
       
-      HistoInfo.h_dRHLT15->Fill(deltaR);
+      h_dRHLT15->Fill(deltaR);
 //       cout << "deltaR HLT : " << deltaR << endl;
       if (deltaR < closestDeltaR) {
 	closestDeltaR = deltaR;
@@ -592,8 +582,8 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     
     // need to pass the following cuts to be loose photons
-    HistoInfo.h_debug1->Fill(et);
-    HistoInfo.h_eta1  ->Fill(eta);
+    h_debug1->Fill(et);
+    h_eta1  ->Fill(eta);
     
 
     bool isFromHardScattering = (genMomPID ==22);
@@ -610,59 +600,59 @@ void EikoTrigMatch::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     if((trigMatchCode & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
       {
 	_isFilled=true;
-	HistoInfo.h_allgetdeno->Fill(et);
-	HistoInfo.h_25allgetdeno->Fill(et);
-	HistoInfo.h_isoallgetdeno->Fill(et);
+	h_allgetdeno->Fill(et);
+	h_25allgetdeno->Fill(et);
+	h_isoallgetdeno->Fill(et);
 
 	if(isFromHardScattering)	  
 	  {
-	    HistoInfo.h_getdeno->Fill(et);
-	    HistoInfo.h_isogetdeno->Fill(et);
-	    HistoInfo.h_25getdeno->Fill(et);
+	    h_getdeno->Fill(et);
+	    h_isogetdeno->Fill(et);
+	    h_25getdeno->Fill(et);
 	  }
 	else if(isFromJet)
 	  {
-	    HistoInfo.h_jetgetdeno->Fill(et);
-	    HistoInfo.h_isojetgetdeno->Fill(et);
-	    HistoInfo.h_25jetgetdeno->Fill(et);
+	    h_jetgetdeno->Fill(et);
+	    h_isojetgetdeno->Fill(et);
+	    h_25jetgetdeno->Fill(et);
 	  }
 
 	else if(isFromQuark)
-	  HistoInfo.h_qgetdeno->Fill(et);
+	  h_qgetdeno->Fill(et);
 	else if(isFromGluon)
-	  HistoInfo.h_ggetdeno->Fill(et);
+	  h_ggetdeno->Fill(et);
 
 
 	if(trigMatchCode & TRIGGER::HLT_Photon15_TrackIso_L1R)
 	  {
-	    HistoInfo.h_isoallgetnumr->Fill(et);
+	    h_isoallgetnumr->Fill(et);
 	    if(isFromHardScattering)
-	      HistoInfo.h_isogetnumr->Fill(et);	
+	      h_isogetnumr->Fill(et);	
 	    else if(isFromJet)
-	      HistoInfo.h_isojetgetnumr->Fill(et);
+	      h_isojetgetnumr->Fill(et);
 	  }
 	  
 	if(trigMatchCode & TRIGGER::HLT_Photon25_L1R)
 	  {
-	    HistoInfo.h_25allgetnumr->Fill(et);
+	    h_25allgetnumr->Fill(et);
 	    if(isFromHardScattering)
-	      HistoInfo.h_25getnumr->Fill(et);	
+	      h_25getnumr->Fill(et);	
 	    else if(isFromJet)
-	      HistoInfo.h_25jetgetnumr->Fill(et);
+	      h_25jetgetnumr->Fill(et);
 	  }
 	  
 	if(trigMatchCode & TRIGGER::HLT_Photon15_L1R)
 	  {
-	    HistoInfo.h_allgetnumr->Fill(et);
+	    h_allgetnumr->Fill(et);
 
 	    if(isFromHardScattering)
-	      HistoInfo.h_getnumr->Fill(et);
+	      h_getnumr->Fill(et);
 	    else if(isFromJet)
-	      HistoInfo.h_jetgetnumr->Fill(et);
+	      h_jetgetnumr->Fill(et);
 	    else if(isFromQuark)
-	      HistoInfo.h_qgetnumr->Fill(et);
+	      h_qgetnumr->Fill(et);
 	    else if(isFromGluon)
-	      HistoInfo.h_ggetnumr->Fill(et);
+	      h_ggetnumr->Fill(et);
 	  } // if pass 15 trigger
       } // if pass L1EG5 trigger
 
