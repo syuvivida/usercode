@@ -52,7 +52,7 @@ using namespace reco;
 using namespace std;
 using namespace math;
 using namespace ROOT;
-
+using namespace syu;
 
 
 class EikoTrigMatch : public edm::EDAnalyzer {

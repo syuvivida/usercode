@@ -4,6 +4,7 @@
 #define MAX_LEPTONS 	64
 #define MAX_PHOTONS     64
 #define MAX_TRIGGER    120
+#define MAX_GENS        64
 #define dummy          -9999
 
 namespace TRIGGER{
@@ -28,7 +29,7 @@ namespace TRIGGER{
 }
 
 
-
+namespace syu{
 class EvtInfoBranches {
 public:
   int   RunNo;
@@ -56,6 +57,7 @@ public:
   int   Location[MAX_PHOTONS];
   int   IsLoose[MAX_PHOTONS];
   int   Trig[MAX_PHOTONS];
+  float L1Pt[MAX_PHOTONS];
   float L3Pt[MAX_PHOTONS];
   float E[MAX_PHOTONS];
   float Et[MAX_PHOTONS];
@@ -74,6 +76,8 @@ public:
   float SCEtaWidth[MAX_PHOTONS];
   float SCPhiWidth[MAX_PHOTONS];
   int   SCNCrystal[MAX_PHOTONS];
+  float SigEta[MAX_PHOTONS];
+  float SigIEta[MAX_PHOTONS];
   int   GenPID[MAX_PHOTONS];
   int   GenGMomPID[MAX_PHOTONS];
   int   GenMomPID[MAX_PHOTONS];
@@ -90,6 +94,7 @@ public:
       IsLoose[i]   =dummy;
       Location[i]  =dummy;
       Trig[i]      =0;
+      L1Pt[i]      =dummy;
       L3Pt[i]      =dummy;
       E[i]    	   =dummy;
       Et[i]   	   =dummy;
@@ -108,6 +113,8 @@ public:
       SCEtaWidth[i]=dummy;
       SCPhiWidth[i]=dummy;
       SCNCrystal[i]=dummy;
+      SigEta[i]    =dummy;
+      SigIEta[i]   =dummy;
       GenPID[i]    =dummy;
       GenGMomPID[i]=dummy;
       GenMomPID[i] =dummy;
@@ -125,6 +132,7 @@ public:
 	root->Branch("PhoInfo.Location"	  , &Location[0]   , "PhoInfo.Location[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.IsLoose"	  , &IsLoose[0]	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.Trig"	  , &Trig[0]	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.L1Pt"	  , &L1Pt[0]	   , "PhoInfo.L1Pt[PhoInfo.Size]/F"	  );
 	root->Branch("PhoInfo.L3Pt"	  , &L3Pt[0]	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
 	root->Branch("PhoInfo.E"          , &E[0]          , "PhoInfo.E[PhoInfo.Size]/F"          );
 	root->Branch("PhoInfo.Et"         , &Et[0]         , "PhoInfo.Et[PhoInfo.Size]/F"         );
@@ -143,6 +151,8 @@ public:
 	root->Branch("PhoInfo.SCEtaWidth" , &SCEtaWidth[0] , "PhoInfo.SCEtaWidth[PhoInfo.Size]/F");	
 	root->Branch("PhoInfo.SCPhiWidth" , &SCPhiWidth[0] , "PhoInfo.SCPhiWidth[PhoInfo.Size]/F");	
 	root->Branch("PhoInfo.SCNCrystal",  &SCNCrystal[0] , "PhoInfo.SCNCrystal[PhoInfo.Size]/I");
+	root->Branch("PhoInfo.SigEta",      &SigEta[0]     , "PhoInfo.SigEta[PhoInfo.Size]/F");
+	root->Branch("PhoInfo.SigIEta",     &SigIEta[0]    , "PhoInfo.SigIEta[PhoInfo.Size]/F");
         root->Branch("PhoInfo.GenPID",      &GenPID[0]     , "PhoInfo.GenPID[PhoInfo.Size]/I");
 	root->Branch("PhoInfo.GenGMomPID" , &GenGMomPID[0] , "PhoInfo.GenGMomPID[PhoInfo.Size]/I" );
 	root->Branch("PhoInfo.GenMomPID"  , &GenMomPID[0]  , "PhoInfo.GenMomPID[PhoInfo.Size]/I" );
@@ -200,5 +210,48 @@ public:
 
    
 
+
+class GenInfoBranches {
+public:
+  int	Size; 
+  int   PID[MAX_GENS];
+  int   MPID[MAX_GENS];
+  float Mass[MAX_GENS];
+  float Pt[MAX_GENS];
+  float Eta[MAX_GENS];
+  float Phi[MAX_GENS];
+
+  
+  //Candidate* CandRef[MAX_GENS]; // backward pointer to the PAT objects
+  void Initialize(){
+
+    Size = 0;
+    for(int i=0; i < MAX_GENS; i++){
+      
+      PID[i] = dummy;
+      MPID[i] = dummy;
+      Mass[i] = dummy;
+      Pt[i]   = dummy;
+      Eta[i]  = dummy;
+      Phi[i]  = dummy;
+       
+  
+    }
+  }
+  
+  void Register(TTree *root) {
+	root->Branch("GenInfo.Size"	  , &Size	   , "GenInfo.Size/I"			  );
+	root->Branch("GenInfo.PID"	  , &PID[0]	   , "GenInfo.PID[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.MPID"	  , &MPID[0]	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.Mass"	  , &Mass[0]	   , "GenInfo.Mass[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Pt"	  , &Pt[0]	   , "GenInfo.Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Eta"	  , &Eta[0]	   , "GenInfo.Eta[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Phi"	  , &Phi[0]	   , "GenInfo.Phi[GenInfo.Size]/F"	  );
+  }  
+}; // end of GenInfoBranches
+
+   
+
+}
 
 #endif

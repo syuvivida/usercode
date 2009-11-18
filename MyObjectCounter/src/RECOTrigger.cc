@@ -52,6 +52,7 @@ using namespace std;
 using namespace trigger;
 using namespace math;
 using namespace ROOT;
+using namespace syu;
 
 
 class RECOTrigger : public edm::EDAnalyzer {

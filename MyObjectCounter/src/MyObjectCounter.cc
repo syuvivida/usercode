@@ -52,7 +52,7 @@ using namespace std;
 using namespace pat;
 using namespace math;
 using namespace ROOT;
-
+using namespace syu;
 
 
 class MyObjectCounter : public edm::EDAnalyzer {
