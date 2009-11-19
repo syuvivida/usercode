@@ -2,6 +2,7 @@
 #define ZEEFORMAT_HH
 
 #define MAX_GENS        64
+#define MAX_ZPAIR       10
 #define dummy          -9999
 
 namespace zee{
@@ -32,109 +33,159 @@ public:
 
 class PhoInfoBranches {
 public:
-  int   Location[2];
-  int   IsLoose[2];
-  int   Trig[2];
-  float L1Pt[2];
-  float L3Pt[2];
-  float E[2];
-  float Et[2];
-  float Pz[2];
-  float Eta[2];
-  float Phi[2];
-  float R9[2];
-  float TrkPtSum[2];
-  float EcalRecHitEtSum[2];
-  float HcalTowerEtSum[2];
-  float HoverE[2];
-  float SCE[2];
-  float SCEt[2];
-  float SCEta[2];
-  float SCPhi[2];
-  float SCEtaWidth[2];
-  float SCPhiWidth[2];
-  int   SCNCrystal[2];
-  float SigEta[2];
-  float SigIEta[2];
-  int   EleClass[2];
-  int   GenPID[2];
-  int   GenGMomPID[2];
-  int   GenMomPID[2];
-  float GenPt[2];
-  float GenMomPt[2];
+  int   ZPairSize;
+  int   Location[MAX_ZPAIR][2];
+  int   IsLoose[MAX_ZPAIR][2];
+  int   Trig[MAX_ZPAIR][2];
+  float L1Pt[MAX_ZPAIR][2];
+  float L3Pt[MAX_ZPAIR][2];
+  float E[MAX_ZPAIR][2];
+  float Et[MAX_ZPAIR][2];
+  float Pz[MAX_ZPAIR][2];
+  float Eta[MAX_ZPAIR][2];
+  float Phi[MAX_ZPAIR][2];
+  float R9[MAX_ZPAIR][2];
+  float TrkPtSum[MAX_ZPAIR][2];
+  float EcalRecHitEtSum[MAX_ZPAIR][2];
+  float HcalTowerEtSum[MAX_ZPAIR][2];
+  float HoverE[MAX_ZPAIR][2];
+  float SCE[MAX_ZPAIR][2];
+  float SCEt[MAX_ZPAIR][2];
+  float SCEta[MAX_ZPAIR][2];
+  float SCPhi[MAX_ZPAIR][2];
+  float SCEtaWidth[MAX_ZPAIR][2];
+  float SCPhiWidth[MAX_ZPAIR][2];
+  int   SCNCrystal[MAX_ZPAIR][2];
+  float SigEta[MAX_ZPAIR][2];
+  float SigIEta[MAX_ZPAIR][2];
+
+  float eE[MAX_ZPAIR][2];
+  float eEt[MAX_ZPAIR][2];
+  float ePz[MAX_ZPAIR][2];
+  float eEta[MAX_ZPAIR][2];
+  float ePhi[MAX_ZPAIR][2];
+  float eR9[MAX_ZPAIR][2];
+  float eTrkPtSum[MAX_ZPAIR][2];
+  float eEcalRecHitEtSum[MAX_ZPAIR][2];
+  float eHcalTowerEtSum[MAX_ZPAIR][2];
+  float eHoverE[MAX_ZPAIR][2];
+  float eSCE[MAX_ZPAIR][2];
+  float eSCEt[MAX_ZPAIR][2];
+  float eSCEta[MAX_ZPAIR][2];
+  float eSCPhi[MAX_ZPAIR][2];
+  float eSCEtaWidth[MAX_ZPAIR][2];
+  float eSCPhiWidth[MAX_ZPAIR][2];
+  int   eSCNCrystal[MAX_ZPAIR][2];
+  float eSigEta[MAX_ZPAIR][2];
+  float eSigIEta[MAX_ZPAIR][2];
+  int   eCharge[MAX_ZPAIR][2];
+  int   eClass[MAX_ZPAIR][2];
   
 
   void Initialize(){
 
-    for(int i=0; i< 2; i++){
+    ZPairSize = 0;
+    for(int i=0; i<MAX_ZPAIR;i++)
+      for(int j=0; j< 2; j++){
 
-      IsLoose[i]   =dummy;
-      Location[i]  =dummy;
-      Trig[i]      =0;
-      L1Pt[i]      =dummy;
-      L3Pt[i]      =dummy;
-      E[i]    	   =dummy;
-      Et[i]   	   =dummy;
-      Pz[i]   	   =dummy;
-      Eta[i]  	   =dummy;
-      Phi[i]  	   =dummy;
-      R9[i]   	   =dummy;
-      TrkPtSum[i]  =dummy;
-      EcalRecHitEtSum[i]=dummy;
-      HcalTowerEtSum[i]=dummy;
-      SCE[i]	   =dummy;
-      HoverE[i]	   =dummy;
-      SCEt[i]	   =dummy;
-      SCEta[i]	   =dummy;
-      SCPhi[i]	   =dummy;
-      SCEtaWidth[i]=dummy;
-      SCPhiWidth[i]=dummy;
-      SCNCrystal[i]=dummy;
-      SigEta[i]    =dummy;
-      SigIEta[i]   =dummy;
-      EleClass[i]  =dummy;
-      GenPID[i]    =dummy;
-      GenGMomPID[i]=dummy;
-      GenMomPID[i] =dummy;
-      GenPt[i]     =dummy;
-      GenMomPt[i]  =dummy;
+      IsLoose[i][j]        =dummy;
+      Location[i][j]       =dummy;
+      Trig[i][j]           =0;
+      L1Pt[i][j]           =dummy;
+      L3Pt[i][j]           =dummy;
+      E[i][j]    	   =dummy;
+      Et[i][j]   	   =dummy;
+      Pz[i][j]   	   =dummy;
+      Eta[i][j]  	   =dummy;
+      Phi[i][j]  	   =dummy;
+      R9[i][j]   	   =dummy;
+      TrkPtSum[i][j]       =dummy;
+      EcalRecHitEtSum[i][j]=dummy;
+      HcalTowerEtSum[i][j] =dummy;
+      SCE[i][j]	           =dummy;
+      HoverE[i][j]	   =dummy;
+      SCEt[i][j]	   =dummy;
+      SCEta[i][j]	   =dummy;
+      SCPhi[i][j]	   =dummy;
+      SCEtaWidth[i][j]     =dummy;
+      SCPhiWidth[i][j]     =dummy;
+      SCNCrystal[i][j]     =dummy;
+      SigEta[i][j]         =dummy;
+      SigIEta[i][j]        =dummy;
+
+      eE[i][j]             =dummy;
+      eEt[i][j]            =dummy;
+      ePz[i][j]            =dummy;
+      eEta[i][j]           =dummy;
+      ePhi[i][j]           =dummy;
+      eR9[i][j]            =dummy;
+      eTrkPtSum[i][j]      =dummy;
+      eEcalRecHitEtSum[i][j] =dummy;
+      eHcalTowerEtSum[i][j]=dummy;
+      eHoverE[i][j]        =dummy;
+      eSCE[i][j]           =dummy;
+      eSCEt[i][j]          =dummy;
+      eSCEta[i][j]         =dummy;
+      eSCPhi[i][j]         =dummy;
+      eSCEtaWidth[i][j]    =dummy;
+      eSCPhiWidth[i][j]    =dummy;
+      eSCNCrystal[i][j]    =dummy;
+      eSigEta[i][j]        =dummy;
+      eSigIEta[i][j]       =dummy;
+      eCharge[i][j]        =dummy;
+      eClass[i][j]         =dummy;
 
     }
   }
   
-  //Candidate* CandRef[2]; // backward pointer to the PAT objects
   
   void Register(TTree *root) {
-	root->Branch("PhoInfo.Location"	  , &Location[0]   , "PhoInfo.Location[2]/I"	  );
-	root->Branch("PhoInfo.IsLoose"	  , &IsLoose[0]	   , "PhoInfo.IsLoose[2]/I"	  );
-	root->Branch("PhoInfo.Trig"	  , &Trig[0]	   , "PhoInfo.Trig[2]/I"	  );
-	root->Branch("PhoInfo.L1Pt"	  , &L1Pt[0]	   , "PhoInfo.L1Pt[2]/F"	  );
-	root->Branch("PhoInfo.L3Pt"	  , &L3Pt[0]	   , "PhoInfo.L3Pt[2]/F"	  );
-	root->Branch("PhoInfo.E"          , &E[0]          , "PhoInfo.E[2]/F"          );
-	root->Branch("PhoInfo.Et"         , &Et[0]         , "PhoInfo.Et[2]/F"         );
-	root->Branch("PhoInfo.Pz"         , &Pz[0]         , "PhoInfo.Pz[2]/F"         );
-	root->Branch("PhoInfo.Eta"        , &Eta[0]        , "PhoInfo.Eta[2]/F"        );
-	root->Branch("PhoInfo.Phi"        , &Phi[0]        , "PhoInfo.Phi[2]/F"        );
-	root->Branch("PhoInfo.R9"         , &R9[0]         , "PhoInfo.R9[2]/F"         );
-	root->Branch("PhoInfo.TrkPtSum"   , &TrkPtSum[0]   , "PhoInfo.TrkPtSum[2]/F"   );
-	root->Branch("PhoInfo.EcalRecHitEtSum", &EcalRecHitEtSum[0], "PhoInfo.EcalRecHitEtSum[2]/F");
-	root->Branch("PhoInfo.HcalTowerEtSum",  &HcalTowerEtSum[0], "PhoInfo.HcalTowerEtSum[2]/F");
-	root->Branch("PhoInfo.HoverE"     , &HoverE[0]     , "PhoInfo.HoverE[2]/F"     );
-	root->Branch("PhoInfo.SCE"        , &SCE[0]        , "PhoInfo.SCE[2]/F");
-	root->Branch("PhoInfo.SCEt"       , &SCEt[0]       , "PhoInfo.SCEt[2]/F");	
-	root->Branch("PhoInfo.SCEta"      , &SCEta[0]      , "PhoInfo.SCEta[2]/F");	
-	root->Branch("PhoInfo.SCPhi"      , &SCPhi[0]      , "PhoInfo.SCPhi[2]/F");	
-	root->Branch("PhoInfo.SCEtaWidth" , &SCEtaWidth[0] , "PhoInfo.SCEtaWidth[2]/F");	
-	root->Branch("PhoInfo.SCPhiWidth" , &SCPhiWidth[0] , "PhoInfo.SCPhiWidth[2]/F");	
-	root->Branch("PhoInfo.SCNCrystal",  &SCNCrystal[0] , "PhoInfo.SCNCrystal[2]/I");
-	root->Branch("PhoInfo.SigEta",      &SigEta[0]     , "PhoInfo.SigEta[2]/F");
-	root->Branch("PhoInfo.SigIEta",     &SigIEta[0]    , "PhoInfo.SigIEta[2]/F");
-	root->Branch("PhoInfo.EleClass",    &EleClass[0]   , "PhoInfo.EleClass[2]/I");
-        root->Branch("PhoInfo.GenPID",      &GenPID[0]     , "PhoInfo.GenPID[2]/I");
-	root->Branch("PhoInfo.GenGMomPID" , &GenGMomPID[0] , "PhoInfo.GenGMomPID[2]/I" );
-	root->Branch("PhoInfo.GenMomPID"  , &GenMomPID[0]  , "PhoInfo.GenMomPID[2]/I" );
-	root->Branch("PhoInfo.GenPt"   , &GenPt[0]   , "PhoInfo.GenPt[2]/F" );
-	root->Branch("PhoInfo.GenMomPt"   , &GenMomPt[0]   , "PhoInfo.GenMomPt[2]/F" );
+    root->Branch("PhoInfo.ZPairSize"    , &ZPairSize	   , "PhoInfo.ZPairSize/I");
+    root->Branch("PhoInfo.Location"	  , Location   , "PhoInfo.Location[PhoInfo.ZPairSize][2]/I"	  );
+    root->Branch("PhoInfo.IsLoose"	  , IsLoose	   , "PhoInfo.IsLoose[PhoInfo.ZPairSize][2]/I"	  );
+    root->Branch("PhoInfo.Trig"	  , Trig	   , "PhoInfo.Trig[PhoInfo.ZPairSize][2]/I"	  );
+    root->Branch("PhoInfo.L1Pt"	  , L1Pt	   , "PhoInfo.L1Pt[PhoInfo.ZPairSize][2]/F"	  );
+    root->Branch("PhoInfo.L3Pt"	  , L3Pt	   , "PhoInfo.L3Pt[PhoInfo.ZPairSize][2]/F"	  );
+    root->Branch("PhoInfo.E"          , E          , "PhoInfo.E[PhoInfo.ZPairSize][2]/F"          );
+    root->Branch("PhoInfo.Et"         , Et         , "PhoInfo.Et[PhoInfo.ZPairSize][2]/F"         );
+    root->Branch("PhoInfo.Pz"         , Pz         , "PhoInfo.Pz[PhoInfo.ZPairSize][2]/F"         );
+    root->Branch("PhoInfo.Eta"        , Eta        , "PhoInfo.Eta[PhoInfo.ZPairSize][2]/F"        );
+    root->Branch("PhoInfo.Phi"        , Phi        , "PhoInfo.Phi[PhoInfo.ZPairSize][2]/F"        );
+    root->Branch("PhoInfo.R9"         , R9         , "PhoInfo.R9[PhoInfo.ZPairSize][2]/F"         );
+    root->Branch("PhoInfo.TrkPtSum"   , TrkPtSum   , "PhoInfo.TrkPtSum[PhoInfo.ZPairSize][2]/F"   );
+    root->Branch("PhoInfo.EcalRecHitEtSum", EcalRecHitEtSum, "PhoInfo.EcalRecHitEtSum[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.HcalTowerEtSum",  HcalTowerEtSum, "PhoInfo.HcalTowerEtSum[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.HoverE"     , HoverE     , "PhoInfo.HoverE[PhoInfo.ZPairSize][2]/F"     );
+    root->Branch("PhoInfo.SCE"        , SCE        , "PhoInfo.SCE[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.SCEt"       , SCEt       , "PhoInfo.SCEt[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.SCEta"      , SCEta      , "PhoInfo.SCEta[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.SCPhi"      , SCPhi      , "PhoInfo.SCPhi[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.SCEtaWidth" , SCEtaWidth , "PhoInfo.SCEtaWidth[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.SCPhiWidth" , SCPhiWidth , "PhoInfo.SCPhiWidth[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.SCNCrystal",  SCNCrystal , "PhoInfo.SCNCrystal[PhoInfo.ZPairSize][2]/I");
+    root->Branch("PhoInfo.SigEta",      SigEta     , "PhoInfo.SigEta[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.SigIEta",     SigIEta    , "PhoInfo.SigIEta[PhoInfo.ZPairSize][2]/F");
+
+    root->Branch("PhoInfo.eE"          , eE          , "PhoInfo.eE[PhoInfo.ZPairSize][2]/F"          );
+    root->Branch("PhoInfo.eEt"         , eEt         , "PhoInfo.eEt[PhoInfo.ZPairSize][2]/F"         );
+    root->Branch("PhoInfo.ePz"         , ePz         , "PhoInfo.ePz[PhoInfo.ZPairSize][2]/F"         );
+    root->Branch("PhoInfo.eEta"        , eEta        , "PhoInfo.eEta[PhoInfo.ZPairSize][2]/F"        );
+    root->Branch("PhoInfo.ePhi"        , ePhi        , "PhoInfo.ePhi[PhoInfo.ZPairSize][2]/F"        );
+    root->Branch("PhoInfo.eR9"         , eR9         , "PhoInfo.eR9[PhoInfo.ZPairSize][2]/F"         );
+    root->Branch("PhoInfo.eTrkPtSum"   , eTrkPtSum   , "PhoInfo.eTrkPtSum[PhoInfo.ZPairSize][2]/F"   );
+    root->Branch("PhoInfo.eEcalRecHitEtSum", eEcalRecHitEtSum, "PhoInfo.eEcalRecHitEtSum[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.eHcalTowerEtSum",  eHcalTowerEtSum, "PhoInfo.eHcalTowerEtSum[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.eHoverE"     , eHoverE     , "PhoInfo.eHoverE[PhoInfo.ZPairSize][2]/F"     );
+    root->Branch("PhoInfo.eSCE"        , eSCE        , "PhoInfo.eSCE[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.eSCEt"       , eSCEt       , "PhoInfo.eSCEt[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.eSCEta"      , eSCEta      , "PhoInfo.eSCEta[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.eSCPhi"      , eSCPhi      , "PhoInfo.eSCPhi[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.eSCEtaWidth" , eSCEtaWidth , "PhoInfo.eSCEtaWidth[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.eSCPhiWidth" , eSCPhiWidth , "PhoInfo.eSCPhiWidth[PhoInfo.ZPairSize][2]/F");	
+    root->Branch("PhoInfo.eSCNCrystal",  eSCNCrystal , "PhoInfo.eSCNCrystal[PhoInfo.ZPairSize][2]/I");
+    root->Branch("PhoInfo.eSigEta",      eSigEta     , "PhoInfo.eSigEta[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.eSigIEta",     eSigIEta    , "PhoInfo.eSigIEta[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.eClass",    eClass   , "PhoInfo.eClass[PhoInfo.ZPairSize][2]/I");
 
   }
 };  // end of PhoInfoBranches
@@ -157,12 +208,12 @@ public:
     Size = 0;
     for(int i=0; i < MAX_GENS; i++){
       
-      PID[i] = dummy;
-      MPID[i] = dummy;
-      Mass[i] = dummy;
-      Pt[i]   = dummy;
-      Eta[i]  = dummy;
-      Phi[i]  = dummy;
+      PID[i]  =dummy;
+      MPID[i] =dummy;
+      Mass[i] =dummy;
+      Pt[i]   =dummy;
+      Eta[i]  =dummy;
+      Phi[i]  =dummy;
        
   
     }

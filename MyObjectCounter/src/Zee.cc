@@ -26,7 +26,7 @@
 #include "PhysicsTools/UtilAlgos/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/PtComparator.h"
 
-
+// #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "DataFormats/Candidate/interface/Particle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
@@ -245,15 +245,31 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     } // check generator-level
   } // end of if hasGenParticle
 
-  
+//   const edm::InputTag ebColName = edm::InputTag("reducedEcalRecHitsEB");
+//   const edm::InputTag esColName = edm::InputTag("reducedEcalRecHitsEE");
+
+//   Handle<EcalRecHitCollection> EBReducedRecHits;
+//   iEvent.getByLabel(ebColName, EBReducedRecHits);
+//   Handle<EcalRecHitCollection> EEReducedRecHits;
+//   iEvent.getByLabel(esColName, EEReducedRecHits);
+//   EcalClusterLazyTools lazyTool(iEvent, iSetup, ebColName, esColName);
+
+  // now loop over Z electron pairs
+  PhoInfo.Initialize();
+  int it_count=-1;
   for(eleGenMap::iterator it_e=myEleGenMap.begin(); 
       it_e!= myEleGenMap.end(); ++it_e)
     {
+      it_count ++;
       // find match to photon
       if(myElePhoMap.find(it_e->first)==myElePhoMap.end())continue;
 
+      int jt_count=-1;
       for(eleGenMap::const_iterator jt_e = myEleGenMap.begin();
 	  jt_e != myEleGenMap.end(); ++jt_e){
+
+	jt_count ++;
+	if(it_count >= jt_count)continue; // each pair is used once only
 	if(jt_e->first == it_e->first)continue;
 
       // find match to photon
@@ -262,18 +278,52 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       EvtInfo.RecZMass = (it_e->first->p4() 
 			  + jt_e->first->p4()).M();
 
+      reco::GsfElectronCollection::const_iterator eleMatch[2];
+      eleMatch[0] = it_e->first;
+      eleMatch[1] = jt_e->first;
 
-      reco::PhotonCollection::const_iterator phoMatch[2];
-      phoMatch[0] = myElePhoMap[it_e->first];
-      phoMatch[1] = myElePhoMap[jt_e->first];
 
     // initialize the variables of ntuples
-      PhoInfo.Initialize();
 
       for (unsigned int ey=0; ey < 2; ey++){
-    
-	reco::PhotonCollection::const_iterator it_ph = phoMatch[ey];
-    
+
+	// first fill electron variables
+	reco::GsfElectronCollection::const_iterator thisEle = 
+	  eleMatch[ey];
+
+// 	const reco::CaloClusterPtr eleSeed = (*thisEle).superCluster()->seed();
+// 	float eR9 = thisEle->superCluster()->rawEnergy() > 1e-6? 
+// 	  lazyTool.e3x3(*eleSeed)/thisEle->superCluster()->rawEnergy():-999;
+	float escet = thisEle->superCluster()->energy()/cosh(thisEle->superCluster()->eta());
+	PhoInfo.eE[PhoInfo.ZPairSize][ey]   = thisEle->energy();
+	PhoInfo.eEt[PhoInfo.ZPairSize][ey]  = thisEle->pt();
+	PhoInfo.ePz[PhoInfo.ZPairSize][ey]  = thisEle->pz();
+	PhoInfo.eEta[PhoInfo.ZPairSize][ey] = thisEle->eta();
+	PhoInfo.ePhi[PhoInfo.ZPairSize][ey] = thisEle->phi();
+// 	PhoInfo.eR9[PhoInfo.ZPairSize][ey]  = eR9;
+	PhoInfo.eTrkPtSum[PhoInfo.ZPairSize][ey] = 
+	  thisEle-> dr04TkSumPt();
+	PhoInfo.eEcalRecHitEtSum[PhoInfo.ZPairSize][ey] = 
+	  thisEle->dr04EcalRecHitSumEt();
+	PhoInfo.eHcalTowerEtSum[PhoInfo.ZPairSize][ey] = 
+	  thisEle->dr04HcalTowerSumEt();
+	PhoInfo.eHoverE[PhoInfo.ZPairSize][ey] = thisEle->hadronicOverEm();
+	PhoInfo.eSCE[PhoInfo.ZPairSize][ey] = thisEle->superCluster()->energy();	
+
+	PhoInfo.eSCEt[PhoInfo.ZPairSize][ey] = escet;
+	PhoInfo.eSCEta[PhoInfo.ZPairSize][ey] = thisEle->superCluster()->eta();
+	PhoInfo.eSCPhi[PhoInfo.ZPairSize][ey] = thisEle->superCluster()->phi();
+	PhoInfo.eSCEtaWidth[PhoInfo.ZPairSize][ey] = thisEle->superCluster()->etaWidth();
+	PhoInfo.eSCPhiWidth[PhoInfo.ZPairSize][ey] = thisEle->superCluster()->phiWidth();
+	PhoInfo.eSCNCrystal[PhoInfo.ZPairSize][ey] = thisEle->superCluster()->size();
+	PhoInfo.eSigEta[PhoInfo.ZPairSize][ey] = thisEle->sigmaEtaEta(); 
+	PhoInfo.eSigIEta[PhoInfo.ZPairSize][ey] = thisEle->sigmaIetaIeta();
+	PhoInfo.eCharge[PhoInfo.ZPairSize][ey]  = thisEle->charge();
+	PhoInfo.eClass[PhoInfo.ZPairSize][ey]  = thisEle->classification();
+
+	// second fill photon variables
+	reco::PhotonCollection::const_iterator it_ph = 
+	  myElePhoMap[eleMatch[ey]];
 
 	float ecalIso = it_ph->ecalRecHitSumEtConeDR04();
 	float hcalIso = it_ph->hcalTowerSumEtConeDR04();
@@ -290,43 +340,46 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	else if(isBarrel)location=1;
 	else if(isEndCap)location=2;
 
-	PhoInfo.Location[ey]     = location;
-	PhoInfo.E    [ey] 	 = it_ph->energy(); 
-	PhoInfo.Et   [ey] 	 = it_ph->et();     
-	PhoInfo.Pz   [ey] 	 = it_ph->pz();     
-	PhoInfo.Eta  [ey] 	 = it_ph->eta();    
-	PhoInfo.Phi  [ey] 	 = it_ph->phi();    
-	PhoInfo.R9   [ey] 	 = it_ph->r9();     
-	PhoInfo.TrkPtSum[ey]     = trkIso;
-	PhoInfo.EcalRecHitEtSum[ey]= ecalIso;
-	PhoInfo.HcalTowerEtSum[ey] = hcalIso;
-	PhoInfo.HoverE[ey]       = it_ph->hadronicOverEm();
+	PhoInfo.Location[PhoInfo.ZPairSize][ey]     = location;
+	PhoInfo.E    [PhoInfo.ZPairSize][ey] 	 = it_ph->energy(); 
+	PhoInfo.Et   [PhoInfo.ZPairSize][ey] 	 = it_ph->et();     
+	PhoInfo.Pz   [PhoInfo.ZPairSize][ey] 	 = it_ph->pz();     
+	PhoInfo.Eta  [PhoInfo.ZPairSize][ey] 	 = it_ph->eta();    
+	PhoInfo.Phi  [PhoInfo.ZPairSize][ey] 	 = it_ph->phi();    
+	PhoInfo.R9   [PhoInfo.ZPairSize][ey] 	 = it_ph->r9();     
+	PhoInfo.TrkPtSum[PhoInfo.ZPairSize][ey]     = trkIso;
+	PhoInfo.EcalRecHitEtSum[PhoInfo.ZPairSize][ey]= ecalIso;
+	PhoInfo.HcalTowerEtSum[PhoInfo.ZPairSize][ey] = hcalIso;
+	PhoInfo.HoverE[PhoInfo.ZPairSize][ey]       = it_ph->hadronicOverEm();
 
-	PhoInfo.SCE[ey]          = it_ph->superCluster()->energy();
-	PhoInfo.SCEta[ey]        = it_ph->superCluster()->eta();
-	PhoInfo.SCPhi[ey]        = it_ph->superCluster()->phi();
-	PhoInfo.SCEtaWidth[ey]   = it_ph->superCluster()->etaWidth();
-	PhoInfo.SCPhiWidth[ey]   = it_ph->superCluster()->phiWidth();
+	PhoInfo.SCE[PhoInfo.ZPairSize][ey]          = it_ph->superCluster()->energy();
+	PhoInfo.SCEta[PhoInfo.ZPairSize][ey]        = it_ph->superCluster()->eta();
+	PhoInfo.SCPhi[PhoInfo.ZPairSize][ey]        = it_ph->superCluster()->phi();
+	PhoInfo.SCEtaWidth[PhoInfo.ZPairSize][ey]   = it_ph->superCluster()->etaWidth();
+	PhoInfo.SCPhiWidth[PhoInfo.ZPairSize][ey]   = it_ph->superCluster()->phiWidth();
 	
 	float scet = it_ph->superCluster()->energy()/cosh(it_ph->superCluster()->eta());
-	PhoInfo.SCEt[ey]       = scet;
+	PhoInfo.SCEt[PhoInfo.ZPairSize][ey]       = scet;
 
-	PhoInfo.SCNCrystal[ey] = it_ph->superCluster()->size();
+	PhoInfo.SCNCrystal[PhoInfo.ZPairSize][ey] = it_ph->superCluster()->size();
 
-	PhoInfo.SigEta[ey]       = it_ph->sigmaEtaEta();
-	PhoInfo.SigIEta[ey]      = it_ph->sigmaIetaIeta();
+	PhoInfo.SigEta[PhoInfo.ZPairSize][ey]       = it_ph->sigmaEtaEta();
+	PhoInfo.SigIEta[PhoInfo.ZPairSize][ey]      = it_ph->sigmaIetaIeta();
       
 	bool passOffline = isLoosePhoton(*it_ph);
-	PhoInfo.IsLoose[ey] = passOffline? 1: 0;
+	PhoInfo.IsLoose[PhoInfo.ZPairSize][ey] = passOffline? 1: 0;
  
 
       } // if number of photons > 0
-    
-      root->Fill();
 
+      PhoInfo.ZPairSize ++;
+      
+      
       } // end of loop over jt_e
   } // end of loop over it_e
 
+    
+  root->Fill();
    
   _nOut++;
   
