@@ -74,7 +74,10 @@ private:
   bool isLoosePhoton(const reco::Photon& it_ph);
   void MatchElectronToPhoton(const edm::Event&);
   void MatchElectronToGenp(const edm::Event&);
-  
+
+  edm::InputTag    _eleLabel;
+  edm::InputTag    _phoLabel;
+  edm::InputTag    _genLabel;
 
   TTree *root;
   EvtInfoBranches  EvtInfo;
@@ -103,7 +106,10 @@ private:
 
 
 Zee::Zee(const edm::ParameterSet& iConfig):
-  _nIn(0), _nOut(0)
+  _nIn(0), _nOut(0),
+  _phoLabel(iConfig.getParameter< edm::InputTag >( "phoLabel" ) ),
+  _eleLabel(iConfig.getParameter< edm::InputTag >( "eleLabel" ) ),
+  _genLabel(iConfig.getParameter< edm::InputTag >( "genLabel" ) )
 
 {  
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
@@ -154,7 +160,7 @@ void Zee::endJob()
 void Zee::dumpGenInfo(const edm::Event& iEvent)
 {
   edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle);
+  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
   if(!hasGenParticle)return;
 
   std::cout << "============================ " << 
@@ -212,6 +218,9 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(_dumpHEP)
     dumpGenInfo(iEvent);
 
+   myElePhoMap.clear();
+   myEleGenMap.clear();
+
    MatchElectronToPhoton(iEvent);
    MatchElectronToGenp(iEvent);
 
@@ -225,7 +234,7 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   // fill generator photons information
   edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle); 
+  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle); 
   GenInfo.Initialize();
   if(hasGenParticle){
     for( std::vector<GenParticle>::const_iterator it_gen = 
@@ -235,7 +244,7 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if(it_gen->pdgId()==23 && GenInfo.Size < 10)EvtInfo.GenZMass = it_gen->mass();
       GenInfo.PID[GenInfo.Size] = it_gen->pdgId();
       GenInfo.MPID[GenInfo.Size] = it_gen->mother()?
-	it_gen->mother()->pdgId():-999;
+	it_gen->mother()->pdgId():0;
       GenInfo.Mass[GenInfo.Size] = it_gen->mass();
       GenInfo.Pt[GenInfo.Size] = it_gen->pt();
       GenInfo.Eta[GenInfo.Size] = it_gen->eta();
@@ -392,13 +401,13 @@ void Zee::MatchElectronToPhoton(const edm::Event& iEvent)
 
   // look for electron collection
   Handle<reco::GsfElectronCollection> electronColl;
-  iEvent.getByLabel("gsfElectrons", electronColl);
+  iEvent.getByLabel(_eleLabel, electronColl);
   bool eleIsValid = electronColl.isValid();
   if(!eleIsValid){cout << "Electron is not valid" << endl; return;}
 
   // look for photon collection
   Handle<reco::PhotonCollection> photonColl;
-  iEvent.getByLabel("photons", photonColl);
+  iEvent.getByLabel(_phoLabel, photonColl);
   bool phoIsValid = photonColl.isValid();
   if(!phoIsValid){cout << "Photon is not valid" << endl; return;}
   
@@ -486,7 +495,7 @@ void Zee::MatchElectronToGenp(const edm::Event& iEvent)
 
   // look for electron collection
   Handle<reco::GsfElectronCollection> electronColl;
-  iEvent.getByLabel("gsfElectrons", electronColl);
+  iEvent.getByLabel(_eleLabel, electronColl);
   bool eleIsValid = electronColl.isValid();
   if(!eleIsValid){cout << "Electron is not valid" << endl; return;}
 
