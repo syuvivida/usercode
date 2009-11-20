@@ -220,6 +220,9 @@ public:
   float Pt[MAX_GENS];
   float Eta[MAX_GENS];
   float Phi[MAX_GENS];
+  int   Trig[MAX_GENS];
+  float L1Pt[MAX_GENS];
+  float L3Pt[MAX_GENS];
 
   
   //Candidate* CandRef[MAX_GENS]; // backward pointer to the PAT objects
@@ -234,7 +237,10 @@ public:
       Pt[i]   = dummy;
       Eta[i]  = dummy;
       Phi[i]  = dummy;
-       
+      Trig[i]      =0;
+      L1Pt[i]      =dummy;
+      L3Pt[i]      =dummy;
+    
   
     }
   }
@@ -247,6 +253,11 @@ public:
 	root->Branch("GenInfo.Pt"	  , &Pt[0]	   , "GenInfo.Pt[GenInfo.Size]/F"	  );
 	root->Branch("GenInfo.Eta"	  , &Eta[0]	   , "GenInfo.Eta[GenInfo.Size]/F"	  );
 	root->Branch("GenInfo.Phi"	  , &Phi[0]	   , "GenInfo.Phi[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Trig"	  , &Trig[0]	   , "GenInfo.Trig[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.L1Pt"	  , &L1Pt[0]	   , "GenInfo.L1Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.L3Pt"	  , &L3Pt[0]	   , "GenInfo.L3Pt[GenInfo.Size]/F"	  );
+
+
   }  
 }; // end of GenInfoBranches
 
