@@ -321,6 +321,18 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    myPhoL3Map_HLT25.clear();
    myPhoL3Map_HLTMu5.clear();
 
+  // look for photons
+  Handle<reco::PhotonCollection> photonColl;
+  iEvent.getByLabel(_phoLabel, photonColl);
+  if(!photonColl.isValid())return;
+
+  // photon - to generator-level photon matching
+  MatchPhoToGen(iEvent);
+
+  // photon - to L1 matching
+  MatchPhoToL1(iEvent);
+
+
    // HLT_L1EG5
    MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
 		"HLT", myPhoL3Map_HLTL1EG5);
@@ -415,17 +427,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   EvtInfo.EvtNo  = iEvent.id().event();
   EvtInfo.HLT    = _thisEvent_trigger;
 
-  // photon - to generator-level photon matching
-  MatchPhoToGen(iEvent);
-
-  // photon - to L1 matching
-  MatchPhoToL1(iEvent);
-
-
-  // look for photons
-  Handle<reco::PhotonCollection> photonColl;
-  iEvent.getByLabel(_phoLabel, photonColl);
-  if(!photonColl.isValid())return;
+  // sort photons
   for (reco::PhotonCollection::const_iterator it_ph = photonColl->begin(); 
        it_ph!=photonColl->end(); it_ph++){
     
@@ -517,6 +519,11 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	    if(it_gen->mother()->mother())
 	      PhoInfo.GenGMomPID[PhoInfo.Size] = it_gen->mother()->mother()->pdgId();
 	  }
+	  else {
+	    genMomPID = 22;
+	    PhoInfo.GenMomPID[PhoInfo.Size]  = genMomPID;
+	  }
+	  
 	} // if there is a matching
 
       bool isFromHardScattering = (genMomPID ==22);

@@ -311,6 +311,14 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   myPhoL3Map_HLT25.clear();
   myPhoL3Map_HLTMu5.clear();
 
+  // look for Gen particle collection
+  edm::Handle<reco::GenParticleCollection> GenHandle;  
+  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
+  if(!hasGenParticle)return;
+
+  // photon - to L1 matching
+  MatchGenPhoToL1(iEvent);
+
   // HLT_L1EG5
   MatchGenPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
 		  "HLT", myPhoL3Map_HLTL1EG5);
@@ -406,14 +414,6 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   EvtInfo.HLT    = _thisEvent_trigger;
 
 
-  // look for Gen particle collection
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
-  if(!hasGenParticle)return;
-
-  // photon - to L1 matching
-  MatchGenPhoToL1(iEvent);
-
   // sort photons by Et
 
   for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
@@ -453,7 +453,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       GenInfo.Phi[GenInfo.Size] = it_gen->phi();
     
       float genpt   = it_gen->pt();
-      int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():0;
+      int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():22;
 	
       bool isFromHardScattering = (genMomPID ==22);
 	
@@ -533,7 +533,6 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       GenInfo.Size++;
 
-      // need to pass the following cuts to be loose photons
       float et = it_gen->et();
       float eta = it_gen->eta();
 
@@ -558,21 +557,9 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  else if(isFromJet)
 	    h_jetgetdeno->Fill(et);
 	  else if(isFromQuark)
-	    {
-	      h_qgetdeno->Fill(et);
-	      // 	      cout << "Quark radiation GenIndex = " << thisGenIndex << "\t" << 
-	      // 		"Genpt = " << genpt << "\t" << "Mother pt = " << genmompt << 
-	      // 		endl;
-	      // 	      dumpGenInfo(iEvent);
-	    }
+	    h_qgetdeno->Fill(et);
 	  else if(isFromGluon)
-	    {
-	      h_ggetdeno->Fill(et);
-	      // 	      cout << "Gluon radiation GenIndex = " << thisGenIndex << "\t" << 
-	      // 		"Genpt = " << genpt << "\t" << "Mother pt = " << genmompt << 
-	      // 		endl;
-	      // 	      dumpGenInfo(iEvent);
-	    }
+	    h_ggetdeno->Fill(et);
 	  
 	  if(_thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
 	    {
