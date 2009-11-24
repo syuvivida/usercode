@@ -105,6 +105,7 @@ private:
 
   int              _thisEvent_trigger;
   bool             _dumpHEP;
+  int              _pdgCode;
   int              _nIn;
   int              _nOut;
 
@@ -148,7 +149,7 @@ GenTrig::GenTrig(const edm::ParameterSet& iConfig):
 
 {  
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
- 
+  _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",  22);
 }
 
 
@@ -229,6 +230,8 @@ void GenTrig::beginJob(const edm::EventSetup&)
   EvtInfo.Initialize();  
   GenInfo.Initialize();
   //   _nIn= _nOut = _thisEvent_trigger = 0;
+
+  std::cout << "Focusing on PDG code = " << _pdgCode << std::endl;
 }
 
 void GenTrig::endJob() 
@@ -418,9 +421,8 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
        it_gen!=GenHandle->end(); it_gen++){
-    if(it_gen->pdgId()!=22 || it_gen->status()!=1)continue;
+    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
     if(it_gen->pt() < 2.)continue;
-    
     float et = it_gen->pt();
     myPhoEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
    
@@ -444,18 +446,19 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       reco::GenParticleCollection::const_iterator it_gen = i->second;
             
+
+      float genpt   = it_gen->pt();
+      int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
+	
     
       GenInfo.PID[GenInfo.Size] = it_gen->pdgId();
-      GenInfo.MPID[GenInfo.Size] = it_gen->mother()? it_gen->mother()->pdgId():0;
+      GenInfo.MPID[GenInfo.Size] = genMomPID;
       GenInfo.Mass[GenInfo.Size] = it_gen->mass();
-      GenInfo.Pt[GenInfo.Size] = it_gen->pt();
+      GenInfo.Pt[GenInfo.Size] = genpt;
       GenInfo.Eta[GenInfo.Size] = it_gen->eta();
       GenInfo.Phi[GenInfo.Size] = it_gen->phi();
     
-      float genpt   = it_gen->pt();
-      int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():22;
-	
-      bool isFromHardScattering = (genMomPID ==22);
+      bool isFromHardScattering = (abs(genMomPID) ==_pdgCode);
 	
       bool isFromJet   = (abs(genMomPID)> 50);
 	
@@ -631,7 +634,7 @@ void GenTrig::MatchGenPhoToL1(const edm::Event& iEvent)
   for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
        it_gen!=GenHandle->end(); it_gen++){
 
-    if(it_gen->pdgId()!=22 || it_gen->status()!=1)continue;
+    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
     if(it_gen->pt() < 2.)continue;
 
     float ptMax = 0;
@@ -713,7 +716,7 @@ void GenTrig::MatchGenPhoToL3(const edm::Event& iEvent,
   for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
        it_gen!=GenHandle->end(); it_gen++){
 
-    if(it_gen->pdgId()!=22 || it_gen->status()!=1)continue;
+    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
     if(it_gen->pt() < 2.)continue;
 
     float ptMax = 0;

@@ -110,11 +110,13 @@ private:
 
   int              _thisEvent_trigger;
   bool             _dumpHEP;
+  int              _pdgCode;
   int              _nIn;
   int              _nOut;
 
   edm::InputTag    _phoLabel;
   edm::InputTag    _genLabel;
+  
 
 
   // histograms
@@ -151,11 +153,9 @@ RECOTrigger::RECOTrigger(const edm::ParameterSet& iConfig):
   _nIn(0), _nOut(0), _thisEvent_trigger(0),
   _phoLabel(iConfig.getParameter< edm::InputTag >( "phoLabel" ) ),
   _genLabel(iConfig.getParameter< edm::InputTag >( "genLabel" ) )
-
-
 {  
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
- 
+  _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",22);
 }
 
 
@@ -238,6 +238,7 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
   PhoInfo.Initialize();
   GenInfo.Initialize();
 //   _nIn= _nOut = _thisEvent_trigger = 0;
+  std::cout << "Focusing on PDG code = " << _pdgCode << std::endl;
 }
 
 void RECOTrigger::endJob() 
@@ -508,7 +509,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       if(myPhoGenMap.find(it_ph)!=myPhoGenMap.end())
 	{
 	  GenParticleCollection::const_iterator it_gen = myPhoGenMap[it_ph];
-	  PhoInfo.GenPID[PhoInfo.Size]       = 22;
+	  PhoInfo.GenPID[PhoInfo.Size]       = _pdgCode;
 	  genpt = it_gen->pt();
 	  PhoInfo.GenPt[PhoInfo.Size]        = genpt;
 	  if(it_gen->mother()){
@@ -520,13 +521,13 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	      PhoInfo.GenGMomPID[PhoInfo.Size] = it_gen->mother()->mother()->pdgId();
 	  }
 	  else {
-	    genMomPID = 22;
+	    genMomPID = _pdgCode;
 	    PhoInfo.GenMomPID[PhoInfo.Size]  = genMomPID;
 	  }
 	  
 	} // if there is a matching
 
-      bool isFromHardScattering = (genMomPID ==22);
+      bool isFromHardScattering = (abs(genMomPID) ==_pdgCode);
 
       bool isFromJet   = (abs(genMomPID)> 50);
    
@@ -716,7 +717,7 @@ void RECOTrigger::MatchPhoToGen(const edm::Event& iEvent)
 	   GenHandle->begin(); 
 	 it_gen != GenHandle->end(); it_gen++ ) {
     
-      if(it_gen->pdgId()!=22 || it_gen->status()!=1)continue;
+      if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
       if(it_gen->pt() < 2.)continue;
 
       GenInfo.PID[GenInfo.Size] = it_gen->pdgId();
