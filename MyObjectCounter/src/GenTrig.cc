@@ -44,6 +44,7 @@
 
 // this file contains the format of lepton, photon, and event structures
 #include "format.hh" 
+#include "trigformat.hh"
                      
 using namespace edm;
 using namespace reco;
