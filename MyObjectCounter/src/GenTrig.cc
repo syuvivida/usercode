@@ -419,14 +419,14 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
   // sort photons by Et
-
+  int count = 0;
   for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-       it_gen!=GenHandle->end(); it_gen++){
+       it_gen!=GenHandle->end() && count < MAX_GENS; it_gen++){
     if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
     if(it_gen->pt() < 2.)continue;
     float et = it_gen->pt();
     myPhoEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
-   
+    count ++;
   }
 
   

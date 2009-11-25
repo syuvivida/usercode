@@ -4,7 +4,7 @@
 #define MAX_LEPTONS 	64
 #define MAX_PHOTONS     64
 #define MAX_TRIGGER    120
-#define MAX_GENS        64
+#define MAX_GENS        32
 #define dummy          -9999
 
 

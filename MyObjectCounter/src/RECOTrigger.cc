@@ -328,16 +328,17 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByLabel(_phoLabel, photonColl);
   if(!photonColl.isValid())return;
 
+
   // photon - to generator-level photon matching
   MatchPhoToGen(iEvent);
 
   // photon - to L1 matching
   MatchPhoToL1(iEvent);
 
-
   // HLT_L1EG5
   MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
 	       "HLT", myPhoL3Map_HLTL1EG5);
+
 
   // HLT_L1EG8
   MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt8",
@@ -347,6 +348,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // HLT_10L1R
   MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
 	       "HLT",myPhoL3Map_HLT10);
+
    
   // HLT_15L1R
   MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
@@ -357,13 +359,16 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   MatchPhoToL3(iEvent,"hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
 	       "HLT",myPhoL3Map_HLT20Iso);
 
+
   // HLT_25L1R
   MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
 	       "HLT",myPhoL3Map_HLT25);
 
+
   // HLT_MU5
   MatchPhoToL3(iEvent,"hltSingleMu5L3Filtered5",
 	       "HLT",myPhoL3Map_HLTMu5);
+
 
 
   if(_nIn < 3)
@@ -413,8 +418,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
     TurnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
 
-    TurnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
-//     TurnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
+    TurnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
 
   } // there's trigger results
 
@@ -429,6 +433,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   EvtInfo.EvtNo  = iEvent.id().event();
   EvtInfo.HLT    = _thisEvent_trigger;
 
+
   // sort photons
   for (reco::PhotonCollection::const_iterator it_ph = photonColl->begin(); 
        it_ph!=photonColl->end(); it_ph++){
@@ -437,7 +442,6 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     myPhoEtMap.insert(std::pair<float,reco::PhotonCollection::const_iterator>(et,it_ph));
    
   }
-
   
   // initialize the variables of ntuples
   PhoInfo.Initialize();
@@ -636,21 +640,9 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
  	  else if(isFromJet)
  	    h_jetgetdeno->Fill(et);
  	  else if(isFromQuark)
-	    {
-	      h_qgetdeno->Fill(et);
-// 	      cout << "Quark radiation GenIndex = " << thisGenIndex << "\t" << 
-// 		"Genpt = " << genpt << "\t" << "Mother pt = " << genmompt << 
-// 		endl;
-// 	      dumpGenInfo(iEvent);
-	    }
+	    h_qgetdeno->Fill(et);
  	  else if(isFromGluon)
-	    {
-	      h_ggetdeno->Fill(et);
-// 	      cout << "Gluon radiation GenIndex = " << thisGenIndex << "\t" << 
-// 		"Genpt = " << genpt << "\t" << "Mother pt = " << genmompt << 
-// 		endl;
-// 	      dumpGenInfo(iEvent);
-	    }
+	    h_ggetdeno->Fill(et);
 	  
 	  if(_thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
 	    {
@@ -716,7 +708,7 @@ void RECOTrigger::MatchPhoToGen(const edm::Event& iEvent)
 
     for( GenParticleCollection::const_iterator it_gen = 
 	   GenHandle->begin(); 
-	 it_gen != GenHandle->end(); it_gen++ ) {
+	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {
     
       if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
       if(it_gen->pt() < 2.)continue;

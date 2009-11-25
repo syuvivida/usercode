@@ -373,7 +373,7 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if(hasGenParticle){
     for( std::vector<GenParticle>::const_iterator it_gen = 
 	   GenHandle->begin(); 
-	 it_gen != GenHandle->end() && GenInfo.Size < 30; it_gen++ ) {
+	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {
    
       if(it_gen->pdgId()==23 && GenInfo.Size < 10)EvtInfo.GenZMass = it_gen->mass();
       GenInfo.PID[GenInfo.Size] = it_gen->pdgId();

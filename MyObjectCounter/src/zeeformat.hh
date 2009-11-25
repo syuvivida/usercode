@@ -1,7 +1,7 @@
 #ifndef ZEEFORMAT_HH
 #define ZEEFORMAT_HH
 
-#define MAX_GENS        64
+#define MAX_GENS        32
 #define MAX_ZPAIR       10
 #define dummy          -9999
 
