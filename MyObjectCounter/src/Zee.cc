@@ -256,6 +256,14 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   myElePhoMap.clear();
   myEleGenMap.clear();
+  myPhoL1Map.clear();
+  myPhoL3Map_HLTL1EG5.clear();
+  myPhoL3Map_HLTL1EG8.clear();
+  myPhoL3Map_HLT10.clear();
+  myPhoL3Map_HLT15.clear();
+  myPhoL3Map_HLT20Iso.clear();
+  myPhoL3Map_HLT25.clear();
+  myPhoL3Map_HLTMu5.clear();
 
   MatchElectronToPhoton(iEvent);
   MatchElectronToGenp(iEvent);
@@ -352,8 +360,6 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
  
 
-
-
   EvtInfo.Initialize();  
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
@@ -381,6 +387,8 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     } // check generator-level
   } // end of if hasGenParticle
+
+
 
 //   const edm::InputTag ebColName = edm::InputTag("reducedEcalRecHitsEB");
 //   const edm::InputTag esColName = edm::InputTag("reducedEcalRecHitsEE");
@@ -535,15 +543,15 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  // L1EG5
 	  if( myPhoL3Map_HLTL1EG5.find(it_ph)!= myPhoL3Map_HLTL1EG5.end())
 	    {
-	      trigMatchCode |= TRIGGER::HLT_L1SingleEG5,
-		l3pt = myPhoL3Map_HLTL1EG5[it_ph].pt();
+	      trigMatchCode |= TRIGGER::HLT_L1SingleEG5;
+	      l3pt = myPhoL3Map_HLTL1EG5[it_ph].pt();
 	    }
 
 	  // L1EG8
 	  if( myPhoL3Map_HLTL1EG8.find(it_ph)!= myPhoL3Map_HLTL1EG8.end())
 	    {
-	      trigMatchCode |= TRIGGER::HLT_L1SingleEG8,
-		l3pt = myPhoL3Map_HLTL1EG8[it_ph].pt();
+	      trigMatchCode |= TRIGGER::HLT_L1SingleEG8;
+	      l3pt = myPhoL3Map_HLTL1EG8[it_ph].pt();
 	    }
 
 	  // HLT_10_L1R
