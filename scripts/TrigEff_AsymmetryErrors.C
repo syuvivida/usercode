@@ -1,12 +1,12 @@
-#include <beta_asymmetry.C>
+#include </home/syu/Photon_Code/CMSSW_3_1_2/src/syu/MyObjectCounter/test/triggerscripts/beta_asymmetry.C>
 #include <TGraphAsymmErrors.h>
 #include <TH1.h>
 
 namespace SY_NT{
 
-TGraphAsymmErrors* MyDivide(TH1D* hdeno, TH1D* hnum);
+TGraphAsymmErrors* MyDivide(TH1F* hdeno, TH1F* hnum);
 
-TGraphAsymmErrors* MyDivide(TH1D* hdeno, TH1D* hnum)
+TGraphAsymmErrors* MyDivide(TH1F* hdeno, TH1F* hnum)
 {
 
   int nbin = hdeno->GetNbinsX();
