@@ -80,6 +80,10 @@ public:
   float eSigIEta[MAX_ZPAIR][2];
   int   eCharge[MAX_ZPAIR][2];
   int   eClass[MAX_ZPAIR][2];
+
+  float genPt[MAX_ZPAIR][2];
+  float genEta[MAX_ZPAIR][2];
+  float genPhi[MAX_ZPAIR][2];
   
 
   void Initialize(){
@@ -135,6 +139,10 @@ public:
       eCharge[i][j]        =dummy;
       eClass[i][j]         =dummy;
 
+      genPt[i][j]          =dummy;
+      genEta[i][j]         =dummy;
+      genPhi[i][j]         =dummy;
+
     }
   }
   
@@ -186,6 +194,11 @@ public:
     root->Branch("PhoInfo.eSigEta",      eSigEta     , "PhoInfo.eSigEta[PhoInfo.ZPairSize][2]/F");
     root->Branch("PhoInfo.eSigIEta",     eSigIEta    , "PhoInfo.eSigIEta[PhoInfo.ZPairSize][2]/F");
     root->Branch("PhoInfo.eClass",    eClass   , "PhoInfo.eClass[PhoInfo.ZPairSize][2]/I");
+
+    root->Branch("PhoInfo.genPt",      genPt    , "PhoInfo.genPt[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.genEta",     genEta    , "PhoInfo.genEta[PhoInfo.ZPairSize][2]/F");
+    root->Branch("PhoInfo.genPhi",     genPhi    , "PhoInfo.genPhi[PhoInfo.ZPairSize][2]/F");
+   
 
   }
 };  // end of PhoInfoBranches
