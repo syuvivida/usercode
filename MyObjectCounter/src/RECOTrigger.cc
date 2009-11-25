@@ -44,6 +44,7 @@
 
 // this file contains the format of lepton, photon, and event structures
 #include "format.hh" 
+#include "trigformat.hh" 
                      
 using namespace edm;
 using namespace reco;
@@ -334,35 +335,35 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   MatchPhoToL1(iEvent);
 
 
-   // HLT_L1EG5
-   MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
-		"HLT", myPhoL3Map_HLTL1EG5);
+  // HLT_L1EG5
+  MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
+	       "HLT", myPhoL3Map_HLTL1EG5);
 
-   // HLT_L1EG8
-   MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt8",
-		"HLT",myPhoL3Map_HLTL1EG8);
+  // HLT_L1EG8
+  MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt8",
+	       "HLT",myPhoL3Map_HLTL1EG8);
 
 
-    // HLT_10L1R
-   MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
-		"HLT",myPhoL3Map_HLT10);
+  // HLT_10L1R
+  MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
+	       "HLT",myPhoL3Map_HLT10);
    
-    // HLT_15L1R
-   MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
-		"HLT",myPhoL3Map_HLT15);
+  // HLT_15L1R
+  MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
+	       "HLT",myPhoL3Map_HLT15);
 
 
-   // HLT_20IsoL1R
-   MatchPhoToL3(iEvent,"hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
-		"HLT",myPhoL3Map_HLT20Iso);
+  // HLT_20IsoL1R
+  MatchPhoToL3(iEvent,"hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
+	       "HLT",myPhoL3Map_HLT20Iso);
 
-    // HLT_25L1R
-   MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
-		"HLT",myPhoL3Map_HLT25);
+  // HLT_25L1R
+  MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
+	       "HLT",myPhoL3Map_HLT25);
 
-    // HLT_MU5
-   MatchPhoToL3(iEvent,"hltSingleMu5L3Filtered5",
-		"HLT",myPhoL3Map_HLTMu5);
+  // HLT_MU5
+  MatchPhoToL3(iEvent,"hltSingleMu5L3Filtered5",
+	       "HLT",myPhoL3Map_HLTMu5);
 
 
   if(_nIn < 3)
@@ -913,6 +914,7 @@ bool RECOTrigger::isLoosePhoton(reco::PhotonCollection::const_iterator it_ph)
 
   if(inAnyGap)return false;
 
+  /*
   // Barrel cuts
   if(isBarrel && ecalIso  > 5.0 + 0.0045*et)return false;
   if(isBarrel && hcalIso  > 5.0)return false;
@@ -922,6 +924,19 @@ bool RECOTrigger::isLoosePhoton(reco::PhotonCollection::const_iterator it_ph)
   // Endcap cuts
   if(isEndCap && ecalIso  > 5.0 + 0.02*et)return false;
   if(isEndCap && hcalIso  > 7.0)return false;
+  if(isEndCap && trkIso > 9.0 )return false;
+  if(isEndCap && it_ph->hadronicOverEm() > 0.15)return false;
+  */
+  // Barrel cuts
+
+  if(isBarrel && ecalIso  > 5.0 + 0.004*et)return false;
+  if(isBarrel && hcalIso  > 5.0)return false;
+  if(isBarrel && trkIso > 9.0 )return false;
+  if(isBarrel && it_ph->hadronicOverEm() > 0.15)return false;
+
+  // Endcap cuts
+  if(isEndCap && ecalIso  > 5.0 + 0.0021*et)return false;
+  if(isEndCap && hcalIso  > 5.0)return false;
   if(isEndCap && trkIso > 9.0 )return false;
   if(isEndCap && it_ph->hadronicOverEm() > 0.15)return false;
 

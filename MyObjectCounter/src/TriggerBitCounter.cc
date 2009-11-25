@@ -44,7 +44,7 @@
 
 // this file contains the format of lepton, photon, and event structures
 #include "format.hh" 
-                     
+#include "trigformat.hh"                     
 
 using namespace edm;
 using namespace reco;
@@ -584,6 +584,7 @@ bool TriggerBitCounter::IsLoosePhoton(reco::Photon it_ph)
 
   if(inAnyGap)return false;
 
+  /*
   // Barrel cuts
   if(isBarrel && ecalIso  > 5.0 + 0.0045*et)return false;
   if(isBarrel && hcalIso  > 5.0)return false;
@@ -595,6 +596,20 @@ bool TriggerBitCounter::IsLoosePhoton(reco::Photon it_ph)
   if(isEndCap && hcalIso  > 7.0)return false;
   if(isEndCap && trkIso > 9.0 )return false;
   if(isEndCap && it_ph.hadronicOverEm() > 0.15)return false;
+  */
+
+  // Barrel cuts
+  if(isBarrel && ecalIso  > 5.0 + 0.004*et)return false;
+  if(isBarrel && hcalIso  > 5.0)return false;
+  if(isBarrel && trkIso > 9.0 )return false;
+  if(isBarrel && it_ph.hadronicOverEm() > 0.15)return false;
+
+  // Endcap cuts
+  if(isEndCap && ecalIso  > 5.0 + 0.0021*et)return false;
+  if(isEndCap && hcalIso  > 5.0)return false;
+  if(isEndCap && trkIso > 9.0 )return false;
+  if(isEndCap && it_ph.hadronicOverEm() > 0.15)return false;
+
 
   if(et        < 10.0)return false;
   if(fabs(eta) > 1.44 && fabs(eta)<1.56)return false;
