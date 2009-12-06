@@ -4,153 +4,19 @@
 // ----------------------------------------------------- 
 // Shin-Shan Yu
 
-
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TObject.h>
-#include <TFile.h>
-#include <TTree.h>
-#include <TH1.h>
-#include <TLorentzVector.h>
-
-
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileDirectory.h"
-
-
-#include "DataFormats/Candidate/interface/Particle.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
-
+#include "syu/MyObjectCounter/header/GenTrig.hh"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/HLTReco/interface/TriggerEvent.h"
-#include "DataFormats/HLTReco/interface/TriggerObject.h"
-#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
-#include "DataFormats/L1Trigger/interface/L1EmParticle.h"
-#include "DataFormats/L1Trigger/interface/L1EmParticleFwd.h"
-
-#include "DataFormats/EgammaCandidates/interface/Photon.h"
-#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
-#include "DataFormats/Math/interface/deltaR.h"
-
-// this file contains the format of lepton, photon, and event structures
-#include "format.hh" 
-#include "trigformat.hh"
-                     
-using namespace edm;
-using namespace reco;
-using namespace std;
-using namespace trigger;
-using namespace math;
-using namespace ROOT;
-using namespace syu;
+#include "syu/MyObjectCounter/header/MyAlg.hh"
 
 
-
-typedef std::map< reco::GenParticleCollection::const_iterator,std::vector<l1extra::L1EmParticle>::const_iterator > phoL1Map;
-typedef std::map< reco::GenParticleCollection::const_iterator,trigger::TriggerObject > phoL3Map;
-typedef std::map< float,reco::GenParticleCollection::const_iterator, std::greater<float> > phoEtMap;
-
-
-class GenTrig : public edm::EDAnalyzer {
-public:
-  explicit GenTrig(const edm::ParameterSet&) ;
-  ~GenTrig();  
-
-    
-private:
-  virtual void beginJob(const edm::EventSetup&) ;
-  virtual void dumpGenInfo(const edm::Event&); 
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
-  virtual void endJob() ;
-  
-  TTree *root;
-  EvtInfoBranches  EvtInfo;
-  GenInfoBranches  GenInfo;
-
-
-  edm::Handle<trigger::TriggerEvent> trgEvent;
-  edm::Handle<TriggerResults> TrgResultsHandle;
-
-
-  phoEtMap  myPhoEtMap;
-  phoL1Map  myPhoL1Map;
-  phoL3Map  myPhoL3Map_HLTL1EG5;
-  phoL3Map  myPhoL3Map_HLTL1EG8;
-  phoL3Map  myPhoL3Map_HLT10;
-  phoL3Map  myPhoL3Map_HLT15;
-  phoL3Map  myPhoL3Map_HLT20Iso;
-  phoL3Map  myPhoL3Map_HLT25;
-  phoL3Map  myPhoL3Map_HLTMu5;
-
-
-  void MatchGenPhoToL1(const edm::Event&);
-
-  void MatchGenPhoToL3(const edm::Event&, 
-		       std::string trgPath,
-		       std::string tag,
-		       phoL3Map& mymap);
-
-  void TurnOnHLTBit(std::string trgPath, 
-		    int         trgCode);
-
-
-  int              _thisEvent_trigger;
-  bool             _dumpHEP;
-  int              _pdgCode;
-  int              _nIn;
-  int              _nOut;
-
-  edm::InputTag    _genLabel;
-
-
-  // histograms
-  TH1F* h_dRL15;
-  TH1F* h_dRL18;
-  TH1F* h_dRHLT15;
-
-  TH1F* h_getdeno;
-  TH1F* h_getnumr;
-  TH1F* h_recgetdeno;
-  TH1F* h_recgetnumr;
-  TH1F* h_gengetdeno;
-  TH1F* h_gengetnumr;
-  TH1F* h_jetgetdeno;
-  TH1F* h_jetgetnumr;
-  TH1F* h_qgetdeno;
-  TH1F* h_qgetnumr;
-  TH1F* h_ggetdeno;
-  TH1F* h_ggetnumr;
-  TH1F* h_debug1;
-  TH1F* h_debug2;
-  TH1F* h_debug3;
-  TH1F* h_debug4;
-  TH1F* h_eta1;
-  TH1F* h_eta2;
-  TH1F* h_mugetdeno;
-  TH1F* h_mugetnumr;
-
-
-};
 
 
 GenTrig::GenTrig(const edm::ParameterSet& iConfig):
-  _nIn(0), _nOut(0), _thisEvent_trigger(0),
-  _genLabel(iConfig.getParameter< edm::InputTag >( "genLabel" ) )
-
-
+  _nIn(0), _nOut(0), _thisEvent_trigger(0), _alg(iConfig)
 {  
-  _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
   _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",  22);
+
 }
 
 
@@ -240,59 +106,6 @@ void GenTrig::endJob()
   std::cout << "GenTrig has " << _nIn << " input events and " << _nOut  << " events" << endl;
 }
 
-// dump generator-level information
-
-void GenTrig::dumpGenInfo(const edm::Event& iEvent)
-{
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
-  if(!hasGenParticle)return;
-
-  std::cout << "============================ " << 
-    "Run " <<  iEvent.id().run() << " Evt " <<  iEvent.id().event() <<
-    " ============================= " << std::endl << std::endl;
-
-  int genIndex = 0;
-
-  printf("GenIndex  ");
-  printf("PDG  ");
-  printf("Status ");
-  printf("Mother PID");
-  printf("   ");
-  printf("Mass ");
-  printf("Energy ");
-  printf("Pt");
-  printf("\n");
-
-
-  for( GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-       it_gen != GenHandle->end(); it_gen++ ) {
-
-    printf("%4i", genIndex);
-    printf("%7i", it_gen->pdgId());
-    printf("%6i", it_gen->status());
-    if(it_gen->mother())
-      printf("%7i", it_gen->mother()->pdgId());
-    else
-      printf("%7i", -1);
-    printf("   ");
-    printf("%9.3f",it_gen->p4().mass());
-    printf("%9.3f",it_gen->energy());
-    printf("%9.3f",it_gen->pt());
-    printf("%9.3f",it_gen->vx());
-    printf("%9.3f",it_gen->vy());
-    printf("%9.3f",it_gen->vz());
-    printf("\n");
-    genIndex ++;
-  }
-
-  std::cout << std::endl 
-	    << "==========================================================="
-            << "===============" 
-	    << std::endl;
-
-}
-
 
 // analyzing reconstructed electrons, muons, and photons
 
@@ -301,9 +114,8 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   _nIn++;
   _thisEvent_trigger = 0;
+  _alg.init(iEvent, false, false, true, true); 
   
-  if(_dumpHEP)
-    dumpGenInfo(iEvent);
 
   myPhoEtMap.clear();
   myPhoL1Map.clear();
@@ -316,42 +128,45 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   myPhoL3Map_HLTMu5.clear();
 
   // look for Gen particle collection
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
-  if(!hasGenParticle)return;
+  myPhoEtMap = _alg.getGenEtMap();
 
+  if(myPhoEtMap.size()==0)return;
+
+  edm::Handle<reco::GenParticleCollection> genHandle;
+  iEvent.getByLabel("genParticles",genHandle);
+  
   // photon - to L1 matching
-  MatchGenPhoToL1(iEvent);
+  _alg.matchPartToL1<reco::GenParticle>(myPhoEtMap, myPhoL1Map);
 
-  // HLT_L1EG5
-  MatchGenPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
-		  "HLT", myPhoL3Map_HLTL1EG5);
+// HLT_L1EG5
+  _alg.matchPartToL3<reco::GenParticle>("hltL1sRelaxedSingleEgammaEt5", "HLT",
+		     myPhoEtMap, myPhoL3Map_HLTL1EG5);
 
   // HLT_L1EG8
-  MatchGenPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt8",
-		  "HLT",myPhoL3Map_HLTL1EG8);
+  _alg.matchPartToL3<reco::GenParticle>("hltL1sRelaxedSingleEgammaEt8", "HLT",
+		     myPhoEtMap, myPhoL3Map_HLTL1EG8);
 
 
   // HLT_10L1R
-  MatchGenPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
-		  "HLT",myPhoL3Map_HLT10);
+  _alg.matchPartToL3<reco::GenParticle>("hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
+		     "HLT", myPhoEtMap, myPhoL3Map_HLT10);
    
   // HLT_15L1R
-  MatchGenPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
-		  "HLT",myPhoL3Map_HLT15);
+  _alg.matchPartToL3<reco::GenParticle>("hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
+		     "HLT", myPhoEtMap, myPhoL3Map_HLT15);
 
 
   // HLT_20IsoL1R
-  MatchGenPhoToL3(iEvent,"hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
-		  "HLT",myPhoL3Map_HLT20Iso);
+  _alg.matchPartToL3<reco::GenParticle>("hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
+		     "HLT", myPhoEtMap, myPhoL3Map_HLT20Iso);
 
   // HLT_25L1R
-  MatchGenPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
-		  "HLT",myPhoL3Map_HLT25);
+  _alg.matchPartToL3<reco::GenParticle>("hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
+		     "HLT", myPhoEtMap, myPhoL3Map_HLT25);
 
   // HLT_MU5
-  MatchGenPhoToL3(iEvent,"hltSingleMu5L3Filtered5",
-		  "HLT",myPhoL3Map_HLTMu5);
+  _alg.matchPartToL3<reco::GenParticle>("hltSingleMu5L3Filtered5", "HLT",
+		     myPhoEtMap, myPhoL3Map_HLTMu5);
 
 
   if(_nIn < 3)
@@ -365,48 +180,28 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       cout << "myPhoL3Map_HLT25_L3Obj.size() = " << myPhoL3Map_HLT25.size() << endl;
     }
 
-  // filter trigger path
-  //1E31
-  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
-  // 8E29
-  //   bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT8E29"),TrgResultsHandle);
+  _alg.turnOnHLTBit("HLT_L1SingleEG5",TRIGGER::HLT_L1SingleEG5);
+
+  _alg.turnOnHLTBit("HLT_L1SingleEG8",TRIGGER::HLT_L1SingleEG8);
   
-
-  if (with_TriggerResults) {
+  _alg.turnOnHLTBit("HLT_Photon10_L1R",TRIGGER::HLT_Photon10_L1R);
   
-    TriggerNames TrgNames( *TrgResultsHandle );   
-
-    vector<string> hlNames_ = TrgNames.triggerNames();
-    if(_nIn < 3)
-      for (size_t i=0; i<TrgNames.size(); ++i) {
-	cout<<"HLT bit = "<<i<<"   "<<hlNames_[i]<<endl;
-      }
-
-    TurnOnHLTBit("HLT_L1SingleEG5",TRIGGER::HLT_L1SingleEG5);
-
-    TurnOnHLTBit("HLT_L1SingleEG8",TRIGGER::HLT_L1SingleEG8);
-
-    TurnOnHLTBit("HLT_Photon10_L1R",TRIGGER::HLT_Photon10_L1R);
-
-    TurnOnHLTBit("HLT_Photon10_LooseEcalIso_TrackIso_L1R",
-		 TRIGGER::HLT_Photon10_LooseEcalIso_TrackIso_L1R);
+  _alg.turnOnHLTBit("HLT_Photon10_LooseEcalIso_TrackIso_L1R",
+			TRIGGER::HLT_Photon10_LooseEcalIso_TrackIso_L1R);
     
-    TurnOnHLTBit("HLT_Photon15_L1R",TRIGGER::HLT_Photon15_L1R);
+  _alg.turnOnHLTBit("HLT_Photon15_L1R",TRIGGER::HLT_Photon15_L1R);
     
-    TurnOnHLTBit("HLT_Photon15_TrackIso_L1R",TRIGGER::HLT_Photon15_TrackIso_L1R);
+  _alg.turnOnHLTBit("HLT_Photon15_TrackIso_L1R",TRIGGER::HLT_Photon15_TrackIso_L1R);
+  
+  _alg.turnOnHLTBit("HLT_Photon15_LooseEcalIso_L1R",TRIGGER::HLT_Photon15_LooseEcalIso_L1R);
+    
+  _alg.turnOnHLTBit("HLT_Photon20_LooseEcalIso_TrackIso_L1R",TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R);
 
-    TurnOnHLTBit("HLT_Photon15_LooseEcalIso_L1R",TRIGGER::HLT_Photon15_LooseEcalIso_L1R);
+  _alg.turnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
 
-    TurnOnHLTBit("HLT_Photon20_LooseEcalIso_TrackIso_L1R",TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R);
-
-    TurnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
-
-    TurnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
-    //     TurnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
-
-  } // there's trigger results
-
- 
+  //_alg.turnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
+  _alg.turnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
+  
 
   // Start to fill the main root branches
   // initialize the variables of ntuples
@@ -415,19 +210,9 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
+  _thisEvent_trigger = _alg.getThisEventTriggerBit();
   EvtInfo.HLT    = _thisEvent_trigger;
 
-
-  // sort photons by Et
-  int count = 0;
-  for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-       it_gen!=GenHandle->end() && count < MAX_GENS; it_gen++){
-    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
-    if(it_gen->pt() < 2.)continue;
-    float et = it_gen->pt();
-    myPhoEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
-    count ++;
-  }
 
   
   // initialize the variables of ntuples
@@ -436,7 +221,8 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   bool _isFilled_Mu = false;
   
 
-  for(phoEtMap::iterator i=myPhoEtMap.begin(); 
+  for(partEtMap<reco::GenParticle>::Type::iterator 
+	i=myPhoEtMap.begin(); 
       i!= myPhoEtMap.end(); ++i)
     {
       
@@ -604,162 +390,6 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   _nOut++;
   
 }
-
-
-
-void GenTrig::MatchGenPhoToL1(const edm::Event& iEvent)
-{
-
-  // look for Gen particle collection
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
-  if(!hasGenParticle)return;
-
-  // check for L1 extra particles
-  edm::Handle<l1extra::L1EmParticleCollection> l1EmNonIso;
-  edm::Handle<l1extra::L1EmParticleCollection> l1EmIso;
-
-  const edm::InputTag l1EmNonIsoTag = edm::InputTag("hltL1extraParticles","NonIsolated");
-  const edm::InputTag l1EmIsoTag = edm::InputTag("hltL1extraParticles","Isolated");
-
-
-  bool hasL1NoIso=false;
-  bool hasL1Iso = false;
-
-  hasL1NoIso = iEvent.getByLabel(l1EmNonIsoTag,l1EmNonIso);
-  hasL1Iso = iEvent.getByLabel(l1EmIsoTag,l1EmIso);
-
-  if(!hasL1NoIso && !hasL1Iso)return;
-
-
-  for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-       it_gen!=GenHandle->end(); it_gen++){
-
-    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
-    if(it_gen->pt() < 2.)continue;
-
-    float ptMax = 0;
-    std::vector<l1extra::L1EmParticle>::const_iterator maxPtIter;
-    bool hasMatch = false;
-
-
-    for( std::vector<l1extra::L1EmParticle>::const_iterator it_l1 = 
-	   l1EmIso->begin(); 
-	 it_l1 != l1EmIso->end(); it_l1++ ) {
-    
-      float deltaR = reco::deltaR(it_l1->eta(), it_l1->phi(),
-				  it_gen->eta(), it_gen->phi());
-
-      float thisL1Pt = it_l1->pt();
-
-      if (deltaR < 0.5 && thisL1Pt > ptMax ) {
-	
-	ptMax = thisL1Pt;
-	maxPtIter = it_l1;
-	hasMatch = true;
-      }
-
-    } // end of L1 isolated trigger objects
-
-
-    for( std::vector<l1extra::L1EmParticle>::const_iterator it_l1 = 
-	   l1EmNonIso->begin(); 
-	 it_l1 != l1EmNonIso->end(); it_l1++ ) {
-    
-      float deltaR = reco::deltaR(it_l1->eta(), it_l1->phi(),
-				  it_gen->eta(), it_gen->phi());
-
-      float thisL1Pt = it_l1->pt();
-
-      if (deltaR < 0.5 && thisL1Pt > ptMax ) {
-	
-	ptMax = thisL1Pt;
-	maxPtIter = it_l1;
-	hasMatch = true;
-      }
-
-    } // end of L1 non-isolated trigger objects
-
-    
-    if(hasMatch)
-      myPhoL1Map.insert(std::pair<reco::GenParticleCollection::const_iterator,
-			std::vector<l1extra::L1EmParticle>::const_iterator>(it_gen,maxPtIter));    
-  } // end of loop over photons
-
-  return;
-
-}
-
-void GenTrig::MatchGenPhoToL3(const edm::Event& iEvent, 
-			      std::string trgPath,
-			      std::string tag,
-			      phoL3Map& thisMap)
-{
-  thisMap.clear();
-
-  // look for Gen particle collection
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
-  if(!hasGenParticle)return;
-
-  // check for HLT objects
-  const edm::InputTag hltsummaryTag = edm::InputTag("hltTriggerSummaryAOD","","HLT");
-  bool has1E31TrigInfo=
-    iEvent.getByLabel(hltsummaryTag, trgEvent);    
-  if(!has1E31TrigInfo)return;
-
-  const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
-
-  const edm::InputTag myLastFilter = edm::InputTag(trgPath,"",tag);
-  if ( trgEvent->filterIndex(myLastFilter) >= trgEvent->sizeFilters())return;
-  const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter) ));
-
-  for (reco::GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-       it_gen!=GenHandle->end(); it_gen++){
-
-    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
-    if(it_gen->pt() < 2.)continue;
-
-    float ptMax = 0;
-    trigger::TriggerObject maxPtIter;
-    bool hasMatch = false;
-
-    for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-      size_type hltf = keys[hlto];
-      const trigger::TriggerObject L3obj(TOC[hltf]);
-      
-      float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				  it_gen->eta(), it_gen->phi());
-      float thisL3Pt = L3obj.pt();
-
-      if (deltaR < 0.5 && thisL3Pt > ptMax) {
-	maxPtIter = L3obj;
-	ptMax = thisL3Pt;
-	hasMatch = true;
-      }
-    } // end of loop over trigger objects
-
-    if(hasMatch)
-      thisMap.insert(std::pair<reco::GenParticleCollection::const_iterator,
-		     trigger::TriggerObject>(it_gen,maxPtIter));    
-
-
-  }// end of loop over photons
-
-  return;
-}
-
-void GenTrig::TurnOnHLTBit(std::string trgPath, 
-			   int         trgCode)
-{
-  TriggerNames trgName( *TrgResultsHandle);   
-  int NTrigger = trgName.size();
-  int tempIndex = (unsigned int)trgName.triggerIndex( trgPath); 
-  if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-    _thisEvent_trigger |= trgCode;
-  return;
-}
-
 
 
 
