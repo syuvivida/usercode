@@ -127,6 +127,9 @@ public:
   partEtMap<pat::Electron>::Type     getPatEleEtMap(){return _patEleEtMap;}
   partEtMap<pat::Muon>::Type         getPatMuoEtMap(){return _patMuoEtMap;}
 
+  // although this is a template, should only apply on photons
+  template <class T> bool isMyLoosePhoton(
+			typename myContainer<T>::myIter it_ph);
   
 private: 
 
@@ -154,6 +157,8 @@ private:
   partEtMap<pat::Electron>::Type                  _patEleEtMap;
   partEtMap<pat::Muon>::Type                      _patMuoEtMap;
 
+
+  edm::ValueMap<bool>                             _loosePhotonID;
 
   edm::ParameterSet         _parameters;
   bool _dumpHEP;
@@ -311,7 +316,57 @@ template <class T> void MyAlg::matchPartToL3(std::string trgPath,
 
 
 
+template <class T> bool MyAlg::isMyLoosePhoton(
+typename myContainer<T>::myIter it_ph)
+{
+  float et = it_ph->et();
+  float eta = it_ph->eta();
+
+  float ecalIso = it_ph->ecalRecHitSumEtConeDR04();
+  float hcalIso = it_ph->hcalTowerSumEtConeDR04();
+  float trkIso  = it_ph->trkSumPtHollowConeDR04();
+
+  bool isBarrel = it_ph->isEB();
+  bool isEndCap = it_ph->isEE();
+  bool inAnyGap = it_ph->isEBEEGap() || 
+    (it_ph->isEB() && it_ph->isEBGap()) || 
+    (it_ph->isEE() && it_ph->isEEGap());
+
+  if(inAnyGap)return false;
+
+  /*
+  // Barrel cuts
+  if(isBarrel && ecalIso  > 5.0 + 0.0045*et)return false;
+  if(isBarrel && hcalIso  > 5.0)return false;
+  if(isBarrel && trkIso > 9.0 )return false;
+  if(isBarrel && it_ph->hadronicOverEm() > 0.15)return false;
+
+  // Endcap cuts
+  if(isEndCap && ecalIso  > 5.0 + 0.02*et)return false;
+  if(isEndCap && hcalIso  > 7.0)return false;
+  if(isEndCap && trkIso > 9.0 )return false;
+  if(isEndCap && it_ph->hadronicOverEm() > 0.15)return false;
+  */
+
+  // Barrel cuts
+  if(isBarrel && ecalIso  > 5.0 + 0.004*et)return false;
+  if(isBarrel && hcalIso  > 5.0)return false;
+  if(isBarrel && trkIso > 9.0 )return false;
+  if(isBarrel && it_ph->hadronicOverEm() > 0.15)return false;
+
+  // Endcap cuts
+  if(isEndCap && ecalIso  > 5.0 + 0.0021*et)return false;
+  if(isEndCap && hcalIso  > 5.0)return false;
+  if(isEndCap && trkIso > 9.0 )return false;
+  if(isEndCap && it_ph->hadronicOverEm() > 0.15)return false;
 
 
+  if(et        < 10.0)return false;
+  if(fabs(eta) > 1.44 && fabs(eta)<1.56)return false;
+  if(fabs(eta) > 2.5)return false;
+
+  return true;
+
+}
 
 #endif
