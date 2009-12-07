@@ -26,8 +26,7 @@
 #include "DataFormats/Candidate/interface/Particle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
-
-// this file contains the format of lepton, photon, and event structures
+// the most important code
 #include "syu/MyObjectCounter/header/MyAlg.hh"
 
                      

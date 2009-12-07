@@ -7,7 +7,6 @@
 #include "syu/MyObjectCounter/header/GenTrig.hh"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
-#include "syu/MyObjectCounter/header/MyAlg.hh"
 
 
 
@@ -199,7 +198,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   _alg.turnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
 
-  //_alg.turnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
+  //  _alg.turnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
   _alg.turnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
   
 
