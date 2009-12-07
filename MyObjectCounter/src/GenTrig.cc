@@ -12,7 +12,7 @@
 
 
 GenTrig::GenTrig(const edm::ParameterSet& iConfig):
-  _nIn(0), _nOut(0), _thisEvent_trigger(0), _alg(iConfig)
+  _nIn(0), _nOut(0), _alg(iConfig)
 {  
   _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",  22);
 
@@ -95,7 +95,6 @@ void GenTrig::beginJob(const edm::EventSetup&)
   GenInfo.Register(root);
   EvtInfo.Initialize();  
   GenInfo.Initialize();
-  //   _nIn= _nOut = _thisEvent_trigger = 0;
 
   std::cout << "Focusing on PDG code = " << _pdgCode << std::endl;
 }
@@ -112,7 +111,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
   _nIn++;
-  _thisEvent_trigger = 0;
+  int _thisEvent_trigger = 0;
   _alg.init(iEvent, false, false, true, true); 
   
 
