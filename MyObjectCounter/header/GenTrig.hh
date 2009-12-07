@@ -68,7 +68,6 @@ private:
 
   int              _nIn;
   int              _nOut;
-  int              _thisEvent_trigger;
   MyAlg            _alg;
   int              _pdgCode;
 
