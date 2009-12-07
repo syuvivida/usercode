@@ -22,21 +22,30 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
   }
   
   if ( this != &original ) {
-    _parameters = original._parameters;
-    _phoHandle   = original._phoHandle;
-    _eleHandle   = original._eleHandle;
-    _genHandle   = original._genHandle;
+    _parameters       = original._parameters;
+    _phoHandle        = original._phoHandle;
+    _eleHandle        = original._eleHandle;
+    _genHandle        = original._genHandle;
     _l1EmNonIsoHandle = original._l1EmNonIsoHandle;
-    _l1EmIsoHandle = original._l1EmIsoHandle;
-    _trgEventHandle = original._trgEventHandle;
+    _l1EmIsoHandle    = original._l1EmIsoHandle;
+    _trgEventHandle   = original._trgEventHandle;
     _trgResultsHandle = original._trgResultsHandle;
-    _phoEtMap = original._phoEtMap;
-    _eleEtMap = original._eleEtMap;
-    _genEtMap = original._genEtMap;
-    _dumpHEP  = original._dumpHEP;
-    _pdgCode  = original._pdgCode;
-    _deltaRMax = original._deltaRMax;
-    _event_trigger = original._event_trigger;
+    _phoEtMap         = original._phoEtMap;
+    _eleEtMap         = original._eleEtMap;
+    _genEtMap         = original._genEtMap;
+
+    _patPhoHandle     = original._patPhoHandle;
+    _patEleHandle     = original._patEleHandle;
+    _patMuoHandle     = original._patMuoHandle;
+
+    _patPhoEtMap      = original._patPhoEtMap;
+    _patEleEtMap      = original._patEleEtMap;
+    _patMuoEtMap      = original._patMuoEtMap;
+
+    _dumpHEP          = original._dumpHEP;
+    _pdgCode          = original._pdgCode;
+    _deltaRMax        = original._deltaRMax;
+    _event_trigger    = original._event_trigger;
    
   }
    return *this;
@@ -52,16 +61,17 @@ void MyAlg::print()
 
 
 void MyAlg::init(const edm::Event &event,
-		   bool doPho,
-		   bool doEle,
-		   bool doGen,
-		   bool doHLT)
+		 bool doPho,
+		 bool doEle,
+		 bool doGen,
+		 bool doHLT,
+		 bool doPAT)
 {
   _event_trigger = 0;
   _genEtMap.clear();
   _phoEtMap.clear();
   _eleEtMap.clear();
-  getHandles(event, doPho, doEle, doGen, doHLT);
+  getHandles(event, doPho, doEle, doGen, doHLT, doPAT);
   if(_dumpHEP)dumpGenInfo(event);
 
 }
@@ -70,7 +80,8 @@ void MyAlg::getHandles(const edm::Event  & event,
 		       bool doPho,
 		       bool doEle,
 		       bool doGen,
-		       bool doHLT)
+		       bool doHLT,
+		       bool doPAT)
 
 {
  
@@ -105,6 +116,25 @@ void MyAlg::getHandles(const edm::Event  & event,
   event.getByLabel(l1EmNonIsoTag, _l1EmNonIsoHandle);
   event.getByLabel(l1EmIsoTag, _l1EmIsoHandle);
   event.getByLabel(hltsummaryTag, _trgEventHandle);
+
+  if(doPAT)
+    {
+      edm::InputTag photonName  = 
+	_parameters.getParameter<edm::InputTag>("patPho");
+      event.getByLabel(photonName, _patPhoHandle);
+      sortParticles<pat::Photon>(_patPhoHandle, _patPhoEtMap);
+
+      edm::InputTag electronName  = 
+	_parameters.getParameter<edm::InputTag>("patEle");
+      event.getByLabel(electronName, _patEleHandle);
+      sortParticles<pat::Electron>(_patEleHandle, _patEleEtMap);
+
+      edm::InputTag muonName = 
+	_parameters.getParameter<edm::InputTag>("patMuo");
+      event.getByLabel(muonName, _patMuoHandle);
+      sortParticles<pat::Muon>(_patMuoHandle, _patMuoEtMap);
+      
+    }
 
 }
 

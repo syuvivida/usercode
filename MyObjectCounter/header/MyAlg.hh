@@ -21,6 +21,13 @@
 #include "FWCore/Framework/interface/TriggerNames.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
+#include "DataFormats/PatCandidates/interface/Particle.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
+
 #include "syu/MyObjectCounter/header/format.hh" 
 #include "syu/MyObjectCounter/header/trigformat.hh"
 
@@ -43,21 +50,24 @@ struct myContainer
 template <class T>
 struct partEtMap
 {
-  typedef typename std::map< float, typename myContainer<T>::myIter, std::greater<float> > Type;
+  typedef typename std::map< float, typename myContainer<T>::myIter, 
+			     std::greater<float> > Type;
 };
 
 template <class T>
 struct partL1Map
 {
   typedef typename std::map< typename myContainer<T>::myIter, 
-			     l1extra::L1EmParticleCollection::const_iterator > Type;
+			     l1extra::L1EmParticleCollection::const_iterator > 
+  Type;
 };
 
 
 template <class T>
 struct partL3Map
 {
-  typedef typename std::map< typename myContainer<T>::myIter, trigger::TriggerObject > Type;
+  typedef typename std::map< typename myContainer<T>::myIter, 
+			     trigger::TriggerObject > Type;
   
 };
 
@@ -72,28 +82,35 @@ public:
 
   MyAlg& operator=( const MyAlg& original);
 
+  // initialization, calls getHandles and dumpGenInfo
+
   void init(const edm::Event & event,
 	    bool doPho,
 	    bool doEle,
 	    bool doGen,
-	    bool doHLT);
+	    bool doHLT,
+	    bool doPAT=false);
 
   void getHandles(const edm::Event  & event, 
 		  bool doPho,
 		  bool doEle,
 		  bool doGen,
-		  bool doHLT);
-
-  void turnOnHLTBit(std::string trgPath, int trgCode);
+		  bool doHLT,
+		  bool doPAT=false);
 
   void dumpGenInfo(const edm::Event&); 
 
+  // turn on HLT bit information
+  void turnOnHLTBit(std::string trgPath, int trgCode);
+  int  getThisEventTriggerBit(){return _event_trigger;}
+
+  // print out the private data members
   void print();
 
-  int        getThisEventTriggerBit(){return _event_trigger;}
   void       sortGenParticles(); // with a PDG code cut
-  template<class T> void sortParticles(const edm::Handle<typename myContainer<T>::container >& handle,
-				       typename partEtMap<T>::Type& etmap);
+  template<class T> void sortParticles(
+	       const edm::Handle<typename myContainer<T>::container >& handle,
+	       typename partEtMap<T>::Type& etmap);
 
   template <class T> void matchPartToL1(typename partEtMap<T>::Type& etmap, 
 					typename partL1Map<T>::Type& mymap );
@@ -105,6 +122,11 @@ public:
   partEtMap<reco::Photon>::Type      getPhoEtMap(){return _phoEtMap;}
   partEtMap<reco::GsfElectron>::Type getEleEtMap(){return _eleEtMap;}
   partEtMap<reco::GenParticle>::Type getGenEtMap(){return _genEtMap;}
+
+  partEtMap<pat::Photon>::Type       getPatPhoEtMap(){return _patPhoEtMap;}
+  partEtMap<pat::Electron>::Type     getPatEleEtMap(){return _patEleEtMap;}
+  partEtMap<pat::Muon>::Type         getPatMuoEtMap(){return _patMuoEtMap;}
+
   
 private: 
 
@@ -117,9 +139,21 @@ private:
   edm::Handle<trigger::TriggerEvent>           _trgEventHandle;
   edm::Handle<edm::TriggerResults>             _trgResultsHandle;
 
-  partEtMap<reco::Photon>::Type          _phoEtMap;
-  partEtMap<reco::GsfElectron>::Type     _eleEtMap;
-  partEtMap<reco::GenParticle>::Type     _genEtMap;
+
+  partEtMap<reco::Photon>::Type                   _phoEtMap;
+  partEtMap<reco::GsfElectron>::Type              _eleEtMap;
+  partEtMap<reco::GenParticle>::Type              _genEtMap;
+
+
+  // handles to pat 
+  edm::Handle<std::vector<pat::Photon> >          _patPhoHandle;
+  edm::Handle<std::vector<pat::Electron> >        _patEleHandle;
+  edm::Handle<std::vector<pat::Muon> >            _patMuoHandle;
+
+  partEtMap<pat::Photon>::Type                    _patPhoEtMap;
+  partEtMap<pat::Electron>::Type                  _patEleEtMap;
+  partEtMap<pat::Muon>::Type                      _patMuoEtMap;
+
 
   edm::ParameterSet         _parameters;
   bool _dumpHEP;
@@ -132,23 +166,25 @@ private:
 // === inline definition of template functions (has to be in the header files)
 //
 
-template < class T> void MyAlg::sortParticles(const edm::Handle< typename myContainer<T>::container >& handle,  
-					      typename partEtMap<T>::Type& sortedEtMap)
-{                                                                                                        
-  sortedEtMap.clear();                                                                                           
-  if(!handle.isValid())return;                                                                                   
-  typename myContainer<T>::myIter it_part;                                                                      
-                                                                                                  
+template < class T> void MyAlg::sortParticles(
+const edm::Handle< typename myContainer<T>::container >& handle,  
+typename partEtMap<T>::Type& sortedEtMap)
+{ 
+  sortedEtMap.clear(); 
+  if(!handle.isValid())return;
+  typename myContainer<T>::myIter it_part; 
   for ( it_part = handle->begin(); it_part != handle->end(); it_part++){
-    float et = it_part->pt();                                                                                   
-    sortedEtMap.insert(std::pair<float,typename myContainer<T>::myIter>(et,it_part));                           
-  } 
+    float et = it_part->pt(); 
+    sortedEtMap.insert(std::pair<float,
+		       typename myContainer<T>::myIter>(et,it_part));  
+  }
   return;
 }
 
 
-template <class T> void MyAlg::matchPartToL1(typename partEtMap<T>::Type& etmap,
-					     typename partL1Map<T>::Type& mymap)
+template <class T> void MyAlg::matchPartToL1(
+				 typename partEtMap<T>::Type& etmap,
+				 typename partL1Map<T>::Type& mymap)
 {
   mymap.clear();
 
@@ -160,7 +196,6 @@ template <class T> void MyAlg::matchPartToL1(typename partEtMap<T>::Type& etmap,
   for(mapIter it_part=etmap.begin(); 
       it_part!= etmap.end(); ++it_part)
     {
-
       float ptMax = 0;
       std::vector<l1extra::L1EmParticle>::const_iterator maxPtIter;
       bool hasMatch = false;
@@ -190,7 +225,8 @@ template <class T> void MyAlg::matchPartToL1(typename partEtMap<T>::Type& etmap,
 	 it_l1 != _l1EmNonIsoHandle->end(); it_l1++ ) {
     
       float deltaR = reco::deltaR(it_l1->eta(), it_l1->phi(),
-				  it_part->second->eta(), it_part->second->phi());
+				  it_part->second->eta(), 
+				  it_part->second->phi());
 
       float thisL1Pt = it_l1->pt();
 
@@ -221,8 +257,8 @@ template <class T> void MyAlg::matchPartToL1(typename partEtMap<T>::Type& etmap,
 //
 template <class T> void MyAlg::matchPartToL3(std::string trgPath,
 					     std::string tag,
-					     typename partEtMap<T>::Type& etmap,
-					     typename partL3Map<T>::Type& mymap)
+					    typename partEtMap<T>::Type& etmap,
+					    typename partL3Map<T>::Type& mymap)
 
 {
   mymap.clear();
