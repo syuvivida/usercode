@@ -54,6 +54,15 @@ struct partEtMap
 			     std::greater<float> > Type;
 };
 
+
+template <class T>
+struct partGenMap
+{
+  typedef typename std::map<typename myContainer<T>::myIter,
+			    reco::GenParticleCollection::const_iterator> Type;
+};
+
+
 template <class T>
 struct partL1Map
 {
@@ -107,17 +116,55 @@ public:
   // print out the private data members
   void print();
 
-  void       sortGenParticles(); // with a PDG code cut
+  // sort generator particles by Pt (with a PDG and pt > 2 GeV cut), 
+  // then insert a pair of et value and const_iterator of GenParticles into a 
+  // map (also a private member, genEtmap)
+
+  void       sortGenParticles(); 
+
+  // sort any class of particles by Et, then insert a pair of et value and
+  // const_iterator of class T into a map (etmap)
   template<class T> void sortParticles(
 	       const edm::Handle<typename myContainer<T>::container >& handle,
 	       typename partEtMap<T>::Type& etmap);
 
+  
+  // match any class of particles (et sorted, etmap) to a generator-level 
+  // particls as long as deltaR, relPt, status criteria are met, then insert a 
+  // pair of const_iterators of class T and generator-level particles (genmap)
+
+  template <class T> void matchPartToGen(float deltaRCut,
+					 float relPtCut,
+					 typename partEtMap<T>::Type  &etmap,
+					 typename partGenMap<T>::Type &genmap,
+					 int status=1
+					 );
+
+  // match any class of particles (et sorted, etmap) to a highest Et L1 object
+  // as long as deltaR criteria are met, then insert 
+  // pair of const_iterators of class T and L1 object (l1map)
+
   template <class T> void matchPartToL1(typename partEtMap<T>::Type& etmap, 
-					typename partL1Map<T>::Type& mymap );
+					typename partL1Map<T>::Type& l1map );
+
+
+  // match any class of particles (et sorted, etmap) to a highest Et L3 object
+  // as long as deltaR criteria are met, then insert 
+  // pair of const_iterators of class T and L3 object (l3map)
 
   template <class T> void matchPartToL3(std::string trgPath, std::string tag,
 					typename partEtMap<T>::Type& etmap,
-					typename partL3Map<T>::Type& mymap);
+					typename partL3Map<T>::Type& l3map);  
+					 
+
+  // although this is a template, should only apply on photons (reco or pat)
+  template <class T> bool isMyLoosePhoton(
+			typename myContainer<T>::myIter it_ph);
+  
+
+
+  // get the presorted map of photons, electrons, muons, generator-level 
+  // particles
 
   partEtMap<reco::Photon>::Type      getPhoEtMap(){return _phoEtMap;}
   partEtMap<reco::GsfElectron>::Type getEleEtMap(){return _eleEtMap;}
@@ -127,13 +174,9 @@ public:
   partEtMap<pat::Electron>::Type     getPatEleEtMap(){return _patEleEtMap;}
   partEtMap<pat::Muon>::Type         getPatMuoEtMap(){return _patMuoEtMap;}
 
-  // although this is a template, should only apply on photons
-  template <class T> bool isMyLoosePhoton(
-			typename myContainer<T>::myIter it_ph);
-  
 private: 
 
-   // Keep a version of the parameter set in question
+  // handles to do sorting and mapping for reconstructed particles
   edm::Handle<reco::PhotonCollection>          _phoHandle;
   edm::Handle<reco::GsfElectronCollection>     _eleHandle;
   edm::Handle<reco::GenParticleCollection>     _genHandle;
@@ -158,18 +201,22 @@ private:
   partEtMap<pat::Muon>::Type                      _patMuoEtMap;
 
 
-  edm::ValueMap<bool>                             _loosePhotonID;
-
   edm::ParameterSet         _parameters;
-  bool _dumpHEP;
-  int  _pdgCode;
-  double _deltaRMax;
+  // HLT bit of an event
   int _event_trigger;
+  // should dump HEPG information or not
+  bool _dumpHEP;
+  // pdgcode for matchPartToGen and sortGenParticles
+  int  _pdgCode;
+  // deltaR for matching between particles and L1/L3 trigger objects
+  double _trigDeltaRMax;
 
 };
 
 // === inline definition of template functions (has to be in the header files)
 //
+// sort any class of particles by Et, then insert a pair of et value and
+// const_iterator of class T into a map (sortedEtMap)
 
 template < class T> void MyAlg::sortParticles(
 const edm::Handle< typename myContainer<T>::container >& handle,  
@@ -187,22 +234,72 @@ typename partEtMap<T>::Type& sortedEtMap)
 }
 
 
+// match any class of particles (et sorted, etmap) to a generator-level 
+// particls as long as deltaR, relPt, status criteria are met, then insert a 
+// pair of const_iterators of class T and generator-level particles (genmap)
+//_____________________________________________________________________________
+//
+template <class T> void MyAlg::matchPartToGen(
+	     float deltaRCut, float relPtCut,
+	     typename partEtMap<T>::Type& etmap,
+	     typename partGenMap<T>::Type& genmap, int status)
+{
+  genmap.clear();
+  if(!_genHandle.isValid())return;
+
+  typedef typename partEtMap<T>::Type::iterator mapIter;
+  for (mapIter it_part= etmap.begin();
+       it_part != etmap.end(); ++it_part)
+    {
+
+      bool hasMatch = false;
+
+      for( GenParticleCollection::const_iterator it_gen = 
+	   _genHandle->begin(); it_gen != _genHandle->end(); it_gen++ ) {
+  
+	if(abs(it_gen->pdgId())!=_pdgCode)continue;
+	if(it_gen->status()!=status)continue;
+    
+	float dR = reco::deltaR(it_part->second->momentum(), 
+				it_gen->momentum());
+	float relPt = fabs(it_part->second->pt()-it_gen->pt())/it_gen->pt();
+
+	if(dR< deltaRCut && relPt < relPtCut)
+	  {
+	    hasMatch = true;
+	    genmap.insert(std::pair< typename myContainer<T>::myIter,
+			  reco::GenParticleCollection::const_iterator>
+			 (it_part->second,it_gen));
+
+	  } // if find a match
+
+	if(hasMatch)break;
+    
+      } // end of loop of generator-level
+    } // end of loop of class T loop
+
+}
+
+
+// match any class of particles (et sorted, etmap) to a highest Et L1 object
+// as long as deltaR criteria are met, then insert 
+// pair of const_iterators of class T and L1 object (l1map)
+
 template <class T> void MyAlg::matchPartToL1(
 				 typename partEtMap<T>::Type& etmap,
-				 typename partL1Map<T>::Type& mymap)
+				 typename partL1Map<T>::Type& l1map)
 {
-  mymap.clear();
+  l1map.clear();
 
   if(!_l1EmIsoHandle.isValid() 
      && !_l1EmNonIsoHandle.isValid())return;
 
   typedef typename partEtMap<T>::Type::iterator mapIter;
- 
   for(mapIter it_part=etmap.begin(); 
       it_part!= etmap.end(); ++it_part)
     {
       float ptMax = 0;
-      std::vector<l1extra::L1EmParticle>::const_iterator maxPtIter;
+      std::vector<l1extra::L1EmParticle>::const_iterator maxL1PtIter;
       bool hasMatch = false;
 
       for( std::vector<l1extra::L1EmParticle>::const_iterator it_l1 = 
@@ -215,10 +312,10 @@ template <class T> void MyAlg::matchPartToL1(
 	
 	float thisL1Pt = it_l1->pt();
 	
-	if (deltaR < _deltaRMax && thisL1Pt > ptMax ) {
+	if (deltaR < _trigDeltaRMax && thisL1Pt > ptMax ) {
 	  
 	  ptMax = thisL1Pt;
-	  maxPtIter = it_l1;
+	  maxL1PtIter = it_l1;
 	  hasMatch = true;
       }
 
@@ -235,10 +332,10 @@ template <class T> void MyAlg::matchPartToL1(
 
       float thisL1Pt = it_l1->pt();
 
-      if (deltaR < _deltaRMax && thisL1Pt > ptMax ) {
+      if (deltaR < _trigDeltaRMax && thisL1Pt > ptMax ) {
 	
 	ptMax = thisL1Pt;
-	maxPtIter = it_l1;
+	maxL1PtIter = it_l1;
 	hasMatch = true;
       }
 
@@ -246,8 +343,8 @@ template <class T> void MyAlg::matchPartToL1(
 
     
     if(hasMatch)
-      mymap.insert(std::pair<typename myContainer<T>::myIter,
-		   l1extra::L1EmParticleCollection::const_iterator>(it_part->second,maxPtIter));    
+      l1map.insert(std::pair<typename myContainer<T>::myIter,
+		   l1extra::L1EmParticleCollection::const_iterator>(it_part->second,maxL1PtIter));    
   } // end of loop over photons
 
   return;
@@ -258,15 +355,19 @@ template <class T> void MyAlg::matchPartToL1(
 }
 
 
+// match any class of particles (et sorted, etmap) to a highest Et L3 object
+// as long as deltaR criteria are met, then insert 
+// pair of const_iterators of class T and L3 object (l3map)
+
 //_____________________________________________________________________________
 //
 template <class T> void MyAlg::matchPartToL3(std::string trgPath,
 					     std::string tag,
 					    typename partEtMap<T>::Type& etmap,
-					    typename partL3Map<T>::Type& mymap)
+					    typename partL3Map<T>::Type& l3map)
 
 {
-  mymap.clear();
+  l3map.clear();
 
   // check for HLT objects
   if(!_trgEventHandle.isValid())return;
@@ -286,7 +387,7 @@ template <class T> void MyAlg::matchPartToL3(std::string trgPath,
     {
  
       float ptMax = 0;
-      trigger::TriggerObject maxPtIter;
+      trigger::TriggerObject maxL3PtIter;
       bool hasMatch = false;
 
       for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
@@ -297,16 +398,16 @@ template <class T> void MyAlg::matchPartToL3(std::string trgPath,
 				    it_part->second->eta(), it_part->second->phi());
 	float thisL3Pt = L3obj.pt();
 
-	if (deltaR < _deltaRMax && thisL3Pt > ptMax) {
-	  maxPtIter = L3obj;
+	if (deltaR < _trigDeltaRMax && thisL3Pt > ptMax) {
+	  maxL3PtIter = L3obj;
 	  ptMax = thisL3Pt;
 	  hasMatch = true;
 	}
       } // end of loop over trigger objects
 
       if(hasMatch)
-	mymap.insert(std::pair<typename myContainer<T>::myIter,
-		     trigger::TriggerObject>(it_part->second,maxPtIter));    
+	l3map.insert(std::pair<typename myContainer<T>::myIter,
+		     trigger::TriggerObject>(it_part->second,maxL3PtIter));    
 
 
     }// end of loop over photons
@@ -315,6 +416,9 @@ template <class T> void MyAlg::matchPartToL3(std::string trgPath,
 }
 
 
+//------------------------------------------------------------------------
+// although this is a template, should only apply on photons (reco or pat)
+//_________________________________________________________________________
 
 template <class T> bool MyAlg::isMyLoosePhoton(
 typename myContainer<T>::myIter it_ph)

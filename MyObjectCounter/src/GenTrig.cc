@@ -5,8 +5,6 @@
 // Shin-Shan Yu
 
 #include "syu/MyObjectCounter/header/GenTrig.hh"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 
 
@@ -111,7 +109,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
   _nIn++;
-  int _thisEvent_trigger = 0;
+  int thisEvent_trigger = 0;
   _alg.init(iEvent, false, false, true, true); 
   
 
@@ -125,14 +123,11 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   myPhoL3Map_HLT25.clear();
   myPhoL3Map_HLTMu5.clear();
 
-  // look for Gen particle collection
+  // sort Gen particle collection
   myPhoEtMap = _alg.getGenEtMap();
 
   if(myPhoEtMap.size()==0)return;
 
-  edm::Handle<reco::GenParticleCollection> genHandle;
-  iEvent.getByLabel("genParticles",genHandle);
-  
   // photon - to L1 matching
   _alg.matchPartToL1<reco::GenParticle>(myPhoEtMap, myPhoL1Map);
 
@@ -208,8 +203,8 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
-  _thisEvent_trigger = _alg.getThisEventTriggerBit();
-  EvtInfo.HLT    = _thisEvent_trigger;
+  thisEvent_trigger = _alg.getThisEventTriggerBit();
+  EvtInfo.HLT    = thisEvent_trigger;
 
 
   
@@ -333,7 +328,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // Use SingleEG5 as the denominator
 
-      if((_thisEvent_trigger & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
+      if((thisEvent_trigger & TRIGGER::HLT_L1SingleEG5) && !_isFilled)
 	{
 	  _isFilled=true;
 	  h_recgetdeno->Fill(et);
@@ -349,7 +344,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  else if(isFromGluon)
 	    h_ggetdeno->Fill(et);
 	  
-	  if(_thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
+	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)
 	    {
 	      h_recgetnumr->Fill(et);
 	      if(isFromHardScattering)
@@ -369,12 +364,12 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
       // Use Muon trigger as the denominator
 
-      if((_thisEvent_trigger & TRIGGER::HLT_Mu5) && !_isFilled_Mu)
+      if((thisEvent_trigger & TRIGGER::HLT_Mu5) && !_isFilled_Mu)
 	{
 	  _isFilled_Mu=true;
 	  h_mugetdeno->Fill(et);
 
-	  if(_thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)	    
+	  if(thisEvent_trigger & TRIGGER::HLT_Photon15_L1R)	    
 	    h_mugetnumr->Fill(et);
 
 	} // if passing muon trigger

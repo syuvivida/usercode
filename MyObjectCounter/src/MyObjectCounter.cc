@@ -106,12 +106,12 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     h_get->Fill(it_ph->et());
 	
     PhoInfo.Index[PhoInfo.Size]        = PhoInfo.Size;  
-    PhoInfo.E    [PhoInfo.Size] 	 = it_ph->energy(); 
-    PhoInfo.Et   [PhoInfo.Size] 	 = it_ph->et();     
-    PhoInfo.Pz   [PhoInfo.Size] 	 = it_ph->pz();     
-    PhoInfo.Eta  [PhoInfo.Size] 	 = it_ph->eta();    
-    PhoInfo.Phi  [PhoInfo.Size] 	 = it_ph->phi();    
-    PhoInfo.R9   [PhoInfo.Size] 	 = it_ph->r9();     
+    PhoInfo.E    [PhoInfo.Size]        = it_ph->energy(); 
+    PhoInfo.Et   [PhoInfo.Size]        = it_ph->et();     
+    PhoInfo.Pz   [PhoInfo.Size]        = it_ph->pz();     
+    PhoInfo.Eta  [PhoInfo.Size]        = it_ph->eta();    
+    PhoInfo.Phi  [PhoInfo.Size]        = it_ph->phi();    
+    PhoInfo.R9   [PhoInfo.Size]        = it_ph->r9();     
     PhoInfo.HoverE[PhoInfo.Size]       = it_ph->hadronicOverEm();
 	
     PhoInfo.SCE[PhoInfo.Size]          = it_ph->superCluster()->energy();

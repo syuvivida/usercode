@@ -1,6 +1,9 @@
 #ifndef TRIGFORMAT_HH
 #define TRIGFORMAT_HH
 
+// here, I define my own trigger bit map for the photon triggers used
+// 
+
 namespace TRIGGER{
   enum {    
     HLT_L1SingleEG5                                = 0x1 << 1,                                               

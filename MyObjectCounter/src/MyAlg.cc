@@ -7,7 +7,7 @@ MyAlg::MyAlg( const edm::ParameterSet & iConfig )  :
 {
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
   _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",  22);
-  _deltaRMax  = iConfig.getUntrackedParameter<double>("dR",  0.5);
+  _trigDeltaRMax  = iConfig.getUntrackedParameter<double>("trigDR",  0.5);
 }
 
 //_____________________________________________________________________________
@@ -44,20 +44,13 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
 
     _dumpHEP          = original._dumpHEP;
     _pdgCode          = original._pdgCode;
-    _deltaRMax        = original._deltaRMax;
+    _trigDeltaRMax        = original._trigDeltaRMax;
     _event_trigger    = original._event_trigger;
    
   }
    return *this;
 }
 
-void MyAlg::print()
-{
-  std::cout << "dumpHEP = " << _dumpHEP << std::endl;
-  std::cout << "pdgCode = " << _pdgCode << std::endl;
-  std::cout << "deltaRMax = " << _deltaRMax << std::endl;
-  std::cout << "thisEvent_trigger = " << _event_trigger << std::endl;
-}
 
 
 void MyAlg::init(const edm::Event &event,
@@ -71,6 +64,10 @@ void MyAlg::init(const edm::Event &event,
   _genEtMap.clear();
   _phoEtMap.clear();
   _eleEtMap.clear();
+  _patPhoEtMap.clear();
+  _patEleEtMap.clear();
+  _patMuoEtMap.clear();
+
   getHandles(event, doPho, doEle, doGen, doHLT, doPAT);
   if(_dumpHEP)dumpGenInfo(event);
 
@@ -139,41 +136,9 @@ void MyAlg::getHandles(const edm::Event  & event,
 }
 
 
-void MyAlg::sortGenParticles(){
-
-  _genEtMap.clear();
-  if(!_genHandle.isValid())return;
-  int count = 0;
-  for (reco::GenParticleCollection::const_iterator it_gen = 
-	 _genHandle->begin(); 
-       it_gen!=_genHandle->end() && count < MAX_GENS; it_gen++){
-    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
-    if(it_gen->pt() < 2.)continue;
-    count ++ ;
-    float et = it_gen->pt();
-    _genEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
-  }
-  return;
-}
-
-
-
-//_____________________________________________________________________________
-void MyAlg::turnOnHLTBit(std::string trgPath, int trgCode)
-{
-  if(!_trgResultsHandle.isValid())return;
-  edm::TriggerNames trgName( *_trgResultsHandle);   
-  int NTrigger = trgName.size();
-  int tempIndex = (unsigned int)trgName.triggerIndex( trgPath); 
-  if(tempIndex < NTrigger && _trgResultsHandle->accept(tempIndex))
-    _event_trigger |= trgCode;
-  return;
-}
-
-
-
 //_____________________________________________________________________________
 // dump generator-level information
+//_____________________________________________________________________________
 
 
 void MyAlg::dumpGenInfo(const edm::Event& iEvent)
@@ -226,3 +191,52 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
   return;
 
 }
+
+
+//_____________________________________________________________________________
+void MyAlg::turnOnHLTBit(std::string trgPath, int trgCode)
+{
+  if(!_trgResultsHandle.isValid())return;
+  edm::TriggerNames trgName( *_trgResultsHandle);   
+  int NTrigger = trgName.size();
+  int tempIndex = (unsigned int)trgName.triggerIndex( trgPath); 
+  if(tempIndex < NTrigger && _trgResultsHandle->accept(tempIndex))
+    _event_trigger |= trgCode;
+  return;
+}
+
+
+//_____________________________________________________________________________
+
+
+void MyAlg::print()
+{
+  std::cout << "dumpHEP = " << _dumpHEP << std::endl;
+  std::cout << "pdgCode = " << _pdgCode << std::endl;
+  std::cout << "trigDeltaRMax = " << _trigDeltaRMax << std::endl;
+  std::cout << "thisEvent_trigger = " << _event_trigger << std::endl;
+}
+
+
+//_____________________________________________________________________________
+
+
+void MyAlg::sortGenParticles(){
+
+  _genEtMap.clear();
+  if(!_genHandle.isValid())return;
+  int count = 0;
+  for (reco::GenParticleCollection::const_iterator it_gen = 
+	 _genHandle->begin(); 
+       it_gen!=_genHandle->end() && count < MAX_GENS; it_gen++){
+    if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
+    if(it_gen->pt() < 2.)continue;
+    count ++ ;
+    float et = it_gen->pt();
+    _genEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
+  }
+  return;
+}
+
+
+

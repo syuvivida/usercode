@@ -1,6 +1,9 @@
 #ifndef FORMAT_HH
 #define FORMAT_HH
 
+// here, I define the format of root trees, for event tree, 
+// photon tree, lepton tree, generator tree
+
 #include <TROOT.h>
 #include <TSystem.h>
 #include <TObject.h>
@@ -25,14 +28,14 @@ public:
   
   void Initialize(){
     
-    RunNo = EvtNo = HLT=dummy;
+    RunNo = EvtNo = HLT = dummy;
 
   }
 
   void Register(TTree *root) {
 	root->Branch("EvtInfo.RunNo"	 , &RunNo     , "EvtInfo.RunNo/I"     );
 	root->Branch("EvtInfo.EvtNo"	 , &EvtNo     , "EvtInfo.EvtNo/I"     );   
-	root->Branch("EvtInfo.HLT"	 , &HLT    , "EvtInfo.HLT/I"     );   
+	root->Branch("EvtInfo.HLT"	 , &HLT       , "EvtInfo.HLT/I"     );   
   }										    
 }; // end of EvtInfoBranches
 
@@ -78,8 +81,8 @@ public:
     for(int i=0; i< MAX_PHOTONS; i++){
 
       Index[i]     =dummy;
-      IsLoose[i]   =dummy;
       Location[i]  =dummy;
+      IsLoose[i]   =dummy;
       Trig[i]      =0;
       L1Pt[i]      =dummy;
       L3Pt[i]      =dummy;
@@ -92,8 +95,8 @@ public:
       TrkPtSum[i]  =dummy;
       EcalRecHitEtSum[i]=dummy;
       HcalTowerEtSum[i]=dummy;
-      SCE[i]	   =dummy;
       HoverE[i]	   =dummy;
+      SCE[i]	   =dummy;
       SCEt[i]	   =dummy;
       SCEta[i]	   =dummy;
       SCPhi[i]	   =dummy;
