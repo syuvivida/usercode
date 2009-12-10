@@ -4,151 +4,13 @@
 // ----------------------------------------------------- 
 // Shin-Shan Yu
 
-
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TObject.h>
-#include <TFile.h>
-#include <TTree.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TLorentzVector.h>
-
-
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileDirectory.h"
-#include "CommonTools/Utils/interface/PtComparator.h"
-
-// #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
-#include "DataFormats/Candidate/interface/Particle.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
-
-#include "DataFormats/HLTReco/interface/TriggerEvent.h"
-#include "DataFormats/HLTReco/interface/TriggerObject.h"
-#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
-#include "DataFormats/L1Trigger/interface/L1EmParticle.h"
-#include "DataFormats/L1Trigger/interface/L1EmParticleFwd.h"
-
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
-#include "DataFormats/EgammaCandidates/interface/Photon.h"
-#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
-
-#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
-
-#include "DataFormats/EgammaCandidates/interface/Electron.h"
-#include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
-
-#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
-#include "DataFormats/Math/interface/deltaR.h"
-
-// this file contains the format of lepton, photon, and event structures
-#include "zeeformat.hh" 
-#include "trigformat.hh"
-#include <map>                     
-
-using namespace edm;
-using namespace std;
-using namespace reco;
-using namespace trigger;
-using namespace math;
-using namespace ROOT;
-using namespace zee;
-
-typedef std::map<reco::GsfElectronCollection::const_iterator,reco::PhotonCollection::const_iterator> elePhoMap;
-typedef std::map<reco::GsfElectronCollection::const_iterator,reco::GenParticleCollection::const_iterator> eleGenMap;
-typedef std::map< reco::PhotonCollection::const_iterator,std::vector<l1extra::L1EmParticle>::const_iterator > phoL1Map;
-typedef std::map< reco::PhotonCollection::const_iterator,trigger::TriggerObject > phoL3Map;
-
-
-
-class Zee : public edm::EDAnalyzer {
-public:
-  explicit Zee(const edm::ParameterSet&) ;
-  ~Zee();  
-
-    
-private:
-  virtual void beginJob(const edm::EventSetup&) ;
-  virtual void dumpGenInfo(const edm::Event&); 
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) ;
-  virtual void endJob() ;
-  bool isLoosePhoton(const reco::Photon& it_ph);
-  void MatchElectronToPhoton(const edm::Event&);
-  void MatchElectronToGenp(const edm::Event&);
-  void MatchPhoToL1(const edm::Event&);
-  void MatchPhoToL3(const edm::Event&, 
-		    std::string trgPath,
-		    std::string tag,
-		    phoL3Map& mymap);
-  void TurnOnHLTBit(std::string trgPath, 
-		    int         trgCode);
-
-
-  edm::InputTag    _eleLabel;
-  edm::InputTag    _phoLabel;
-  edm::InputTag    _genLabel;
-
-  TTree *root;
-  EvtInfoBranches  EvtInfo;
-  PhoInfoBranches  PhoInfo;
-  GenInfoBranches  GenInfo;
-  elePhoMap        myElePhoMap;
-  eleGenMap        myEleGenMap;
-  phoL1Map         myPhoL1Map;
-  phoL3Map         myPhoL3Map_HLTL1EG5;
-  phoL3Map         myPhoL3Map_HLTL1EG8;
-  phoL3Map         myPhoL3Map_HLT10;
-  phoL3Map         myPhoL3Map_HLT15;
-  phoL3Map         myPhoL3Map_HLT20Iso;
-  phoL3Map         myPhoL3Map_HLT25;
-  phoL3Map         myPhoL3Map_HLTMu5;
-
-
-  int              _thisEvent_trigger;
-
-
-  bool             _dumpHEP;
-  int              _nIn;
-  int              _nOut;
-
-  edm::Handle<trigger::TriggerEvent> trgEvent;
-  edm::Handle<TriggerResults> TrgResultsHandle;
-
-
-  // histogram
-  TH1F* h_trkisodeno;
-  TH1F* h_trkisonumr;
-  TH1F* h_sigietadeno;
-  TH1F* h_sigietanumr;
-  TH2F* h_xy;
-  TH2F* h_rz;
-  TH1F* h_dE;
-
-
-
-};
+#include "syu/MyObjectCounter/header/Zee.hh" 
 
 
 Zee::Zee(const edm::ParameterSet& iConfig):
-  _nIn(0), _nOut(0), _thisEvent_trigger(0),
-  _phoLabel(iConfig.getParameter< edm::InputTag >( "phoLabel" ) ),
-  _eleLabel(iConfig.getParameter< edm::InputTag >( "eleLabel" ) ),
-  _genLabel(iConfig.getParameter< edm::InputTag >( "genLabel" ) )
-
+  _nIn(0), _nOut(0), _alg(iConfig)
 {  
-  _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
- 
+
 }
 
 
@@ -187,59 +49,7 @@ void Zee::beginJob(const edm::EventSetup&)
 
 void Zee::endJob() 
 {
-  std::cout << "Zee has " << _nIn << " input events and " << _nOut  << " events" << endl;
-}
-
-// dump generator-level information
-
-void Zee::dumpGenInfo(const edm::Event& iEvent)
-{
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle);
-  if(!hasGenParticle)return;
-
-  std::cout << "============================ " << 
-    "Run " <<  iEvent.id().run() << " Evt " <<  iEvent.id().event() <<
-    " ============================= " << std::endl << std::endl;
-
-  int genIndex = 0;
-
-  printf("GenIndex  ");
-  printf("PDG  ");
-  printf("Status ");
-  printf("Mother PID");
-  printf("   ");
-  printf("Mass ");
-  printf("Energy ");
-  printf("Pt ");
-  printf("Eta ");
-  printf("\n");
-
-
-  for( GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-       it_gen != GenHandle->end(); it_gen++ ) {
-
-    printf("%4i", genIndex);
-    printf("%7i", it_gen->pdgId());
-    printf("%6i", it_gen->status());
-    if(it_gen->mother())
-      printf("%7i", it_gen->mother()->pdgId());
-    else
-      printf("%7i", -1);
-    printf("   ");
-    printf("%9.3f",it_gen->p4().mass());
-    printf("%9.3f",it_gen->energy());
-    printf("%9.3f",it_gen->pt());
-    printf("%9.3f",it_gen->eta());
-    printf("\n");
-    genIndex ++;
-  }
-
-  std::cout << std::endl 
-	    << "==========================================================="
-            << "===============" 
-	    << std::endl;
-
+  std::cout << "Zee has " << _nIn << " input events and " << _nOut  << " output events" << endl;
 }
 
 
@@ -249,14 +59,14 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
   _nIn++;
-  _thisEvent_trigger = 0;
-  
-  if(_dumpHEP)
-    dumpGenInfo(iEvent);
+  int thisEvent_trigger = 0;
+  _alg.init(iEvent, true, true, true, true); 
 
-  myElePhoMap.clear();
-  myEleGenMap.clear();
-  myPhoL1Map.clear();
+  myEleEtMap.clear();   // sorted electron Et map
+  myPhoEtMap.clear();   // sorted photon Et map
+  myElePhoMap.clear();  // sorted electron photon matching
+  myEleGenMap.clear();  // generator-level electron and reconstructed electron mapping
+  myPhoL1Map.clear(); 
   myPhoL3Map_HLTL1EG5.clear();
   myPhoL3Map_HLTL1EG8.clear();
   myPhoL3Map_HLT10.clear();
@@ -264,45 +74,55 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   myPhoL3Map_HLT20Iso.clear();
   myPhoL3Map_HLT25.clear();
   myPhoL3Map_HLTMu5.clear();
+  
+  myEleEtMap = _alg.getEleEtMap();
+  myPhoEtMap = _alg.getPhoEtMap();
 
-  MatchElectronToPhoton(iEvent);
-  MatchElectronToGenp(iEvent);
-
- // photon - to L1 matching
-  MatchPhoToL1(iEvent);
+//   if(myEleEtMap.size()==0)return;
+//   if(myPhoEtMap.size()==0)return;
 
 
-  // HLT_L1EG5
-  MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt5",
-	       "HLT", myPhoL3Map_HLTL1EG5);
+  // matching between electron and photon
+  _alg.matchEleToPho<reco::GsfElectron, reco::Photon>( myEleEtMap,
+						       myPhoEtMap,
+						       myElePhoMap);
+
+  // matching between electron and generator-level particles
+  _alg.matchPartToGen<reco::GsfElectron>(0.5,1.0,myEleEtMap,myEleGenMap);
+  
+  // photon - to L1 matching
+  _alg.matchPartToL1<reco::Photon>(myPhoEtMap, myPhoL1Map);
+
+// HLT_L1EG5
+  _alg.matchPartToL3<reco::Photon>("hltL1sRelaxedSingleEgammaEt5", "HLT",
+				   myPhoEtMap, myPhoL3Map_HLTL1EG5);
 
   // HLT_L1EG8
-  MatchPhoToL3(iEvent,"hltL1sRelaxedSingleEgammaEt8",
-	       "HLT",myPhoL3Map_HLTL1EG8);
-
+  _alg.matchPartToL3<reco::Photon>("hltL1sRelaxedSingleEgammaEt8", "HLT",
+				   myPhoEtMap, myPhoL3Map_HLTL1EG8);
 
   // HLT_10L1R
-  MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
-	       "HLT",myPhoL3Map_HLT10);
+  _alg.matchPartToL3<reco::Photon>("hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter",
+				   "HLT", myPhoEtMap, myPhoL3Map_HLT10);
    
   // HLT_15L1R
-  MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
-	       "HLT",myPhoL3Map_HLT15);
-
+  _alg.matchPartToL3<reco::Photon>("hltL1NonIsoHLTNonIsoSinglePhotonEt15HcalIsolFilter",
+				   "HLT", myPhoEtMap, myPhoL3Map_HLT15);
 
   // HLT_20IsoL1R
-  MatchPhoToL3(iEvent,"hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
-	       "HLT",myPhoL3Map_HLT20Iso);
+  _alg.matchPartToL3<reco::Photon>("hltL1NonIsoHLTLEITISinglePhotonEt20TrackIsolFilter",
+				   "HLT", myPhoEtMap, myPhoL3Map_HLT20Iso);
 
   // HLT_25L1R
-  MatchPhoToL3(iEvent,"hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
-	       "HLT",myPhoL3Map_HLT25);
+  _alg.matchPartToL3<reco::Photon>("hltL1NonIsoHLTNonIsoSinglePhotonEt25HcalIsolFilter",
+				   "HLT", myPhoEtMap, myPhoL3Map_HLT25);
 
   // HLT_MU5
-  MatchPhoToL3(iEvent,"hltSingleMu5L3Filtered5",
-	       "HLT",myPhoL3Map_HLTMu5);
+  _alg.matchPartToL3<reco::Photon>("hltSingleMu5L3Filtered5", "HLT",
+				   myPhoEtMap, myPhoL3Map_HLTMu5);
 
 
+ 
   if(_nIn < 3)
     {
       cout << "myPhoL3Map_HLTL1EG5_L3Obj.size() ="  << myPhoL3Map_HLTL1EG5.size() << endl;
@@ -314,61 +134,40 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       cout << "myPhoL3Map_HLT25_L3Obj.size() = " << myPhoL3Map_HLT25.size() << endl;
     }
 
+  _alg.turnOnHLTBit("HLT_L1SingleEG5",TRIGGER::HLT_L1SingleEG5);
 
+  _alg.turnOnHLTBit("HLT_L1SingleEG8",TRIGGER::HLT_L1SingleEG8);
   
-  // Start to fill the main root branches
-  // initialize the variables of ntuples
-  // filter trigger path
-  //1E31
-  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
-  // 8E29
-//   bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT8E29"),TrgResultsHandle);
+  _alg.turnOnHLTBit("HLT_Photon10_L1R",TRIGGER::HLT_Photon10_L1R);
   
-  if (with_TriggerResults) {
-  
-    TriggerNames TrgNames( *TrgResultsHandle );   
-
-    vector<string> hlNames_ = TrgNames.triggerNames();
-    if(_nIn < 3)
-      for (size_t i=0; i<TrgNames.size(); ++i) {
-	cout<<"HLT bit = "<<i<<"   "<<hlNames_[i]<<endl;
-      }
-
-    TurnOnHLTBit("HLT_L1SingleEG5",TRIGGER::HLT_L1SingleEG5);
-
-    TurnOnHLTBit("HLT_L1SingleEG8",TRIGGER::HLT_L1SingleEG8);
-
-    TurnOnHLTBit("HLT_Photon10_L1R",TRIGGER::HLT_Photon10_L1R);
-
-    TurnOnHLTBit("HLT_Photon10_LooseEcalIso_TrackIso_L1R",
-		 TRIGGER::HLT_Photon10_LooseEcalIso_TrackIso_L1R);
+  _alg.turnOnHLTBit("HLT_Photon10_LooseEcalIso_TrackIso_L1R",
+			TRIGGER::HLT_Photon10_LooseEcalIso_TrackIso_L1R);
     
-    TurnOnHLTBit("HLT_Photon15_L1R",TRIGGER::HLT_Photon15_L1R);
+  _alg.turnOnHLTBit("HLT_Photon15_L1R",TRIGGER::HLT_Photon15_L1R);
     
-    TurnOnHLTBit("HLT_Photon15_TrackIso_L1R",TRIGGER::HLT_Photon15_TrackIso_L1R);
+  _alg.turnOnHLTBit("HLT_Photon15_TrackIso_L1R",TRIGGER::HLT_Photon15_TrackIso_L1R);
+  
+  _alg.turnOnHLTBit("HLT_Photon15_LooseEcalIso_L1R",TRIGGER::HLT_Photon15_LooseEcalIso_L1R);
+    
+  _alg.turnOnHLTBit("HLT_Photon20_LooseEcalIso_TrackIso_L1R",TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R);
 
-    TurnOnHLTBit("HLT_Photon15_LooseEcalIso_L1R",TRIGGER::HLT_Photon15_LooseEcalIso_L1R);
+  _alg.turnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
 
-    TurnOnHLTBit("HLT_Photon20_LooseEcalIso_TrackIso_L1R",TRIGGER::HLT_Photon20_LooseEcalIso_TrackIso_L1R);
+  _alg.turnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
+  //  _alg.turnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
+  
 
-    TurnOnHLTBit("HLT_Photon25_L1R",TRIGGER::HLT_Photon25_L1R);
-
-    TurnOnHLTBit("HLT_Mu5",TRIGGER::HLT_Mu5);
-//     TurnOnHLTBit("HLT_L1MuOpen",TRIGGER::HLT_Mu5);
-
-  } // there's trigger results
-
- 
 
   EvtInfo.Initialize();  
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
-  EvtInfo.HLT    = _thisEvent_trigger;
+  thisEvent_trigger = _alg.getThisEventTriggerBit();
+  EvtInfo.HLT    = thisEvent_trigger;
 
 
   // fill generator information
   edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel(_genLabel, GenHandle); 
+  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle); 
   GenInfo.Initialize();
   if(hasGenParticle){
     for( std::vector<GenParticle>::const_iterator it_gen = 
@@ -402,19 +201,19 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // now loop over Z electron pairs
   PhoInfo.Initialize();
   int it_count=-1;
-  for(elePhoMap::iterator it_e=myElePhoMap.begin(); 
-      it_e!= myElePhoMap.end(); ++it_e)
+  typedef elePhoMap<reco::GsfElectron, reco::Photon>::Type::iterator mapIter;
+
+  for(mapIter it_e=myElePhoMap.begin(); it_e!= myElePhoMap.end(); ++it_e)
     {
       it_count ++;
 
       int jt_count=-1;
-      for(elePhoMap::const_iterator jt_e = myElePhoMap.begin();
-	  jt_e != myElePhoMap.end(); ++jt_e){
-
+      for(mapIter jt_e = myElePhoMap.begin(); jt_e != myElePhoMap.end(); 
+	  ++jt_e){
+	
 	jt_count ++;
 	if(it_count >= jt_count)continue; // each pair is used once only
 	if(jt_e->first == it_e->first)continue;
-
 
 	EvtInfo.RecZMass = (it_e->first->p4() 
 			    + jt_e->first->p4()).M();
@@ -506,7 +305,7 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  PhoInfo.SigEta[PhoInfo.ZPairSize][ey]       = it_ph->sigmaEtaEta();
 	  PhoInfo.SigIEta[PhoInfo.ZPairSize][ey]      = it_ph->sigmaIetaIeta();
       
-	  bool passOffline = isLoosePhoton(*it_ph);
+	  bool passOffline = _alg.isMyLoosePhoton<reco::Photon>(it_ph);
 	  PhoInfo.IsLoose[PhoInfo.ZPairSize][ey] = passOffline? 1: 0;
  
 	  // match to generator level
@@ -602,340 +401,6 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
 }
 
-
-void Zee::MatchElectronToPhoton(const edm::Event& iEvent)
-{
-  myElePhoMap.clear();
-
-  // look for electron collection
-  Handle<reco::GsfElectronCollection> electronColl;
-  iEvent.getByLabel(_eleLabel, electronColl);
-  bool eleIsValid = electronColl.isValid();
-  if(!eleIsValid){cout << "Electron is not valid" << endl; return;}
-
-  // look for photon collection
-  Handle<reco::PhotonCollection> photonColl;
-  iEvent.getByLabel(_phoLabel, photonColl);
-  bool phoIsValid = photonColl.isValid();
-  if(!phoIsValid){cout << "Photon is not valid" << endl; return;}
-  
-
-  // first loop over electrons
-  unsigned int count=0;
-  for(reco::GsfElectronCollection::const_iterator it_e = electronColl->begin();
-      it_e != electronColl->end(); it_e++){
-
-    if(it_e->pt()>10)count ++ ;
-    double ptMax   = 0;
-    bool findMatch = false;
-
-    // now loop over photons
-    reco::PhotonCollection::const_iterator thisPho;
-    for (reco::PhotonCollection::const_iterator it_ph = photonColl->begin(); 
-	 it_ph!=photonColl->end(); it_ph++){
-  
-      // find the highest pt photon that has the same supercluster seed as 
-      // electron
-      double thisPhoEnergy = it_ph->superCluster()->energy();
-      double distx = fabs(it_e->superCluster()->seed()->x() -
-			  it_ph->superCluster()->seed()->x());
-      double disty = fabs(it_e->superCluster()->seed()->y() -
-			  it_ph->superCluster()->seed()->y());
-      double distrphi = sqrt(distx*distx + disty*disty);
-
-      double distz = fabs(it_e->superCluster()->seed()->z() -
-			  it_ph->superCluster()->seed()->z());
-
-      h_xy->Fill(distx,disty);
-      h_rz->Fill(distrphi,distz);
-   
-      double relE  = it_e->superCluster()->seed()->energy()>1e-3? 
-	fabs(it_ph->superCluster()->seed()->energy() - 
-	     it_e->superCluster()->seed()->energy())
-	/it_e->superCluster()->seed()->energy(): -999;
-      
-      h_dE->Fill(relE);
-
-      if( distx < 3.0 && disty < 3.0 && distz < 3.0 && relE < 0.2	 
-	 && thisPhoEnergy > ptMax)
-	{
-	  ptMax   = thisPhoEnergy;
-	  thisPho = it_ph;
-	  findMatch = true;
-	} // if matched
-      
-    } // end of loop over photon
-
-    if(findMatch)
-      myElePhoMap.insert(std::pair<reco::GsfElectronCollection::const_iterator,
-			 reco::PhotonCollection::const_iterator>(it_e,thisPho));
-    
-  
-  } // end of loop over electron
-
-  if(myElePhoMap.size()!=count)
-    cout << "There are " << count  << " electrons" << endl;
-
-  return;
-
-}
-
-
-void Zee::MatchElectronToGenp(const edm::Event& iEvent)
-{
-
-  myEleGenMap.clear();
-
-  // look for electron collection
-  Handle<reco::GsfElectronCollection> electronColl;
-  iEvent.getByLabel(_eleLabel, electronColl);
-  bool eleIsValid = electronColl.isValid();
-  if(!eleIsValid){cout << "Electron is not valid" << endl; return;}
-
-  // look for Gen particle collection
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle);
-  if(!hasGenParticle)return;
-
-  unsigned int count=0;
-
-  // loop over electron first
-  for(reco::GsfElectronCollection::const_iterator it_e = electronColl->begin();
-      it_e != electronColl->end(); it_e++){
-
-    double ptMax   = 0;
-    bool findMatch = false;
-
-    count ++;
-
-    // find the highest et gen particle from Z matched to electron 
-    GenParticleCollection::const_iterator thisGen;
-    for(GenParticleCollection::const_iterator it_gen = GenHandle->begin(); 
-	it_gen != GenHandle->end(); it_gen++ ) {
-
-      double thisGenEnergy = it_gen->pt();
-
-      if(abs(it_gen->pdgId())!=11 || it_gen->status()!=1)continue;
-      if(it_gen->mother() && abs(it_gen->mother()->pdgId())!=11)continue;
-      if(it_gen->mother()->mother() 
-	 && abs(it_gen->mother()->mother()->pdgId()!=23))continue;
-      
-      float dR = reco::deltaR(it_e->momentum(), it_gen->momentum());
-      float relPt = fabs(it_e->pt()-it_gen->pt())/it_gen->pt();
-
-      if(dR<0.5 && relPt < 1.0 && thisGenEnergy > ptMax)
-	{
-	  ptMax = thisGenEnergy;
-	  thisGen = it_gen;
-	  findMatch = true;
-	} // if find a match
-    } // end of loop over gen particle
-
-    if(findMatch)
-      myEleGenMap.insert(std::pair<reco::GsfElectronCollection::const_iterator,
-			 reco::GenParticleCollection::const_iterator>
-			 (it_e,thisGen));
-
-  } // end of loop over electron
-
-//   if(myEleGenMap.size()!=count)
-//     cout << "There are " << count  << " electrons and " << myEleGenMap.size() << " generated." << endl;
-  
-  return;
-
-}
-
-
-void Zee::MatchPhoToL1(const edm::Event& iEvent)
-{
- // look for photons
-  if(myElePhoMap.size()==0)return;
-
-  // check for L1 extra particles
-  edm::Handle<l1extra::L1EmParticleCollection> l1EmNonIso;
-  edm::Handle<l1extra::L1EmParticleCollection> l1EmIso;
-
-  const edm::InputTag l1EmNonIsoTag = edm::InputTag("hltL1extraParticles","NonIsolated");
-  const edm::InputTag l1EmIsoTag = edm::InputTag("hltL1extraParticles","Isolated");
-
-
-  bool hasL1NoIso=false;
-  bool hasL1Iso = false;
-
-  hasL1NoIso = iEvent.getByLabel(l1EmNonIsoTag,l1EmNonIso);
-  hasL1Iso = iEvent.getByLabel(l1EmIsoTag,l1EmIso);
-
-  if(!hasL1NoIso && !hasL1Iso)return;
-
-
-  for(elePhoMap::iterator it_e=myElePhoMap.begin(); 
-      it_e!= myElePhoMap.end(); ++it_e)
-    {
-
-      reco::PhotonCollection::const_iterator it_ph = it_e->second;
-
-      float ptMax = 0;
-      std::vector<l1extra::L1EmParticle>::const_iterator maxPtIter;
-      bool hasMatch = false;
-
-
-      for( std::vector<l1extra::L1EmParticle>::const_iterator it_l1 = 
-	     l1EmIso->begin(); 
-	   it_l1 != l1EmIso->end(); it_l1++ ) {
-    
-	float deltaR = reco::deltaR(it_l1->eta(), it_l1->phi(),
-				    it_ph->eta(), it_ph->phi());
-
-	float thisL1Pt = it_l1->pt();
-
-	if (deltaR < 0.5 && thisL1Pt > ptMax ) {
-	
-	  ptMax = thisL1Pt;
-	  maxPtIter = it_l1;
-	  hasMatch = true;
-	}
-
-      } // end of L1 isolated trigger objects
-
-
-      for( std::vector<l1extra::L1EmParticle>::const_iterator it_l1 = 
-	     l1EmNonIso->begin(); 
-	   it_l1 != l1EmNonIso->end(); it_l1++ ) {
-    
-	float deltaR = reco::deltaR(it_l1->eta(), it_l1->phi(),
-				    it_ph->eta(), it_ph->phi());
-
-	float thisL1Pt = it_l1->pt();
-
-	if (deltaR < 0.5 && thisL1Pt > ptMax ) {
-	
-	  ptMax = thisL1Pt;
-	  maxPtIter = it_l1;
-	  hasMatch = true;
-	}
-
-      } // end of L1 non-isolated trigger objects
-
-    
-      if(hasMatch)
-	myPhoL1Map.insert(std::pair<reco::PhotonCollection::const_iterator,
-			  std::vector<l1extra::L1EmParticle>::const_iterator>(it_ph,maxPtIter));    
-    } // end of loop over photons
-
-  return;
-
-}
-
-void Zee::MatchPhoToL3(const edm::Event& iEvent, 
-		       std::string trgPath,
-		       std::string tag,
-		       phoL3Map& thisMap)
-{
-  thisMap.clear();
-
- // look for photons
-  if(myElePhoMap.size()==0)return;
-
-  // check for HLT objects
-  const edm::InputTag hltsummaryTag = edm::InputTag("hltTriggerSummaryAOD","","HLT");
-  bool has1E31TrigInfo=
-    iEvent.getByLabel(hltsummaryTag, trgEvent);    
-  if(!has1E31TrigInfo)return;
-
-  const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
-
-  const edm::InputTag myLastFilter = edm::InputTag(trgPath,"",tag);
-  if ( trgEvent->filterIndex(myLastFilter) >= trgEvent->sizeFilters())return;
-  const trigger::Keys& keys( trgEvent->filterKeys( trgEvent->filterIndex(myLastFilter) ));
-
-
-  for(elePhoMap::iterator it_e=myElePhoMap.begin(); 
-      it_e!= myElePhoMap.end(); ++it_e)
-    {
-
-    reco::PhotonCollection::const_iterator it_ph = it_e->second;
-
-    float ptMax = 0;
-    trigger::TriggerObject maxPtIter;
-    bool hasMatch = false;
-
-    for ( unsigned int hlto = 0; hlto < keys.size(); hlto++ ) {
-      size_type hltf = keys[hlto];
-      const trigger::TriggerObject L3obj(TOC[hltf]);
-      
-      float deltaR = reco::deltaR(L3obj.eta(), L3obj.phi(),
-				  it_ph->eta(), it_ph->phi());
-      float thisL3Pt = L3obj.pt();
-
-      if (deltaR < 0.5 && thisL3Pt > ptMax) {
-	maxPtIter = L3obj;
-	ptMax = thisL3Pt;
-	hasMatch = true;
-      }
-    } // end of loop over trigger objects
-
-    if(hasMatch)
-      thisMap.insert(std::pair<reco::PhotonCollection::const_iterator,
-			trigger::TriggerObject>(it_ph,maxPtIter));    
-    
-
-    }// end of loop over photons
-
-
-   return;
-}
-
-void Zee::TurnOnHLTBit(std::string trgPath, 
-		       int         trgCode)
-{
-    TriggerNames trgName( *TrgResultsHandle);   
-    int NTrigger = trgName.size();
-    int tempIndex = (unsigned int)trgName.triggerIndex( trgPath); 
-    if(tempIndex < NTrigger && TrgResultsHandle->accept(tempIndex))
-      _thisEvent_trigger |= trgCode;
-    return;
-}
-
-
-
-
-bool Zee::isLoosePhoton(const reco::Photon& it_ph)
-{
-  float et = it_ph.et();
-  float eta = it_ph.eta();
-
-  float ecalIso = it_ph.ecalRecHitSumEtConeDR04();
-  float hcalIso = it_ph.hcalTowerSumEtConeDR04();
-  float trkIso  = it_ph.trkSumPtHollowConeDR04();
-
-  bool isBarrel = it_ph.isEB();
-  bool isEndCap = it_ph.isEE();
-  bool inAnyGap = it_ph.isEBEEGap() || 
-    (it_ph.isEB() && it_ph.isEBGap()) || 
-    (it_ph.isEE() && it_ph.isEEGap());
-
-  if(inAnyGap)return false;
-
-
-  // Barrel cuts
-  if(isBarrel && ecalIso  > 5.0 + 0.004*et)return false;
-  if(isBarrel && hcalIso  > 5.0)return false;
-  if(isBarrel && trkIso > 9.0 )return false;
-  if(isBarrel && it_ph.hadronicOverEm() > 0.15)return false;
-
-  // Endcap cuts
-  if(isEndCap && ecalIso  > 5.0 + 0.0021*et)return false;
-  if(isEndCap && hcalIso  > 5.0)return false;
-  if(isEndCap && trkIso > 9.0 )return false;
-  if(isEndCap && it_ph.hadronicOverEm() > 0.15)return false;
-
-  if(et        < 10.0)return false;
-  if(fabs(eta) > 1.44 && fabs(eta)<1.56)return false;
-  if(fabs(eta) > 2.5)return false;
-
-  return true;
-
-}
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(Zee);
