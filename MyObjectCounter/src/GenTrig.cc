@@ -216,10 +216,10 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   for(partEtMap<reco::GenParticle>::Type::iterator 
 	i=myPhoEtMap.begin(); 
-      i!= myPhoEtMap.end(); ++i)
+      i!= myPhoEtMap.end() && GenInfo.Size < MAX_GENS; ++i)
     {
       
-      if (GenInfo.Size>=MAX_GENS) {
+      if (GenInfo.Size >= MAX_GENS) {
 	fprintf(stderr,"ERROR: number of generator photons exceeds the size of array.\n");
 	exit(1);
       }

@@ -222,7 +222,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	   GenHandle->begin(); 
 	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {
 
-      if (GenInfo.Size>=MAX_GENS) {
+      if (GenInfo.Size>= MAX_GENS) {
 	fprintf(stderr,"ERROR: number of generator photons exceeds the size of array.\n");
 	exit(1);
       }            
@@ -247,10 +247,10 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   bool _isFilled_Mu = false;
   
   for(partEtMap<reco::Photon>::Type::iterator i=myPhoEtMap.begin(); 
-      i!= myPhoEtMap.end(); ++i)
+      i!= myPhoEtMap.end() && PhoInfo.Size < MAX_PHOTONS; ++i)
     {
       
-      if (PhoInfo.Size>=MAX_PHOTONS) {
+      if (PhoInfo.Size >= MAX_PHOTONS) {
 	fprintf(stderr,"ERROR: number of photons exceeds the size of array.\n");
 	exit(1);
       }

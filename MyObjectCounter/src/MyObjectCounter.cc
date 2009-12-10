@@ -94,9 +94,9 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   partEtMap<pat::Photon>::Type thisPhoMap = _alg.getPatPhoEtMap();
 
   for( partEtMap<pat::Photon>::Type::iterator mapIter = thisPhoMap.begin(); 
-       mapIter != thisPhoMap.end(); mapIter++ ) {
-   
-    if (PhoInfo.Size>=MAX_PHOTONS) {
+       mapIter != thisPhoMap.end() && PhoInfo.Size < MAX_PHOTONS; mapIter++) {
+      
+    if (PhoInfo.Size >= MAX_PHOTONS) {
       fprintf(stderr,"ERROR: number of photons exceeds the size of array.\n");
       exit(1);
     }
@@ -149,9 +149,9 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   partEtMap<pat::Muon>::Type thisMuoMap = _alg.getPatMuoEtMap();
   
   for( partEtMap<pat::Muon>::Type::iterator mapIter = thisMuoMap.begin(); 
-       mapIter != thisMuoMap.end(); mapIter++ ) {
+       mapIter != thisMuoMap.end() && LepInfo.Size < MAX_LEPTONS; mapIter++ ) {
           
-    if (LepInfo.Size>=MAX_LEPTONS) {
+    if (LepInfo.Size >= MAX_LEPTONS) {
       fprintf(stderr,"ERROR: number of leptons exceeds the size of array.\n");
       exit(1);
     }
@@ -178,9 +178,9 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   partEtMap<pat::Electron>::Type thisEleMap = _alg.getPatEleEtMap();
 
   for( partEtMap<pat::Electron>::Type::iterator mapIter = thisEleMap.begin(); 
-       mapIter != thisEleMap.end(); mapIter++ ) {          
+       mapIter != thisEleMap.end() && LepInfo.Size < MAX_LEPTONS; mapIter++ ) {          
   
-    if (LepInfo.Size>=MAX_LEPTONS) {
+    if (LepInfo.Size >= MAX_LEPTONS) {
       fprintf(stderr,"ERROR: number of leptons exceeds the size of array.\n");
       exit(1);
     }

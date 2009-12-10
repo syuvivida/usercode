@@ -144,9 +144,9 @@ void TriggerBitCounter::analyze(const edm::Event& iEvent, const edm::EventSetup&
   partEtMap<pat::Photon>::Type thisPhoMap = _alg.getPatPhoEtMap();
 
   for( partEtMap<pat::Photon>::Type::iterator mapIter = thisPhoMap.begin(); 
-       mapIter != thisPhoMap.end(); mapIter++ ) {
+       mapIter != thisPhoMap.end() && PhoInfo.Size < MAX_PHOTONS; mapIter++ ) {
     
-    if (PhoInfo.Size>=MAX_PHOTONS) {
+    if (PhoInfo.Size >= MAX_PHOTONS) {
       fprintf(stderr,"ERROR: number of photons exceeds the size of array.\n");
       exit(1);
     }
