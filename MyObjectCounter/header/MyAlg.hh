@@ -27,8 +27,6 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
-
-#include "syu/MyObjectCounter/header/format.hh" 
 #include "syu/MyObjectCounter/header/trigformat.hh"
 
 
@@ -79,6 +77,17 @@ struct partL3Map
 			     trigger::TriggerObject > Type;
   
 };
+
+
+// although this is a template class, but should be used only to electrons 
+// and photons (reco or pat)
+template <class T, class A>
+struct elePhoMap
+{
+  typedef typename std::map< typename myContainer<T>::myIter,
+			     typename myContainer<A>::myIter > Type;
+};
+
 
 class MyAlg {
 //-----------------------------------------------------------------------------
@@ -155,7 +164,15 @@ public:
   template <class T> void matchPartToL3(std::string trgPath, std::string tag,
 					typename partEtMap<T>::Type& etmap,
 					typename partL3Map<T>::Type& l3map);  
-					 
+
+  // this mapping can be used for either from electron to photon, 
+  // or from photon to electron, the first one is the mother
+ 
+  template <class T, class A> void matchEleToPho(
+		typename partEtMap<T>::Type& elemap,
+		typename partEtMap<A>::Type& phomap,
+		typename elePhoMap<T,A>::Type &mymap);
+
 
   // although this is a template, should only apply on photons (reco or pat)
   template <class T> bool isMyLoosePhoton(
@@ -414,6 +431,74 @@ template <class T> void MyAlg::matchPartToL3(std::string trgPath,
 
   return;
 }
+
+
+//_______________________________________________________________
+// this mapping can be used for either from electron to photon, 
+// or from photon to electron, the first one is mother
+//______________________________________________________________
+
+template <class T, class A> void MyAlg::matchEleToPho(
+	      typename partEtMap<T>::Type& elemap,
+	      typename partEtMap<A>::Type& phomap,
+	      typename elePhoMap<T,A>::Type& mymap)
+{
+  
+ // first loop over electrons
+  unsigned int count=0;
+  typedef typename partEtMap<T>::Type::iterator mapIter_ab;
+  typedef typename partEtMap<A>::Type::iterator mapIter_ey;
+ 
+  for(mapIter_ab eIter = elemap.begin(); eIter!=elemap.end(); ++eIter){
+
+    typename myContainer<T>::myIter it_e = eIter->second;
+    if(it_e->pt()>10)count ++ ;
+    double ptMax   = 0;
+    bool findMatch = false;
+    typename myContainer<A>::myIter bestMatchIter;
+    // now loop over photons
+    for(mapIter_ey pIter = phomap.begin(); pIter!=phomap.end(); ++pIter){
+      
+      typename myContainer<A>::myIter it_ph = pIter->second;
+      // find the highest pt photon that has the same supercluster seed as 
+      // electron
+      double thisPhoEnergy = it_ph->superCluster()->energy();
+      double distx = fabs(it_e->superCluster()->seed()->x() -
+			  it_ph->superCluster()->seed()->x());
+      double disty = fabs(it_e->superCluster()->seed()->y() -
+			  it_ph->superCluster()->seed()->y());
+//       double distrphi = sqrt(distx*distx + disty*disty);
+
+      double distz = fabs(it_e->superCluster()->seed()->z() -
+			  it_ph->superCluster()->seed()->z());
+   
+      double relE  = it_e->superCluster()->seed()->energy()>1e-3? 
+	fabs(it_ph->superCluster()->seed()->energy() - 
+	     it_e->superCluster()->seed()->energy())
+	/it_e->superCluster()->seed()->energy(): -999;
+      
+      if( distx < 3.0 && disty < 3.0 && distz < 3.0 && relE < 0.2	 
+	 && thisPhoEnergy > ptMax)
+	{
+	  ptMax   = thisPhoEnergy;
+	  bestMatchIter = it_ph;
+	  findMatch = true;
+	} // if matched
+      
+    } // end of loop over photon
+
+    if(findMatch)
+      mymap.insert(std::pair<typename myContainer<T>::myIter,
+		   typename myContainer<A>::myIter>(it_e,bestMatchIter));
+    
+  } // end of loop over electron
+
+  if(mymap.size()!=count)
+    cout << "There are " << count  << " electrons" << endl;
+  
+
+}
+
 
 
 //------------------------------------------------------------------------

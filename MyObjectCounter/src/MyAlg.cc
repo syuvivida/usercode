@@ -225,13 +225,10 @@ void MyAlg::sortGenParticles(){
 
   _genEtMap.clear();
   if(!_genHandle.isValid())return;
-  int count = 0;
   for (reco::GenParticleCollection::const_iterator it_gen = 
-	 _genHandle->begin(); 
-       it_gen!=_genHandle->end() && count < MAX_GENS; it_gen++){
+	 _genHandle->begin(); it_gen!=_genHandle->end(); it_gen++){
     if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
     if(it_gen->pt() < 2.)continue;
-    count ++ ;
     float et = it_gen->pt();
     _genEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
   }

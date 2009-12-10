@@ -28,6 +28,7 @@
 
 // the most important code
 #include "syu/MyObjectCounter/header/MyAlg.hh"
+#include "syu/MyObjectCounter/header/format.hh" 
 
                      
 using namespace edm;

@@ -99,7 +99,7 @@ void GenTrig::beginJob(const edm::EventSetup&)
 
 void GenTrig::endJob() 
 {
-  std::cout << "GenTrig has " << _nIn << " input events and " << _nOut  << " events" << endl;
+  std::cout << "GenTrig has " << _nIn << " input events and " << _nOut  << " output events" << endl;
 }
 
 

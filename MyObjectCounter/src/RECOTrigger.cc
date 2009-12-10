@@ -97,7 +97,7 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
 
 void RECOTrigger::endJob() 
 {
-  std::cout << "RECOTrigger has " << _nIn << " input events and " << _nOut  << " events" << endl;
+  std::cout << "RECOTrigger has " << _nIn << " input events and " << _nOut  << " output events" << endl;
 }
 
 
@@ -121,7 +121,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   myPhoL3Map_HLT25.clear();
   myPhoL3Map_HLTMu5.clear();
 
-  // sort Gen particle collection
+  // sort photon particle collection
   myPhoEtMap = _alg.getPhoEtMap();
 
   if(myPhoEtMap.size()==0)return;

@@ -25,6 +25,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 
 #include "syu/MyObjectCounter/header/MyAlg.hh"
+#include "syu/MyObjectCounter/header/format.hh" 
 
 
 using namespace edm;

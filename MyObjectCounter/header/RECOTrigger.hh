@@ -28,6 +28,7 @@
 
 // the most important code
 #include "syu/MyObjectCounter/header/MyAlg.hh"
+#include "syu/MyObjectCounter/header/format.hh" 
 
 using namespace edm;
 using namespace reco;
@@ -55,7 +56,7 @@ private:
   syu::GenInfoBranches  GenInfo;
 
   partEtMap<reco::Photon>::Type  myPhoEtMap;
-  partGenMap<reco::Photon>::Type      myPhoGenMap;
+  partGenMap<reco::Photon>::Type myPhoGenMap;
   partL1Map<reco::Photon>::Type  myPhoL1Map;
   partL3Map<reco::Photon>::Type  myPhoL3Map_HLTL1EG5;
   partL3Map<reco::Photon>::Type  myPhoL3Map_HLTL1EG8;

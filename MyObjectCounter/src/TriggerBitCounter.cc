@@ -85,7 +85,7 @@ void TriggerBitCounter::beginJob(const edm::EventSetup&)
 
 void TriggerBitCounter::endJob() 
 {
-  std::cout << "TriggerBitCounter has " << _nIn << " input events and " << _nOut  << " events" << endl;
+  std::cout << "TriggerBitCounter has " << _nIn << " input events and " << _nOut  << " output events" << endl;
 }
 
 

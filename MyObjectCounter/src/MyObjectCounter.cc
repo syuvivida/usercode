@@ -43,7 +43,7 @@ void MyObjectCounter::beginJob(const edm::EventSetup&)
 
 void MyObjectCounter::endJob() 
 {
-  std::cout << "MyObjectCounter has " << _nIn << " input events and " << _nOut  << " events" << endl;
+  std::cout << "MyObjectCounter has " << _nIn << " input events and " << _nOut  << " output events" << endl;
 }
 
 
