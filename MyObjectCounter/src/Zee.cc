@@ -5,7 +5,8 @@
 // Shin-Shan Yu
 
 #include "syu/MyObjectCounter/header/Zee.hh" 
-
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 
 Zee::Zee(const edm::ParameterSet& iConfig):
   _nIn(0), _nOut(0), _alg(iConfig)
@@ -60,7 +61,7 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   _nIn++;
   int thisEvent_trigger = 0;
-  _alg.init(iEvent, true, true, true, true); 
+  _alg.init(iEvent, true, true, true); 
 
   myEleEtMap.clear();   // sorted electron Et map
   myPhoEtMap.clear();   // sorted photon Et map

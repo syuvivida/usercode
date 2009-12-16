@@ -110,7 +110,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   _nIn++;
   int thisEvent_trigger = 0;
-  _alg.init(iEvent, false, false, true, true); 
+  _alg.init(iEvent, false, false, true); 
   
 
   myPhoEtMap.clear();

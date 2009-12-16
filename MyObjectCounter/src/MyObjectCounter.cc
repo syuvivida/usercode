@@ -53,7 +53,7 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 {
 
   _nIn++;
-  _alg.init(iEvent, false, false, true, true, true); 
+  _alg.init(iEvent, false, false, true, true); 
 
   // filter trigger path
   edm::Handle<TriggerResults> TrgResultsHandle;

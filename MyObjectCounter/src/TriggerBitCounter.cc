@@ -95,7 +95,7 @@ void TriggerBitCounter::analyze(const edm::Event& iEvent, const edm::EventSetup&
 {
 
   _nIn++;
-  _alg.init(iEvent, false, false, true, true, true); 
+  _alg.init(iEvent, false, false, true, true); 
 
   int thisEvent_trigger =0;
 

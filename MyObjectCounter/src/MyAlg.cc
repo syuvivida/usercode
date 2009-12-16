@@ -3,7 +3,7 @@
 
 
 MyAlg::MyAlg( const edm::ParameterSet & iConfig )  :
-  _parameters( iConfig ), _event_trigger(0)
+  _parameters( iConfig ), _event_trigger(0),_isData(true)
 {
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
   _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",  22);
@@ -56,7 +56,6 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
 void MyAlg::init(const edm::Event &event,
 		 bool doPho,
 		 bool doEle,
-		 bool doGen,
 		 bool doHLT,
 		 bool doPAT)
 {
@@ -68,7 +67,9 @@ void MyAlg::init(const edm::Event &event,
   _patEleEtMap.clear();
   _patMuoEtMap.clear();
 
-  getHandles(event, doPho, doEle, doGen, doHLT, doPAT);
+  _isData = event.isRealData();
+
+  getHandles(event, doPho, doEle, doHLT, doPAT);
   if(_dumpHEP)dumpGenInfo(event);
 
 }
@@ -76,7 +77,6 @@ void MyAlg::init(const edm::Event &event,
 void MyAlg::getHandles(const edm::Event  & event,
 		       bool doPho,
 		       bool doEle,
-		       bool doGen,
 		       bool doHLT,
 		       bool doPAT)
 
@@ -95,7 +95,7 @@ void MyAlg::getHandles(const edm::Event  & event,
     sortParticles<reco::GsfElectron>(_eleHandle, _eleEtMap);
   }
 
-  if(doGen){
+  if(isMC()){
     edm::InputTag genParticlesName = _parameters.getParameter<edm::InputTag>("genLabel");
     event.getByLabel(genParticlesName, _genHandle);
     sortGenParticles();
@@ -159,7 +159,10 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
   printf("   ");
   printf("Mass ");
   printf("Energy ");
-  printf("Pt");
+  printf("Pt ");
+  printf("Px ");
+  printf("Py ");
+  printf("Pz ");
   printf("\n");
 
 
@@ -177,9 +180,9 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
     printf("%9.3f",it_gen->p4().mass());
     printf("%9.3f",it_gen->energy());
     printf("%9.3f",it_gen->pt());
-    printf("%9.3f",it_gen->vx());
-    printf("%9.3f",it_gen->vy());
-    printf("%9.3f",it_gen->vz());
+    printf("%9.3f",it_gen->p4().x());
+    printf("%9.3f",it_gen->p4().y());
+    printf("%9.3f",it_gen->p4().z());
     printf("\n");
     genIndex ++;
   }

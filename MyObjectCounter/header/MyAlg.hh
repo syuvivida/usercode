@@ -105,14 +105,12 @@ public:
   void init(const edm::Event & event,
 	    bool doPho,
 	    bool doEle,
-	    bool doGen,
 	    bool doHLT,
 	    bool doPAT=false);
 
   void getHandles(const edm::Event  & event, 
 		  bool doPho,
 		  bool doEle,
-		  bool doGen,
 		  bool doHLT,
 		  bool doPAT=false);
 
@@ -124,6 +122,9 @@ public:
 
   // print out the private data members
   void print();
+
+  bool isMC(){return (!_isData);}
+  bool isData(){return _isData;}
 
   // sort generator particles by Pt (with a PDG and pt > 2 GeV cut), 
   // then insert a pair of et value and const_iterator of GenParticles into a 
@@ -221,12 +222,16 @@ private:
   edm::ParameterSet         _parameters;
   // HLT bit of an event
   int _event_trigger;
+
+  bool _isData;
+
   // should dump HEPG information or not
   bool _dumpHEP;
   // pdgcode for matchPartToGen and sortGenParticles
   int  _pdgCode;
   // deltaR for matching between particles and L1/L3 trigger objects
   double _trigDeltaRMax;
+
 
 };
 

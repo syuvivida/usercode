@@ -108,7 +108,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   _nIn++;
   int thisEvent_trigger = 0;
-  _alg.init(iEvent, true, false, true, true); 
+  _alg.init(iEvent, true, false, true); 
   
   myPhoEtMap.clear();
   myPhoGenMap.clear();
