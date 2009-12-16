@@ -9,6 +9,7 @@
 <use name=PhysicsTools/PatAlgos>
 <use name=PhysicsTools/PatUtils>
 <use name=FWCore/ServiceRegistry>
+<use name=RecoEgamma/EgammaMCTools>
 <use name=HLTrigger/HLTcore>
 <use name=root>
 <flags EDM_PLUGIN=1>
@@ -25,6 +26,7 @@
   <use name=PhysicsTools/PatAlgos>
   <use name=PhysicsTools/PatUtils>
   <use name=FWCore/ServiceRegistry>
+  <use name=RecoEgamma/EgammaMCTools>
   <use name=HLTrigger/HLTcore>
   <use name=root>
 </export>
