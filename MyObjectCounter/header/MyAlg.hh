@@ -200,6 +200,11 @@ public:
   partEtMap<pat::Electron>::Type     getPatEleEtMap(){return _patEleEtMap;}
   partEtMap<pat::Muon>::Type         getPatMuoEtMap(){return _patMuoEtMap;}
 
+  // get each individual handle
+
+  edm::Handle<reco::GenParticleCollection> getGenHandle(){return _genHandle;}
+  edm::Handle<edm::TriggerResults> getTrgResultsHandle(){return _trgResultsHandle;}
+
 private: 
 
   // handles to do sorting and mapping for reconstructed particles

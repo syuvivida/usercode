@@ -203,21 +203,20 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // initialize the variables of ntuples
   EvtInfo.Initialize();  
 
-  
+  EvtInfo.isData = _alg.isData()? 1: 0;
   EvtInfo.RunNo  = iEvent.id().run();
   EvtInfo.EvtNo  = iEvent.id().event();
   thisEvent_trigger = _alg.getThisEventTriggerBit();
   EvtInfo.HLT    = thisEvent_trigger;
-
  
   // initialize the variables of ntuples
 
   // first fill generator information, not associated with reconstructed 
   // particle 
   GenInfo.Initialize();
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle);
-  if(hasGenParticle){
+  GenInfo.ptHat  = _alg.ptHat();
+  edm::Handle<reco::GenParticleCollection> GenHandle = _alg.getGenHandle();
+  if(GenHandle.isValid()){
     for( GenParticleCollection::const_iterator it_gen = 
 	   GenHandle->begin(); 
 	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {

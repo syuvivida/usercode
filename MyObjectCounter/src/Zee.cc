@@ -167,10 +167,9 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
   // fill generator information
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle); 
+  edm::Handle<reco::GenParticleCollection> GenHandle = _alg.getGenHandle();
   GenInfo.Initialize();
-  if(hasGenParticle){
+  if(GenHandle.isValid()){
     for( std::vector<GenParticle>::const_iterator it_gen = 
 	   GenHandle->begin(); 
 	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {

@@ -56,9 +56,8 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   _alg.init(iEvent, false, false, true, true); 
 
   // filter trigger path
-  edm::Handle<TriggerResults> TrgResultsHandle;
-  bool with_TriggerResults = iEvent.getByLabel(InputTag("TriggerResults::HLT"),TrgResultsHandle);
-  if (with_TriggerResults) {
+  edm::Handle<TriggerResults> TrgResultsHandle = _alg.getTrgResultsHandle();
+  if (TrgResultsHandle.isValid()) {
   
     TriggerNames TrgNames( *TrgResultsHandle );   
     unsigned int TrgIdx1 = TrgNames.triggerIndex( "HLT_Photon10_L1R" );

@@ -88,9 +88,8 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // first fill generator information, not associated with reconstructed 
   // particle 
   GenInfo.Initialize();
-  edm::Handle<reco::GenParticleCollection> GenHandle;  
-  bool hasGenParticle = iEvent.getByLabel("genParticles", GenHandle);
-  if(hasGenParticle){
+  edm::Handle<reco::GenParticleCollection> GenHandle = _alg.getGenHandle();  
+  if(GenHandle.isValid()){
     for( GenParticleCollection::const_iterator it_gen = 
 	   GenHandle->begin(); 
 	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {

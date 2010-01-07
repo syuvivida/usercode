@@ -13,6 +13,7 @@
 #include <TH2.h>
 #include <TLorentzVector.h>
 
+#define MAX_VTX         20
 #define MAX_LEPTONS 	64
 #define MAX_PHOTONS     64
 #define MAX_TRIGGER    120
@@ -20,24 +21,79 @@
 #define dummy          -9999
 
 namespace syu{
+
+
 class EvtInfoBranches {
 public:
+  int   isData;
   int   RunNo;
   int   EvtNo;
   int   HLT;
   
   void Initialize(){
     
-    RunNo = EvtNo = HLT = dummy;
+    isData= RunNo = EvtNo = HLT = dummy;
 
   }
 
   void Register(TTree *root) {
+	root->Branch("EvtInfo.isData"	 , &isData    , "EvtInfo.isData/I"    );
 	root->Branch("EvtInfo.RunNo"	 , &RunNo     , "EvtInfo.RunNo/I"     );
 	root->Branch("EvtInfo.EvtNo"	 , &EvtNo     , "EvtInfo.EvtNo/I"     );   
-	root->Branch("EvtInfo.HLT"	 , &HLT       , "EvtInfo.HLT/I"     );   
+	root->Branch("EvtInfo.HLT"	 , &HLT       , "EvtInfo.HLT/I"       );   
+
   }										    
 }; // end of EvtInfoBranches
+
+
+class VtxInfoBranches {
+
+public:
+  int Size;
+  int Index[MAX_VTX];
+  float pos[MAX_VTX][3];
+  float poserr[MAX_VTX][3];
+  float rho[MAX_VTX];
+  float chi2[MAX_VTX];
+  int   ndof[MAX_VTX];
+  int   ntrks[MAX_VTX];
+
+
+  void Initialize(){
+
+    Size = 0;
+    for(int i=0; i < MAX_VTX; i++){
+      
+      Index[i] = dummy;
+
+      for(int j=0; j < 3; j++){
+	pos[i][3]    = dummy;
+	poserr[i][3] = dummy;
+      }  // loop over x,y,z
+
+      rho[i]       = dummy;
+      chi2[i]      = dummy;
+      ndof[i]      = dummy;
+      ntrks[i]     = dummy;
+      
+    } // loop over number of vertices
+    
+  }
+
+  void Register(TTree *root) {
+    root->Branch("VtxInfo.Size"	        , &Size	         , "VtxInfo.Size/I"			  );
+    root->Branch("VtxInfo.Index"	, Index 	 , "VtxInfo.Index[VtxInfo.Size]/I"	  );
+    root->Branch("VtxInfo.pos"          , pos            , "VtxInfo.pos[VtxInfo.Size][3]/F"     );
+    root->Branch("VtxInfo.poserr"       , poserr         , "VtxInfo.poserr[VtxInfo.Size][3]/F"  );
+    root->Branch("VtxInfo.rho"          , rho            , "VtxInfo.rho[VtxInfo.Size]/F"        );
+    root->Branch("VtxInfo.chi2"         , chi2           , "VtxInfo.chi2[VtxInfo.Size]/F"       );
+    root->Branch("VtxInfo.ndof"         , ndof           , "VtxInfo.ndof[VtxInfo.Size]/I"       );
+    root->Branch("VtxInfo.ntrks"        , ntrks          , "VtxInfo.ntrks[VtxInfo.Size]/I"      );
+    
+  }  
+  
+};
+
 
 
 class PhoInfoBranches {
@@ -118,36 +174,36 @@ public:
   
   void Register(TTree *root) {
 	root->Branch("PhoInfo.Size"	  , &Size	   , "PhoInfo.Size/I"			  );
-	root->Branch("PhoInfo.Index"	  , &Index[0]	   , "PhoInfo.Index[PhoInfo.Size]/I"	  );
-	root->Branch("PhoInfo.Location"	  , &Location[0]   , "PhoInfo.Location[PhoInfo.Size]/I"	  );
-	root->Branch("PhoInfo.IsLoose"	  , &IsLoose[0]	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
-	root->Branch("PhoInfo.Trig"	  , &Trig[0]	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
-	root->Branch("PhoInfo.L1Pt"	  , &L1Pt[0]	   , "PhoInfo.L1Pt[PhoInfo.Size]/F"	  );
-	root->Branch("PhoInfo.L3Pt"	  , &L3Pt[0]	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
-	root->Branch("PhoInfo.E"          , &E[0]          , "PhoInfo.E[PhoInfo.Size]/F"          );
-	root->Branch("PhoInfo.Et"         , &Et[0]         , "PhoInfo.Et[PhoInfo.Size]/F"         );
-	root->Branch("PhoInfo.Pz"         , &Pz[0]         , "PhoInfo.Pz[PhoInfo.Size]/F"         );
-	root->Branch("PhoInfo.Eta"        , &Eta[0]        , "PhoInfo.Eta[PhoInfo.Size]/F"        );
-	root->Branch("PhoInfo.Phi"        , &Phi[0]        , "PhoInfo.Phi[PhoInfo.Size]/F"        );
-	root->Branch("PhoInfo.R9"         , &R9[0]         , "PhoInfo.R9[PhoInfo.Size]/F"         );
-	root->Branch("PhoInfo.TrkPtSum"   , &TrkPtSum[0]   , "PhoInfo.TrkPtSum[PhoInfo.Size]/F"   );
-	root->Branch("PhoInfo.EcalRecHitEtSum", &EcalRecHitEtSum[0], "PhoInfo.EcalRecHitEtSum[PhoInfo.Size]/F");
-	root->Branch("PhoInfo.HcalTowerEtSum",  &HcalTowerEtSum[0], "PhoInfo.HcalTowerEtSum[PhoInfo.Size]/F");
-	root->Branch("PhoInfo.HoverE"     , &HoverE[0]     , "PhoInfo.HoverE[PhoInfo.Size]/F"     );
-	root->Branch("PhoInfo.SCE"        , &SCE[0]        , "PhoInfo.SCE[PhoInfo.Size]/F");
-	root->Branch("PhoInfo.SCEt"       , &SCEt[0]       , "PhoInfo.SCEt[PhoInfo.Size]/F");	
-	root->Branch("PhoInfo.SCEta"      , &SCEta[0]      , "PhoInfo.SCEta[PhoInfo.Size]/F");	
-	root->Branch("PhoInfo.SCPhi"      , &SCPhi[0]      , "PhoInfo.SCPhi[PhoInfo.Size]/F");	
-	root->Branch("PhoInfo.SCEtaWidth" , &SCEtaWidth[0] , "PhoInfo.SCEtaWidth[PhoInfo.Size]/F");	
-	root->Branch("PhoInfo.SCPhiWidth" , &SCPhiWidth[0] , "PhoInfo.SCPhiWidth[PhoInfo.Size]/F");	
-	root->Branch("PhoInfo.SCNCrystal",  &SCNCrystal[0] , "PhoInfo.SCNCrystal[PhoInfo.Size]/I");
-	root->Branch("PhoInfo.SigEta",      &SigEta[0]     , "PhoInfo.SigEta[PhoInfo.Size]/F");
-	root->Branch("PhoInfo.SigIEta",     &SigIEta[0]    , "PhoInfo.SigIEta[PhoInfo.Size]/F");
-        root->Branch("PhoInfo.GenPID",      &GenPID[0]     , "PhoInfo.GenPID[PhoInfo.Size]/I");
-	root->Branch("PhoInfo.GenGMomPID" , &GenGMomPID[0] , "PhoInfo.GenGMomPID[PhoInfo.Size]/I" );
-	root->Branch("PhoInfo.GenMomPID"  , &GenMomPID[0]  , "PhoInfo.GenMomPID[PhoInfo.Size]/I" );
-	root->Branch("PhoInfo.GenPt"   , &GenPt[0]   , "PhoInfo.GenPt[PhoInfo.Size]/F" );
-	root->Branch("PhoInfo.GenMomPt"   , &GenMomPt[0]   , "PhoInfo.GenMomPt[PhoInfo.Size]/F" );
+	root->Branch("PhoInfo.Index"	  , Index   	   , "PhoInfo.Index[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.Location"	  , Location       , "PhoInfo.Location[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.IsLoose"	  , IsLoose   	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.Trig"	  , Trig   	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.L1Pt"	  , L1Pt   	   , "PhoInfo.L1Pt[PhoInfo.Size]/F"	  );
+	root->Branch("PhoInfo.L3Pt"	  , L3Pt   	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
+	root->Branch("PhoInfo.E"          , E              , "PhoInfo.E[PhoInfo.Size]/F"          );
+	root->Branch("PhoInfo.Et"         , Et             , "PhoInfo.Et[PhoInfo.Size]/F"         );
+	root->Branch("PhoInfo.Pz"         , Pz             , "PhoInfo.Pz[PhoInfo.Size]/F"         );
+	root->Branch("PhoInfo.Eta"        , Eta            , "PhoInfo.Eta[PhoInfo.Size]/F"        );
+	root->Branch("PhoInfo.Phi"        , Phi            , "PhoInfo.Phi[PhoInfo.Size]/F"        );
+	root->Branch("PhoInfo.R9"         , R9             , "PhoInfo.R9[PhoInfo.Size]/F"         );
+	root->Branch("PhoInfo.TrkPtSum"   , TrkPtSum       , "PhoInfo.TrkPtSum[PhoInfo.Size]/F"   );
+	root->Branch("PhoInfo.EcalRecHitEtSum", EcalRecHitEtSum, "PhoInfo.EcalRecHitEtSum[PhoInfo.Size]/F");
+	root->Branch("PhoInfo.HcalTowerEtSum",  HcalTowerEtSum, "PhoInfo.HcalTowerEtSum[PhoInfo.Size]/F");
+	root->Branch("PhoInfo.HoverE"     , HoverE         , "PhoInfo.HoverE[PhoInfo.Size]/F"     );
+	root->Branch("PhoInfo.SCE"        , SCE            , "PhoInfo.SCE[PhoInfo.Size]/F"        );
+	root->Branch("PhoInfo.SCEt"       , SCEt           , "PhoInfo.SCEt[PhoInfo.Size]/F"       );	
+	root->Branch("PhoInfo.SCEta"      , SCEta          , "PhoInfo.SCEta[PhoInfo.Size]/F"      );	
+	root->Branch("PhoInfo.SCPhi"      , SCPhi          , "PhoInfo.SCPhi[PhoInfo.Size]/F"      );	
+	root->Branch("PhoInfo.SCEtaWidth" , SCEtaWidth     , "PhoInfo.SCEtaWidth[PhoInfo.Size]/F" );	
+	root->Branch("PhoInfo.SCPhiWidth" , SCPhiWidth     , "PhoInfo.SCPhiWidth[PhoInfo.Size]/F" );	
+	root->Branch("PhoInfo.SCNCrystal" , SCNCrystal     , "PhoInfo.SCNCrystal[PhoInfo.Size]/I" );
+	root->Branch("PhoInfo.SigEta"     , SigEta         , "PhoInfo.SigEta[PhoInfo.Size]/F"     );
+	root->Branch("PhoInfo.SigIEta"    , SigIEta        , "PhoInfo.SigIEta[PhoInfo.Size]/F"    );
+        root->Branch("PhoInfo.GenPID"     , GenPID         , "PhoInfo.GenPID[PhoInfo.Size]/I"     );
+	root->Branch("PhoInfo.GenGMomPID" , GenGMomPID     , "PhoInfo.GenGMomPID[PhoInfo.Size]/I" );
+	root->Branch("PhoInfo.GenMomPID"  , GenMomPID      , "PhoInfo.GenMomPID[PhoInfo.Size]/I"  );
+	root->Branch("PhoInfo.GenPt"      , GenPt          , "PhoInfo.GenPt[PhoInfo.Size]/F"      );
+	root->Branch("PhoInfo.GenMomPt"   , GenMomPt       , "PhoInfo.GenMomPt[PhoInfo.Size]/F"   );
 
   }
 };  // end of PhoInfoBranches
@@ -186,15 +242,15 @@ public:
   
   void Register(TTree *root) {
 	root->Branch("LepInfo.Size"	  , &Size	   , "LepInfo.Size/I"			  );
-	root->Branch("LepInfo.Index"	  , &Index[0]	   , "LepInfo.Index[LepInfo.Size]/I"	  );
-	root->Branch("LepInfo.LeptonType" , &LeptonType[0] , "LepInfo.LeptonType[LepInfo.Size]/I" );
-	root->Branch("LepInfo.Charge"	  , &Charge[0]     , "LepInfo.Charge[LepInfo.Size]/I"	  );
-	root->Branch("LepInfo.Pt"	  , &Pt[0]	   , "LepInfo.Pt[LepInfo.Size]/F"	  );
-	root->Branch("LepInfo.Eta"	  , &Eta[0]	   , "LepInfo.Eta[LepInfo.Size]/F"	  );
-	root->Branch("LepInfo.Phi"	  , &Phi[0]	   , "LepInfo.Phi[LepInfo.Size]/F"	  );
-	root->Branch("LepInfo.TrackIso"   , &TrackIso[0]   , "LepInfo.TrackIso[LepInfo.Size]/F"   );
-	root->Branch("LepInfo.EcalIso"    , &EcalIso[0]    , "LepInfo.EcalIso[LepInfo.Size]/F"    );   
-	root->Branch("LepInfo.HcalIso"    , &HcalIso[0]    , "LepInfo.HcalIso[LepInfo.Size]/F"    ); 
+	root->Branch("LepInfo.Index"	  , Index          , "LepInfo.Index[LepInfo.Size]/I"	  );
+	root->Branch("LepInfo.LeptonType" , LeptonType     , "LepInfo.LeptonType[LepInfo.Size]/I" );
+	root->Branch("LepInfo.Charge"	  , Charge         , "LepInfo.Charge[LepInfo.Size]/I"	  );
+	root->Branch("LepInfo.Pt"	  , Pt   	   , "LepInfo.Pt[LepInfo.Size]/F"	  );
+	root->Branch("LepInfo.Eta"	  , Eta  	   , "LepInfo.Eta[LepInfo.Size]/F"	  );
+	root->Branch("LepInfo.Phi"	  , Phi 	   , "LepInfo.Phi[LepInfo.Size]/F"	  );
+	root->Branch("LepInfo.TrackIso"   , TrackIso       , "LepInfo.TrackIso[LepInfo.Size]/F"   );
+	root->Branch("LepInfo.EcalIso"    , EcalIso        , "LepInfo.EcalIso[LepInfo.Size]/F"    );   
+	root->Branch("LepInfo.HcalIso"    , HcalIso        , "LepInfo.HcalIso[LepInfo.Size]/F"    ); 
   }  
 }; // end of LepInfoBranches
 
@@ -203,6 +259,7 @@ public:
 
 class GenInfoBranches {
 public:
+  float ptHat;
   int	Size; 
   int   PID[MAX_GENS];
   int   MPID[MAX_GENS];
@@ -218,6 +275,7 @@ public:
   //Candidate* CandRef[MAX_GENS]; // backward pointer to the PAT objects
   void Initialize(){
 
+    ptHat = dummy;
     Size = 0;
     for(int i=0; i < MAX_GENS; i++){
       
@@ -236,16 +294,17 @@ public:
   }
   
   void Register(TTree *root) {
+	root->Branch("GenInfo.ptHat"      , &ptHat         , "GenInfo.ptHat/F"     );
 	root->Branch("GenInfo.Size"	  , &Size	   , "GenInfo.Size/I"			  );
-	root->Branch("GenInfo.PID"	  , &PID[0]	   , "GenInfo.PID[GenInfo.Size]/I"	  );
-	root->Branch("GenInfo.MPID"	  , &MPID[0]	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
-	root->Branch("GenInfo.Mass"	  , &Mass[0]	   , "GenInfo.Mass[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Pt"	  , &Pt[0]	   , "GenInfo.Pt[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Eta"	  , &Eta[0]	   , "GenInfo.Eta[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Phi"	  , &Phi[0]	   , "GenInfo.Phi[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Trig"	  , &Trig[0]	   , "GenInfo.Trig[GenInfo.Size]/I"	  );
-	root->Branch("GenInfo.L1Pt"	  , &L1Pt[0]	   , "GenInfo.L1Pt[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.L3Pt"	  , &L3Pt[0]	   , "GenInfo.L3Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.PID"	  , PID 	   , "GenInfo.PID[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.MPID"	  , MPID	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.Mass"	  , Mass	   , "GenInfo.Mass[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Pt"	  , Pt  	   , "GenInfo.Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Eta"	  , Eta 	   , "GenInfo.Eta[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Phi"	  , Phi 	   , "GenInfo.Phi[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Trig"	  , Trig 	   , "GenInfo.Trig[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.L1Pt"	  , L1Pt	   , "GenInfo.L1Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.L3Pt"	  , L3Pt	   , "GenInfo.L3Pt[GenInfo.Size]/F"	  );
 
 
   }  

@@ -244,12 +244,12 @@ public:
   
   void Register(TTree *root) {
 	root->Branch("GenInfo.Size"	  , &Size	   , "GenInfo.Size/I"			  );
-	root->Branch("GenInfo.PID"	  , &PID[0]	   , "GenInfo.PID[GenInfo.Size]/I"	  );
-	root->Branch("GenInfo.MPID"	  , &MPID[0]	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
-	root->Branch("GenInfo.Mass"	  , &Mass[0]	   , "GenInfo.Mass[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Pt"	  , &Pt[0]	   , "GenInfo.Pt[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Eta"	  , &Eta[0]	   , "GenInfo.Eta[GenInfo.Size]/F"	  );
-	root->Branch("GenInfo.Phi"	  , &Phi[0]	   , "GenInfo.Phi[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.PID"	  , PID   	   , "GenInfo.PID[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.MPID"	  , MPID   	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.Mass"	  , Mass   	   , "GenInfo.Mass[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Pt"	  , Pt   	   , "GenInfo.Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Eta"	  , Eta   	   , "GenInfo.Eta[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.Phi"	  , Phi  	   , "GenInfo.Phi[GenInfo.Size]/F"	  );
   }  
 }; // end of GenInfoBranches
 
