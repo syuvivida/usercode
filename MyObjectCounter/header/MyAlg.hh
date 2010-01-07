@@ -8,6 +8,8 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
@@ -125,6 +127,7 @@ public:
 
   bool isMC(){return (!_isData);}
   bool isData(){return _isData;}
+  double ptHat(){return _ptHat;}
 
   // sort generator particles by Pt (with a PDG and pt > 2 GeV cut), 
   // then insert a pair of et value and const_iterator of GenParticles into a 
@@ -184,6 +187,11 @@ public:
   // get the presorted map of photons, electrons, muons, generator-level 
   // particles
 
+  std::vector<reco::GenParticleCollection::const_iterator>     getHardGenVec(){return _hardGenParticle;}
+  bool getMatchGen(reco::GenParticleCollection::const_iterator& tempIter,
+		   int pdgCode, int status, float px1, float py1, float pz1, 
+		   float vx1=-99999, float vy1=-99999, float vz1=-99999);
+
   partEtMap<reco::Photon>::Type      getPhoEtMap(){return _phoEtMap;}
   partEtMap<reco::GsfElectron>::Type getEleEtMap(){return _eleEtMap;}
   partEtMap<reco::GenParticle>::Type getGenEtMap(){return _genEtMap;}
@@ -198,12 +206,15 @@ private:
   edm::Handle<reco::PhotonCollection>          _phoHandle;
   edm::Handle<reco::GsfElectronCollection>     _eleHandle;
   edm::Handle<reco::GenParticleCollection>     _genHandle;
+  edm::Handle<HepMCProduct>                    _hepMCHandle;
+  edm::Handle<GenEventInfoProduct>             _genEventHandle;
   edm::Handle<l1extra::L1EmParticleCollection> _l1EmNonIsoHandle;
   edm::Handle<l1extra::L1EmParticleCollection> _l1EmIsoHandle;
   edm::Handle<trigger::TriggerEvent>           _trgEventHandle;
   edm::Handle<edm::TriggerResults>             _trgResultsHandle;
 
 
+  std::vector<reco::GenParticleCollection::const_iterator> _hardGenParticle;
   partEtMap<reco::Photon>::Type                   _phoEtMap;
   partEtMap<reco::GsfElectron>::Type              _eleEtMap;
   partEtMap<reco::GenParticle>::Type              _genEtMap;
@@ -224,6 +235,7 @@ private:
   int _event_trigger;
 
   bool _isData;
+  double _ptHat;
 
   // should dump HEPG information or not
   bool _dumpHEP;

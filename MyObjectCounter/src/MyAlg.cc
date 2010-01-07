@@ -3,7 +3,7 @@
 
 
 MyAlg::MyAlg( const edm::ParameterSet & iConfig )  :
-  _parameters( iConfig ), _event_trigger(0),_isData(true)
+  _parameters( iConfig ), _event_trigger(0),_isData(true),_ptHat(-999.)
 {
   _dumpHEP = iConfig.getUntrackedParameter<bool>("dumpHEP", false);
   _pdgCode = iConfig.getUntrackedParameter<int>("pdgCode",  22);
@@ -22,14 +22,16 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
   }
   
   if ( this != &original ) {
-    _parameters       = original._parameters;
     _phoHandle        = original._phoHandle;
     _eleHandle        = original._eleHandle;
     _genHandle        = original._genHandle;
+    _hepMCHandle      = original._hepMCHandle;
+    _genEventHandle   = original._genEventHandle;
     _l1EmNonIsoHandle = original._l1EmNonIsoHandle;
     _l1EmIsoHandle    = original._l1EmIsoHandle;
     _trgEventHandle   = original._trgEventHandle;
     _trgResultsHandle = original._trgResultsHandle;
+    _hardGenParticle  = original._hardGenParticle;
     _phoEtMap         = original._phoEtMap;
     _eleEtMap         = original._eleEtMap;
     _genEtMap         = original._genEtMap;
@@ -42,10 +44,13 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
     _patEleEtMap      = original._patEleEtMap;
     _patMuoEtMap      = original._patMuoEtMap;
 
+    _parameters       = original._parameters;
+    _event_trigger    = original._event_trigger;
+    _isData           = original._isData;
+    _ptHat            = original._ptHat;
     _dumpHEP          = original._dumpHEP;
     _pdgCode          = original._pdgCode;
-    _trigDeltaRMax        = original._trigDeltaRMax;
-    _event_trigger    = original._event_trigger;
+    _trigDeltaRMax    = original._trigDeltaRMax;
    
   }
    return *this;
@@ -66,7 +71,7 @@ void MyAlg::init(const edm::Event &event,
   _patPhoEtMap.clear();
   _patEleEtMap.clear();
   _patMuoEtMap.clear();
-
+  _hardGenParticle.clear();
   _isData = event.isRealData();
 
   getHandles(event, doPho, doEle, doHLT, doPAT);
@@ -96,6 +101,11 @@ void MyAlg::getHandles(const edm::Event  & event,
   }
 
   if(isMC()){
+    
+    event.getByLabel("generator",_hepMCHandle);
+    event.getByLabel("generator",_genEventHandle);
+    _ptHat = _genEventHandle->binningValues()[0];
+
     edm::InputTag genParticlesName = _parameters.getParameter<edm::InputTag>("genLabel");
     event.getByLabel(genParticlesName, _genHandle);
     sortGenParticles();
@@ -155,7 +165,7 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
   printf("GenIndex  ");
   printf("PDG  ");
   printf("Status ");
-  printf("Mother PID");
+  printf("Mother");
   printf("   ");
   printf("Mass ");
   printf("Energy ");
@@ -163,6 +173,9 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
   printf("Px ");
   printf("Py ");
   printf("Pz ");
+  printf("Vx ");
+  printf("Vy ");
+  printf("Vz ");
   printf("\n");
 
 
@@ -183,6 +196,9 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
     printf("%9.3f",it_gen->p4().x());
     printf("%9.3f",it_gen->p4().y());
     printf("%9.3f",it_gen->p4().z());
+    printf("%9.3f",it_gen->vx());
+    printf("%9.3f",it_gen->vy());
+    printf("%9.3f",it_gen->vz());
     printf("\n");
     genIndex ++;
   }
@@ -214,10 +230,12 @@ void MyAlg::turnOnHLTBit(std::string trgPath, int trgCode)
 
 void MyAlg::print()
 {
+  std::cout << "thisEvent_trigger = " << _event_trigger << std::endl;
+  std::cout << "isData = " << _isData << std::endl;
+  std::cout << "ptHat = " << _ptHat << std::endl;
   std::cout << "dumpHEP = " << _dumpHEP << std::endl;
   std::cout << "pdgCode = " << _pdgCode << std::endl;
   std::cout << "trigDeltaRMax = " << _trigDeltaRMax << std::endl;
-  std::cout << "thisEvent_trigger = " << _event_trigger << std::endl;
 }
 
 
@@ -227,10 +245,26 @@ void MyAlg::print()
 void MyAlg::sortGenParticles(){
 
   _genEtMap.clear();
+  _hardGenParticle.clear();
+  if(isData())return;
   if(!_genHandle.isValid())return;
+  int countIndex = -1;
   for (reco::GenParticleCollection::const_iterator it_gen = 
 	 _genHandle->begin(); it_gen!=_genHandle->end(); it_gen++){
+    countIndex ++;
     if(abs(it_gen->pdgId())!=_pdgCode || it_gen->status()!=1)continue;
+    int mPID = -1;
+    int mStatus = -1;
+    if(it_gen->mother())
+      { 
+	mPID    = it_gen->mother()->pdgId();
+	mStatus = it_gen->mother()->status();
+      }
+    if(countIndex < 50 && (mPID==-1 || 
+			   (abs(mPID)==_pdgCode && mStatus==3)))
+      _hardGenParticle.push_back(it_gen);
+    
+
     if(it_gen->pt() < 2.)continue;
     float et = it_gen->pt();
     _genEtMap.insert(std::pair<float,reco::GenParticleCollection::const_iterator>(et,it_gen));
@@ -239,4 +273,41 @@ void MyAlg::sortGenParticles(){
 }
 
 
+bool MyAlg::getMatchGen(reco::GenParticleCollection::const_iterator& tempIter,
+			int pdgCode, int status, 
+			float px1, float py1, float pz1, 
+			float vx1, float vy1, float vz1)
+{
+  if(isData())return false;
+  if(!_genHandle.isValid())return false;
+  int countIndex = -1;
+
+  bool findOne = false;
+  for (reco::GenParticleCollection::const_iterator it_gen = 
+	 _genHandle->begin(); it_gen!=_genHandle->end(); it_gen++){
+    countIndex ++;
+    if(abs(it_gen->pdgId())!= pdgCode || it_gen->status()!= status)continue;
+    
+    float dpx = fabs(px1 - it_gen->p4().x());
+    float dpy = fabs(py1 - it_gen->p4().y());
+    float dpz = fabs(pz1 - it_gen->p4().z());
+    float dvx = fabs(vx1 - it_gen->vx());
+    float dvy = fabs(vy1 - it_gen->vy());
+    float dvz = fabs(vz1 - it_gen->vz());
+
+    
+    if(dpx < 0.001 && dpy < 0.001 && dpz < 0.001 && 
+       (vx1 < -9999 || vy1 < -9999 || vz1 < -9999 || 
+	(dvx < 0.001 && dvy < 0.001 && dvz < 0.001)))
+      {
+	tempIter = it_gen;
+	findOne = true;
+	break;
+      }
+
+  }
+
+  return findOne;
+
+}
 
