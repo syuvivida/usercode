@@ -217,6 +217,7 @@ public:
 class GenInfoBranches {
 public:
   int	Size; 
+  int   Index[MAX_GENS];
   int   PID[MAX_GENS];
   int   MPID[MAX_GENS];
   float Mass[MAX_GENS];
@@ -230,7 +231,7 @@ public:
 
     Size = 0;
     for(int i=0; i < MAX_GENS; i++){
-      
+      Index[i]=dummy;
       PID[i]  =dummy;
       MPID[i] =dummy;
       Mass[i] =dummy;
@@ -244,6 +245,7 @@ public:
   
   void Register(TTree *root) {
 	root->Branch("GenInfo.Size"	  , &Size	   , "GenInfo.Size/I"			  );
+	root->Branch("GenInfo.Index"	  , Index 	   , "GenInfo.Index[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.PID"	  , PID   	   , "GenInfo.PID[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.MPID"	  , MPID   	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.Mass"	  , Mass   	   , "GenInfo.Mass[GenInfo.Size]/F"	  );

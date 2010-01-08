@@ -22,6 +22,8 @@
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "DataFormats/PatCandidates/interface/Particle.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -204,6 +206,7 @@ public:
 
   edm::Handle<reco::GenParticleCollection> getGenHandle(){return _genHandle;}
   edm::Handle<edm::TriggerResults> getTrgResultsHandle(){return _trgResultsHandle;}
+  edm::Handle<reco::VertexCollection> getVtxHandle(){return _vertexHandle;}
 
 private: 
 
@@ -217,6 +220,7 @@ private:
   edm::Handle<l1extra::L1EmParticleCollection> _l1EmIsoHandle;
   edm::Handle<trigger::TriggerEvent>           _trgEventHandle;
   edm::Handle<edm::TriggerResults>             _trgResultsHandle;
+  edm::Handle<reco::VertexCollection>          _vertexHandle;
 
 
   std::vector<reco::GenParticleCollection::const_iterator> _hardGenParticle;

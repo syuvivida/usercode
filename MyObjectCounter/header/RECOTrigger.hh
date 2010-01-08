@@ -54,6 +54,7 @@ private:
   syu::EvtInfoBranches  EvtInfo;
   syu::PhoInfoBranches  PhoInfo;
   syu::GenInfoBranches  GenInfo;
+  syu::VtxInfoBranches  VtxInfo;
 
   partEtMap<reco::Photon>::Type  myPhoEtMap;
   partGenMap<reco::Photon>::Type myPhoGenMap;

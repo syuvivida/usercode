@@ -86,10 +86,12 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
 			       "after photon trigger cuts", nbin,xmin,xmax);
 
   root = new TTree("root","root");
-  EvtInfo.Register(root);  
+  EvtInfo.Register(root); 
+  VtxInfo.Register(root);
   PhoInfo.Register(root);
-  GenInfo.Register(root);
+  GenInfo.Register(root); 
   EvtInfo.Initialize();  
+  VtxInfo.Initialize();
   PhoInfo.Initialize();
   GenInfo.Initialize();
   std::cout << "Focusing on PDG code = " << _pdgCode << std::endl;
@@ -208,7 +210,39 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   EvtInfo.EvtNo  = iEvent.id().event();
   thisEvent_trigger = _alg.getThisEventTriggerBit();
   EvtInfo.HLT    = thisEvent_trigger;
- 
+
+  // fill vertex information
+  VtxInfo.Initialize(); 
+  edm::Handle<reco::VertexCollection> vertexHandle = _alg.getVtxHandle();
+  if(vertexHandle.isValid()){
+    for (reco::VertexCollection::const_iterator vit=vertexHandle->begin(); 
+	 vit!=vertexHandle->end(); vit++){
+      if(vit->isFake())continue;
+      if (VtxInfo.Size>= MAX_VTXS) {
+	fprintf(stderr,"ERROR: number of vertices exceeds the size of array.\n");
+	exit(1);
+      }            
+
+      VtxInfo.Index[VtxInfo.Size] = VtxInfo.Size;
+      VtxInfo.pos[VtxInfo.Size][0] = vit->position().X();
+      VtxInfo.pos[VtxInfo.Size][1] = vit->position().Y();
+      VtxInfo.pos[VtxInfo.Size][2] = vit->position().Z();
+      
+      VtxInfo.poserr[VtxInfo.Size][0] = vit->xError();
+      VtxInfo.poserr[VtxInfo.Size][1] = vit->yError();
+      VtxInfo.poserr[VtxInfo.Size][2] = vit->zError();
+      
+      VtxInfo.rho[VtxInfo.Size]   = vit->position().Rho();
+      VtxInfo.chi2[VtxInfo.Size]  = vit->chi2();
+      VtxInfo.ndof[VtxInfo.Size]  = vit->ndof();
+      VtxInfo.ntrks[VtxInfo.Size] = vit->tracksSize();
+
+      VtxInfo.Size ++ ;
+    
+    } // end of loop over vertices
+
+  } // if vertexHandle is valid
+
   // initialize the variables of ntuples
 
   // first fill generator information, not associated with reconstructed 
@@ -229,13 +263,14 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       float genpt   = it_gen->pt();
       int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
       if(it_gen->pdgId()!=_pdgCode || it_gen->pt() < 2.)continue;
-    
-      GenInfo.PID[GenInfo.Size]  = it_gen->pdgId();
-      GenInfo.MPID[GenInfo.Size] = genMomPID;
-      GenInfo.Mass[GenInfo.Size] = it_gen->mass();
-      GenInfo.Pt[GenInfo.Size]   = genpt;
-      GenInfo.Eta[GenInfo.Size]  = it_gen->eta();
-      GenInfo.Phi[GenInfo.Size]  = it_gen->phi();
+   
+      GenInfo.Index[GenInfo.Size] = GenInfo.Size;
+      GenInfo.PID[GenInfo.Size]   = it_gen->pdgId();
+      GenInfo.MPID[GenInfo.Size]  = genMomPID;
+      GenInfo.Mass[GenInfo.Size]  = it_gen->mass();
+      GenInfo.Pt[GenInfo.Size]    = genpt;
+      GenInfo.Eta[GenInfo.Size]   = it_gen->eta();
+      GenInfo.Phi[GenInfo.Size]   = it_gen->phi();
       GenInfo.Size ++;
 
     } // end of filling generator-level information    

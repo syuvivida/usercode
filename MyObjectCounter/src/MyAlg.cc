@@ -31,6 +31,7 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
     _l1EmIsoHandle    = original._l1EmIsoHandle;
     _trgEventHandle   = original._trgEventHandle;
     _trgResultsHandle = original._trgResultsHandle;
+    _vertexHandle     = original._vertexHandle;
     _hardGenParticle  = original._hardGenParticle;
     _phoEtMap         = original._phoEtMap;
     _eleEtMap         = original._eleEtMap;
@@ -124,6 +125,9 @@ void MyAlg::getHandles(const edm::Event  & event,
   event.getByLabel(l1EmNonIsoTag, _l1EmNonIsoHandle);
   event.getByLabel(l1EmIsoTag, _l1EmIsoHandle);
   event.getByLabel(hltsummaryTag, _trgEventHandle);
+
+  const edm::InputTag vtxCollTag = edm::InputTag("offlinePrimaryVertices");
+  event.getByLabel(vtxCollTag, _vertexHandle);
 
   if(doPAT)
     {

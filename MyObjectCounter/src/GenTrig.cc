@@ -210,9 +210,9 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   // initialize the variables of ntuples
   GenInfo.Initialize();
+  GenInfo.ptHat  = _alg.ptHat();  
   bool _isFilled = false;
   bool _isFilled_Mu = false;
-  
 
   for(partEtMap<reco::GenParticle>::Type::iterator 
 	i=myPhoEtMap.begin(); 
@@ -230,7 +230,7 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       float genpt   = it_gen->pt();
       int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
 	
-    
+      GenInfo.Index[GenInfo.Size] = GenInfo.Size;
       GenInfo.PID[GenInfo.Size] = it_gen->pdgId();
       GenInfo.MPID[GenInfo.Size] = genMomPID;
       GenInfo.Mass[GenInfo.Size] = it_gen->mass();

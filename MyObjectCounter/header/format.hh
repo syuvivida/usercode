@@ -13,7 +13,7 @@
 #include <TH2.h>
 #include <TLorentzVector.h>
 
-#define MAX_VTX         20
+#define MAX_VTXS        20
 #define MAX_LEPTONS 	64
 #define MAX_PHOTONS     64
 #define MAX_TRIGGER    120
@@ -50,19 +50,19 @@ class VtxInfoBranches {
 
 public:
   int Size;
-  int Index[MAX_VTX];
-  float pos[MAX_VTX][3];
-  float poserr[MAX_VTX][3];
-  float rho[MAX_VTX];
-  float chi2[MAX_VTX];
-  int   ndof[MAX_VTX];
-  int   ntrks[MAX_VTX];
+  int Index[MAX_VTXS];
+  float pos[MAX_VTXS][3];
+  float poserr[MAX_VTXS][3];
+  float rho[MAX_VTXS];
+  float chi2[MAX_VTXS];
+  int   ndof[MAX_VTXS];
+  int   ntrks[MAX_VTXS];
 
 
   void Initialize(){
 
     Size = 0;
-    for(int i=0; i < MAX_VTX; i++){
+    for(int i=0; i < MAX_VTXS; i++){
       
       Index[i] = dummy;
 
@@ -261,6 +261,7 @@ class GenInfoBranches {
 public:
   float ptHat;
   int	Size; 
+  int   Index[MAX_GENS];
   int   GenIndex[MAX_GENS];
   int   PID[MAX_GENS];
   int   MPID[MAX_GENS];
@@ -280,6 +281,7 @@ public:
     Size = 0;
     for(int i=0; i < MAX_GENS; i++){
       
+      Index[i]     = dummy;
       GenIndex[i]  = dummy;
       PID[i]       = dummy;
       MPID[i]      = dummy;
@@ -298,6 +300,7 @@ public:
   void Register(TTree *root) {
 	root->Branch("GenInfo.ptHat"      , &ptHat         , "GenInfo.ptHat/F"     );
 	root->Branch("GenInfo.Size"	  , &Size	   , "GenInfo.Size/I"			  );
+	root->Branch("GenInfo.Index"	  , Index 	   , "GenInfo.Index[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.GenIndex"	  , GenIndex 	   , "GenInfo.GenIndex[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.PID"	  , PID 	   , "GenInfo.PID[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.MPID"	  , MPID	   , "GenInfo.MPID[GenInfo.Size]/I"	  );

@@ -175,6 +175,7 @@ void Zee::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 it_gen != GenHandle->end() && GenInfo.Size < MAX_GENS; it_gen++ ) {
    
       if(it_gen->pdgId()==23 && GenInfo.Size < 10)EvtInfo.GenZMass = it_gen->mass();
+      GenInfo.Index[GenInfo.Size] = GenInfo.Size;
       GenInfo.PID[GenInfo.Size] = it_gen->pdgId();
       GenInfo.MPID[GenInfo.Size] = it_gen->mother()?
 	it_gen->mother()->pdgId():0;

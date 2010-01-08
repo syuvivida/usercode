@@ -23,12 +23,12 @@ void Conv::beginJob(const edm::EventSetup&)
   TFileDirectory results = TFileDirectory( fs->mkdir("Conv") );
 
   heta_all  = fs->make<TH1F>("heta_all","#eta of all photons",
-			     160,-4.0,4.0);
+			     80,-4.0,4.0);
   heta_original = fs->make<TH1F>("heta_original","#eta of all photons from hard scattering",
-			     160,-4.0,4.0);
+			     80,-4.0,4.0);
   heta_counte  = fs->make<TProfile>("heta_counte","Conversion rate (count electrons)",
-				   160,-4.0,4.0);
-  heta_conv = fs->make<TProfile>("heta_conv","Conversion rate (use PhotonMCTruth)", 160,-4.0,4.0);
+				   80,-4.0,4.0);
+  heta_conv = fs->make<TProfile>("heta_conv","Conversion rate (use PhotonMCTruth)", 80,-4.0,4.0);
 
 
   he_original = fs->make<TH1F>("he_original","E of all photons from hard scattering", 100, 0, 500);
@@ -105,6 +105,7 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
       if(it_gen->pdgId()!=_pdgCode || it_gen->pt() < 2.)continue;
     
+      GenInfo.Index[GenInfo.Size]    = GenInfo.Size;
       GenInfo.GenIndex[GenInfo.Size] = countIndex;
       GenInfo.PID[GenInfo.Size]  = it_gen->pdgId();
       GenInfo.MPID[GenInfo.Size] = genMomPID;
