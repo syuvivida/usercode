@@ -83,6 +83,9 @@ private:
   TProfile*        hpt_counte;
   TProfile*        hpt_conv;
 
+  TH1F*            he_original;
+  TProfile*        he_counte;
+  TProfile*        he_conv;
 
 
 };

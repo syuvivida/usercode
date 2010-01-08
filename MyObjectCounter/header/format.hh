@@ -261,6 +261,7 @@ class GenInfoBranches {
 public:
   float ptHat;
   int	Size; 
+  int   GenIndex[MAX_GENS];
   int   PID[MAX_GENS];
   int   MPID[MAX_GENS];
   float Mass[MAX_GENS];
@@ -279,15 +280,16 @@ public:
     Size = 0;
     for(int i=0; i < MAX_GENS; i++){
       
-      PID[i] = dummy;
-      MPID[i] = dummy;
-      Mass[i] = dummy;
-      Pt[i]   = dummy;
-      Eta[i]  = dummy;
-      Phi[i]  = dummy;
-      Trig[i]      =0;
-      L1Pt[i]      =dummy;
-      L3Pt[i]      =dummy;
+      GenIndex[i]  = dummy;
+      PID[i]       = dummy;
+      MPID[i]      = dummy;
+      Mass[i]      = dummy;
+      Pt[i]        = dummy;
+      Eta[i]       = dummy;
+      Phi[i]       = dummy;
+      Trig[i]      = 0;
+      L1Pt[i]      = dummy;
+      L3Pt[i]      = dummy;
     
   
     }
@@ -296,6 +298,7 @@ public:
   void Register(TTree *root) {
 	root->Branch("GenInfo.ptHat"      , &ptHat         , "GenInfo.ptHat/F"     );
 	root->Branch("GenInfo.Size"	  , &Size	   , "GenInfo.Size/I"			  );
+	root->Branch("GenInfo.GenIndex"	  , GenIndex 	   , "GenInfo.GenIndex[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.PID"	  , PID 	   , "GenInfo.PID[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.MPID"	  , MPID	   , "GenInfo.MPID[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.Mass"	  , Mass	   , "GenInfo.Mass[GenInfo.Size]/F"	  );
