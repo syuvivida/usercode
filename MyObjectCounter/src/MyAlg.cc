@@ -104,7 +104,8 @@ void MyAlg::getHandles(const edm::Event  & event,
     
     event.getByLabel("generator",_hepMCHandle);
     event.getByLabel("generator",_genEventHandle);
-    _ptHat = _genEventHandle->binningValues()[0];
+    _ptHat = _genEventHandle.isValid() && _genEventHandle->hasBinningValues() ? 
+      _genEventHandle->binningValues()[0]: -999.;
 
     edm::InputTag genParticlesName = _parameters.getParameter<edm::InputTag>("genLabel");
     event.getByLabel(genParticlesName, _genHandle);

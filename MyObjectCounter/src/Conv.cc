@@ -23,25 +23,27 @@ void Conv::beginJob(const edm::EventSetup&)
   TFileDirectory results = TFileDirectory( fs->mkdir("Conv") );
 
   heta_all  = fs->make<TH1F>("heta_all","#eta of all photons",
-			     200,-4.0,4.0);
+			     160,-4.0,4.0);
   heta_original = fs->make<TH1F>("heta_original","#eta of all photons from hard scattering",
-			     200,-4.0,4.0);
+			     160,-4.0,4.0);
   heta_counte  = fs->make<TProfile>("heta_counte","Conversion rate (count electrons)",
-				   200,-4.0,4.0);
-  heta_conv = fs->make<TProfile>("heta_conv","Conversion rate (use PhotonMCTruth)", 200,-4.0,4.0);
+				   160,-4.0,4.0);
+  heta_conv = fs->make<TProfile>("heta_conv","Conversion rate (use PhotonMCTruth)", 160,-4.0,4.0);
 
 
-  hpt_all  = fs->make<TH1F>("hpt_all","p_{T} of all photons", 50,0,200);
-  hpt_original = fs->make<TH1F>("hpt_original","p_{T} of all photons from hard scattering", 50, 0, 200);
-  hpt_counte  = fs->make<TProfile>("hpt_counte","Conversion rate (count electrons)", 50, 0, 200);
-  hpt_conv = fs->make<TProfile>("hpt_conv","Conversion rate (use PhotonMCTruth)", 50, 0, 200);
+  he_original = fs->make<TH1F>("he_original","E of all photons from hard scattering", 100, 0, 500);
+  he_counte  = fs->make<TProfile>("he_counte","Conversion rate (count electrons)", 100, 0, 500);
+  he_conv = fs->make<TProfile>("he_conv","Conversion rate (use PhotonMCTruth)", 100, 0, 500);
+
+  hpt_all  = fs->make<TH1F>("hpt_all","p_{T} of all photons", 50,0,250);
+  hpt_original = fs->make<TH1F>("hpt_original","p_{T} of all photons from hard scattering", 50, 0, 250);
+  hpt_counte  = fs->make<TProfile>("hpt_counte","Conversion rate (count electrons)", 50, 0, 250);
+  hpt_conv = fs->make<TProfile>("hpt_conv","Conversion rate (use PhotonMCTruth)", 50, 0, 250);
 
   root = new TTree("root","root");
   EvtInfo.Register(root);  
-  PhoInfo.Register(root);
   GenInfo.Register(root);
   EvtInfo.Initialize();  
-  PhoInfo.Initialize();
   GenInfo.Initialize();
 
   thePhotonMCTruthFinder_ = new PhotonMCTruthFinder();
@@ -62,7 +64,6 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   _nIn++;
   _alg.init(iEvent, true, true, false); 
-  
   myPhoEtMap.clear();
   myPhoGenMap.clear();
   myEleEtMap.clear();
@@ -82,12 +83,13 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   EvtInfo.EvtNo  = iEvent.id().event();
   EvtInfo.HLT    = myEleEtMap.size();
 
- 
   // initialize the variables of ntuples
 
   // first fill generator information, not associated with reconstructed 
   // particle 
   GenInfo.Initialize();
+  GenInfo.ptHat  = _alg.ptHat();
+  int countIndex=0;
   edm::Handle<reco::GenParticleCollection> GenHandle = _alg.getGenHandle();  
   if(GenHandle.isValid()){
     for( GenParticleCollection::const_iterator it_gen = 
@@ -98,11 +100,12 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	fprintf(stderr,"ERROR: number of generator photons exceeds the size of array.\n");
 	exit(1);
       }            
-
+      countIndex++;
       float genpt   = it_gen->pt();
       int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
       if(it_gen->pdgId()!=_pdgCode || it_gen->pt() < 2.)continue;
     
+      GenInfo.GenIndex[GenInfo.Size] = countIndex;
       GenInfo.PID[GenInfo.Size]  = it_gen->pdgId();
       GenInfo.MPID[GenInfo.Size] = genMomPID;
       GenInfo.Mass[GenInfo.Size] = it_gen->mass();
@@ -114,7 +117,7 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     } // end of filling generator-level information    
   } // if have generator-level information
 
-  PhoInfo.Initialize();
+
 
 //   std::cout  << " MCPhotonAnalyzer Looking for MC truth " << "\n";
  
@@ -129,7 +132,9 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
  
   theSimTracks.insert(theSimTracks.end(),SimTk->begin(),SimTk->end());
   theSimVertices.insert(theSimVertices.end(),SimVtx->begin(),SimVtx->end());
+
   /*
+  if(myHardGen.size()>1.0){
   for(int i=0; i< myHardGen.size(); i++){
 
     reco::GenParticleCollection::const_iterator thisGen = myHardGen[i];
@@ -138,6 +143,9 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       thisGen->p4().y() << ", " << 
       thisGen->p4().z() << endl;
  
+  }
+  
+  _alg.dumpGenInfo(iEvent);
   }
   */
  
@@ -165,6 +173,8 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     float et = iPho->fourMomentum().et();
     hpt_all->Fill(et);
 
+    float energy = iPho->fourMomentum().e();
+
     reco::GenParticleCollection::const_iterator matchedPart;
     bool findOne = 
       _alg.getMatchGen( matchedPart, 22, 1, 
@@ -185,14 +195,17 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     heta_original->Fill(eta);
     hpt_original->Fill(et);
+    he_original->Fill(energy);
 
     float rate = iPho->isAConversion()? 1:0;
     heta_conv->Fill(eta,rate);
     hpt_conv->Fill(et,rate);
+    he_conv->Fill(energy,rate);
     
     float rate_e = hasElectron? 1:0;
     heta_counte->Fill(eta,rate_e);
     hpt_counte->Fill(et,rate_e);
+    he_counte->Fill(energy,rate_e);
     
   } // end of loop over MC truth
 
