@@ -12,6 +12,7 @@ MyAlg::MyAlg( const edm::ParameterSet & iConfig )  :
 
 //_____________________________________________________________________________
 MyAlg::~MyAlg() {
+  delete _thePhotonMCTruthFinder;
 }
 
 MyAlg& MyAlg::operator=( const MyAlg& original)
@@ -33,6 +34,9 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
     _trgResultsHandle = original._trgResultsHandle;
     _vertexHandle     = original._vertexHandle;
     _hardGenParticle  = original._hardGenParticle;
+    _myConvPhotons    = original._myConvPhotons;
+    _myPhotonMCTruth  = original._myPhotonMCTruth;
+
     _phoEtMap         = original._phoEtMap;
     _eleEtMap         = original._eleEtMap;
     _genEtMap         = original._genEtMap;
@@ -73,8 +77,10 @@ void MyAlg::init(const edm::Event &event,
   _patEleEtMap.clear();
   _patMuoEtMap.clear();
   _hardGenParticle.clear();
+  _myConvPhotons.clear();
+  _myPhotonMCTruth.clear();
   _isData = event.isRealData();
-
+  _thePhotonMCTruthFinder = new PhotonMCTruthFinder();
   getHandles(event, doPho, doEle, doHLT, doPAT);
   if(_dumpHEP)dumpGenInfo(event);
 
@@ -104,13 +110,49 @@ void MyAlg::getHandles(const edm::Event  & event,
   if(isMC()){
     
     event.getByLabel("generator",_hepMCHandle);
+    // in order to get pthat
     event.getByLabel("generator",_genEventHandle);
     _ptHat = _genEventHandle.isValid() && _genEventHandle->hasBinningValues() ? 
       _genEventHandle->binningValues()[0]: -999.;
 
+     // generator-level particle information
     edm::InputTag genParticlesName = _parameters.getParameter<edm::InputTag>("genLabel");
     event.getByLabel(genParticlesName, _genHandle);
     sortGenParticles();
+
+    // in order to get photon conversion information
+    std::vector<SimTrack> theSimTracks;
+    std::vector<SimVertex> theSimVertices;
+ 
+    edm::Handle<SimTrackContainer> SimTk;
+    edm::Handle<SimVertexContainer> SimVtx;
+    event.getByLabel("g4SimHits",SimTk);
+    event.getByLabel("g4SimHits",SimVtx);
+    if(SimTk.isValid())
+      theSimTracks.insert(theSimTracks.end(),SimTk->begin(),SimTk->end());
+    if(SimVtx.isValid())
+      theSimVertices.insert(theSimVertices.end(),SimVtx->begin(),SimVtx->end());
+    _myPhotonMCTruth = 
+      _thePhotonMCTruthFinder->find (theSimTracks,  theSimVertices);
+     for ( std::vector<PhotonMCTruth>::const_iterator 
+	     iPho=_myPhotonMCTruth.begin(); iPho !=_myPhotonMCTruth.end(); 
+	   ++iPho ){
+       
+       if(!iPho->isAConversion())continue;
+       reco::GenParticleCollection::const_iterator matchedPart;
+       bool findOne = getMatchGen( matchedPart, 22, 1, 
+				   iPho->fourMomentum().x(),
+				   iPho->fourMomentum().y(),
+				   iPho->fourMomentum().z(),
+				   iPho->primaryVertex().x(),
+				   iPho->primaryVertex().y(),
+				   iPho->primaryVertex().z()
+				   );
+       if(!findOne)continue;
+       _myConvPhotons.push_back(matchedPart);
+     } // end of loop over PhotonMCTruth
+
+
   }
 
   if(doHLT){

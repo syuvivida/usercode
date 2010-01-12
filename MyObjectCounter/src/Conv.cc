@@ -5,6 +5,7 @@
 // Shin-Shan Yu
 
 #include "syu/MyObjectCounter/header/Conv.hh" 
+#include <algorithm>
 
 Conv::Conv(const edm::ParameterSet& iConfig):
   _nIn(0), _nOut(0), _alg(iConfig)
@@ -68,11 +69,14 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   myPhoGenMap.clear();
   myEleEtMap.clear();
   myHardGen.clear();
+  myConvPho.clear();
 
   // sort photon particle collection
   myPhoEtMap = _alg.getPhoEtMap();
   myEleEtMap = _alg.getEleEtMap();
   myHardGen  = _alg.getHardGenVec();
+  myConvPho  = _alg.getConvPhoton();
+
 
   // Start to fill the main root branches
   // initialize the variables of ntuples
@@ -104,7 +108,14 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       float genpt   = it_gen->pt();
       int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
       if(it_gen->pdgId()!=_pdgCode || it_gen->pt() < 2.)continue;
-    
+      
+      float convRate = 0;
+      if(std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= myConvPho.end())
+	convRate = 1.0;
+      else convRate=0.0;
+      if(genMomPID==22 && it_gen->mother()->status()==3)
+	heta_counte->Fill(it_gen->eta(),convRate);
+
       GenInfo.Index[GenInfo.Size]    = GenInfo.Size;
       GenInfo.GenIndex[GenInfo.Size] = countIndex;
       GenInfo.PID[GenInfo.Size]  = it_gen->pdgId();
@@ -204,7 +215,7 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     he_conv->Fill(energy,rate);
     
     float rate_e = hasElectron? 1:0;
-    heta_counte->Fill(eta,rate_e);
+//     heta_counte->Fill(eta,rate_e);
     hpt_counte->Fill(et,rate_e);
     he_counte->Fill(energy,rate_e);
     

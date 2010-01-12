@@ -10,6 +10,14 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruth.h"
+#include "RecoEgamma/EgammaMCTools/interface/PhotonMCTruth.h"
+#include "RecoEgamma/EgammaMCTools/interface/PhotonMCTruthFinder.h"
+#include "SimDataFormats/Track/interface/SimTrack.h"
+#include "SimDataFormats/Track/interface/SimTrackContainer.h"
+#include "SimDataFormats/Vertex/interface/SimVertex.h"
+#include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
+
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
@@ -190,6 +198,9 @@ public:
   // particles
 
   std::vector<reco::GenParticleCollection::const_iterator>     getHardGenVec(){return _hardGenParticle;}
+  std::vector<reco::GenParticleCollection::const_iterator>     getConvPhoton(){return _myConvPhotons;}
+  std::vector<PhotonMCTruth>         getPhotonMCTruth(){return _myPhotonMCTruth;}
+
   bool getMatchGen(reco::GenParticleCollection::const_iterator& tempIter,
 		   int pdgCode, int status, float px1, float py1, float pz1, 
 		   float vx1=-99999, float vy1=-99999, float vz1=-99999);
@@ -224,6 +235,10 @@ private:
 
 
   std::vector<reco::GenParticleCollection::const_iterator> _hardGenParticle;
+  std::vector<reco::GenParticleCollection::const_iterator> _myConvPhotons;
+  std::vector<PhotonMCTruth>                      _myPhotonMCTruth;
+  PhotonMCTruthFinder*                            _thePhotonMCTruthFinder;
+
   partEtMap<reco::Photon>::Type                   _phoEtMap;
   partEtMap<reco::GsfElectron>::Type              _eleEtMap;
   partEtMap<reco::GenParticle>::Type              _genEtMap;

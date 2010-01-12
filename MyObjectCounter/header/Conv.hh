@@ -64,6 +64,7 @@ private:
   partGenMap<reco::Photon>::Type myPhoGenMap;
   partEtMap<reco::GsfElectron>::Type myEleEtMap;
   std::vector<reco::GenParticleCollection::const_iterator> myHardGen;
+  std::vector<reco::GenParticleCollection::const_iterator> myConvPho;
 
   PhotonMCTruthFinder*  thePhotonMCTruthFinder_;
 

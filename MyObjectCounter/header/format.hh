@@ -55,7 +55,7 @@ public:
   float poserr[MAX_VTXS][3];
   float rho[MAX_VTXS];
   float chi2[MAX_VTXS];
-  int   ndof[MAX_VTXS];
+  float ndof[MAX_VTXS];
   int   ntrks[MAX_VTXS];
 
 
@@ -87,7 +87,7 @@ public:
     root->Branch("VtxInfo.poserr"       , poserr         , "VtxInfo.poserr[VtxInfo.Size][3]/F"  );
     root->Branch("VtxInfo.rho"          , rho            , "VtxInfo.rho[VtxInfo.Size]/F"        );
     root->Branch("VtxInfo.chi2"         , chi2           , "VtxInfo.chi2[VtxInfo.Size]/F"       );
-    root->Branch("VtxInfo.ndof"         , ndof           , "VtxInfo.ndof[VtxInfo.Size]/I"       );
+    root->Branch("VtxInfo.ndof"         , ndof           , "VtxInfo.ndof[VtxInfo.Size]/F"       );
     root->Branch("VtxInfo.ntrks"        , ntrks          , "VtxInfo.ntrks[VtxInfo.Size]/I"      );
     
   }  
