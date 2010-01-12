@@ -5,6 +5,7 @@
 // Shin-Shan Yu
 
 #include "syu/MyObjectCounter/header/RECOTrigger.hh" 
+#include <algorithm>
 
 
 RECOTrigger::RECOTrigger(const edm::ParameterSet& iConfig):
@@ -23,6 +24,7 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("RECOTrigger") );
 
+  heta_conv = fs->make<TProfile>("heta_conv","Conversion rate (use PhotonMCTruth)", 80,-4.0,4.0);
 
   h_dRL15  = fs->make<TH1F>("h_dRL15","#Delta R between photons and"
 			    "trigger L1EG5", 100,0,10);
@@ -111,7 +113,12 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   _nIn++;
   int thisEvent_trigger = 0;
   _alg.init(iEvent, true, false, true); 
-  
+ 
+
+  std::vector<reco::GenParticleCollection::const_iterator> myConvPho;
+  myConvPho.clear();
+  myConvPho  = _alg.getConvPhoton();
+ 
   myPhoEtMap.clear();
   myPhoGenMap.clear();
   myPhoL1Map.clear();
@@ -345,6 +352,12 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       if(myPhoGenMap.find(it_ph)!=myPhoGenMap.end())
 	{
 	  GenParticleCollection::const_iterator it_gen = myPhoGenMap[it_ph];
+
+	  // check if it's a conversion using MC truth
+	  PhoInfo.IsConv[PhoInfo.Size] = 
+	    (std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= 
+	     myConvPho.end())? 1:0;
+
 	  PhoInfo.GenPID[PhoInfo.Size]       = _pdgCode;
 	  genpt = it_gen->pt();
 	  PhoInfo.GenPt[PhoInfo.Size]        = genpt;
@@ -353,6 +366,10 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	    genMomPID = it_gen->mother()->pdgId();
 	    PhoInfo.GenMomPID[PhoInfo.Size]  = genMomPID;
 	    PhoInfo.GenMomPt[PhoInfo.Size]   = it_gen->mother()->pt();
+	    
+	    if(genMomPID==22 && it_gen->mother()->status()==3)
+	      heta_conv->Fill(it_gen->eta(), PhoInfo.IsConv[PhoInfo.Size]);
+
 	    if(it_gen->mother()->mother())
 	      PhoInfo.GenGMomPID[PhoInfo.Size] = it_gen->mother()->mother()->pdgId();
 	  }

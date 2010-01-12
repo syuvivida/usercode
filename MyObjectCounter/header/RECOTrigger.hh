@@ -7,6 +7,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1.h>
+#include <TProfile.h>
 #include <TLorentzVector.h>
 
 
@@ -77,6 +78,8 @@ private:
 
 
   // histograms
+  TProfile*        heta_conv;
+
   TH1F* h_dRL15;
   TH1F* h_dRL18;
   TH1F* h_dRHLT15;

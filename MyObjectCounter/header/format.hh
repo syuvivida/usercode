@@ -103,6 +103,7 @@ public:
   int   Location[MAX_PHOTONS];
   int   IsLoose[MAX_PHOTONS];
   int   Trig[MAX_PHOTONS];
+  int   IsConv[MAX_PHOTONS];
   float L1Pt[MAX_PHOTONS];
   float L3Pt[MAX_PHOTONS];
   float E[MAX_PHOTONS];
@@ -140,6 +141,7 @@ public:
       Location[i]  =dummy;
       IsLoose[i]   =dummy;
       Trig[i]      =0;
+      IsConv[i]    =dummy;
       L1Pt[i]      =dummy;
       L3Pt[i]      =dummy;
       E[i]    	   =dummy;
@@ -178,6 +180,7 @@ public:
 	root->Branch("PhoInfo.Location"	  , Location       , "PhoInfo.Location[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.IsLoose"	  , IsLoose   	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.Trig"	  , Trig   	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
+	root->Branch("PhoInfo.IsConv"	  , IsConv   	   , "PhoInfo.IsConv[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.L1Pt"	  , L1Pt   	   , "PhoInfo.L1Pt[PhoInfo.Size]/F"	  );
 	root->Branch("PhoInfo.L3Pt"	  , L3Pt   	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
 	root->Branch("PhoInfo.E"          , E              , "PhoInfo.E[PhoInfo.Size]/F"          );
