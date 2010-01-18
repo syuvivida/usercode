@@ -103,9 +103,9 @@ public:
   int   Location[MAX_PHOTONS];
   int   IsLoose[MAX_PHOTONS];
   int   Trig[MAX_PHOTONS];
-  int   IsConv[MAX_PHOTONS];
   float L1Pt[MAX_PHOTONS];
   float L3Pt[MAX_PHOTONS];
+  int   IsConv[MAX_PHOTONS];
   float E[MAX_PHOTONS];
   float Et[MAX_PHOTONS];
   float Pz[MAX_PHOTONS];
@@ -141,9 +141,9 @@ public:
       Location[i]  =dummy;
       IsLoose[i]   =dummy;
       Trig[i]      =0;
-      IsConv[i]    =dummy;
       L1Pt[i]      =dummy;
       L3Pt[i]      =dummy;
+      IsConv[i]    =dummy;
       E[i]    	   =dummy;
       Et[i]   	   =dummy;
       Pz[i]   	   =dummy;
@@ -180,9 +180,9 @@ public:
 	root->Branch("PhoInfo.Location"	  , Location       , "PhoInfo.Location[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.IsLoose"	  , IsLoose   	   , "PhoInfo.IsLoose[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.Trig"	  , Trig   	   , "PhoInfo.Trig[PhoInfo.Size]/I"	  );
-	root->Branch("PhoInfo.IsConv"	  , IsConv   	   , "PhoInfo.IsConv[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.L1Pt"	  , L1Pt   	   , "PhoInfo.L1Pt[PhoInfo.Size]/F"	  );
 	root->Branch("PhoInfo.L3Pt"	  , L3Pt   	   , "PhoInfo.L3Pt[PhoInfo.Size]/F"	  );
+	root->Branch("PhoInfo.IsConv"	  , IsConv   	   , "PhoInfo.IsConv[PhoInfo.Size]/I"	  );
 	root->Branch("PhoInfo.E"          , E              , "PhoInfo.E[PhoInfo.Size]/F"          );
 	root->Branch("PhoInfo.Et"         , Et             , "PhoInfo.Et[PhoInfo.Size]/F"         );
 	root->Branch("PhoInfo.Pz"         , Pz             , "PhoInfo.Pz[PhoInfo.Size]/F"         );
@@ -275,7 +275,9 @@ public:
   int   Trig[MAX_GENS];
   float L1Pt[MAX_GENS];
   float L3Pt[MAX_GENS];
-
+  int   IsConv[MAX_GENS];
+  float CalIso[MAX_GENS];
+  float TrkIso[MAX_GENS];
   
   //Candidate* CandRef[MAX_GENS]; // backward pointer to the PAT objects
   void Initialize(){
@@ -294,8 +296,10 @@ public:
       Phi[i]       = dummy;
       Trig[i]      = 0;
       L1Pt[i]      = dummy;
-      L3Pt[i]      = dummy;
-    
+      L3Pt[i]      = dummy;     
+      IsConv[i]    = dummy;
+      CalIso[i]    = dummy;
+      TrkIso[i]    = dummy;
   
     }
   }
@@ -314,6 +318,9 @@ public:
 	root->Branch("GenInfo.Trig"	  , Trig 	   , "GenInfo.Trig[GenInfo.Size]/I"	  );
 	root->Branch("GenInfo.L1Pt"	  , L1Pt	   , "GenInfo.L1Pt[GenInfo.Size]/F"	  );
 	root->Branch("GenInfo.L3Pt"	  , L3Pt	   , "GenInfo.L3Pt[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.IsConv"	  , IsConv 	   , "GenInfo.IsConv[GenInfo.Size]/I"	  );
+	root->Branch("GenInfo.CalIso"	  , CalIso	   , "GenInfo.CalIso[GenInfo.Size]/F"	  );
+	root->Branch("GenInfo.TrkIso"	  , TrkIso	   , "GenInfo.TrkIso[GenInfo.Size]/F"	  );
 
 
   }  

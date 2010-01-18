@@ -87,6 +87,24 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
   h_mugetnumr = fs->make<TH1F>("h_mugetnumr","Reconstructed photon Et "
 			       "after photon trigger cuts", nbin,xmin,xmax);
 
+  // isolation histograms
+
+  fIsoPt00 = fs->make<TH1F>("fIsoPt00", "Photon pt before isolation cuts", 100, 0,200);  
+  fIsoPt01 = fs->make<TH1F>("fIsoPt01", "Photon pt after isolation Et < 2 GeV cuts", 100, 0,200);
+  fEffIso  = fs->make<TH1F>("fEffIso", "Photon isolation efficiency", 100, 0,200);
+  fIsoPt00->Sumw2();
+  fIsoPt01->Sumw2();
+  fEffIso->Sumw2();
+
+  // isolation Et < 2 GeV vs eta
+  fIsoEta00 = fs->make<TH1F>("fIsoEta00", "Photon Eta before isolation cuts", 40, -4.,4.);
+  fIsoEta01 = fs->make<TH1F>("fIsoEta01", "Photon Eta after isolation Et < 2 GeV cuts", 40, -4., 4.);
+  fEffIsoEta = fs->make<TH1F>("fEffIsoEta", "Photon isolation efficiency", 40, -4.,4.);
+  fIsoEta00->Sumw2();
+  fIsoEta01->Sumw2();
+  fEffIsoEta->Sumw2();
+
+
   root = new TTree("root","root");
   EvtInfo.Register(root); 
   VtxInfo.Register(root);
@@ -101,6 +119,12 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
 
 void RECOTrigger::endJob() 
 {
+//   fEffIso->BayesDivide(fIsoPt01,fIsoPt00, "w");
+//   fEffIsoEta->BayesDivide(fIsoEta01,fIsoEta00, "w");
+  fEffIso->Divide(fIsoPt01,fIsoPt00,1.0,1.0,"B");
+  fEffIsoEta->Divide(fIsoEta01, fIsoEta00,1.0,1.0,"B");
+
+
   std::cout << "RECOTrigger has " << _nIn << " input events and " << _nOut  << " output events" << endl;
 }
 
@@ -278,6 +302,26 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       GenInfo.Pt[GenInfo.Size]    = genpt;
       GenInfo.Eta[GenInfo.Size]   = it_gen->eta();
       GenInfo.Phi[GenInfo.Size]   = it_gen->phi();
+      GenInfo.CalIso[GenInfo.Size] = _alg.getGenCalIso(it_gen);
+      GenInfo.TrkIso[GenInfo.Size] = _alg.getGenTrkIso(it_gen);
+      GenInfo.IsConv[GenInfo.Size] = 
+	(std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= 
+	 myConvPho.end())? 1:0;
+
+
+      if(genMomPID ==22 && it_gen->pdgId() == 22 && 
+	 it_gen->mother()->status() == 3)
+	{
+	  fIsoPt00 ->Fill(genpt);
+	  fIsoEta00->Fill(it_gen->eta());
+
+	  if(GenInfo.CalIso[GenInfo.Size]  < 2.0)
+	    {
+	      fIsoPt01->Fill(genpt);
+	      fIsoEta01->Fill(it_gen->eta());
+	    }
+	} // if it's a hard scattering photon
+
       GenInfo.Size ++;
 
     } // end of filling generator-level information    

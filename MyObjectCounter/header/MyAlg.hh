@@ -9,6 +9,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "SimDataFormats/CrossingFrame/interface/CrossingFrame.h"
+
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruth.h"
 #include "RecoEgamma/EgammaMCTools/interface/PhotonMCTruth.h"
@@ -127,6 +129,8 @@ public:
 		  bool doPAT=false);
 
   void dumpGenInfo(const edm::Event&); 
+  void dumpHepMCProduct(const edm::Event&);
+  void dumpMixHepMCProduct(const edm::Event&);
 
   // turn on HLT bit information
   void turnOnHLTBit(std::string trgPath, int trgCode);
@@ -205,6 +209,11 @@ public:
 		   int pdgCode, int status, float px1, float py1, float pz1, 
 		   float vx1=-99999, float vy1=-99999, float vz1=-99999);
 
+  float getGenCalIso(reco::GenParticleCollection::const_iterator, 
+		     const float etMin = 0., const float dRMax = 0.4);
+  float getGenTrkIso(reco::GenParticleCollection::const_iterator, 
+		     const float ptMin = 0., const float dRMax = 0.4);
+
   partEtMap<reco::Photon>::Type      getPhoEtMap(){return _phoEtMap;}
   partEtMap<reco::GsfElectron>::Type getEleEtMap(){return _eleEtMap;}
   partEtMap<reco::GenParticle>::Type getGenEtMap(){return _genEtMap;}
@@ -226,6 +235,7 @@ private:
   edm::Handle<reco::GsfElectronCollection>     _eleHandle;
   edm::Handle<reco::GenParticleCollection>     _genHandle;
   edm::Handle<HepMCProduct>                    _hepMCHandle;
+  edm::Handle<CrossingFrame<edm::HepMCProduct> > _mixHepMCHandle;
   edm::Handle<GenEventInfoProduct>             _genEventHandle;
   edm::Handle<l1extra::L1EmParticleCollection> _l1EmNonIsoHandle;
   edm::Handle<l1extra::L1EmParticleCollection> _l1EmIsoHandle;

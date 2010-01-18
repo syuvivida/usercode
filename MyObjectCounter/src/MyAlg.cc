@@ -1,5 +1,6 @@
 
 #include "syu/MyObjectCounter/header/MyAlg.hh" 
+#include "SimDataFormats/CrossingFrame/interface/MixCollection.h"
 
 
 MyAlg::MyAlg( const edm::ParameterSet & iConfig )  :
@@ -27,6 +28,7 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
     _eleHandle        = original._eleHandle;
     _genHandle        = original._genHandle;
     _hepMCHandle      = original._hepMCHandle;
+    _mixHepMCHandle   = original._mixHepMCHandle;
     _genEventHandle   = original._genEventHandle;
     _l1EmNonIsoHandle = original._l1EmNonIsoHandle;
     _l1EmIsoHandle    = original._l1EmIsoHandle;
@@ -83,6 +85,8 @@ void MyAlg::init(const edm::Event &event,
   _thePhotonMCTruthFinder = new PhotonMCTruthFinder();
   getHandles(event, doPho, doEle, doHLT, doPAT);
   if(_dumpHEP)dumpGenInfo(event);
+  //  if(_dumpHEP)dumpHepMCProduct(event);
+  // if(_dumpHEP)dumpMixHepMCProduct(event);
 
 }
 
@@ -109,7 +113,11 @@ void MyAlg::getHandles(const edm::Event  & event,
 
   if(isMC()){
     
+    // HepMCProduct
     event.getByLabel("generator",_hepMCHandle);
+    //    event.getByLabel("mix","source", _mixHepMCHandle);
+    event.getByLabel("mix","generator", _mixHepMCHandle);
+
     // in order to get pthat
     event.getByLabel("generator",_genEventHandle);
     _ptHat = _genEventHandle.isValid() && _genEventHandle->hasBinningValues() ? 
@@ -196,6 +204,56 @@ void MyAlg::getHandles(const edm::Event  & event,
 //_____________________________________________________________________________
 // dump generator-level information
 //_____________________________________________________________________________
+void MyAlg::dumpHepMCProduct(const edm::Event& iEvent)
+{
+  if(!_hepMCHandle.isValid())return;
+  std::cout << "============================ " << 
+    "MyAlg::dumpHepMCProduct Run " <<  iEvent.id().run() << " Evt " <<  iEvent.id().event() <<
+    " ============================= " << std::endl << std::endl;
+  const HepMC::GenEvent* evt = _hepMCHandle->GetEvent();
+
+   
+  HepMC::GenEvent::particle_const_iterator begin = evt->particles_begin();
+  HepMC::GenEvent::particle_const_iterator end = evt->particles_end();
+  for(HepMC::GenEvent::particle_const_iterator it = begin; it != end; ++it){
+    
+    (*it)->print();
+
+  } // end of loop over HepMC Product
+
+  
+
+}
+
+void MyAlg::dumpMixHepMCProduct(const edm::Event& iEvent)
+{
+  if(!_mixHepMCHandle.isValid()){
+    std::cout << "I can't find the mixHepMCProduct" << std::endl; return;
+  }
+  std::cout << "============================ " << 
+    "MyAlg::dumpMixHepMCProduct Run " <<  iEvent.id().run() << " Evt " <<  iEvent.id().event() <<
+    " ============================= " << std::endl << std::endl;
+  
+  std::auto_ptr<MixCollection<edm::HepMCProduct> > 
+    colhepmc(new MixCollection<edm::HepMCProduct>(_mixHepMCHandle.product()));
+  MixCollection<edm::HepMCProduct>::iterator cfihepmc;
+  int counthepmc=0;
+  std::cout <<" \nWe got "<<colhepmc->sizeSignal()<<" signal hepmc products and "<<colhepmc->sizePileup()<<" pileup hepmcs, total: "<<colhepmc->size()<<std::endl;
+  for (cfihepmc=colhepmc->begin(); cfihepmc!=colhepmc->end();cfihepmc++) {
+      std::cout<<" edm::HepMCProduct "<<counthepmc<<" has event number "<<cfihepmc->GetEvent()->event_number()<<", "<< cfihepmc->GetEvent()->particles_size()<<" particles and "<<cfihepmc->GetEvent()->vertices_size()<<" vertices,  bunchcr= "<<cfihepmc.bunch()<<" trigger= "<<cfihepmc.getTrigger() <<" sourcetype= "<<cfihepmc.getSourceType()<<std::endl;
+      HepMCProduct myprod=colhepmc->getObject(counthepmc);
+      std::cout<<"same with getObject:hepmc product   "<<counthepmc<<" has event number "<<myprod.GetEvent()->event_number()<<", "<<myprod.GetEvent()->particles_size()<<" particles and "<<myprod.GetEvent()->vertices_size()<<" vertices"<<std::endl;
+
+      HepMC::GenEvent::particle_const_iterator begin = myprod.GetEvent()->particles_begin();
+      HepMC::GenEvent::particle_const_iterator end = myprod.GetEvent()->particles_end();
+      for(HepMC::GenEvent::particle_const_iterator it = begin; it != end; ++it)
+	(*it)->print();
+      counthepmc++;
+
+  } // end of loop over different HepMCProducts
+
+
+}
 
 
 void MyAlg::dumpGenInfo(const edm::Event& iEvent)
@@ -319,6 +377,8 @@ void MyAlg::sortGenParticles(){
   return;
 }
 
+//_____________________________________________________________________________
+
 
 bool MyAlg::getMatchGen(reco::GenParticleCollection::const_iterator& tempIter,
 			int pdgCode, int status, 
@@ -358,3 +418,58 @@ bool MyAlg::getMatchGen(reco::GenParticleCollection::const_iterator& tempIter,
 
 }
 
+//_____________________________________________________________________________
+
+float MyAlg::getGenCalIso(reco::GenParticleCollection::const_iterator thisIter, 
+			  const float etMin, const float dRMax)
+{
+
+  if(isData())return 9999.;
+  if(!_genHandle.isValid())return 9999.;
+
+  float etSum = 0;
+  int countIndex=-1;
+  // cout << "etSum = " << etSum << endl;
+  for (reco::GenParticleCollection::const_iterator it_gen = 
+	 _genHandle->begin(); it_gen!=_genHandle->end(); it_gen++){
+    countIndex++;
+    if(it_gen == thisIter) continue;
+    if(it_gen->status()!=1)continue;
+    int pdgCode = abs(it_gen->pdgId());
+    // we should not count neutrinos
+    if(pdgCode==12 || pdgCode==14 || pdgCode==16)continue; 
+    float dR = reco::deltaR(thisIter->momentum(), 
+			    it_gen->momentum());
+    float et = it_gen->et();
+    if(et > etMin && dR < dRMax){etSum += et;
+      //   cout << countIndex << " etSum = " << etSum << " dR = " << dR << endl;
+    }
+  }
+  return etSum;
+
+}
+
+//_____________________________________________________________________________
+
+
+float MyAlg::getGenTrkIso(reco::GenParticleCollection::const_iterator thisIter, 
+			  const float ptMin, const float dRMax)
+{
+
+  if(isData())return 9999.;
+  if(!_genHandle.isValid())return 9999.;
+
+  float ptSum = 0;
+  for (reco::GenParticleCollection::const_iterator it_gen = 
+	 _genHandle->begin(); it_gen!=_genHandle->end(); it_gen++){
+    if(it_gen == thisIter) continue;
+    if(it_gen->status()!=1)continue;
+    if(it_gen->charge()==0)continue;
+    float dR = reco::deltaR(thisIter->momentum(), 
+			    it_gen->momentum());
+    float pt = it_gen->pt();
+    if(pt > ptMin && dR < dRMax)ptSum += pt;
+  }
+  return ptSum;
+
+}

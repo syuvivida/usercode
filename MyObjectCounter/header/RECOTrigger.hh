@@ -105,6 +105,15 @@ private:
   TH1F* h_mugetdeno;
   TH1F* h_mugetnumr;
 
+  // for isolation
+  TH1F* fIsoPt00;
+  TH1F* fIsoPt01;
+  TH1F* fEffIso;
+
+  TH1F* fIsoEta00;
+  TH1F* fIsoEta01;
+  TH1F* fEffIsoEta;
+
 
 };
 

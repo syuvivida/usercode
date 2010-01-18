@@ -112,7 +112,10 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   int thisEvent_trigger = 0;
   _alg.init(iEvent, false, false, true); 
   
-
+  std::vector<reco::GenParticleCollection::const_iterator> myConvPho;
+  myConvPho.clear();
+  myConvPho  = _alg.getConvPhoton();
+ 
   myPhoEtMap.clear();
   myPhoL1Map.clear();
   myPhoL3Map_HLTL1EG5.clear();
@@ -236,8 +239,13 @@ void GenTrig::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       GenInfo.Mass[GenInfo.Size] = it_gen->mass();
       GenInfo.Pt[GenInfo.Size] = genpt;
       GenInfo.Eta[GenInfo.Size] = it_gen->eta();
-      GenInfo.Phi[GenInfo.Size] = it_gen->phi();
-    
+      GenInfo.Phi[GenInfo.Size] = it_gen->phi();      
+      GenInfo.CalIso[GenInfo.Size] = _alg.getGenCalIso(it_gen);
+      GenInfo.TrkIso[GenInfo.Size] = _alg.getGenTrkIso(it_gen);
+      GenInfo.IsConv[GenInfo.Size] = 
+	(std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= 
+	 myConvPho.end())? 1:0;
+  
       bool isFromHardScattering = (abs(genMomPID) ==_pdgCode);
 	
       bool isFromJet   = (abs(genMomPID)> 50);
