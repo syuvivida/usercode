@@ -110,6 +110,10 @@ private:
   TH1F* fIsoPt01;
   TH1F* fEffIso;
 
+  TH1F* fTrkIsoPt00;
+  TH1F* fTrkIsoPt01;
+  TH1F* fEffTrkIso;
+
   TH1F* fIsoEta00;
   TH1F* fIsoEta01;
   TH1F* fEffIsoEta;
