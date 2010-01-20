@@ -438,6 +438,7 @@ float MyAlg::getGenCalIso(reco::GenParticleCollection::const_iterator thisIter,
     int pdgCode = abs(it_gen->pdgId());
     // we should not count neutrinos
     if(pdgCode==12 || pdgCode==14 || pdgCode==16)continue; 
+    if(pdgCode==13)continue;
     float dR = reco::deltaR(thisIter->momentum(), 
 			    it_gen->momentum());
     float et = it_gen->et();
