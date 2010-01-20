@@ -105,10 +105,8 @@ void GenIso::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if(genMomPID ==22 && it_gen->pdgId() == 22 && 
 	 it_gen->mother()->status() == 3)
 	{
-	  const float etamax = _etaMax;
-	  const float ptmin  = _ptMin;
 
-	  if(fabs(geneta)< etamax)
+	  if(fabs(geneta)< _etaMax)
 	    {
 	      fIsoPt00 ->Fill(genpt);
 	      if(gen_caliso < 2.0)
@@ -120,7 +118,7 @@ void GenIso::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    }
 
 
-	  if(genpt>ptmin)
+	  if(genpt>_ptMin)
 	    {
 	      fIsoEta00->Fill(geneta);
 	      if(gen_caliso < 2.0)
