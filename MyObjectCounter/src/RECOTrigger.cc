@@ -89,9 +89,21 @@ void RECOTrigger::beginJob(const edm::EventSetup&)
 
   // isolation histograms
 
-  fIsoPt00 = fs->make<TH1F>("fIsoPt00", "Photon pt before isolation cuts", 100, 0,200);  
-  fIsoPt01 = fs->make<TH1F>("fIsoPt01", "Photon pt after isolation Et < 2 GeV cuts", 100, 0,200);
-  fEffIso  = fs->make<TH1F>("fEffIso", "Photon isolation efficiency", 100, 0,200);
+  fTrkIsoPt00 = fs->make<TH1F>("fTrkIsoPt00", "Photon pt before track"
+			       " isolation cuts", 50, 0,200);
+  fTrkIsoPt01 = fs->make<TH1F>("fTrkIsoPt01", "Photon pt after track isolation"
+			       " pt < 2 GeV/c cuts", 50, 0,200);
+  fEffTrkIso  = fs->make<TH1F>("fEffTrkIso", "Photon track isolation "
+			       "efficiency", 50, 0,200);
+  fTrkIsoPt00->Sumw2();
+  fTrkIsoPt01->Sumw2();
+  fEffTrkIso->Sumw2();
+
+
+
+  fIsoPt00 = fs->make<TH1F>("fIsoPt00", "Photon pt before isolation cuts", 50, 0,200);  
+  fIsoPt01 = fs->make<TH1F>("fIsoPt01", "Photon pt after isolation Et < 2 GeV cuts", 50, 0,200);
+  fEffIso  = fs->make<TH1F>("fEffIso", "Photon isolation efficiency", 50, 0,200);
   fIsoPt00->Sumw2();
   fIsoPt01->Sumw2();
   fEffIso->Sumw2();
@@ -122,6 +134,7 @@ void RECOTrigger::endJob()
 //   fEffIso->BayesDivide(fIsoPt01,fIsoPt00, "w");
 //   fEffIsoEta->BayesDivide(fIsoEta01,fIsoEta00, "w");
   fEffIso->Divide(fIsoPt01,fIsoPt00,1.0,1.0,"B");
+  fEffTrkIso->Divide(fTrkIsoPt01,fTrkIsoPt00,1.0,1.0,"B");
   fEffIsoEta->Divide(fIsoEta01, fIsoEta00,1.0,1.0,"B");
 
 
@@ -292,6 +305,7 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       }            
 
       float genpt   = it_gen->pt();
+      float geneta  = it_gen->eta();
       int genMomPID = it_gen->mother()? it_gen->mother()->pdgId():_pdgCode;
       if(it_gen->pdgId()!=_pdgCode || it_gen->pt() < 2.)continue;
    
@@ -300,26 +314,42 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       GenInfo.MPID[GenInfo.Size]  = genMomPID;
       GenInfo.Mass[GenInfo.Size]  = it_gen->mass();
       GenInfo.Pt[GenInfo.Size]    = genpt;
-      GenInfo.Eta[GenInfo.Size]   = it_gen->eta();
+      GenInfo.Eta[GenInfo.Size]   = geneta;
       GenInfo.Phi[GenInfo.Size]   = it_gen->phi();
-      GenInfo.CalIso[GenInfo.Size] = _alg.getGenCalIso(it_gen);
-      GenInfo.TrkIso[GenInfo.Size] = _alg.getGenTrkIso(it_gen);
+      
+      float gen_caliso = _alg.getGenCalIso(it_gen);
+      GenInfo.CalIso[GenInfo.Size] = gen_caliso;
+      float gen_trkiso = _alg.getGenTrkIso(it_gen);
+      GenInfo.TrkIso[GenInfo.Size] = gen_trkiso;
       GenInfo.IsConv[GenInfo.Size] = 
 	(std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= 
 	 myConvPho.end())? 1:0;
 
-
       if(genMomPID ==22 && it_gen->pdgId() == 22 && 
 	 it_gen->mother()->status() == 3)
 	{
-	  fIsoPt00 ->Fill(genpt);
-	  fIsoEta00->Fill(it_gen->eta());
+	  const float etamax = 2.5;
+	  const float ptmin  = 0.0;
 
-	  if(GenInfo.CalIso[GenInfo.Size]  < 2.0)
+	  if(fabs(geneta)< etamax)
 	    {
-	      fIsoPt01->Fill(genpt);
-	      fIsoEta01->Fill(it_gen->eta());
+	      fIsoPt00 ->Fill(genpt);
+	      if(gen_caliso < 2.0)
+		fIsoPt01 ->Fill(genpt);
+	      
+	      fTrkIsoPt00 ->Fill(genpt);
+	      if(gen_trkiso < 2.0)
+		fTrkIsoPt01 ->Fill(genpt);
 	    }
+
+
+	  if(genpt>ptmin)
+	    {
+	      fIsoEta00->Fill(geneta);
+	      if(gen_caliso < 2.0)
+		fIsoEta01->Fill(geneta);
+	    }
+	
 	} // if it's a hard scattering photon
 
       GenInfo.Size ++;
