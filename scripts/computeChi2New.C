@@ -13,16 +13,15 @@
 #include <TPaveStats.h>
 #include <TPad.h>
 
-void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, int decCode, bool logy=true)
+void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, int decCode, bool logy)
 {
   // scale the area of the cloned histogram to 1
   char name[100];
-//   float fmc = 1/(float)hmc->Integral();
-//   float fdata = 1/(float)hdata->Integral();
-  float fmc = (float)hdata->Integral()/(float)hmc->Integral();
+  float fmc = (float)hdata->GetEntries()/(float)hmc->GetEntries();
   float fdata = 1.0;
 
-  cout << "Data total integral = " << hdata->Integral() << endl;
+  cout << "Data total entries = " << hdata->GetEntries() << endl;
+  cout << "MC total entries = " << hmc->GetEntries() << endl;
 
   hmc->Sumw2();
   hdata->Sumw2();
@@ -53,24 +52,32 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
     double nmcerr=hmcc->GetBinError(i);
     double ndataerr=hdatac->GetBinError(i); 
     
-    if(nmc<=0 || ndata<=0)
-      continue;
+    if(nmc<0 || ndata<0)continue;    
     
-    hscale->SetBinContent(i,ndata/nmc);
-    double err = 
-	(ndata/nmc)*sqrt(pow(nmcerr/nmc,2)+pow(ndataerr/ndata,2));
-    hscale->SetBinError(i,err);
-
-    cout << "dump " << ndata << "\t" << nmc << "\t" << ndataerr << "\t" << 
-      nmcerr << endl;
+    if(nmcerr==0 && ndataerr==0)continue;
 
     double chi2ndef = (nmc-ndata)*(nmc-ndata)/
       ( nmcerr*nmcerr+ ndataerr*ndataerr);
     chi2 += chi2ndef;
-
-    cout << hmcc->GetBinCenter(i) << " : " << ndata << " : " << nmc;
-    cout << " " << chi2ndef << endl;
     realbin++;
+
+//     cout << "dump " << ndata << "\t" << nmc << "\t" << ndataerr << "\t" << 
+//       nmcerr << endl;
+    cout << "Bin " << i << " : " << ndata << ", " << nmc;
+    cout << " " << chi2ndef << endl;
+
+
+    // now calculate the ratio
+    if(nmc==0 || nmcerr==0)continue;
+    hscale->SetBinContent(i,ndata/nmc);
+    double err = 0;
+    if(ndata==0)
+      err = (ndata/nmc)*nmc/nmcerr;
+    else
+      err=
+	(ndata/nmc)*sqrt(pow(nmcerr/nmc,2)+pow(ndataerr/ndata,2));
+    hscale->SetBinError(i,err);
+
 
  }
 
@@ -124,15 +131,27 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 //   hdatac->SetLabelSize( 0.055,"Y");
 //   hscale->SetLabelSize( 0.055,"Y");
 
-  if(hmcc->GetMaximum()+hmcc->GetBinError(hmcc->GetMaximumBin()) > 
-     hdatac->GetMaximum()+hdatac->GetBinError(hdatac->GetMaximumBin()))
+  float datamaxi = hdatac->GetMaximum()+hdatac->GetBinError(hdatac->GetMaximumBin());
+  float mcmaxi   = hmcc->GetMaximum()+hmcc->GetBinError(hmcc->GetMaximumBin());
+
+  if(mcmaxi > datamaxi)
     {
+//       if(!logy)hmcc->SetMaximum(mcmaxi*1.5);
+//       else hmcc->SetMaximum(mcmaxi*5);
+//       if(!logy)hdatac->SetMaximum(mcmaxi*1.5);
+//       else hdatac->SetMaximum(mcmaxi*5);
+
       hmcc->Draw("he");
       hdatac->Draw("e,same");
     }
   else{
-    hdatac->Draw("e");
-    hmcc->Draw("he,same");
+
+//     if(!logy)hmcc->SetMaximum(datamaxi*1.5);
+//     else hmcc->SetMaximum(datamaxi*5);
+//     if(!logy)hdatac->SetMaximum(datamaxi*1.5);
+//     else hdatac->SetMaximum(datamaxi*5);
+      hdatac->Draw("e");
+      hmcc->Draw("he,same");
   }
 
   hdatac->Draw("e,same");
@@ -175,7 +194,10 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   hscale->GetYaxis()->SetDecimals();
   hscale->SetMinimum(-0.5);
   float maximum = hscale->GetMaximum()+2.0;
-  hscale->SetMaximum(3.8);
+  const float MAX=3.8;
+  const float MAX_MAX=50.0;
+  if(maximum<MAX)hscale->SetMaximum(MAX);
+//   else if(maximum>MAX_MAX)hscale->SetMaximum(MAX_MAX);
   hscale->Draw("e1");
   TF1* fline = new TF1("fline","pol1");
   fline->SetLineWidth(3);
@@ -183,8 +205,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   fline->SetNpx(2500);
   hscale->Fit("fline","","");
   std::string dirname = logy ? 
-    "/home/syu/figure/900GeVdata/logy": 
-    "/home/syu/figure/900GeVdata/";
+    "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/logy":
+    "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/";
 
   if(decCode==1) psname += "_barrel";
   else if(decCode==2) psname += "_endcap";
@@ -193,8 +215,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   c1->Print(filename.data());
   filename = dirname + psname + ".gif";  
   c1->Print(filename.data());
-  filename = dirname + psname + ".C";  
-  c1->Print(filename.data());
+//   filename = dirname + psname + ".C";  
+//   c1->Print(filename.data());
 
 }
 

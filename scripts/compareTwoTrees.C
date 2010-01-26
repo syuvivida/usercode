@@ -1,23 +1,33 @@
-void compareTwoTrees(std::string file1, std::string file2, 
-		     std::string tree1, std::string var1,
+#include <TCut.h>
+
+void compareTwoTrees(TChain* t1, TChain* t2, 
+		     std::string var1,
 		     int decCode, 
 		     std::string psname,
 		     int nbin, float xmin, float xmax, 
 		     std::string xtitle="", std::string ytitle="",
-		     std::string cut1="",
-		     std::string tree2="", std::string var2="",
-		     std::string cut2="")
+		     TCut cut1="")
 {
-  if(tree2 == ""  )tree2=tree1;
-  if(var2 ==  "" )var2=var1;
-  if(cut2 == "")cut2=cut1;
+  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/selection.h");
+
+  // for cuts the same for barrel and endcap
+  TCut allCut = cut1 + myCut;
+
+//   // only for data
+  if(psname.find("2360") != std::string::npos)
+    allCut += Cut_2360GeV;
+  else
+    allCut += Cut_900GeV;
+
+  if(decCode==1)
+    allCut += barrelCut;
+  else if(decCode==2)
+    allCut += endcapCut;
+
+  cout << "The cuts are " << allCut << endl;
   
   gStyle->SetOptStat(0);
-  TChain* t1 = new TChain(tree1.data());
-  t1->Add(file1.data());
 
-  TChain* t2 = new TChain(tree2.data());
-  t2->Add(file2.data());
 
   float binwidth = (xmax-xmin)/(float)nbin;
 
@@ -40,21 +50,21 @@ void compareTwoTrees(std::string file1, std::string file2,
 
   std::string temp = var1 + ">>h1";
 
-  t1->Draw(temp.data(), cut1.data());
+  t1->Draw(temp.data(), allCut);
   h1->SetLineColor(4);
   h1->Draw();
   cout << "h1 mean = " << h1->GetMean() << " and width = " << h1->GetRMS() << 
     " and entries = " << h1->GetEntries() << endl;
 
-  temp = var2 + ">>h2";
-  t2->Draw(temp.data(), cut2.data());
+  temp = var1 + ">>h2";
+  t2->Draw(temp.data(), allCut);
   h2->SetLineColor(2);
   h2->Draw();
   cout << "h2 mean = " << h2->GetMean() << " and width = " << h2->GetRMS() << 
     " and entries = " << h2->GetEntries() << endl;
 
   
-  gROOT->ProcessLine(".L computeChi2New.C");
+  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/computeChi2New.C");
   computeChi2New(h1,h2,hscale,psname,decCode,false);
   computeChi2New(h1,h2,hscale,psname,decCode,true);
 
