@@ -44,7 +44,8 @@ void callCompare_endcap()
   compareTwoTrees(dataF,mcF,"PHOLEAD_phi",decCode,"phi_900GeV",60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"#phi(#gamma) ","");
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta_900GeV",40,-3.,5.,"SC #eta","");
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta_900GeV",55,-3.,8.,"SC #eta","");
+
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scphi_900GeV",60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","");
 
