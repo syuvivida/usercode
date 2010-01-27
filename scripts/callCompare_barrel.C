@@ -34,13 +34,15 @@ void callCompare_barrel(std::string dataName, std::string mcName)
   int decCode = 1;
 
   decCode = 0;
+
+  compareTwoTrees(dataF,mcF,"corSumEt",decCode,"corSumEt"+tempName,50,0.,10.,"corSumEt [GeV]","");
+
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta"+tempName,55,-3.,8.,"SC #eta","");
 
 
   decCode = 1;
-
 
   compareTwoTrees(dataF,mcF,"vtxX",decCode,"vx"+tempName,50,-0.1,1.5,"Highest #Sigma p_{T} vertex x position [cm]","");
 
@@ -164,7 +166,6 @@ void callCompare_barrel(std::string dataName, std::string mcName)
   noZCut = "PHOLEAD_hcalTowerSumEtConeDR04 > 0";
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04No0"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","",noZCut);
-
 
 
 

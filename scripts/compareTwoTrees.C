@@ -25,8 +25,6 @@ void compareTwoTrees(TChain* t1, TChain* t2,
     dataCut= Cut_900GeV;
 
   
-  gStyle->SetOptStat(0);
-
 
   float binwidth = (xmax-xmin)/(float)nbin;
 
@@ -38,6 +36,28 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   sprintf(tempName, "Candidates per %1.5lf", binwidth);
   if(ytitle == "")ytitle = tempName;
 
+
+  std::string temp_variable = var1 + ": run >>hf1";
+  t1->Draw(temp_variable.data(), allCut && dataCut,"prof");
+  temp_variable = var1 + ": run >>hf2";
+
+  TCanvas* c2 = new TCanvas("c2");
+  hf1->SetTitle("");
+  hf1->SetXTitle("Run");
+  hf1->SetMarkerColor(2);
+  hf1->SetMarkerSize(1);
+  hf1->SetYTitle(xtitle.data());
+  hf1->Draw("");
+
+  std::string decName;
+  if(decCode==0)decName = "_all";
+  else if(decCode==1)decName = "_barrel";
+  else if(decCode==2)decName = "_endcap";
+  
+  std::string runName = "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/runDep_" + psname + decName + ".eps";
+  c2->Print(runName.data());
+  runName = "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/runDep_" + psname + decName + ".gif";
+  c2->Print(runName.data());
   
   TH1F* h1 = new TH1F("h1","",nbin,xmin,xmax);
   h1->SetXTitle(xtitle.data());  
@@ -70,6 +90,8 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/computeChi2New.C");
   computeChi2New(h1,h2,hscale,psname,decCode,false);
   computeChi2New(h1,h2,hscale,psname,decCode,true);
+
+
 
   delete h1;
   delete h2;
