@@ -49,6 +49,12 @@ void callCompare_endcap()
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scphi_900GeV",60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","");
 
+  TCut etaCut = "PHOLEAD_scEta > 0";
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scpphi_900GeV",60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi (#eta >0)","",etaCut);
+
+  etaCut = "PHOLEAD_scEta < 0";
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scnphi_900GeV",60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi (#eta <0)","",etaCut);
+
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy",decCode,"rawenergy_900GeV",100,0.,100.,"SC raw energy [GeV]","");
 
