@@ -56,13 +56,13 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
     
     if(nmcerr==0 && ndataerr==0)continue;
 
+    if(nmc==0 && ndata==0)continue;
+
     double chi2ndef = (nmc-ndata)*(nmc-ndata)/
       ( nmcerr*nmcerr+ ndataerr*ndataerr);
     chi2 += chi2ndef;
     realbin++;
 
-//     cout << "dump " << ndata << "\t" << nmc << "\t" << ndataerr << "\t" << 
-//       nmcerr << endl;
     cout << "Bin " << i << " : " << ndata << ", " << nmc;
     cout << " " << chi2ndef << endl;
 
@@ -72,7 +72,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
     hscale->SetBinContent(i,ndata/nmc);
     double err = 0;
     if(ndata==0)
-      err = (ndata/nmc)*nmc/nmcerr;
+      err = 0.;
     else
       err=
 	(ndata/nmc)*sqrt(pow(nmcerr/nmc,2)+pow(ndataerr/ndata,2));
@@ -127,29 +127,16 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
       hmcc->SetMinimum(mini);
       hdatac->SetMinimum(mini);
     }
-//   hmcc->SetLabelSize( 0.055,"Y");
-//   hdatac->SetLabelSize( 0.055,"Y");
-//   hscale->SetLabelSize( 0.055,"Y");
 
   float datamaxi = hdatac->GetMaximum()+hdatac->GetBinError(hdatac->GetMaximumBin());
   float mcmaxi   = hmcc->GetMaximum()+hmcc->GetBinError(hmcc->GetMaximumBin());
 
   if(mcmaxi > datamaxi)
     {
-//       if(!logy)hmcc->SetMaximum(mcmaxi*1.5);
-//       else hmcc->SetMaximum(mcmaxi*5);
-//       if(!logy)hdatac->SetMaximum(mcmaxi*1.5);
-//       else hdatac->SetMaximum(mcmaxi*5);
-
       hmcc->Draw("he");
       hdatac->Draw("e,same");
     }
   else{
-
-//     if(!logy)hmcc->SetMaximum(datamaxi*1.5);
-//     else hmcc->SetMaximum(datamaxi*5);
-//     if(!logy)hdatac->SetMaximum(datamaxi*1.5);
-//     else hdatac->SetMaximum(datamaxi*5);
       hdatac->Draw("e");
       hmcc->Draw("he,same");
   }
@@ -210,14 +197,17 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
   if(decCode==1) psname += "_barrel";
   else if(decCode==2) psname += "_endcap";
+  else if(decCode==0) psname += "_all";
 
   std::string filename = dirname + psname + ".eps";
   c1->Print(filename.data());
   filename = dirname + psname + ".gif";  
   c1->Print(filename.data());
-//   filename = dirname + psname + ".C";  
-//   c1->Print(filename.data());
 
+  delete c1;
+  delete l1;
+  delete leg4;
+  delete fline;
 }
 
 

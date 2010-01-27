@@ -1,4 +1,5 @@
 #include <TCut.h>
+#include "selection.h"
 
 void compareTwoTrees(TChain* t1, TChain* t2, 
 		     std::string var1,
@@ -8,23 +9,21 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 		     std::string xtitle="", std::string ytitle="",
 		     TCut cut1="")
 {
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/selection.h");
-
   // for cuts the same for barrel and endcap
   TCut allCut = cut1 + myCut;
-
-//   // only for data
-  if(psname.find("2360") != std::string::npos)
-    allCut += Cut_2360GeV;
-  else
-    allCut += Cut_900GeV;
 
   if(decCode==1)
     allCut += barrelCut;
   else if(decCode==2)
     allCut += endcapCut;
 
-  cout << "The cuts are " << allCut << endl;
+//   // only for data
+  TCut dataCut;
+  if(psname.find("2360") != std::string::npos)
+    dataCut= Cut_2360GeV;
+  else
+    dataCut= Cut_900GeV;
+
   
   gStyle->SetOptStat(0);
 
@@ -33,6 +32,10 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 
   char tempName[300];
   sprintf(tempName, "Candidates per %1.3lf", binwidth);
+  if(binwidth < 0.001)
+  sprintf(tempName, "Candidates per %1.4lf", binwidth);
+  if(binwidth < 0.0001)
+  sprintf(tempName, "Candidates per %1.5lf", binwidth);
   if(ytitle == "")ytitle = tempName;
 
   
@@ -50,7 +53,7 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 
   std::string temp = var1 + ">>h1";
 
-  t1->Draw(temp.data(), allCut);
+  t1->Draw(temp.data(), allCut && dataCut);
   h1->SetLineColor(4);
   h1->Draw();
   cout << "h1 mean = " << h1->GetMean() << " and width = " << h1->GetRMS() << 
@@ -67,6 +70,10 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/computeChi2New.C");
   computeChi2New(h1,h2,hscale,psname,decCode,false);
   computeChi2New(h1,h2,hscale,psname,decCode,true);
+
+  delete h1;
+  delete h2;
+  delete hscale;
 
 
 }

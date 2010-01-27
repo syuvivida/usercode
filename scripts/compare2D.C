@@ -1,4 +1,5 @@
 #include <TCut.h>
+#include <selection.h>
 
 void compare2D(TChain* t1, TChain* t2, 
 	       std::string var1, std::string var2,
@@ -9,23 +10,25 @@ void compare2D(TChain* t1, TChain* t2,
 	       std::string xtitle="", std::string ytitle="",
 	       TCut cut1="")
 {
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/selection.h");
 
   // for cuts the same for barrel and endcap
   TCut allCut = cut1 + looseCut;
 
 //   // only for data
+
+//   // only for data
+  TCut dataCut;
   if(psname.find("2360") != std::string::npos)
-    allCut += Cut_2360GeV;
+    dataCut= Cut_2360GeV;
   else
-    allCut += Cut_900GeV;
+    dataCut= Cut_900GeV;
 
   if(decCode==1)
     allCut += barrelCut;
   else if(decCode==2)
     allCut += endcapCut;
 
-  cout << "The cuts are " << allCut << endl;
+//   cout << "The cuts are " << allCut << endl;
   
   gStyle->SetOptStat(0);
 
@@ -48,7 +51,7 @@ void compare2D(TChain* t1, TChain* t2,
 
   std::string temp = var2 + ":" + var1 + ">>h1";
 
-  t1->Draw(temp.data(), allCut,"colz");
+  t1->Draw(temp.data(), allCut && dataCut,"colz");
 
   temp = var2 + ":" + var1 + ">>h2";
   t2->Draw(temp.data(), allCut,"colz");
