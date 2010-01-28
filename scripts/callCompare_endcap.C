@@ -80,7 +80,7 @@ void callCompare_endcap(std::string dataName, std::string mcName)
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,35,0,35.0,"Energy of second energetic crystal [GeV]","");
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",50,0.0,2.0,"eMax/e3x3","");
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",200,0.0,2.0,"eMax/e3x3","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,100,0,100.0,"e2x2 [GeV]","");
 
