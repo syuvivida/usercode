@@ -187,10 +187,14 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 //   else if(maximum>MAX_MAX)hscale->SetMaximum(MAX_MAX);
   hscale->Draw("e1");
   TF1* fline = new TF1("fline","pol1");
+  TLine* l2 = new TLine(low,1.,high,1.);
+  l2->SetLineColor(4);
+  l2->SetLineStyle(3);
   fline->SetLineWidth(3);
   fline->SetLineColor(6);
   fline->SetNpx(2500);
   hscale->Fit("fline","","");
+  l2->Draw("same");
   std::string dirname = logy ? 
     "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/logy":
     "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/";
