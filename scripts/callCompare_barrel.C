@@ -35,7 +35,9 @@ void callCompare_barrel(std::string dataName, std::string mcName)
 
   decCode = 0;
 
-  compareTwoTrees(dataF,mcF,"corSumEt",decCode,"corSumEt"+tempName,50,0.,10.,"corSumEt [GeV]","");
+//   compareTwoTrees(dataF,mcF,"corSumEt",decCode,"corSumEt"+tempName,50,0.,10.,"corSumEt [GeV]","");
+
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,75,-0.5,599.5,"Number of pixel hits in each event ","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","");
 

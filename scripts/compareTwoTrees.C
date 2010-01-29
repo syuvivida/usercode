@@ -39,7 +39,6 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 
   std::string temp_variable = var1 + ": run >>hf1";
   t1->Draw(temp_variable.data(), allCut && dataCut,"prof");
-  temp_variable = var1 + ": run >>hf2";
 
   TCanvas* c2 = new TCanvas("c2");
   hf1->SetTitle("");

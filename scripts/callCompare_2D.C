@@ -29,11 +29,11 @@ void callCompare_2D(std::string dataName, std::string mcName)
   if(dataName.find("2360") != std::string::npos)
     tempName = "_2360GeV";
 
-  compare2D(dataF,mcF,"PHOLEAD_scPhi", "PHOLEAD_scEta",decCode,"scetavsscphi" + tempName,180,-TMath::Pi(),TMath::Pi(),170,-3.0,3.0,"SC #phi","SC #eta");
+  compare2D(dataF,mcF,"PHOLEAD_scPhi", "PHOLEAD_scEta",decCode,"scetavsscphi" + tempName,120,-TMath::Pi(),TMath::Pi(),115,-3.0,3.0,"SC #phi","SC #eta");
 
-  compare2D(dataF,mcF,"PHOLEAD_phi", "PHOLEAD_eta",decCode,"etavsphi" + tempName,180,-TMath::Pi(),TMath::Pi(),170,-3.0,3.0,"#phi(#gamma)","#eta(#gamma)");
+  compare2D(dataF,mcF,"PHOLEAD_phi", "PHOLEAD_eta",decCode,"etavsphi" + tempName,120,-TMath::Pi(),TMath::Pi(),115,-3.0,3.0,"#phi(#gamma)","#eta(#gamma)");
 
-  compare2D(dataF,mcF,"PHOLEAD_pt","PHOLEAD_eta",decCode,"etavspt" + tempName,80,0,10.0,170,-3.0,3.0,"p_{T}(#gamma)","#eta(#gamma)");
+  compare2D(dataF,mcF,"PHOLEAD_pt","PHOLEAD_eta",decCode,"etavspt" + tempName,80,0,10.0,115,-3.0,3.0,"p_{T}(#gamma)","#eta(#gamma)");
 
 
 }

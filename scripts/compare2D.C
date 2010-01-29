@@ -60,14 +60,14 @@ void compare2D(TChain* t1, TChain* t2,
   c1->Divide(2,1);
   c1->cd(1);
   h1->Draw("colz");
-  TLatex *   tex = new TLatex(-2.778001,3.200524,"Data");
+  TLatex *   tex = new TLatex(0.0,3.200524,"Data");
   tex->SetTextFont(42);
   tex->SetTextSize(0.06918021);
   tex->SetLineWidth(2);
   tex->Draw("same");
   c1->cd(2);
   h2->Draw("colz");
-  TLatex *   tex2 = new TLatex(-2.778001,3.200524,"MC");
+  TLatex *   tex2 = new TLatex(0.0,3.200524,"MC");
   tex2->SetTextFont(42);
   tex2->SetTextSize(0.06918021);
   tex2->SetLineWidth(2);
