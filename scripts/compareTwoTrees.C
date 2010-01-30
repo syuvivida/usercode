@@ -7,7 +7,7 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 		     std::string psname,
 		     int nbin, float xmin, float xmax, 
 		     std::string xtitle="", std::string ytitle="",
-		     TCut cut1="")
+		     TCut cut1="",float yMAX=3.8)
 {
   // for cuts the same for barrel and endcap
   TCut allCut = cut1 + myCut;
@@ -89,8 +89,8 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 
   
   gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/computeChi2New.C");
-  computeChi2New(h1,h2,hscale,psname,decCode,false);
-  computeChi2New(h1,h2,hscale,psname,decCode,true);
+  computeChi2New(h1,h2,hscale,psname,decCode,false,yMAX);
+  computeChi2New(h1,h2,hscale,psname,decCode,true,yMAX);
 
 
 

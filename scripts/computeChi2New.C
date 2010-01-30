@@ -13,7 +13,7 @@
 #include <TPaveStats.h>
 #include <TPad.h>
 
-void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, int decCode, bool logy)
+void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, int decCode, bool logy, float ymax)
 {
   // scale the area of the cloned histogram to 1
   char name[100];
@@ -175,10 +175,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   hscale->GetYaxis()->SetDecimals();
   hscale->SetMinimum(-0.5);
   float maximum = hscale->GetMaximum()+2.0;
-  const float MAX=3.8;
-  const float MAX_MAX=50.0;
-  if(maximum<MAX)hscale->SetMaximum(MAX);
-//   else if(maximum>MAX_MAX)hscale->SetMaximum(MAX_MAX);
+  if(ymax>-999.)hscale->SetMaximum(ymax);
   hscale->Draw("e1");
   TF1* fline = new TF1("fline","pol1");
   TLine* l2 = new TLine(low,1.,high,1.);
