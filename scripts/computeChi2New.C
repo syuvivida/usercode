@@ -23,9 +23,6 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   cout << "Data total entries = " << hdata->GetEntries() << endl;
   cout << "MC total entries = " << hmc->GetEntries() << endl;
 
-  hmc->Sumw2();
-  hdata->Sumw2();
-
   TH1F *hmcc = (TH1F*)hmc->Clone();
   hmcc->SetName("hmcc");
   hmcc->Sumw2();
@@ -68,12 +65,9 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
 
     // now calculate the ratio
-    if(nmc==0 || nmcerr==0)continue;
+    if(nmc==0 || nmcerr==0 || ndata==0 || ndataerr==0)continue;
     hscale->SetBinContent(i,ndata/nmc);
     double err = 0;
-    if(ndata==0)
-      err = 0.;
-    else
       err=
 	(ndata/nmc)*sqrt(pow(nmcerr/nmc,2)+pow(ndataerr/ndata,2));
     hscale->SetBinError(i,err);
@@ -86,7 +80,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   
  cout << "chi2=" << chi2 << endl;
  
- double prob = hdata->KolmogorovTest(hmcc);
+ double prob = hdatac->KolmogorovTest(hmcc);
  cout << "prob KS = " << prob << endl;
  if(realbin > 1)
    {

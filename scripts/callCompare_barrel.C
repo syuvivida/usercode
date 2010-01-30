@@ -10,7 +10,7 @@
 #include <TMath.h>
 
 
-void callCompare_barrel(std::string dataName, std::string mcName)
+void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeight=false)
 {
 
   std::string treeName = "NTuples/Analysis";
@@ -18,9 +18,8 @@ void callCompare_barrel(std::string dataName, std::string mcName)
   TChain* dataF = new TChain(treeName.data());
   dataF->Add(dataName.data());
 
-//   std::string treeName2 = "Analysis";
-
-  TChain* mcF = new TChain(treeName.data());
+  std::string treeName2 = applyWeight? "Analysis": treeName;
+  TChain* mcF = new TChain(treeName2.data());
   mcF->Add(mcName.data());
 
  
@@ -34,8 +33,6 @@ void callCompare_barrel(std::string dataName, std::string mcName)
   int decCode = 1;
 
   decCode = 0;
-
-//   compareTwoTrees(dataF,mcF,"corSumEt",decCode,"corSumEt"+tempName,50,0.,10.,"corSumEt [GeV]","");
 
   compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,75,-0.5,599.5,"Number of pixel hits in each event ","");
 

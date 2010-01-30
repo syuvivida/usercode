@@ -9,7 +9,7 @@
 #include <TROOT.h>
 #include <TMath.h>
 
-void callCompare_2D(std::string dataName, std::string mcName)
+void callCompare_2D(std::string dataName, std::string mcName, bool applyWeight=false)
 {
 
   std::string treeName = "NTuples/Analysis";
@@ -17,8 +17,8 @@ void callCompare_2D(std::string dataName, std::string mcName)
   TChain* dataF = new TChain(treeName.data());
   dataF->Add(dataName.data());
 
-  //   std::string treeName2 = "Analysis";
-  TChain* mcF = new TChain(treeName.data());
+  std::string treeName2 = applyWeight? "Analysis": treeName;
+  TChain* mcF = new TChain(treeName2.data());
   mcF->Add(mcName.data());
 
   gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/compare2D.C");

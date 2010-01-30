@@ -9,7 +9,7 @@
 #include <TROOT.h>
 #include <TMath.h>
 
-void callCompare_endcap(std::string dataName, std::string mcName)
+void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeight=false)
 {
 
   std::string treeName = "NTuples/Analysis";
@@ -17,8 +17,8 @@ void callCompare_endcap(std::string dataName, std::string mcName)
   TChain* dataF = new TChain(treeName.data());
   dataF->Add(dataName.data());
 
-//   std::string treeName2 = "Analysis";
-  TChain* mcF = new TChain(treeName.data());
+  std::string treeName2 = applyWeight? "Analysis": treeName;
+  TChain* mcF = new TChain(treeName2.data());
   mcF->Add(mcName.data());
 
   std::string tempName = "_900GeV";
