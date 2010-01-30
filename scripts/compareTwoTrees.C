@@ -35,8 +35,10 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   if(binwidth < 0.0001)
   sprintf(tempName, "Candidates per %1.5lf", binwidth);
   if(ytitle == "")ytitle = tempName;
-
-
+  
+  float runmin = 123586;
+  float runmax = 124240;
+  TProfile* hf1 = new TProfile("hf1","",16,runmin,runmax);
   std::string temp_variable = var1 + ": run >>hf1";
   t1->Draw(temp_variable.data(), allCut && dataCut,"prof");
 
@@ -95,7 +97,8 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   delete h1;
   delete h2;
   delete hscale;
-
+  delete hf1;
+  delete c2;
 
 }
 		     
