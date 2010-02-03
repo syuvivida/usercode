@@ -85,7 +85,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,10,0,5.0,"Energy of second energetic crystal [GeV]","","");
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",200,0.0,2.0,"eMax/e3x3","","",36.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",200,0.0,2.0,"eMax/e3x3","","",20.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,30,0,30.0,"e2x2 [GeV]","","",6.0);
 
@@ -140,7 +140,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","","");
 
-
+  /*
   // asking only track isolation  > 0
   TCut newcut = "PHOLEAD_trackIso > 0.0";
   compareTwoTrees(dataF,mcF,"PHOLEAD_trackIso",decCode,"pattrkisoNo0"+tempName,20,0,10.,"PAT trackIso [GeV/c]","",newcut); 
@@ -152,12 +152,12 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   newcut = "PHOLEAD_trkSumPtHollowConeDR04 > 0.0";
   compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtHollowConeDR04",decCode,"hollowtrkiso04No0"+tempName,20,0,10.,"trkSumPtHollowConeDR04 [GeV/c]","",newcut);
   compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04No0"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","",newcut);
-
+  */
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalIso",decCode,"pathcaliso"+tempName,55,-1.0,10.0,"PAT hcalIso [GeV]","","",6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","","",6.0);
-
+  /*
   TCut noZCut = "PHOLEAD_hcalIso>0";
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalIso",decCode,"pathcalisoNo0"+tempName,55,-1.0,10.0,"PAT hcalIso [GeV]","",noZCut,6.0);
@@ -165,7 +165,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   noZCut = "PHOLEAD_hcalTowerSumEtConeDR04 > 0";
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04No0"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","",noZCut,6.0);
-
-
+  */
+  
 
 }

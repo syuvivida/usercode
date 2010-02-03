@@ -166,7 +166,7 @@ void callCompare_endcap_old(std::string dataName, std::string mcName)
   compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","","",30.0);
 
 
-
+  /*
   // asking only track isolation  > 0
   TCut newcut = "PHOLEAD_trackIso > 0.0";
   compareTwoTrees(dataF,mcF,"PHOLEAD_trackIso",decCode,"pattrkisoNo0"+tempName,20,0,10.,"PAT trackIso [GeV/c]","",newcut,30.0); 
@@ -177,13 +177,14 @@ void callCompare_endcap_old(std::string dataName, std::string mcName)
   newcut = "PHOLEAD_trkSumPtHollowConeDR04 > 0.0";
   compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtHollowConeDR04",decCode,"hollowtrkiso04No0"+tempName,20,0,10.,"trkSumPtHollowConeDR04 [GeV/c]","",newcut,30.0);
   compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04No0"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","",newcut,30.0);
-
+  */
 
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalIso",decCode,"pathcaliso"+tempName,55,-1.0,10.0,"PAT hcalIso [GeV]","","",6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","","",6.0);
 
+  /*
   TCut noZCut = "PHOLEAD_hcalIso>0";
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalIso",decCode,"pathcalisoNo0"+tempName,55,-1.0,10.0,"PAT hcalIso [GeV]","",noZCut,6.0);
@@ -191,7 +192,7 @@ void callCompare_endcap_old(std::string dataName, std::string mcName)
   noZCut = "PHOLEAD_hcalTowerSumEtConeDR04 > 0";
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04No0"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","",noZCut,6.0);
-
+  */
 
 }
 
