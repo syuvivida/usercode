@@ -13,8 +13,7 @@ TCut looseCut = "vtxIsFake==0"
   " && PHOLEAD_pt > 2.0"
 ;
 
-TCut Cut_900GeV = "run!=124120"
-  //  "&& run!=124230"
+TCut Cut_900GeV = "run<124120"
   ;
 TCut Cut_2360GeV = "run==124120"; 
 
