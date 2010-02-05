@@ -154,7 +154,7 @@ void overlayData(TChain* t1,
   else if(decCode==1)decName = "barrel";
   else if(decCode==2)decName = "endcap";
   
-  TLegend* leg4 = new TLegend(0.692529,0.364407,0.899425,0.898305);
+  TLegend* leg4 = new TLegend(0.652529,0.364407,0.859425,0.898305);
   leg4->SetFillColor(0);
   leg4->SetFillStyle(0);
   leg4->SetTextSize(0.04);
@@ -164,7 +164,7 @@ void overlayData(TChain* t1,
     "$CMSSW_BASE/src/CRAB/preprod_figures/";
   psname = psname + "_" + decName;
   
-  TCanvas* c1 = new TCanvas("c1");
+  TCanvas* c1 = new TCanvas("c1","",500,500);
   const int HistosPerCanvas = 3;
   h[firstNonZero]->SetTitle("");
   h[firstNonZero]->SetLineColor(1);
@@ -176,6 +176,8 @@ void overlayData(TChain* t1,
  
   int nHistos = 0;
   int nCanvas = 0;
+  int colorCODE[]={kRed, kBlue, kViolet};
+
   for(int i=0; i < numRuns; i++)
     {
       if(i == firstNonZero)continue;
@@ -186,7 +188,7 @@ void overlayData(TChain* t1,
 
       // setting color and line style
       int tempNumber =(nHistos-1)%HistosPerCanvas;
-      int COLOR = ((int)(tempNumber/2)+1)*2;
+      int COLOR = colorCODE[tempNumber] ; //((int)(tempNumber/2)+1)*2;
       int STYLE = nHistos%2 == 1? 1: 3;
       cout << COLOR << endl;
       h[i]->SetLineColor(COLOR);
@@ -217,8 +219,8 @@ void overlayData(TChain* t1,
 	  leg4->Draw("same");
 	  sprintf(name,"%d",nCanvas);
 	  std::string countName(name);
-	  std::string epsfilename = dirname + psname + countName + ".eps";
-	  std::string giffilename = dirname + psname + countName + ".gif";
+	  std::string epsfilename = dirname + "dataOnly_" + psname + countName + ".eps";
+	  std::string giffilename = dirname + "dataOnly_" + psname + countName + ".gif";
 
 	  c1->Print(epsfilename.data());
 // 	  c1->Print(giffilename.data());
