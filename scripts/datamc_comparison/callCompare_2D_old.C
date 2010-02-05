@@ -18,7 +18,7 @@ void callCompare_2D_old(std::string dataName, std::string mcName)
 
  int nfile = 0;
   TSystemDirectory *base = new TSystemDirectory("root","root");
-  base->SetDirectory("/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/allOldData");
+  base->SetDirectory("$CMSSW_BASE/src/CRAB/allOldData");
   TList *listOfFiles = base->GetListOfFiles();
   TIter fileIt(listOfFiles);
   TFile *fileH = new TFile();
@@ -53,7 +53,7 @@ void callCompare_2D_old(std::string dataName, std::string mcName)
   std::cout << "Opened " << nfile << " files" << std::endl;
 
 
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/compare2D.C");
+  gROOT->ProcessLine(".L $PWD/compare2D.C");
 
   int decCode = 0;
 

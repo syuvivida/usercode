@@ -27,7 +27,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   if(dataName.find("2360") != std::string::npos)
     tempName = "_2360GeV";  
 
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/compareTwoTrees.C");
+  gROOT->ProcessLine(".L $PWD/compareTwoTrees.C");
 
 
   int decCode = 1;

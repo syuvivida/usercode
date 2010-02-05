@@ -77,7 +77,7 @@ void compare2D(TChain* t1, TChain* t2,
     h2->GetEntries() << endl;
 
   std::string dirname = 
-    "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/";
+    "$CMSSW_BASE/src/CRAB/preprod_figures/";
 
   if(decCode==1) psname += "_barrel";
   else if(decCode==2) psname += "_endcap";

@@ -55,9 +55,9 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   else if(decCode==1)decName = "_barrel";
   else if(decCode==2)decName = "_endcap";
   
-  std::string runName = "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/runDep_" + psname + decName + ".eps";
+  std::string runName = "$CMSSW_BASE/src/CRAB/preprod_figures/runDep_" + psname + decName + ".eps";
   c2->Print(runName.data());
-  runName = "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/runDep_" + psname + decName + ".gif";
+  runName = "$CMSSW_BASE/src/CRAB/preprod_figures/runDep_" + psname + decName + ".gif";
   c2->Print(runName.data());
   
   TH1F* h1 = new TH1F("h1","",nbin,xmin,xmax);
@@ -88,7 +88,7 @@ void compareTwoTrees(TChain* t1, TChain* t2,
     " and entries = " << h2->GetEntries() << endl;
 
   
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/computeChi2New.C");
+  gROOT->ProcessLine(".L $PWD/computeChi2New.C");
   computeChi2New(h1,h2,hscale,psname,decCode,false,yMAX);
   computeChi2New(h1,h2,hscale,psname,decCode,true,yMAX);
 

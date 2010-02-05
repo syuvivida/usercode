@@ -103,7 +103,8 @@ void overlayData(TChain* t1,
       int nEve = h[i]->GetEntries();
       
       // find out the first non-zero histogram
-      if(nEve >0 && firstNonZero < 0)firstNonZero = i;
+//       if(nEve >0 && firstNonZero < 0)firstNonZero = i;
+      if(runNo[i] == 124023)firstNonZero = i;
       if(nEve >0)NHISTOS_ENTRIES++;
 
       if(nScaleEve < MIN && nScaleEve>0)
@@ -143,7 +144,7 @@ void overlayData(TChain* t1,
   MAX *= 1.2;
   cout << "MAX = " << MAX << " and firstNonZero = " << firstNonZero << endl;
 
-  for(int i=firstNonZero; i < numRuns; i++)
+  for(int i= 0; i < numRuns; i++)
     h[i]->SetMaximum(MAX);
       
 
@@ -160,7 +161,7 @@ void overlayData(TChain* t1,
   leg4->SetBorderSize(0);
  
   std::string dirname = 
-    "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/";
+    "$CMSSW_BASE/src/CRAB/preprod_figures/";
   psname = psname + "_" + decName;
   
   TCanvas* c1 = new TCanvas("c1");
@@ -175,8 +176,9 @@ void overlayData(TChain* t1,
  
   int nHistos = 0;
   int nCanvas = 0;
-  for(int i=firstNonZero+1; i < numRuns; i++)
+  for(int i=0; i < numRuns; i++)
     {
+      if(i == firstNonZero)continue;
       int nEve = h[i]->GetEntries();
       sprintf(title,"Run %d", runNo[i]);
       if(nEve<1)continue;
@@ -219,7 +221,7 @@ void overlayData(TChain* t1,
 	  std::string giffilename = dirname + psname + countName + ".gif";
 
 	  c1->Print(epsfilename.data());
-	  c1->Print(giffilename.data());
+// 	  c1->Print(giffilename.data());
 	}
       
     }

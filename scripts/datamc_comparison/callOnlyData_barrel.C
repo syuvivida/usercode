@@ -23,7 +23,7 @@ void callOnlyData_barrel(std::string dataName)
   if(dataName.find("2360") != std::string::npos)
     tempName = "_2360GeV";  
 
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/overlayData.C");
+  gROOT->ProcessLine(".L $PWD/overlayData.C");
 
 
   int decCode = 1;

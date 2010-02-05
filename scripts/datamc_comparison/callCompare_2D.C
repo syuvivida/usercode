@@ -21,7 +21,7 @@ void callCompare_2D(std::string dataName, std::string mcName, bool applyWeight=f
   TChain* mcF = new TChain(treeName2.data());
   mcF->Add(mcName.data());
 
-  gROOT->ProcessLine(".L /home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/scripts/compare2D.C");
+  gROOT->ProcessLine(".L $PWD/compare2D.C");
 
   int decCode = 0;
 

@@ -187,8 +187,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   hscale->Fit("fline","","");
   l2->Draw("same");
   std::string dirname = logy ? 
-    "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/logy":
-    "/home/syu/testYenJie/CMSSW_3_3_6_patch3/src/CRAB/preprod_figures/";
+    "$CMSSW_BASE/src/CRAB/preprod_figures/logy":
+    "$CMSSW_BASE/src/CRAB/preprod_figures/";
 
   if(decCode==1) psname += "_barrel";
   else if(decCode==2) psname += "_endcap";
