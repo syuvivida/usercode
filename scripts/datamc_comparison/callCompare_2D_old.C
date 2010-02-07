@@ -8,6 +8,7 @@
 #include <TChain.h>
 #include <TROOT.h>
 #include <TMath.h>
+#include "compare2D.C"
 
 void callCompare_2D_old(std::string dataName, std::string mcName)
 {
@@ -53,7 +54,7 @@ void callCompare_2D_old(std::string dataName, std::string mcName)
   std::cout << "Opened " << nfile << " files" << std::endl;
 
 
-  gROOT->ProcessLine(".L $PWD/compare2D.C");
+  //  gROOT->ProcessLine(".L $PWD/compare2D.C");
 
   int decCode = 0;
 

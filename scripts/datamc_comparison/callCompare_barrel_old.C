@@ -8,7 +8,7 @@
 #include <TChain.h>
 #include <TROOT.h>
 #include <TMath.h>
-
+#include "compareTwoTrees.C"
 
 void callCompare_barrel_old(std::string dataName, std::string mcName)
 {
@@ -60,7 +60,7 @@ void callCompare_barrel_old(std::string dataName, std::string mcName)
   if(dataName.find("2360") != std::string::npos)
     tempName = "_2360GeV";  
 
-  gROOT->ProcessLine(".L $PWD/compareTwoTrees.C");
+  //  gROOT->ProcessLine(".L $PWD/compareTwoTrees.C");
 
 
   int decCode = 1;
