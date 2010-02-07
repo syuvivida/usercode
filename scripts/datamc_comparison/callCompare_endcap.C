@@ -8,6 +8,7 @@
 #include <TChain.h>
 #include <TROOT.h>
 #include <TMath.h>
+#include "compareTwoTrees.C"
 
 void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeight=false)
 {
@@ -26,7 +27,7 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
     tempName = "_2360GeV";  
   
 
-  gROOT->ProcessLine(".L $PWD/compareTwoTrees.C");
+  //  gROOT->ProcessLine(".L $PWD/compareTwoTrees.C");
 
   int decCode = 2;
 

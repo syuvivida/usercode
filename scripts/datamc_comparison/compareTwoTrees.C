@@ -1,5 +1,6 @@
 #include <TCut.h>
 #include "tightSelection.h"
+#include "computeChi2New.C"
 
 void compareTwoTrees(TChain* t1, TChain* t2, 
 		     std::string var1,
@@ -11,6 +12,9 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 {
   // for cuts the same for barrel and endcap
   TCut allCut = cut1 + myCut;
+
+  // cuts for getting overall scale factor
+  TCut scaleCut = allCut;
 
   if(decCode==1)
     allCut += barrelCut;
@@ -87,9 +91,25 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   cout << "h2 mean = " << h2->GetMean() << " and width = " << h2->GetRMS() << 
     " and entries = " << h2->GetEntries() << endl;
 
-  
-  gROOT->ProcessLine(".L $PWD/computeChi2New.C");
+
+  // below is to get the overall scale factor
+
+  TH1F* scaleh1 = new TH1F("scaleh1","",nbin,xmin,xmax);
+  TH1F* scaleh2 = new TH1F("scaleh2","",nbin,xmin,xmax);
+  temp = var1 + ">>scaleh1";
+  t1->Draw(temp.data(), scaleCut && dataCut);
+  temp = var1 + ">>scaleh2";
+  t2->Draw(temp.data(), scaleCut);
+  float scaleFactor = (float)scaleh1->GetEntries()/(float)scaleh2->GetEntries();
+  hscale->SetBinContent(1, scaleFactor);
+  hscale->SetBinError(1,0.001);
+  //  gROOT->ProcessLine(".L $PWD/computeChi2New.C");
+  // in linear scale
   computeChi2New(h1,h2,hscale,psname,decCode,false,yMAX);
+  // in log scale
+  hscale->Reset();
+  hscale->SetBinContent(1, scaleFactor);
+  hscale->SetBinError(1,0.001);
   computeChi2New(h1,h2,hscale,psname,decCode,true,yMAX);
 
 
@@ -97,6 +117,8 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   delete h1;
   delete h2;
   delete hscale;
+  delete scaleh1;
+  delete scaleh2;
   delete hf1;
   delete c2;
 

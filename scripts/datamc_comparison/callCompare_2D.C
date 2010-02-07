@@ -8,6 +8,7 @@
 #include <TChain.h>
 #include <TROOT.h>
 #include <TMath.h>
+#include "compare2D.C"
 
 void callCompare_2D(std::string dataName, std::string mcName, bool applyWeight=false)
 {
@@ -21,7 +22,7 @@ void callCompare_2D(std::string dataName, std::string mcName, bool applyWeight=f
   TChain* mcF = new TChain(treeName2.data());
   mcF->Add(mcName.data());
 
-  gROOT->ProcessLine(".L $PWD/compare2D.C");
+  //  gROOT->ProcessLine(".L $PWD/compare2D.C");
 
   int decCode = 0;
 

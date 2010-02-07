@@ -22,6 +22,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
   cout << "Data total entries = " << hdata->GetEntries() << endl;
   cout << "MC total entries = " << hmc->GetEntries() << endl;
+  cout << "fmc = " << fmc << endl;
+  cout << "overall scale factor = " << hscale->GetBinContent(1) << endl;
 
   TH1F *hmcc = (TH1F*)hmc->Clone();
   hmcc->SetName("hmcc");
@@ -40,7 +42,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   int realbin =0;
  
 
-  
+  hscale->Reset();
   // loop over n bins and compute chi2, also fill hscale
  for(int i=1;i<=n;i++){
 
