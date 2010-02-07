@@ -21,13 +21,16 @@ void overlayData(TChain* t1,
     dataCut= Cut_900GeV;
 
   allCut += dataCut;
-  TCut scaleCut = allCut; // doesnt separate endcap and barrel
+  // if we are scaling relative to all data, uncommented out the following line
+  //  TCut scaleCut = allCut; // doesnt separate endcap and barrel
 
   // now separate barrel and endcap
   if(decCode==1)
     allCut += barrelCut;
   else if(decCode==2)
     allCut += endcapCut;
+  // if we are scaling barrel and endcap separately, uncommented the following line
+  TCut scaleCut = allCut;  
 
 
   float binwidth = (xmax-xmin)/(float)nbin;
@@ -118,14 +121,14 @@ void overlayData(TChain* t1,
   cout << "Run " << MINRUN << " has minimum entries = " << MIN << endl;
   
 
-  // find out the maximum and scale every histogram to be the same entries;
+  // find out the maximum and scale every histogram to have the same entries;
   float MAX = -999.;
   for(int i=0; i < numRuns; i++)
     {
 
       int nEve = h[i]->GetEntries();
-      if( nEve <1)continue;
       int nScaleEve = hs[i]->GetEntries();
+      if( nEve < 1 || nScaleEve < 1)continue;
       float scale = float(MIN)/float(nScaleEve);
       cout << "nScaleEve = " << nScaleEve << ", nEve = " << nEve 
 	   << ", scale " << i << " = " << scale << endl;
@@ -133,7 +136,7 @@ void overlayData(TChain* t1,
       h[i]->Scale(scale);
 
       float thisMax = h[i]->GetMaximum()  
-// 	h[i]->GetBinError(h[i]->GetMaximumBin())
+// 	+h[i]->GetBinError(h[i]->GetMaximumBin())
 	;
       if(thisMax > MAX)MAX = thisMax;
 
