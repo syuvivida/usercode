@@ -88,7 +88,11 @@ void compare2D(TChain* t1, TChain* t2,
   filename = dirname + psname + ".gif";  
   c1->Print(filename.data());  
 
- 
+  delete c1;
+  delete tex;
+  delete tex2;
+  delete h1;
+  delete h2;
 
 }
 		     

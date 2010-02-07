@@ -243,6 +243,6 @@ void overlayData(TChain* t1,
   for(int i=0; i < numRuns; i++)
     { delete h[i]; delete hs[i];}
   delete c1;
-
+  delete leg4;
 }
 		     
