@@ -69,6 +69,12 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","","");
 
+  TCut etaCut = "PHOLEAD_scEta > 0";
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scpphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi (#eta >0)","",etaCut);
+
+  etaCut = "PHOLEAD_scEta < 0";
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scnphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi (#eta <0)","",etaCut);
+
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName,25,0.,25.,"SC raw energy [GeV]","","",6.5);
 
