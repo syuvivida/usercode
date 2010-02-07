@@ -40,7 +40,6 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta"+tempName,55,-3.,8.,"SC #eta","","");
 
-
   decCode = 1;
 
   compareTwoTrees(dataF,mcF,"vtxX",decCode,"vx"+tempName,50,-0.1,1.5,"Highest #Sigma p_{T} vertex x position [cm]","","",-1000.);
@@ -88,7 +87,9 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,10,0,5.0,"Energy of second energetic crystal [GeV]","","");
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",200,0.0,2.0,"eMax/e3x3","","",20.0);
+  //  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",200,0.0,2.0,"eMax/e3x3","","",20.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",100,0.0,2.0,"eMax/e3x3","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,30,0,30.0,"e2x2 [GeV]","","",6.0);
 
@@ -106,8 +107,9 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName,20,0,0.05,"#sigma_{#eta#eta}","","",20.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName,20,0,0.05,"#sigma_{i#etai#eta}","","",20.0);
+  //  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName,20,0,0.05,"#sigma_{i#etai#eta}","","",20.0);
 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName,20,0,0.05,"#sigma_{i#etai#eta}","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hadronicOverEm",decCode,"hadem"+tempName,60,0,0.6,"E_{had}/E_{EM}","","",6.0);
 
