@@ -55,6 +55,9 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_pt",decCode,"pt"+tempName,20,0.,20.,"p_{T}(#gamma) [GeV/c]","","",10.0);
 
+  // fake seed pt
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"pseudoseedpt"+tempName,20
+		  ,0.,20.,"eMax*sin(SC #theta) [GeV]","","",10.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,40,-3.,5.,"#eta(#gamma) ","","");
 
