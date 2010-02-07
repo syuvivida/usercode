@@ -8,7 +8,7 @@
 #include <TChain.h>
 #include <TROOT.h>
 #include <TMath.h>
-
+#include "overlayData.C"
 
 void callOnlyData_barrel(std::string dataName)
 {
@@ -23,7 +23,7 @@ void callOnlyData_barrel(std::string dataName)
   if(dataName.find("2360") != std::string::npos)
     tempName = "_2360GeV";  
 
-  gROOT->ProcessLine(".L $PWD/overlayData.C");
+  //  gROOT->ProcessLine(".L $PWD/overlayData.C");
 
 
   int decCode = 1;
