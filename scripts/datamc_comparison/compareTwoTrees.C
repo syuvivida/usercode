@@ -100,18 +100,19 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   t1->Draw(temp.data(), scaleCut && dataCut);
   temp = var1 + ">>scaleh2";
   t2->Draw(temp.data(), scaleCut);
-  float scaleFactor = (float)scaleh1->GetEntries()/(float)scaleh2->GetEntries();
-  hscale->SetBinContent(1, scaleFactor);
-  hscale->SetBinError(1,0.001);
-  //  gROOT->ProcessLine(".L $PWD/computeChi2New.C");
-  // in linear scale
-  computeChi2New(h1,h2,hscale,psname,decCode,false,yMAX);
-  // in log scale
-  hscale->Reset();
-  hscale->SetBinContent(1, scaleFactor);
-  hscale->SetBinError(1,0.001);
-  computeChi2New(h1,h2,hscale,psname,decCode,true,yMAX);
-
+  if(scaleh1->GetEntries() > 0 && scaleh2->GetEntries()>0){
+    float scaleFactor = (float)scaleh1->GetEntries()/(float)scaleh2->GetEntries();
+    hscale->SetBinContent(1, scaleFactor);
+    hscale->SetBinError(1,0.001);
+    //  gROOT->ProcessLine(".L $PWD/computeChi2New.C");
+    // in linear scale
+    computeChi2New(h1,h2,hscale,psname,decCode,false,yMAX);
+    // in log scale
+    hscale->Reset();
+    hscale->SetBinContent(1, scaleFactor);
+    hscale->SetBinError(1,0.001);
+    computeChi2New(h1,h2,hscale,psname,decCode,true,yMAX);
+  }
 
 
   delete h1;

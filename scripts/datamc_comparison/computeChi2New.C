@@ -164,6 +164,18 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   leg4->AddEntry(hmcc,"MC");
   leg4->Draw("same");
 
+  TPaveText *pt = new TPaveText(0.60302,0.5,0.80987,0.6,"NDCBR");
+  pt->SetBorderSize(0);
+  pt->SetFillColor(0);
+  pt->SetFillStyle(0);
+  pt->SetBorderSize(0);
+  pt->SetLineWidth(3);
+  pt->SetTextAlign(12);
+  //  pt->SetTextFont(42);
+  pt->SetTextSize(0.08);
+  pt->AddText("SC #eta > 0");
+  //  pt->Draw();
+
 
   c1->cd(2);
   gStyle->SetStatW       (0.3);
