@@ -70,6 +70,7 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName,100,0.,100.,"SC raw energy [GeV]","","",6.5);
 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"rawet"+tempName,25,0.,25.,"SC raw E_{T} [GeV]","","",6.5);
   
   compareTwoTrees(dataF,mcF,"PHOLEAD_r9",decCode,"r9"+tempName,40,0,2.0,"R9(#gamma) ","","");
 
