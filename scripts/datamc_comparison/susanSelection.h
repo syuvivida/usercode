@@ -35,6 +35,6 @@ TCut runCut = "run == 123596 ||"
   "run == 124030"
 ;
 
-TCut Cut_900GeV  = "run<124120 && run!=123815" && runCut;
+TCut Cut_900GeV  = "run<124120 && run!=123815" + runCut;
 TCut Cut_2360GeV = "run==124120"; 
 
