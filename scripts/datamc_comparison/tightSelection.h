@@ -14,9 +14,6 @@ TCut myCut       = basicCut + fiducialCut;
 
 TCut looseCut    = basicCut;
 
-TCut Cut_900GeV  = "run<124120 && run!=123815" && runCut;
-TCut Cut_2360GeV = "run==124120"; 
-
 TCut barrelCut   = "PHOLEAD_isEB==1 && PHOLEAD_isEE==0";
 TCut endcapCut   = "PHOLEAD_isEB==0 && PHOLEAD_isEE==1";
 
@@ -36,4 +33,7 @@ TCut runCut = "run == 123596 ||"
   "run == 124027 ||"
   "run == 124030"
   ;
+
+TCut Cut_900GeV  = "run<124120 && run!=123815" && runCut;
+TCut Cut_2360GeV = "run==124120"; 
 
