@@ -14,11 +14,12 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   TCut allCut = cut1 + myCut;
 
   // cuts for getting overall scale factor
-  TCut scaleCut = allCut;
+//   TCut scaleCut = allCut;
+  TCut scaleCut = "";
 
-  if(decCode==1)
+  if(decCode%10==1)
     allCut += barrelCut;
-  else if(decCode==2)
+  else if(decCode%10==2)
     allCut += endcapCut;
 
 //   // only for data
@@ -27,8 +28,6 @@ void compareTwoTrees(TChain* t1, TChain* t2,
     dataCut= Cut_2360GeV;
   else
     dataCut= Cut_900GeV;
-
-  
 
   float binwidth = (xmax-xmin)/(float)nbin;
 
@@ -55,9 +54,9 @@ void compareTwoTrees(TChain* t1, TChain* t2,
   hf1->Draw("");
 
   std::string decName;
-  if(decCode==0)decName = "_all";
-  else if(decCode==1)decName = "_barrel";
-  else if(decCode==2)decName = "_endcap";
+  if(decCode%10==0)decName = "_all";
+  else if(decCode%10==1)decName = "_barrel";
+  else if(decCode%10==2)decName = "_endcap";
   
   std::string runName = "$CMSSW_BASE/src/CRAB/preprod_figures/runDep_" + psname + decName + ".eps";
   c2->Print(runName.data());

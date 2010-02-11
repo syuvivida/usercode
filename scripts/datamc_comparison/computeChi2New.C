@@ -72,6 +72,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
     // now calculate the ratio
     if(nmc==0 || nmcerr==0 || ndata==0 || ndataerr==0)continue;
+    cout << "Bin " << i << " ratio = " << ndata/nmc << endl;
     hscale->SetBinContent(i,ndata/nmc);
     double err = 0;
       err=
@@ -158,8 +159,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   //  leg4->SetTextFont(42);
   leg4->SetBorderSize(0);
   std::string dataname = "Data";
-  if(decCode==1) dataname += " (barrel)";
-  else if(decCode==2) dataname += " (endcap)";
+  if(decCode%10==1) dataname += " (barrel)";
+  else if(decCode%10==2) dataname += " (endcap)";
   leg4->AddEntry(hdatac, dataname.data());
   leg4->AddEntry(hmcc,"MC");
   leg4->Draw("same");
@@ -173,8 +174,15 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   pt->SetTextAlign(12);
   //  pt->SetTextFont(42);
   pt->SetTextSize(0.08);
-  pt->AddText("SC #eta > 0");
-  //  pt->Draw();
+
+  if(decCode >= 10 && decCode < 20){
+    pt->AddText("SC #eta > 0");
+    pt->Draw();
+  }
+  else if(decCode >= 20 && decCode < 30){
+    pt->AddText("SC #eta < 0");
+    pt->Draw();
+  }
 
 
   c1->cd(2);
@@ -208,9 +216,13 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
     "$CMSSW_BASE/src/CRAB/preprod_figures/logy":
     "$CMSSW_BASE/src/CRAB/preprod_figures/";
 
-  if(decCode==1) psname += "_barrel";
-  else if(decCode==2) psname += "_endcap";
-  else if(decCode==0) psname += "_all";
+  if(decCode%10==1) psname += "_barrel";
+  else if(decCode%10==2) psname += "_endcap";
+  else if(decCode%10==0) psname += "_all";
+
+  if(decCode>=10 && decCode<20) psname += "_possceta";
+  else if(decCode>=20 && decCode<30) psname += "_negsceta";
+  
 
   std::string filename = dirname + psname + ".eps";
   c1->Print(filename.data());

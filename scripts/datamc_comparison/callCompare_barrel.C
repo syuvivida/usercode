@@ -34,7 +34,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   decCode = 0;
 
-  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,75,-0.5,599.5,"Number of pixel hits in each event ","","",10.0);
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","","",10.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","","");
 
@@ -68,12 +68,6 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","","");
-
-  TCut etaCut = "PHOLEAD_scEta > 0";
-  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scpphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi (#eta >0)","",etaCut);
-
-  etaCut = "PHOLEAD_scEta < 0";
-  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scnphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi (#eta <0)","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName,25,0.,25.,"SC raw energy [GeV]","","",6.5);
 
@@ -177,6 +171,248 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04No0"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","",noZCut,6.0);
   */
+  
+
+  // ========================================================================================
+  // EB+
+  //  
+  // ========================================================================================
+
+  TCut etaCut = "PHOLEAD_scEta > 0";
+  
+  decCode = 10;
+
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","",etaCut,10.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta"+tempName,55,-3.,8.,"SC #eta","",etaCut);
+
+  decCode = 11;
+
+  compareTwoTrees(dataF,mcF,"vtxX",decCode,"vx"+tempName,50,-0.1,1.5,"Highest #Sigma p_{T} vertex x position [cm]","",etaCut,-1000.);
+
+  compareTwoTrees(dataF,mcF,"vtxY",decCode,"vy"+tempName,50,-0.3,2.0,"Highest #Sigma p_{T} vertex y position [cm]","",etaCut,-1000.);
+
+  compareTwoTrees(dataF,mcF,"vtxZ",decCode,"vz"+tempName,50,-20.,30.,"Highest #Sigma p_{T} vertex z position [cm]","",etaCut,-1000.);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_energy",decCode,"energy"+tempName,25,0.,25.,"E(#gamma) [GeV]","",etaCut,6.5);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_pt",decCode,"pt"+tempName,20,0.,20.,"p_{T}(#gamma) [GeV/c]","",etaCut,10.0);
+
+  // fake seed pt
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"pseudoseedpt"+tempName,20
+		  ,0.,20.,"eMax*sin(SC #theta) [GeV]","",etaCut,10.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,40,-3.,5.,"#eta(#gamma) ","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta"+tempName,40,-3.,5.,"SC #eta","",etaCut);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_phi",decCode,"phi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"#phi(#gamma) ","",etaCut);
+
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName,25,0.,25.,"SC raw energy [GeV]","",etaCut,6.5);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"rawet"+tempName,25,0.,25.,"SC raw E_{T} [GeV]","",etaCut,6.5);
+  
+  compareTwoTrees(dataF,mcF,"PHOLEAD_r9",decCode,"r9"+tempName,40,0,2.0,"R9(#gamma) ","",etaCut,5.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_clustersSize",decCode,"nbcinsc"+tempName,11,-0.5,10.5,"Number of basic clusters in SC","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_phiWidth",decCode,"scphiwidth"+tempName,32,0,0.16,"SC #phi width","",etaCut,5.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","",etaCut,26.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax",decCode,"sceMax"+tempName,25,0,25.0,"Energy of most energetic crystal [GeV]","",etaCut,30.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,10,0,5.0,"Energy of second energetic crystal [GeV]","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",100,0.0,2.0,"eMax/e3x3","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,30,0,30.0,"e2x2 [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e3x3",decCode,"sce3x3"+tempName,30,0,30.0,"e3x3 [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e4x4",decCode,"sce4x4"+tempName,30,0,30.0,"e4x4 [GeV]","",etaCut,8.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e5x5",decCode,"sce5x5"+tempName,30,0,30.0,"e5x5 [GeV]","",etaCut,8.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","",etaCut,10.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.001,0.002,"covEtaPhi","",etaCut,5.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","",etaCut,12.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName,20,0,0.05,"#sigma_{#eta#eta}","",etaCut,20.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName,20,0,0.05,"#sigma_{i#etai#eta}","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hadronicOverEm",decCode,"hadem"+tempName,60,0,0.6,"E_{had}/E_{EM}","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_caloIso",decCode,"patcaloiso"+tempName,55,-1.0,10.0,"PAT calIso [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_ecalIso",decCode,"patecaliso"+tempName,55,-1.0,10.0,"PAT ecalIso [GeV]","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_ecalRecHitSumEtConeDR04",decCode,"ecaliso04"+tempName,55,-1.0,10.0,"ecalRecHitSumEtConeDR04 [GeV]","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hasConversionTracks",decCode,"hasconv"+tempName,2,-0.5,1.5,"hasConversionTracks","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hasPixelSeed",decCode,"haspixel"+tempName,2,-0.5,1.5,"hasPixelSeed","",etaCut);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trackIso",decCode,"pattrkiso"+tempName,60,0.0,30.0,"PAT trackIso [GeV/c]","",etaCut);
+ 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtSolidConeDR04",decCode,"solidtrkiso04"+tempName,60,0,30.0,"trkSumPtSolidConeDR04 [GeV/c]","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtHollowConeDR04",decCode,"hollowtrkiso04"+tempName,60,0,30.0,"trkSumPtHollowConeDR04 [GeV/c]","",etaCut);
+  
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trackIso",decCode,"close_pattrkiso"+tempName,20,0.0,10.0,"PAT trackIso [GeV/c]","",etaCut);
+ 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtSolidConeDR04",decCode,"close_solidtrkiso04"+tempName,20,0,10.0,"trkSumPtSolidConeDR04 [GeV/c]","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtHollowConeDR04",decCode,"close_hollowtrkiso04"+tempName,20,0,10.0,"trkSumPtHollowConeDR04 [GeV/c]","",etaCut);
+  
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkSolidConeDR04",decCode,"solidntrk04"+tempName,11,-0.5,10.5,"nTrkSolidConeDR04","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hcalIso",decCode,"pathcaliso"+tempName,55,-1.0,10.0,"PAT hcalIso [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","",etaCut,6.0);
+
+
+ // ========================================================================================
+  // EB-
+  //  
+  // ========================================================================================
+
+  etaCut = "PHOLEAD_scEta < 0";
+  
+  decCode = 20;
+
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","",etaCut,10.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta"+tempName,55,-3.,8.,"SC #eta","",etaCut);
+
+  decCode = 21;
+
+  compareTwoTrees(dataF,mcF,"vtxX",decCode,"vx"+tempName,50,-0.1,1.5,"Highest #Sigma p_{T} vertex x position [cm]","",etaCut,-1000.);
+
+  compareTwoTrees(dataF,mcF,"vtxY",decCode,"vy"+tempName,50,-0.3,2.0,"Highest #Sigma p_{T} vertex y position [cm]","",etaCut,-1000.);
+
+  compareTwoTrees(dataF,mcF,"vtxZ",decCode,"vz"+tempName,50,-20.,30.,"Highest #Sigma p_{T} vertex z position [cm]","",etaCut,-1000.);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_energy",decCode,"energy"+tempName,25,0.,25.,"E(#gamma) [GeV]","",etaCut,6.5);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_pt",decCode,"pt"+tempName,20,0.,20.,"p_{T}(#gamma) [GeV/c]","",etaCut,10.0);
+
+  // fake seed pt
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"pseudoseedpt"+tempName,20
+		  ,0.,20.,"eMax*sin(SC #theta) [GeV]","",etaCut,10.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,40,-3.,5.,"#eta(#gamma) ","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scEta",decCode,"sceta"+tempName,40,-3.,5.,"SC #eta","",etaCut);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_phi",decCode,"phi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"#phi(#gamma) ","",etaCut);
+
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_scPhi",decCode,"scphi"+tempName,60,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName,25,0.,25.,"SC raw energy [GeV]","",etaCut,6.5);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"rawet"+tempName,25,0.,25.,"SC raw E_{T} [GeV]","",etaCut,6.5);
+  
+  compareTwoTrees(dataF,mcF,"PHOLEAD_r9",decCode,"r9"+tempName,40,0,2.0,"R9(#gamma) ","",etaCut,5.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_clustersSize",decCode,"nbcinsc"+tempName,11,-0.5,10.5,"Number of basic clusters in SC","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_phiWidth",decCode,"scphiwidth"+tempName,32,0,0.16,"SC #phi width","",etaCut,5.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","",etaCut,26.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax",decCode,"sceMax"+tempName,25,0,25.0,"Energy of most energetic crystal [GeV]","",etaCut,30.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,10,0,5.0,"Energy of second energetic crystal [GeV]","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",100,0.0,2.0,"eMax/e3x3","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,30,0,30.0,"e2x2 [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e3x3",decCode,"sce3x3"+tempName,30,0,30.0,"e3x3 [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e4x4",decCode,"sce4x4"+tempName,30,0,30.0,"e4x4 [GeV]","",etaCut,8.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_e5x5",decCode,"sce5x5"+tempName,30,0,30.0,"e5x5 [GeV]","",etaCut,8.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","",etaCut,10.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.001,0.002,"covEtaPhi","",etaCut,5.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","",etaCut,12.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName,20,0,0.05,"#sigma_{#eta#eta}","",etaCut,20.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName,20,0,0.05,"#sigma_{i#etai#eta}","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hadronicOverEm",decCode,"hadem"+tempName,60,0,0.6,"E_{had}/E_{EM}","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_caloIso",decCode,"patcaloiso"+tempName,55,-1.0,10.0,"PAT calIso [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_ecalIso",decCode,"patecaliso"+tempName,55,-1.0,10.0,"PAT ecalIso [GeV]","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_ecalRecHitSumEtConeDR04",decCode,"ecaliso04"+tempName,55,-1.0,10.0,"ecalRecHitSumEtConeDR04 [GeV]","",etaCut,6.0);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hasConversionTracks",decCode,"hasconv"+tempName,2,-0.5,1.5,"hasConversionTracks","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hasPixelSeed",decCode,"haspixel"+tempName,2,-0.5,1.5,"hasPixelSeed","",etaCut);
+
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trackIso",decCode,"pattrkiso"+tempName,60,0.0,30.0,"PAT trackIso [GeV/c]","",etaCut);
+ 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtSolidConeDR04",decCode,"solidtrkiso04"+tempName,60,0,30.0,"trkSumPtSolidConeDR04 [GeV/c]","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtHollowConeDR04",decCode,"hollowtrkiso04"+tempName,60,0,30.0,"trkSumPtHollowConeDR04 [GeV/c]","",etaCut);
+  
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trackIso",decCode,"close_pattrkiso"+tempName,20,0.0,10.0,"PAT trackIso [GeV/c]","",etaCut);
+ 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtSolidConeDR04",decCode,"close_solidtrkiso04"+tempName,20,0,10.0,"trkSumPtSolidConeDR04 [GeV/c]","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_trkSumPtHollowConeDR04",decCode,"close_hollowtrkiso04"+tempName,20,0,10.0,"trkSumPtHollowConeDR04 [GeV/c]","",etaCut);
+  
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkSolidConeDR04",decCode,"solidntrk04"+tempName,11,-0.5,10.5,"nTrkSolidConeDR04","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","",etaCut);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hcalIso",decCode,"pathcaliso"+tempName,55,-1.0,10.0,"PAT hcalIso [GeV]","",etaCut,6.0);
+
+  compareTwoTrees(dataF,mcF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,55,-1.0,10.0,"hcalTowerSumEtConeDR04 [GeV]","",etaCut,6.0);
+  
+
   
 
 }
