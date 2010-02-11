@@ -7,14 +7,16 @@ TCut basicCut    = "vtxIsFake==0 && vtxNdof > 4"
 
 TCut fiducialCut = "PHOLEAD_isEBEEGap==0 && PHOLEAD_isEBGap==0"
   " && PHOLEAD_isEEGap==0 && PHOLEAD_isTransGap==0"
-  " && abs(PHOLEAD_scEta) < 2.5"
+  " && abs(PHOLEAD_scEta) < 2.5"  
+  //  " && PHOLEAD_scEta > 0" 
+  //  " && PHOLEAD_scEta < 0" 
   ;
 
 TCut myCut       = basicCut + fiducialCut;
 
 TCut looseCut    = basicCut;
 
-TCut Cut_900GeV  = "run<124120";
+TCut Cut_900GeV  = "run<124120 && run!=123815";
 TCut Cut_2360GeV = "run==124120"; 
 
 TCut barrelCut   = "PHOLEAD_isEB==1 && PHOLEAD_isEE==0";

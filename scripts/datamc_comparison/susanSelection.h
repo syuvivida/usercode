@@ -1,22 +1,22 @@
 #include <TCut.h>
 
-TCut basicCut    = "vtxIsFake==0 && vtxNdof > 4"
-  " && ((PHOLEAD_isEB==1 && PHOLEAD_isEE==0 && (PHOLEAD_eMax/PHOLEAD_e3x3<0.9)) || (PHOLEAD_isEB==0 && PHOLEAD_isEE==1))"
-  " && nHfTowersP>=1 && nHfTowersN>=1 && clusVtxCut==1"
-  " && PHOLEAD_hasPixelSeed==0"
+TCut basicCut    = "vtxIsFake==0 && vtxNdof >= 4"
+  " && ((PHOLEAD_isEB==1 && PHOLEAD_isEE==0 && !(abs(PHOLEAD_eMax/PHOLEAD_e3x3-1)<0.1)) || (PHOLEAD_isEB==0 && PHOLEAD_isEE==1))" 
   " && PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta)))) > 2.0"
   ;
 
 TCut fiducialCut = "PHOLEAD_isEBEEGap==0 && PHOLEAD_isEBGap==0"
   " && PHOLEAD_isEEGap==0 && PHOLEAD_isTransGap==0"
-  " && abs(PHOLEAD_scEta) < 3.0"
+  " && abs(PHOLEAD_scEta) < 2.5"
+  //  " && PHOLEAD_scEta > 0" 
+  //  " && PHOLEAD_scEta < 0" 
   ;
 
 TCut myCut       = basicCut + fiducialCut;
 
 TCut looseCut    = basicCut;
 
-TCut Cut_900GeV  = "run<124120";
+TCut Cut_900GeV  = "run<124120 && run!=123815";
 TCut Cut_2360GeV = "run==124120"; 
 
 TCut barrelCut   = "PHOLEAD_isEB==1 && PHOLEAD_isEE==0";
