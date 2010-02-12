@@ -79,7 +79,7 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,35,0,35.0,"Energy of second energetic crystal [GeV]","","",6.0);
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",100,0.0,2.0,"eMax/e3x3","","");
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio"+tempName,100,0.0,2.0,"eMax/e3x3","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,100,0,100.0,"e2x2 [GeV]","","",6.0);
 
@@ -195,7 +195,7 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,35,0,35.0,"Energy of second energetic crystal [GeV]","",etaCut,6.0);
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",100,0.0,2.0,"eMax/e3x3","",etaCut);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio"+tempName,100,0.0,2.0,"eMax/e3x3","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,100,0,100.0,"e2x2 [GeV]","",etaCut,6.0);
 
@@ -310,7 +310,7 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName,35,0,35.0,"Energy of second energetic crystal [GeV]","",etaCut,6.0);
 
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio",100,0.0,2.0,"eMax/e3x3","",etaCut);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio"+tempName,100,0.0,2.0,"eMax/e3x3","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName,100,0,100.0,"e2x2 [GeV]","",etaCut,6.0);
 
