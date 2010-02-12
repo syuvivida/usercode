@@ -89,7 +89,8 @@ void overlayData(TChain* t1,
       sprintf(HisName,"h%02i",i);
       h[i] = new TH1F(HisName,title,nbin,xmin,xmax);
       h[i]->SetXTitle(xtitle.data());  
-      h[i]->SetYTitle(ytitle.data());  
+//       h[i]->SetYTitle(ytitle.data());  
+//       h[i]->SetTitleOffset(1.5,"Y");
       std::string histo = HisName;
       std::string tempDraw = var1 + ">>" + histo;
       t1->Draw(tempDraw.data(), allCut && thisRunCut);
