@@ -26,7 +26,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   cout << "overall scale factor = " << hscale->GetBinContent(1) << endl;
   
   // if we want to use an overall scale factor, uncommented the following line
-  //  fmc = hscale->GetBinContent(1) ;
+  fmc = hscale->GetBinContent(1) ;
   cout << "Now fmc = " << fmc << endl;
 
   TH1F *hmcc = (TH1F*)hmc->Clone();
