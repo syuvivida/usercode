@@ -44,12 +44,14 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   decCode = 1;
 
+
   compareTwoTrees(dataF,mcF,"vtxX",decCode,"vx"+tempName,50,-0.1,1.5,"Highest #Sigma p_{T} vertex x position [cm]","","",-1000.);
 
   compareTwoTrees(dataF,mcF,"vtxY",decCode,"vy"+tempName,50,-0.3,2.0,"Highest #Sigma p_{T} vertex y position [cm]","","",-1000.);
 
   compareTwoTrees(dataF,mcF,"vtxZ",decCode,"vz"+tempName,50,-20.,30.,"Highest #Sigma p_{T} vertex z position [cm]","","",-1000.);
 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_ncry",decCode,"scncry"+tempName,25,-0.5,49.5,"Number of hits used in SC","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_energy",decCode,"energy"+tempName,25,0.,25.,"E(#gamma) [GeV]","","",6.5);
 

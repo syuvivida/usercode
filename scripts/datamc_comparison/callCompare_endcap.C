@@ -39,6 +39,7 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"vtxZ",decCode,"vz"+tempName,50,-20.,30.,"Highest #Sigma p_{T} vertex z position [cm]","","",-1000);
 
+  compareTwoTrees(dataF,mcF,"PHOLEAD_ncry",decCode,"scncry"+tempName,25,-0.5,49.5,"Number of hits used in SC","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_energy",decCode,"energy"+tempName,100,0.,100.,"E(#gamma) [GeV]","","",6.5);
 

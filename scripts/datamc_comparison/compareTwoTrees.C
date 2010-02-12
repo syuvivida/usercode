@@ -15,12 +15,19 @@ void compareTwoTrees(TChain* t1, TChain* t2,
 
   // cuts for getting overall scale factor
   TCut scaleCut = myCut;
-//  TCut scaleCut = "";
 
   if(decCode%10==1)
-    allCut += barrelCut;
+    {
+      allCut += barrelCut;
+      scaleCut += barrelCut;
+    }
+      
   else if(decCode%10==2)
-    allCut += endcapCut;
+    {
+      allCut += endcapCut;
+      scaleCut += endcapCut;
+    }
+
 
 //   // only for data
   TCut dataCut;
