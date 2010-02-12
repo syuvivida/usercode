@@ -7,7 +7,7 @@ TCut basicCut    = "vtxIsFake==0 && vtxNdof >= 4"
   ;
 
 TCut fiducialCut = "PHOLEAD_isEBEEGap==0 && PHOLEAD_isEBGap==0"
-  " && PHOLEAD_isEEGap==0 && PHOLEAD_isTransGap==0"
+  " && PHOLEAD_isEEGap==0"
   " && abs(PHOLEAD_scEta) < 2.5"
   ;
 
