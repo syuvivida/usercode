@@ -84,7 +84,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_phiWidth",decCode,"scphiwidth"+tempName,32,0,0.16,"SC #phi width","","",5.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","","",26.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","","",5.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eMax",decCode,"sceMax"+tempName,25,0,25.0,"Energy of most energetic crystal [GeV]","","",30.0);
 
@@ -105,7 +105,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","","",10.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.001,0.002,"covEtaPhi","","",5.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.002,"covEtaPhi","","",6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","","",12.0);
 
@@ -233,7 +233,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_phiWidth",decCode,"scphiwidth"+tempName,32,0,0.16,"SC #phi width","",etaCut,5.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","",etaCut,26.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","",etaCut,5.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eMax",decCode,"sceMax"+tempName,25,0,25.0,"Energy of most energetic crystal [GeV]","",etaCut,30.0);
 
@@ -251,7 +251,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","",etaCut,10.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.001,0.002,"covEtaPhi","",etaCut,5.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.002,"covEtaPhi","",etaCut,6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","",etaCut,12.0);
 
@@ -353,7 +353,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_phiWidth",decCode,"scphiwidth"+tempName,32,0,0.16,"SC #phi width","",etaCut,5.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","",etaCut,26.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,25,0,0.04,"SC #eta width","",etaCut,5.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eMax",decCode,"sceMax"+tempName,25,0,25.0,"Energy of most energetic crystal [GeV]","",etaCut,30.0);
 
@@ -371,7 +371,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","",etaCut,10.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.001,0.002,"covEtaPhi","",etaCut,5.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.002,"covEtaPhi","",etaCut,6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","",etaCut,12.0);
 

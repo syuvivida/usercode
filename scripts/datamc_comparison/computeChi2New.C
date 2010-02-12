@@ -119,8 +119,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   hmcc->SetXTitle("");
   hmcc->GetYaxis()->SetDecimals();
   hdatac->GetYaxis()->SetDecimals();
-//   hmcc->GetYaxis()->SetNdivisions(5);
-//   hdatac->GetYaxis()->SetNdivisions(5);
+  hmcc->GetXaxis()->SetNdivisions(5);
+  hdatac->GetXaxis()->SetNdivisions(5);
   hdatac->SetXTitle("");
   if(!logy)
     {
@@ -199,6 +199,7 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   gStyle->SetOptFit(1);
   hscale->SetTitle("");
   hscale->GetYaxis()->SetDecimals();
+  hscale->GetXaxis()->SetNdivisions(5);
   hscale->SetMinimum(-0.5);
   float maximum = hscale->GetMaximum()+2.0;
   if(ymax>-999.)hscale->SetMaximum(ymax);
