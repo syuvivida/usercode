@@ -119,7 +119,8 @@ void overlayData(TChain* t1,
     }
  
   cout << "Run " << MINRUN << " has minimum entries = " << MIN << endl;
-  
+  MIN = hs[firstNonZero]->GetEntries();
+  cout << "Run 124023 has minimum entries = " << MIN << endl;
 
   // find out the maximum and scale every histogram to have the same entries;
   float MAX = -999.;
@@ -174,12 +175,14 @@ void overlayData(TChain* t1,
   h[firstNonZero]->SetLineStyle(1);
   h[firstNonZero]->SetLineWidth(2);
   h[firstNonZero]->SetMarkerSize(0);
+  h[firstNonZero]->GetXaxis()->SetNdivisions(5);
   char name[300];
   cout << "Run " << runNo[firstNonZero] << " included" << endl;
  
   int nHistos = 0;
   int nCanvas = 0;
   int colorCODE[]={kRed, kBlue, kViolet};
+  int markerCODE[]={24,21,3};
 
   for(int i=0; i < numRuns; i++)
     {
@@ -192,11 +195,14 @@ void overlayData(TChain* t1,
       // setting color and line style
       int tempNumber =(nHistos-1)%HistosPerCanvas;
       int COLOR = colorCODE[tempNumber] ; //((int)(tempNumber/2)+1)*2;
+      int MARKER = markerCODE[tempNumber];
       int STYLE = nHistos%2 == 1? 1: 3;
       cout << COLOR << endl;
       h[i]->SetLineColor(COLOR);
+      h[i]->SetMarkerStyle(MARKER);
       h[i]->SetLineStyle(STYLE);
-      h[i]->SetMarkerSize(0);
+      h[i]->SetMarkerColor(COLOR);
+      h[i]->SetMarkerSize(1);
       h[i]->SetLineWidth(2);
 
       if(nHistos%HistosPerCanvas==1)
@@ -205,7 +211,7 @@ void overlayData(TChain* t1,
 	    c1->SetLogy(1);
 	  else
 	    c1->SetLogy(0);
-
+	  h[firstNonZero]->SetMarkerSize(0);
 	  h[firstNonZero]->Draw("histe");
 	  leg4->Clear();
 	  leg4->SetHeader(decName.data());

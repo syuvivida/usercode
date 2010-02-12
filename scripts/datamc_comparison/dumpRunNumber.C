@@ -49,7 +49,7 @@ void dumpRunNumber(std::string dataname)
   int ngood = 0;
   for(RunMap::iterator i=runs.begin(); i!=runs.end(); ++i)
     {
-      if(i->second < 500)continue;
+      if(i->second < 400)continue;
       cout << i->first << " " << i->second << endl;
       fout << i->first << endl;
       ngood ++;

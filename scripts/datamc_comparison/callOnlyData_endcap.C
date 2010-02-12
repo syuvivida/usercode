@@ -32,7 +32,7 @@ void callOnlyData_endcap(std::string dataName)
   overlayData(dataF,"PHOLEAD_energy",decCode,"energy"+tempName, 25,0., 100,"E(#gamma) [GeV]","","",true);
 
 
-  overlayData(dataF,"PHOLEAD_pt",decCode,"pt"+tempName,10,0.,20.,"p_{T}(#gamma) [GeV/c]","","",true);
+  overlayData(dataF,"PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"rawet"+tempName,10,0.,20.,"raw E_{T}(#gamma) [GeV]","","",true);
 
 
   overlayData(dataF,"PHOLEAD_eta",decCode,"eta"+tempName,20,-3.,7.,"#eta(#gamma) ","","");
@@ -63,7 +63,7 @@ void callOnlyData_endcap(std::string dataName)
 
   overlayData(dataF,"PHOLEAD_phiWidth",decCode,"scphiwidth"+tempName,10,0,0.25,"SC #phi width","","");
 
-  overlayData(dataF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,10,0,0.25,"SC #eta width","","");
+  overlayData(dataF,"PHOLEAD_etaWidth",decCode,"scetawidth"+tempName,20,0,0.25,"SC #eta width","","");
 
   overlayData(dataF,"PHOLEAD_eMax",decCode,"sceMax"+tempName,15,0,60.0,"Energy of most energetic crystal [GeV]","","",true);
 
@@ -80,15 +80,15 @@ void callOnlyData_endcap(std::string dataName)
 
   overlayData(dataF,"PHOLEAD_e5x5",decCode,"sce5x5"+tempName, 25,0, 100.,"e5x5 [GeV]","","",true);
 
-  overlayData(dataF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName, 5,0,0.02,"covPhiPhi","","");
+  overlayData(dataF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,10,0,0.02,"covPhiPhi","","");
 
-  overlayData(dataF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName, 5, -0.01,0.03,"covEtaPhi","","");
+  overlayData(dataF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName, 5, -0.005,0.02,"covEtaPhi","","");
 
-  overlayData(dataF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName, 5,0,0.02,"covEtaEta","","");
+  overlayData(dataF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName, 10,0,0.02,"covEtaEta","","");
 
-  overlayData(dataF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName, 5,0,0.25,"#sigma_{#eta#eta}","","");
+  overlayData(dataF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName, 10,0,0.25,"#sigma_{#eta#eta}","","");
 
-  overlayData(dataF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName, 5,0,0.25,"#sigma_{i#etai#eta}","","");
+  overlayData(dataF,"PHOLEAD_sigmaIetaIeta",decCode,"sigietaieta"+tempName, 10,0,0.25,"#sigma_{i#etai#eta}","","");
 
 
   overlayData(dataF,"PHOLEAD_hadronicOverEm",decCode,"hadem"+tempName,16,0,0.8,"E_{had}/E_{EM}","","",true);

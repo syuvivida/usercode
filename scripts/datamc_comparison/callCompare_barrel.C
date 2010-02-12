@@ -34,7 +34,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   decCode = 0;
 
-  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","","",10.0);
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,60,-0.5,599.5,"Number of pixel hits in each event ","","",10.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","","");
 
@@ -182,7 +182,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   
   decCode = 10;
 
-  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","",etaCut,10.0);
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,60,-0.5,599.5,"Number of pixel hits in each event ","",etaCut,10.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","",etaCut);
 
@@ -302,7 +302,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
   
   decCode = 20;
 
-  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","",etaCut,10.0);
+  compareTwoTrees(dataF,mcF,"nHits",decCode,"npixelhits"+tempName,60,-0.5,599.5,"Number of pixel hits in each event ","",etaCut,10.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_eta",decCode,"eta"+tempName,55,-3.,8.,"#eta(#gamma) ","",etaCut);
 
