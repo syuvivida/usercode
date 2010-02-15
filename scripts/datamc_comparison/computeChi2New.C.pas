@@ -16,6 +16,14 @@
 
 void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, int decCode, bool logy, float ymax)
 {
+  // check if one should use ndivision5 or not
+  bool useNDivison5=true;
+  if(psname.find("sceta") != std::string::npos || psname.find("scphi") != std::string::npos)
+    useNDivison5=false;
+  if(psname.find("scetawidth") != std::string::npos || psname.find("scphiwidth") != std::string::npos)
+    useNDivison5=true;
+
+
   // scale the area of the cloned histogram to 1
   char name[100];
   float fmc = (float)hdata->GetEntries()/(float)hmc->GetEntries();
@@ -108,10 +116,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   gPad->SetTopMargin(0.01);
   gPad->SetBottomMargin(0);
   gPad->SetRightMargin(0.04);
-//   hdatac->SetMarkerStyle(21);
   hdatac->SetMarkerColor(dataColor);
   hdatac->SetLineColor(dataColor);
-//   hmcc->SetMarkerStyle(22);
   hmcc->SetMarkerSize(0);
   hmcc->SetMarkerColor(mcColor);
   hmcc->SetLineColor(mcColor);
@@ -120,8 +126,11 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   hmcc->SetXTitle("");
   hmcc->GetYaxis()->SetDecimals();
   hdatac->GetYaxis()->SetDecimals();
-  hmcc->GetXaxis()->SetNdivisions(5);
-  hdatac->GetXaxis()->SetNdivisions(5);
+  if(useNDivison5)
+    {
+      hmcc->GetXaxis()->SetNdivisions(5);
+      hdatac->GetXaxis()->SetNdivisions(5);
+    }
   hdatac->SetXTitle("");
   setTDRStyle();
  
@@ -162,13 +171,10 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
   sprintf(name,"#chi^{2}/N = %d/%d",chi2,realbin-1 );
 
-//   TLegend* leg4 = new TLegend(0.60302,0.655274,0.80987,0.914113);
   TLegend* leg4 = new TLegend(0.60302,0.455274,0.80987,0.714113);
-  //  leg4->SetHeader(name);
   leg4->SetFillColor(0);
   leg4->SetFillStyle(0);
   leg4->SetTextSize(0.055);
-  //  leg4->SetTextFont(42);
   leg4->SetBorderSize(0);
   std::string dataname = "Data";
   if(decCode%10==1) dataname += " (barrel)";
@@ -198,12 +204,6 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
 
   c1->cd(2);
-//   gStyle->SetStatW       (0.3);
-//   gStyle->SetStatH       (0.3);
-//   gStyle->SetStatX       (0.879447);
-//   gStyle->SetStatY       (0.939033);
-//   gStyle->SetStatFontSize(0.05);
-//   gStyle->SetStatBorderSize(0);
   gPad->SetRightMargin(0.04);
   gPad->SetTopMargin(0);
   gPad->SetBottomMargin(0.2);
@@ -211,7 +211,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   gStyle->SetOptFit(1);
   hscale->SetTitle("");
   hscale->GetYaxis()->SetDecimals();
-  hscale->GetXaxis()->SetNdivisions(5);
+  if(useNDivison5)
+    hscale->GetXaxis()->SetNdivisions(5);
   hscale->SetMinimum(-0.5);
   float maximum = hscale->GetMaximum()+2.0;
   if(ymax>-999.)hscale->SetMaximum(ymax);
