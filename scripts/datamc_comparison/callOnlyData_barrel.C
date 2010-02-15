@@ -31,7 +31,7 @@ void callOnlyData_barrel(std::string dataName)
 
   decCode = 0;
 
-  overlayData(dataF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,599.5,"Number of pixel hits in each event ","","");
+  overlayData(dataF,"nHits",decCode,"npixelhits"+tempName,10,-0.5,799.5,"Number of pixel hits in each event ","","");
 
   overlayData(dataF,"PHOLEAD_eta",decCode,"eta"+tempName,20,-3.,7.,"#eta(#gamma) ","","");
 
