@@ -150,7 +150,10 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
   latexLabel.SetTextSize(0.055);
   latexLabel.SetNDC();
   latexLabel.DrawLatex(0.56, 0.87, "CMS Preliminary 2009");
-  latexLabel.DrawLatex(0.56, 0.80, "#sqrt{s} = 900 GeV");
+  if(psname.find("2360") != std::string::npos)
+    latexLabel.DrawLatex(0.56, 0.80, "#sqrt{s} = 2.36 TeV");
+  else
+    latexLabel.DrawLatex(0.56, 0.80, "#sqrt{s} = 900 GeV");
 
   TLine* l1 = new TLine(low,0,high,0);
   l1->SetLineColor(2);
@@ -236,8 +239,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
 
   std::string filename = dirname + psname + ".eps";
   c1->Print(filename.data());
-  filename = dirname + psname + ".gif";  
-  c1->Print(filename.data());
+//   filename = dirname + psname + ".gif";  
+//   c1->Print(filename.data());
 
   delete c1;
   delete l1;
