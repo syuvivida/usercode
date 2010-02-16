@@ -105,7 +105,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","","",10.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.002,"covEtaPhi","","",6.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.001,"covEtaPhi","","",6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","","",12.0);
 
@@ -251,7 +251,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","",etaCut,10.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.002,"covEtaPhi","",etaCut,6.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.001,"covEtaPhi","",etaCut,6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","",etaCut,12.0);
 
@@ -371,7 +371,7 @@ void callCompare_barrel(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.001,"covPhiPhi","",etaCut,10.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.002,"covEtaPhi","",etaCut,6.0);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,30, -0.0004,0.001,"covEtaPhi","",etaCut,6.0);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.001,"covEtaEta","",etaCut,12.0);
 

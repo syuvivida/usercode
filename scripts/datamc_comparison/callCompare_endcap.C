@@ -90,11 +90,11 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e5x5",decCode,"sce5x5"+tempName,100,0,100.0,"e5x5 [GeV]","","",6.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,30,0,0.03,"covPhiPhi","","");
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.01,"covPhiPhi","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,60, -0.005,0.01,"covEtaPhi","","",6.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,30,0,0.03,"covEtaEta","","");
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.01,"covEtaEta","","");
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName,25,0,0.25,"#sigma_{#eta#eta}","","");
 
@@ -206,11 +206,11 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e5x5",decCode,"sce5x5"+tempName,100,0,100.0,"e5x5 [GeV]","",etaCut,6.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,30,0,0.03,"covPhiPhi","",etaCut);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.01,"covPhiPhi","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,60, -0.005,0.01,"covEtaPhi","",etaCut,6.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,30,0,0.03,"covEtaEta","",etaCut);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.01,"covEtaEta","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName,25,0,0.25,"#sigma_{#eta#eta}","",etaCut);
 
@@ -321,11 +321,11 @@ void callCompare_endcap(std::string dataName, std::string mcName, bool applyWeig
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_e5x5",decCode,"sce5x5"+tempName,100,0,100.0,"e5x5 [GeV]","",etaCut,6.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,30,0,0.03,"covPhiPhi","",etaCut);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName,20,0,0.01,"covPhiPhi","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,60, -0.005,0.01,"covEtaPhi","",etaCut,6.0);
 
-  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,30,0,0.03,"covEtaEta","",etaCut);
+  compareTwoTrees(dataF,mcF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,20,0,0.01,"covEtaEta","",etaCut);
 
   compareTwoTrees(dataF,mcF,"PHOLEAD_sigmaEtaEta",decCode,"sigetaeta"+tempName,25,0,0.25,"#sigma_{#eta#eta}","",etaCut);
 
