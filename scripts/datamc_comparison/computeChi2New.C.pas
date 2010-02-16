@@ -106,7 +106,8 @@ void computeChi2New(TH1F* hdata, TH1F* hmc, TH1F* hscale, std::string psname, in
    }
  
   int dataColor=1;
-  int mcColor = 64;
+//  int mcColor = 64;
+  int mcColor = kYellow;
   
   TCanvas* c1 = new TCanvas("c1","",700,1000);  
   c1->Divide(1,2,0.01,0);
