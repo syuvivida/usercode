@@ -2,6 +2,7 @@
 #include "tightSelection.h"
 #include "setTDRStyle.C"
 
+
 void overlayData(TChain* t1,
 		 std::string var1,
 		 int decCode, 
@@ -10,7 +11,7 @@ void overlayData(TChain* t1,
 		 std::string xtitle="", std::string ytitle="",
 		 TCut cut1="",bool logy=false)
 {
-  
+
   // for cuts the same for barrel and endcap
   TCut allCut = cut1 + myCut;
 
@@ -159,9 +160,8 @@ void overlayData(TChain* t1,
   if(decCode==0)decName = "all";
   else if(decCode==1)decName = "barrel";
   else if(decCode==2)decName = "endcap";
-
-  TLegend* leg4 = new TLegend(0.652529,0.204407,0.859425,0.758305);
-  //  TLegend* leg4 = new TLegend(0.652529,0.364407,0.859425,0.898305);
+  
+  TLegend* leg4 = new TLegend(0.652529,0.22,0.859425,0.75);
   leg4->SetFillColor(0);
   leg4->SetFillStyle(0);
   leg4->SetTextSize(0.04);
@@ -230,6 +230,7 @@ void overlayData(TChain* t1,
 	{
 	  nCanvas ++;
 	  leg4->Draw("same");
+
 	  TLatex latexLabel;
 	  latexLabel.SetTextSize(0.04);
 	  latexLabel.SetNDC();
@@ -238,6 +239,7 @@ void overlayData(TChain* t1,
 	    latexLabel.DrawLatex(0.56, 0.80, "#sqrt{s} = 2.36 TeV");
 	  else
 	    latexLabel.DrawLatex(0.56, 0.80, "#sqrt{s} = 900 GeV");
+
 
 	  sprintf(name,"%d",nCanvas);
 	  std::string countName(name);
