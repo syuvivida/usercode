@@ -113,6 +113,6 @@ void callOnlyData_barrel(std::string dataName)
 
   overlayData(dataF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","","");
 
-  overlayData(dataF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,5,-1.0,9.0,"hcalTowerSumEtConeDR04 [GeV]","","",true);
+  overlayData(dataF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,10,-1.0,9.0,"hcalTowerSumEtConeDR04 [GeV]","","",true);
 
 }
