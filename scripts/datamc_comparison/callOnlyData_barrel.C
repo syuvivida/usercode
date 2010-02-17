@@ -42,7 +42,7 @@ void callOnlyData_barrel(std::string dataName)
   
   overlayData(dataF,"PHOLEAD_energy",decCode,"energy"+tempName, 7,0.,28.,"E(#gamma) [GeV]","","",true);
 
-  overlayData(dataF,"PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"rawet"+tempName,14,0.,28.,"raw E_{T}(#gamma) [GeV]","","",true);
+  overlayData(dataF,"PHOLEAD_rawEnergy*sin( (2*atan(exp(-PHOLEAD_scEta))))",decCode,"rawet"+tempName,30,0.,120,"raw E_{T}(#gamma) [GeV]","","",true);
 
 
   overlayData(dataF,"PHOLEAD_eta",decCode,"eta"+tempName,16,-3.,5.,"#eta(#gamma) ","","");
@@ -54,10 +54,10 @@ void callOnlyData_barrel(std::string dataName)
 
 
 
-  overlayData(dataF,"PHOLEAD_scPhi",decCode,"scphi"+tempName,10,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","","");
+  overlayData(dataF,"PHOLEAD_scPhi",decCode,"scphi"+tempName,20,-1.5*TMath::Pi(),3.5*TMath::Pi(),"SC #phi","","");
 
 
-  overlayData(dataF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName, 10,0.,20.,"SC raw energy [GeV]","","",true);
+  overlayData(dataF,"PHOLEAD_rawEnergy",decCode,"rawenergy"+tempName, 30,0.,120,"SC raw energy [GeV]","","",true);
 
   
   overlayData(dataF,"PHOLEAD_r9",decCode,"r9"+tempName,10,0,2.0,"R9(#gamma) ","","");
@@ -86,7 +86,7 @@ void callOnlyData_barrel(std::string dataName)
 
   overlayData(dataF,"PHOLEAD_covPhiPhi",decCode,"covphiphi"+tempName, 10,0,0.001,"covPhiPhi","","");
 
-  overlayData(dataF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,5, -0.0005,0.0005,"covEtaPhi","","");
+  overlayData(dataF,"PHOLEAD_covEtaPhi",decCode,"covetaphi"+tempName,12, -0.0005,0.0007,"covEtaPhi","","");
 
   overlayData(dataF,"PHOLEAD_covEtaEta",decCode,"covetaeta"+tempName,10 ,0,0.001,"covEtaEta","","");
 
@@ -113,6 +113,6 @@ void callOnlyData_barrel(std::string dataName)
 
   overlayData(dataF,"PHOLEAD_nTrkHollowConeDR04",decCode,"hollowntrk04"+tempName,11,-0.5,10.5,"nTrkHollowConeDR04","","");
 
-  overlayData(dataF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,10,-1.0,9.0,"hcalTowerSumEtConeDR04 [GeV]","","",true);
+  overlayData(dataF,"PHOLEAD_hcalTowerSumEtConeDR04",decCode,"hcaliso04"+tempName,12,-1.0,11.,"hcalTowerSumEtConeDR04 [GeV]","","",true);
 
 }

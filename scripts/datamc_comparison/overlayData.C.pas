@@ -149,6 +149,7 @@ void overlayData(TChain* t1,
 
 
   MAX *= 1.2;
+  //  if(psname.find("raw") != std::string::npos)MAX =1e5;
   cout << "MAX = " << MAX << " and firstNonZero = " << firstNonZero << endl;
 
   for(int i= 0; i < numRuns; i++)
