@@ -113,8 +113,8 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if(std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= myConvPho.end())
 	convRate = 1.0;
       else convRate=0.0;
-      if(genMomPID==22 && it_gen->mother()->status()==3)
-	heta_counte->Fill(it_gen->eta(),convRate);
+      //      if(genMomPID==22 && it_gen->mother()->status()==3)
+      //	heta_counte->Fill(it_gen->eta(),convRate);
 
       GenInfo.Index[GenInfo.Size]    = GenInfo.Size;
       GenInfo.GenIndex[GenInfo.Size] = countIndex;
@@ -200,10 +200,12 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     if(!findOne)continue;
 
+    //    if(matchedPart->mother() && 
+    //       (matchedPart->mother()->pdgId()!=22 ||
+    //	matchedPart->mother()->status()!=3))
+    //      continue;
     if(matchedPart->mother() && 
-       (matchedPart->mother()->pdgId()!=22 ||
-	matchedPart->mother()->status()!=3))
-      continue;
+       matchedPart->mother()->pdgId()!=111)continue;
 
     heta_original->Fill(eta);
     hpt_original->Fill(et);
@@ -215,7 +217,7 @@ void Conv::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     he_conv->Fill(energy,rate);
     
     float rate_e = hasElectron? 1:0;
-//     heta_counte->Fill(eta,rate_e);
+    heta_counte->Fill(eta,rate_e);
     hpt_counte->Fill(et,rate_e);
     he_counte->Fill(energy,rate_e);
     

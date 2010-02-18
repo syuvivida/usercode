@@ -37,8 +37,10 @@ void GenIso::beginJob(const edm::EventSetup&)
   
   dphigj_match  = fs->make<TH1F>("dphigj_match","for photon pt close to pthat" 
 				 " within 10%", ndphibin, dphimin, dphimax);
-  dphigj_lowpt  = fs->make<TH1F>("dphigj_lowpt","for photon pt not close to pthat" 
-				 " within 50%", ndphibin, dphimin, dphimax);
+  dphigj_lopt  = fs->make<TH1F>("dphigj_lopt","for photon pt not close to pthat" 
+				 " within -50%", ndphibin, dphimin, dphimax);
+  dphigj_hipt  = fs->make<TH1F>("dphigj_hipt","for photon pt not close to pthat" 
+				 " within +50%", ndphibin, dphimin, dphimax);
   dphigj_mismatch  = fs->make<TH1F>("dphigj_mismatch","for photon pt "
 				    "much lower than hard-scattering photon pt", 
 				    ndphibin, dphimin, dphimax);
@@ -50,16 +52,20 @@ void GenIso::beginJob(const edm::EventSetup&)
 
   detagj_match  = fs->make<TH1F>("detagj_match","for photon pt close to pthat" 
 				 " within 10%", ndetabin, detamin, detamax);
-  detagj_lowpt  = fs->make<TH1F>("detagj_lowpt","for photon pt not close to pthat" 
-				 " within 50%", ndetabin, detamin, detamax);
+  detagj_lopt  = fs->make<TH1F>("detagj_lopt","for photon pt not close to pthat" 
+				 " within -50%", ndetabin, detamin, detamax);
+  detagj_hipt  = fs->make<TH1F>("detagj_hipt","for photon pt not close to pthat" 
+				 " within +50%", ndetabin, detamin, detamax);
   detagj_mismatch  = fs->make<TH1F>("detagj_mismatch","for photon pt "
 				    "much lower than hard-scattering photon pt", 
 				    ndetabin, detamin, detamax);
 
   drgj_match  = fs->make<TH1F>("dr_match","for photon pt close to pthat"
                                  " within 10%", ndetabin, detamin, detamax);
-  drgj_lowpt  = fs->make<TH1F>("dr_lowpt","for photon pt not close to pthat"
-                                 " within 50%", ndetabin, detamin, detamax);
+  drgj_lopt  = fs->make<TH1F>("dr_lopt","for photon pt not close to pthat"
+                                 " within -50%", ndetabin, detamin, detamax);
+  drgj_hipt  = fs->make<TH1F>("dr_hipt","for photon pt not close to pthat"
+                                 " within +50%", ndetabin, detamin, detamax);
   drgj_mismatch  = fs->make<TH1F>("dr_mismatch","for photon pt "
                                     "much lower than hard-scattering photon pt",
                                     ndetabin, detamin, detamax);
@@ -97,12 +103,20 @@ void GenIso::beginJob(const edm::EventSetup&)
   fIsoPt01_match->Sumw2();
   fEffIso_match->Sumw2();
 
-  fIsoPt00_lowpt = fs->make<TH1F>("fIsoPt00_lowpt", "(pthat-ptmin diff>50%) Photon pt before isolation cuts", nptbin, xptmin, xptmax);  
-  fIsoPt01_lowpt = fs->make<TH1F>("fIsoPt01_lowpt", "(pthat-ptmin diff>50%) Photon pt after isolation Et < 2 GeV cuts", nptbin, xptmin, xptmax);
-  fEffIso_lowpt  = fs->make<TH1F>("fEffIso_lowpt", "(pthat-ptmin diff>50%) Photon isolation efficiency", nptbin, xptmin, xptmax);
-  fIsoPt00_lowpt->Sumw2();
-  fIsoPt01_lowpt->Sumw2();
-  fEffIso_lowpt->Sumw2();
+  fIsoPt00_lopt = fs->make<TH1F>("fIsoPt00_lopt", "(pthat-ptmin diff>50%) Photon pt before isolation cuts", nptbin, xptmin, xptmax);  
+  fIsoPt01_lopt = fs->make<TH1F>("fIsoPt01_lopt", "(pthat-ptmin diff>50%) Photon pt after isolation Et < 2 GeV cuts", nptbin, xptmin, xptmax);
+  fEffIso_lopt  = fs->make<TH1F>("fEffIso_lopt", "(pthat-ptmin diff>50%) Photon isolation efficiency", nptbin, xptmin, xptmax);
+  fIsoPt00_lopt->Sumw2();
+  fIsoPt01_lopt->Sumw2();
+  fEffIso_lopt->Sumw2();
+
+  fIsoPt00_hipt = fs->make<TH1F>("fIsoPt00_hipt", "(pthat-ptmin diff>50%) Photon pt before isolation cuts", nptbin, xptmin, xptmax);  
+  fIsoPt01_hipt = fs->make<TH1F>("fIsoPt01_hipt", "(pthat-ptmin diff>50%) Photon pt after isolation Et < 2 GeV cuts", nptbin, xptmin, xptmax);
+  fEffIso_hipt  = fs->make<TH1F>("fEffIso_hipt", "(pthat-ptmin diff>50%) Photon isolation efficiency", nptbin, xptmin, xptmax);
+  fIsoPt00_hipt->Sumw2();
+  fIsoPt01_hipt->Sumw2();
+  fEffIso_hipt->Sumw2();
+
 
   fIsoPt00_mismatch = fs->make<TH1F>("fIsoPt00_mismatch", "(Mismatched to hardscattering) Photon pt before isolation cuts", nptbin, xptmin, xptmax);  
   fIsoPt01_mismatch = fs->make<TH1F>("fIsoPt01_mismatch", "(Mismatched to hardscattering) Photon pt after isolation Et < 2 GeV cuts", nptbin, xptmin, xptmax);
@@ -141,12 +155,21 @@ void GenIso::beginJob(const edm::EventSetup&)
   fIsoEta01_match->Sumw2();
   fEffIsoEta_match->Sumw2();
 
-  fIsoEta00_lowpt = fs->make<TH1F>("fIsoEta00_lowpt", "(pthat-ptmin diff>50%) Photon eta before isolation cuts", netabin, xetamin, xetamax);  
-  fIsoEta01_lowpt = fs->make<TH1F>("fIsoEta01_lowpt", "(pthat-ptmin diff>50%) Photon eta after isolation Et < 2 GeV cuts", netabin, xetamin, xetamax);
-  fEffIsoEta_lowpt  = fs->make<TH1F>("fEffIsoEta_lowpt", "(pthat-ptmin diff>50%) Photon isolation efficiency", netabin, xetamin, xetamax);
-  fIsoEta00_lowpt->Sumw2();
-  fIsoEta01_lowpt->Sumw2();
-  fEffIsoEta_lowpt->Sumw2();
+  fIsoEta00_lopt = fs->make<TH1F>("fIsoEta00_lopt", "(pthat-ptmin diff>50%) Photon eta before isolation cuts", netabin, xetamin, xetamax);  
+  fIsoEta01_lopt = fs->make<TH1F>("fIsoEta01_lopt", "(pthat-ptmin diff>50%) Photon eta after isolation Et < 2 GeV cuts", netabin, xetamin, xetamax);
+  fEffIsoEta_lopt  = fs->make<TH1F>("fEffIsoEta_lopt", "(pthat-ptmin diff>50%) Photon isolation efficiency", netabin, xetamin, xetamax);
+  fIsoEta00_lopt->Sumw2();
+  fIsoEta01_lopt->Sumw2();
+  fEffIsoEta_lopt->Sumw2();
+
+
+  fIsoEta00_hipt = fs->make<TH1F>("fIsoEta00_hipt", "(pthat-ptmin diff>50%) Photon eta before isolation cuts", netabin, xetamin, xetamax);  
+  fIsoEta01_hipt = fs->make<TH1F>("fIsoEta01_hipt", "(pthat-ptmin diff>50%) Photon eta after isolation Et < 2 GeV cuts", netabin, xetamin, xetamax);
+  fEffIsoEta_hipt  = fs->make<TH1F>("fEffIsoEta_hipt", "(pthat-ptmin diff>50%) Photon isolation efficiency", netabin, xetamin, xetamax);
+  fIsoEta00_hipt->Sumw2();
+  fIsoEta01_hipt->Sumw2();
+  fEffIsoEta_hipt->Sumw2();
+
 
   fIsoEta00_mismatch = fs->make<TH1F>("fIsoEta00_mismatch", "(Mismatched to hardscattering) Photon eta before isolation cuts", netabin, xetamin, xetamax);  
   fIsoEta01_mismatch = fs->make<TH1F>("fIsoEta01_mismatch", "(Mismatched to hardscattering) Photon eta after isolation Et < 2 GeV cuts", netabin, xetamin, xetamax);
@@ -172,8 +195,11 @@ void GenIso::endJob()
   fEffIso_mismatch->Divide(fIsoPt01_mismatch,fIsoPt00_mismatch,1.0,1.0,"B");
   fEffIsoEta_mismatch->Divide(fIsoEta01_mismatch, fIsoEta00_mismatch,1.0,1.0,"B");
 
-  fEffIso_lowpt->Divide(fIsoPt01_lowpt,fIsoPt00_lowpt,1.0,1.0,"B");
-  fEffIsoEta_lowpt->Divide(fIsoEta01_lowpt, fIsoEta00_lowpt,1.0,1.0,"B");
+  fEffIso_lopt->Divide(fIsoPt01_lopt,fIsoPt00_lopt,1.0,1.0,"B");
+  fEffIsoEta_lopt->Divide(fIsoEta01_lopt, fIsoEta00_lopt,1.0,1.0,"B");
+
+  fEffIso_hipt->Divide(fIsoPt01_hipt,fIsoPt00_hipt,1.0,1.0,"B");
+  fEffIsoEta_hipt->Divide(fIsoEta01_hipt, fIsoEta00_hipt,1.0,1.0,"B");
 
   fEffTrkIso->Divide(fTrkIsoPt01,fTrkIsoPt00,1.0,1.0,"B");
   fEffIsoCone03->Divide(fIsoCone0301,fIsoCone0300,1.0,1.0,"B");
@@ -243,9 +269,11 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // if this is a hard scattering photon
       if(genMomPID ==_pdgCode && it_gen->pdgId() == _pdgCode && 
-	 it_gen->mother()->status() == 3)
+ 	 it_gen->mother()->status() == 3)
+//       if(genMomPID !=_pdgCode && it_gen->pdgId() == _pdgCode && 
+// 	 it_gen->mother()->status() == 3)
 	{
-	  // assign variables for later use
+	  // assign variables for later use, look for the hardest photon
 	  if(genpt > stable_gammapt)
 	    {
 	      stable_gammapt       = genpt;
@@ -262,7 +290,8 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   
     // check only the first 8 particles
     bool ptMinMatchedToPtHat=false;
-    bool ptMinDiffFromPtHat =false;
+    bool ptMinDiffFromPtHat_plus =false;
+    bool ptMinDiffFromPtHat_minus =false;
     bool ptMinDiffFromPtHard=false;
     
     if(hasOut1 && hasOut2 && stable_gammapt > 0){
@@ -272,11 +301,11 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       float dr   = sqrt(dphi*dphi+deta*deta);
  
-      float diffpt =  fabs( (ptHat-stable_gammapt)/ptHat);
+      float diffpt =  (stable_gammapt-ptHat)/ptHat ;
 
       //      cout << "diffpt = " << diffpt << endl;
       
-      if(diffpt < 0.1)
+      if(fabs(diffpt) < 0.1)
 	{
 	  //	  cout << "matched pthat!!" << endl;
 	  accept = true;
@@ -287,15 +316,27 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	}
       
+      else if(diffpt < -0.5)
+	{
+	  //	  cout << "low pt" << endl;
+	  dphigj_lopt->Fill(dphi);
+	  detagj_lopt->Fill(deta);
+	  drgj_lopt  ->Fill(dr);
+	  ptMinDiffFromPtHat_minus = true;
+	  
+	}
+
+
       else if(diffpt > 0.5)
 	{
 	  //	  cout << "low pt" << endl;
-	  dphigj_lowpt->Fill(dphi);
-	  detagj_lowpt->Fill(deta);
-	  drgj_lowpt  ->Fill(dr);
-	  ptMinDiffFromPtHat = true;
+	  dphigj_hipt->Fill(dphi);
+	  detagj_hipt->Fill(deta);
+	  drgj_hipt  ->Fill(dr);
+	  ptMinDiffFromPtHat_plus = true;
 	  
 	}
+
 
       if( fabs(stable_gammapt - gamma_hard->pt())/gamma_hard->pt() > 0.4)
 	{
@@ -320,12 +361,17 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      fIsoPt01_match ->Fill(stable_gammapt);	  
 	  }
 	  
-	  if(ptMinDiffFromPtHat){
-	    fIsoPt00_lowpt ->Fill(stable_gammapt);
+	  if(ptMinDiffFromPtHat_minus){
+	    fIsoPt00_lopt ->Fill(stable_gammapt);
 	    if(stable_gammacaliso04 < _isoMaxCut)
-	      fIsoPt01_lowpt ->Fill(stable_gammapt);	  
+	      fIsoPt01_lopt ->Fill(stable_gammapt);	  
 	  }
 	  
+	  if(ptMinDiffFromPtHat_plus){
+	    fIsoPt00_hipt ->Fill(stable_gammapt);
+	    if(stable_gammacaliso04 < _isoMaxCut)
+	      fIsoPt01_hipt ->Fill(stable_gammapt);	  
+	  }
 
 	  if(ptMinDiffFromPtHard){
 	    fIsoPt00_mismatch ->Fill(stable_gammapt);
@@ -357,12 +403,17 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      fIsoEta01_match ->Fill(stable_gammaeta);	  
 	  }
 	  
-	  if(ptMinDiffFromPtHat){
-	    fIsoEta00_lowpt ->Fill(stable_gammaeta);
+	  if(ptMinDiffFromPtHat_minus){
+	    fIsoEta00_lopt ->Fill(stable_gammaeta);
 	    if(stable_gammacaliso04 < _isoMaxCut)
-	      fIsoEta01_lowpt ->Fill(stable_gammaeta);	  
+	      fIsoEta01_lopt ->Fill(stable_gammaeta);	  
 	  }
 	  
+	  if(ptMinDiffFromPtHat_plus){
+	    fIsoEta00_hipt ->Fill(stable_gammaeta);
+	    if(stable_gammacaliso04 < _isoMaxCut)
+	      fIsoEta01_hipt ->Fill(stable_gammaeta);	  
+	  }
 
 	  if(ptMinDiffFromPtHard){
 	    fIsoEta00_mismatch ->Fill(stable_gammaeta);
@@ -378,6 +429,45 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
   } // if have generator-level information
+
+
+  // the following code is ported from Vasu
+  using namespace HepMC;  
+  edm::Handle<HepMCProduct> hepMCProduct = _alg.getHepMCHandle();
+  const GenEvent* genEventInfo = hepMCProduct->GetEvent();
+  
+
+//   for(GenEvent::vertex_const_iterator vertexIter=genEventInfo->vertices_begin();vertexIter!=genEventInfo->vertices_end(); vertexIter++){
+//     HepMC::GenVertex *genVtxTemp = (*vertexIter);
+
+//     if(genVtxTemp->particles_in_size()!=2)
+//       continue;
+    
+//     if(genVtxTemp->particles_out_size()!=2)
+//       continue;   
+
+//     iBarCode =genVtxTemp->barcode();
+//     iVerticiesLeft++;
+ 
+//   }
+
+//   if(iVerticiesLeft>1)
+//     std::cout<<"************************************************** More than one vertex left"<<std::endl;
+
+//   HepMC::GenVertex *genVtxHard = genEventInfo->barcode_to_vertex(iBarCode);
+
+//   if(genVtxHard&&iVerticiesLeft==1){
+//     for(GenVertex::particles_out_const_iterator particleOut=genVtxHard->particles_out_const_begin();particleOut!=genVtxHard->particles_out_const_end(); particleOut++){
+//       HepMC::GenParticle* genParticle = (*particleOut);
+      
+//       if(genParticle->pdg_id()!=22&&genParticle->status()!=1)
+// 	continue;
+//   if(accept)    
+//   genEventInfo->print();
+//     }
+//   }
+ 
+
 
 
   if(accept){_nOut++;}

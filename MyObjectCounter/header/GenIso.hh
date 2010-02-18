@@ -81,6 +81,7 @@ private:
   TH1F* fEffIsoCone03;
 
   // separate in 3 cases
+  // for photons with pt that match to pthat
   TH1F* fIsoPt00_match;
   TH1F* fIsoPt01_match;
   TH1F* fEffIso_match;
@@ -88,12 +89,22 @@ private:
   TH1F* fIsoEta01_match;
   TH1F* fEffIsoEta_match;
 
-  TH1F* fIsoPt00_lowpt;
-  TH1F* fIsoPt01_lowpt;
-  TH1F* fEffIso_lowpt;
-  TH1F* fIsoEta00_lowpt;
-  TH1F* fIsoEta01_lowpt;
-  TH1F* fEffIsoEta_lowpt;
+  // for photons with pt that are 50% lower than the pthat
+  TH1F* fIsoPt00_lopt;
+  TH1F* fIsoPt01_lopt;
+  TH1F* fEffIso_lopt;
+  TH1F* fIsoEta00_lopt;
+  TH1F* fIsoEta01_lopt;
+  TH1F* fEffIsoEta_lopt;
+
+  // for photons with pt that are 50% higher than the pthat
+  TH1F* fIsoPt00_hipt;
+  TH1F* fIsoPt01_hipt;
+  TH1F* fEffIso_hipt;
+  TH1F* fIsoEta00_hipt;
+  TH1F* fIsoEta01_hipt;
+  TH1F* fEffIsoEta_hipt;
+
 
   TH1F* fIsoPt00_mismatch;
   TH1F* fIsoPt01_mismatch;
@@ -106,15 +117,18 @@ private:
   // check angular separation between photon and parton
   
   TH1F* dphigj_match;
-  TH1F* dphigj_lowpt;    // photon
+  TH1F* dphigj_lopt;    // photon
+  TH1F* dphigj_hipt;    // photon
   TH1F* dphigj_mismatch; // photon with status = 1 has lower pt than status = 3
 
   TH1F* detagj_match;
-  TH1F* detagj_lowpt;    // photon
+  TH1F* detagj_lopt;    // photon
+  TH1F* detagj_hipt;    // photon
   TH1F* detagj_mismatch; // photon with status = 1 has lower pt than status = 3
 
   TH1F* drgj_match;
-  TH1F* drgj_lowpt;    // photon                                                                              
+  TH1F* drgj_lopt;    // photon                            
+  TH1F* drgj_hipt;    // photon                                                                      
   TH1F* drgj_mismatch; // photon with status = 1 has lower pt than status = 3                                   
 
 

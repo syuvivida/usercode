@@ -325,8 +325,8 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	(std::find(myConvPho.begin(),myConvPho.end(),it_gen)!= 
 	 myConvPho.end())? 1:0;
 
-      if(genMomPID ==22 && it_gen->pdgId() == 22 && 
-	 it_gen->mother()->status() == 3)
+      if( !it_gen->mother() || (genMomPID ==22 && it_gen->pdgId() == 22 && 
+				it_gen->mother()->status() == 3))
 	{
 	  const float etamax = 2.5;
 	  const float ptmin  = 0.0;
@@ -440,8 +440,9 @@ void RECOTrigger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	    genMomPID = it_gen->mother()->pdgId();
 	    PhoInfo.GenMomPID[PhoInfo.Size]  = genMomPID;
 	    PhoInfo.GenMomPt[PhoInfo.Size]   = it_gen->mother()->pt();
-	    
-	    if(genMomPID==22 && it_gen->mother()->status()==3)
+
+	    if(!it_gen->mother() || 
+	       (genMomPID==22 && it_gen->mother()->status()==3))
 	      heta_conv->Fill(it_gen->eta(), PhoInfo.IsConv[PhoInfo.Size]);
 
 	    if(it_gen->mother()->mother())
