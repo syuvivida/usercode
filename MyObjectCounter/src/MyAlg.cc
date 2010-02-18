@@ -116,7 +116,7 @@ void MyAlg::getHandles(const edm::Event  & event,
     // HepMCProduct
     event.getByLabel("generator",_hepMCHandle);
     //    event.getByLabel("mix","source", _mixHepMCHandle);
-    event.getByLabel("mix","generator", _mixHepMCHandle);
+    //    event.getByLabel("mix","generator", _mixHepMCHandle);
 
     // in order to get pthat
     event.getByLabel("generator",_genEventHandle);
