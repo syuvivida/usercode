@@ -225,8 +225,9 @@ public:
   // get each individual handle
 
   edm::Handle<reco::GenParticleCollection> getGenHandle(){return _genHandle;}
-  edm::Handle<edm::TriggerResults> getTrgResultsHandle(){return _trgResultsHandle;}
-  edm::Handle<reco::VertexCollection> getVtxHandle(){return _vertexHandle;}
+  edm::Handle<HepMCProduct>                getHepMCHandle(){return _hepMCHandle;}
+  edm::Handle<edm::TriggerResults>         getTrgResultsHandle(){return _trgResultsHandle;}
+  edm::Handle<reco::VertexCollection>      getVtxHandle(){return _vertexHandle;}
 
 private: 
 
