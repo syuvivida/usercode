@@ -74,7 +74,7 @@ void callOnlyData_barrel(std::string dataName)
   overlayData(dataF,"PHOLEAD_e2nd",decCode,"sce2nd"+tempName, 5,0,5.0,"Energy of second energetic crystal [GeV]","","",true);
 
 
-  overlayData(dataF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio", 20,0.0,2.0,"eMax/e3x3","","");
+  overlayData(dataF,"PHOLEAD_eMax/PHOLEAD_e3x3", decCode,"sceSpikeRatio"+tempName, 20,0.0,2.0,"eMax/e3x3","","");
 
   overlayData(dataF,"PHOLEAD_e2x2",decCode,"sce2x2"+tempName, 7,0,28.0,"e2x2 [GeV]","","",true);
 
