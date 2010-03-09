@@ -11,24 +11,38 @@
 
 using namespace std;
 
-void produceHisto::Loop(bool useLeadingPhotonOnly, bool matching)
+void produceHisto::Loop()
 {
+
+  cout << "The settings are: " << endl;
+  cout << "useLeadingPhotonOnly_ = " << useLeadingPhotonOnly_ << endl;
+  cout << "matching_ = " << matching_ << endl;
+
+  // check if this is a QCD or a photon+jet samples
+  // should check the particle list in GenpBlock when they are available
+  int isQCD = 0;
+  if(inputFile_.find("QCD") != std::string::npos)isQCD=1;
+
   // check the pthat sample
-  const int pthat[8]={15, 30, 80, 170, 300, 470, 800, 10000000};
+  const int pthat[NMC+1]={15, 30, 80, 170, 300, 470, 800, 10000000};
   char name[300];
   Float_t PTHAT_MIN = -999.;
   Float_t PTHAT_MAX = -999.;
-  for(int i=0; i < 7; i++)
+  int thisMC = -1;
+  for(int i=0; i < NMC; i++)
     {
       sprintf(name,"%d",pthat[i]);
       if(inputFile_.find(name) != std::string::npos){
 	PTHAT_MIN = pthat[i];
 	PTHAT_MAX = pthat[i+1];
+	thisMC = i;
       }
     }
-  
+ 
+
   cout << "Restricted to pthat = " << PTHAT_MIN << " to " << PTHAT_MAX 
        << " GeV" << endl;
+
 
    if (fChain == 0) return;
 
@@ -56,6 +70,7 @@ void produceHisto::Loop(bool useLeadingPhotonOnly, bool matching)
 	       " %1.2f < |eta| < %1.2f",
 	       fBinsY[i],fBinsY[i+1], fBinsZ[j], fBinsZ[j+1]);
        hcaliso[i][j] = new TH1F(name,title,280,-2.,12.0);
+       hcaliso[i][j] -> Sumw2();
 
 
        sprintf(name,"hecaliso%02i_%02i",i,j);
@@ -63,26 +78,27 @@ void produceHisto::Loop(bool useLeadingPhotonOnly, bool matching)
 	       " %1.2f < |eta| < %1.2f",
 	       fBinsY[i],fBinsY[i+1], fBinsZ[j], fBinsZ[j+1]);
        hecaliso[i][j] = new TH1F(name,title,180,-2.,7.0);
+       hecaliso[i][j] -> Sumw2();
+
 
        sprintf(name,"hhcaliso%02i_%02i",i,j);
        sprintf(title,"HCAL isolation pt = %3.0f--%3.0f GeV,"
 	       " %1.2f < |eta| < %1.2f",
 	       fBinsY[i],fBinsY[i+1], fBinsZ[j], fBinsZ[j+1]);
        hhcaliso[i][j] = new TH1F(name,title,100,0,5.0);
+       hhcaliso[i][j] -> Sumw2();
+
 
        sprintf(name,"htrkiso%02i_%02i",i,j);
        sprintf(title,"Track isolation pt = %3.0f--%3.0f GeV,"
 	       " %1.2f < |eta| < %1.2f",
 	       fBinsY[i],fBinsY[i+1], fBinsZ[j], fBinsZ[j+1]);
        htrkiso[i][j] = new TH1F(name,title,90,0,9.0);
+       htrkiso[i][j] -> Sumw2();
      }
 
    }
 
-   // check if this is a QCD or a photon+jet samples
-   // should check the particle list in GenpBlock when they are available
-   bool isQCD = false;
-   if(inputFile_.find("QCD") != std::string::npos)isQCD=true;
 
    // Now loop over entries
    Long64_t ncount =0;
@@ -117,8 +133,8 @@ void produceHisto::Loop(bool useLeadingPhotonOnly, bool matching)
 	      hasHardPho=true;
 	  }
 
-  	if( ( ((!hasHardPho || !hasGenPho) && !isQCD) || 
-	     (!hasGenPho && isQCD) ) && matching )continue;
+  	if( ( ((!hasHardPho || !hasGenPho) && isQCD==0) || 
+	     (!hasGenPho && isQCD==1) ) && matching_ )continue;
 
 	bool isBarrel = (isEB[ph]==1);
 	bool isEndCap = (isEE[ph]==1);
@@ -180,7 +196,7 @@ void produceHisto::Loop(bool useLeadingPhotonOnly, bool matching)
 
 	hcaliso[EtBin][EtaBin]->Fill(calIso);
 
-	if(useLeadingPhotonOnly)break;
+	if(useLeadingPhotonOnly_)break;
 
       } // end of loop over photons
 

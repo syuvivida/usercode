@@ -16,8 +16,10 @@
 
 using namespace std;
 
-const int MAXNPHOTONS = 20;
-const int MAXNGENMATCH = 9;
+const Int_t MAXNPHOTONS  = 20;
+const Int_t MAXNGENMATCH = 9;
+const Int_t NMC          = 7;
+
 
 class produceHisto {
 public :
@@ -169,15 +171,21 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(bool useLeadingPhotonOnly=true, bool matching=true);
+   virtual void     Loop();
+   void             SetUseLeadPhoton(bool value){useLeadingPhotonOnly_ = value;}
+   void             SetMatching(bool value){matching_ = value;}
    virtual Bool_t   Notify();
-   virtual void     Show(Long64_t entry = -1);
+   virtual void     Show(Long64_t entry = -1);   
+   bool useLeadingPhotonOnly_;
+   bool matching_;
 };
 
 #endif
 
 #ifdef produceHisto_cxx
-produceHisto::produceHisto(std::string filename)
+produceHisto::produceHisto(std::string filename):
+  useLeadingPhotonOnly_(true),
+  matching_(true)
 {
   inputFile_ = filename;
   TTree* tree;
