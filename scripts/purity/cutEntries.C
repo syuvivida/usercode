@@ -10,7 +10,7 @@
 #include "tightSelection.h"
 
 void cutEntries(std::string filename,
-		std::string treename="ncuAnalyzerKit/EventTree")
+		std::string treename="skimLaurent/photonTree")
 {
 
   // chain in all the ncu ntuples in the same directory
@@ -25,9 +25,9 @@ void cutEntries(std::string filename,
   fout << ntotal << " "; 
   
   int npass = 0; 
-  if(filename.find("qcd") == std::string::npos){
+//   if(filename.find("qcd") == std::string::npos){
     npass= pho->Draw("run",basicCut && realCut); 
-  }
+//   }
   cout << "Real photons = " << npass << endl;
   fout << npass << endl;
   fout.close();
