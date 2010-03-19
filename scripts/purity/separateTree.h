@@ -463,17 +463,16 @@ separateTree::separateTree(std::string filename)
   TTree* tree;
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-   if (tree == 0) {
-     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.data());
-     if (!f) {
-       f = new TFile(filename.data());
-       std::string temp = filename + ":/NTuples";
-       f->cd(temp.data());
-     }
-     tree = (TTree*)gDirectory->Get("Analysis");
-
-   }
-   Init(tree);
+  TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.data());
+  if (!f) {
+    f = new TFile(filename.data());
+    std::string temp = filename + ":/NTuples";
+    f->cd(temp.data());
+  }
+  tree = (TTree*)gDirectory->Get("Analysis");
+  if(!tree) 
+    tree = (TTree*)gDirectory->Get("Analysis");
+  Init(tree);
 }
 
 separateTree::~separateTree()
