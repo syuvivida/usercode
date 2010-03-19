@@ -17,11 +17,13 @@ void separateTree::Loop(int mode)
    std::string outputFile_data = inputFile_ + endfix;
    cout << "Saving "  << endfix << " tree" << endl;
    TFile* newfile_data = new TFile(outputFile_data.data(),"recreate");
+   cout << "Saving "  << endfix << " tree" << endl;
 
-   Long64_t nentries = fChain->GetEntriesFast();
+   Long64_t nentries = fChain->GetEntries();
    TTree* newtree = fChain->CloneTree(0);
 
    Long64_t nbytes = 0, nb = 0;
+   cout << "nentries = " << nentries << endl;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;

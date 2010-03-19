@@ -470,8 +470,6 @@ separateTree::separateTree(std::string filename)
     f->cd(temp.data());
   }
   tree = (TTree*)gDirectory->Get("Analysis");
-  if(!tree) 
-    tree = (TTree*)gDirectory->Get("Analysis");
   Init(tree);
 }
 
