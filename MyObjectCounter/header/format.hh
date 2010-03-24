@@ -67,8 +67,8 @@ public:
       Index[i] = dummy;
 
       for(int j=0; j < 3; j++){
-	pos[i][3]    = dummy;
-	poserr[i][3] = dummy;
+	pos[i][j]    = dummy;
+	poserr[i][j] = dummy;
       }  // loop over x,y,z
 
       rho[i]       = dummy;
