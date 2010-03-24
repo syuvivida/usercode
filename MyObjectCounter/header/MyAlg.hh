@@ -575,20 +575,6 @@ typename myContainer<T>::myIter it_ph)
 
   if(inAnyGap)return false;
 
-  /*
-  // Barrel cuts
-  if(isBarrel && ecalIso  > 5.0 + 0.0045*et)return false;
-  if(isBarrel && hcalIso  > 5.0)return false;
-  if(isBarrel && trkIso > 9.0 )return false;
-  if(isBarrel && it_ph->hadronicOverEm() > 0.15)return false;
-
-  // Endcap cuts
-  if(isEndCap && ecalIso  > 5.0 + 0.02*et)return false;
-  if(isEndCap && hcalIso  > 7.0)return false;
-  if(isEndCap && trkIso > 9.0 )return false;
-  if(isEndCap && it_ph->hadronicOverEm() > 0.15)return false;
-  */
-
   // Barrel cuts
   if(isBarrel && ecalIso  > 5.0 + 0.004*et)return false;
   if(isBarrel && hcalIso  > 5.0)return false;
