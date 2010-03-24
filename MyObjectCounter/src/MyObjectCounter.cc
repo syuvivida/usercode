@@ -22,7 +22,7 @@ MyObjectCounter::~MyObjectCounter()
 {
 }
 
-void MyObjectCounter::beginJob(const edm::EventSetup&)
+void MyObjectCounter::beginJob()
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("MyObjectCounter") );

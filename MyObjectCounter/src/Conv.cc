@@ -18,7 +18,7 @@ Conv::~Conv()
 {
 }
 
-void Conv::beginJob(const edm::EventSetup&)
+void Conv::beginJob()
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("Conv") );

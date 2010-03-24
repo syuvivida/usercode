@@ -21,7 +21,7 @@ GenTrig::~GenTrig()
 {
 }
 
-void GenTrig::beginJob(const edm::EventSetup&)
+void GenTrig::beginJob()
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("GenTrig") );

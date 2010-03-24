@@ -20,7 +20,7 @@ TriggerBitCounter::~TriggerBitCounter()
 {
 }
 
-void TriggerBitCounter::beginJob(const edm::EventSetup&)
+void TriggerBitCounter::beginJob()
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("TriggerBitCounter") );

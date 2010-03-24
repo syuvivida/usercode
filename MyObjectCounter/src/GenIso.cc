@@ -23,7 +23,7 @@ GenIso::~GenIso()
 {
 }
 
-void GenIso::beginJob(const edm::EventSetup&)
+void GenIso::beginJob()
 {
   TFileDirectory results = TFileDirectory( fs->mkdir("GenIso") );
 

@@ -19,7 +19,7 @@ RECOTrigger::~RECOTrigger()
 {
 }
 
-void RECOTrigger::beginJob(const edm::EventSetup&)
+void RECOTrigger::beginJob()
 {
   edm::Service<TFileService> fs;
   TFileDirectory results = TFileDirectory( fs->mkdir("RECOTrigger") );
