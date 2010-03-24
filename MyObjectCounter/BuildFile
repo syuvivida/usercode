@@ -4,6 +4,7 @@
 <use name=DataFormats/Candidate>
 <use name=DataFormats/PatCandidates>
 <use name=DataFormats/HepMCCandidate>
+<use name=CommonTools/UtilAlgos>
 <use name=PhysicsTools/UtilAlgos>
 <use name=PhysicsTools/CandUtils>
 <use name=PhysicsTools/PatAlgos>
@@ -14,13 +15,13 @@
 <use name=root>
 <flags EDM_PLUGIN=1>
 <export>
-  <lib name=MyAnaObjectCounter>
   <use name=FWCore/Framework>
   <use name=FWCore/PluginManager>
   <use name=DataFormats/Provenance>
   <use name=DataFormats/Candidate>
   <use name=DataFormats/PatCandidates>
   <use name=DataFormats/HepMCCandidate>
+  <use name=CommonTools/UtilAlgos>
   <use name=PhysicsTools/UtilAlgos>
   <use name=PhysicsTools/CandUtils>
   <use name=PhysicsTools/PatAlgos>
