@@ -432,9 +432,9 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
   // the following code is ported from Vasu
-  using namespace HepMC;  
-  edm::Handle<HepMCProduct> hepMCProduct = _alg.getHepMCHandle();
-  const GenEvent* genEventInfo = hepMCProduct->GetEvent();
+//   using namespace HepMC;  
+//   edm::Handle<HepMCProduct> hepMCProduct = _alg.getHepMCHandle();
+//   const GenEvent* genEventInfo = hepMCProduct->GetEvent();
   
 
 //   for(GenEvent::vertex_const_iterator vertexIter=genEventInfo->vertices_begin();vertexIter!=genEventInfo->vertices_end(); vertexIter++){
