@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Mar 19 13:44:16 2010 by ROOT version 5.18/00
+// Sun Apr 11 22:41:41 2010 by ROOT version 5.22/00d
 // from TTree Analysis/Analysis
-// found on file: ../QCDPhoton_Ntuple/PhotonJet0_15_7TeV_MC_combined.root
+// found on file: MPA_PhotonJetPt15_31X.root
 //////////////////////////////////////////////////////////
 
 #ifndef separateTree_h
@@ -13,6 +13,8 @@
 #include <TFile.h>
 #include <string>
 #include <iostream>
+
+using namespace std;
 
 class separateTree {
 public :
@@ -36,6 +38,11 @@ public :
    Int_t           kMaxL1Bits;
    Int_t           nL1Bits;
    UChar_t         L1Bit[128];   //[nL1Bits]
+   UChar_t         HLT_L1SingleEG5;
+   UChar_t         HLT_L1SingleEG8;
+   UChar_t         HLT_Photon10_L1R;
+   UChar_t         HLT_Photon15_L1R;
+   UChar_t         HLT_Photon20_L1R;
    Int_t           kMaxTrigFlag;
    Int_t           nHLTBits;
    UChar_t         HLTBit[100];   //[nHLTBits]
@@ -91,144 +98,149 @@ public :
    Double_t        metCaloMETPhiInmHF;
    Int_t           nJets;
    Int_t           kMaxJets;
-   Float_t         jetPt[20];   //[kMaxJets]
-   Float_t         jetE[20];   //[kMaxJets]
-   Float_t         jetP[20];   //[kMaxJets]
-   Float_t         jetEta[20];   //[kMaxJets]
-   Float_t         jetPhi[20];   //[kMaxJets]
-   Float_t         jetCharge[20];   //[kMaxJets]
-   Int_t           jetNtrk[20];   //[kMaxJets]
-   UChar_t         jetIsCaloJet[20];   //[kMaxJets]
-   UChar_t         jetIsPFJet[20];   //[kMaxJets]
-   UChar_t         jetIsBasicJet[20];   //[kMaxJets]
-   Float_t         jetMaxEInEmTowers[20];   //[kMaxJets]
-   Float_t         jetMaxEInHadTowers[20];   //[kMaxJets]
-   Float_t         jetEnergyFractionHadronic[20];   //[kMaxJets]
-   Float_t         jetEmEnergyFraction[20];   //[kMaxJets]
-   Float_t         jetHadEnergyInHB[20];   //[kMaxJets]
-   Float_t         jetHadEnergyInHO[20];   //[kMaxJets]
-   Float_t         jetHadEnergyInHE[20];   //[kMaxJets]
-   Float_t         jetHadEnergyInHF[20];   //[kMaxJets]
-   Float_t         jetEmEnergyInEB[20];   //[kMaxJets]
-   Float_t         jetEmEnergyInEE[20];   //[kMaxJets]
-   Float_t         jetEmEnergyInHF[20];   //[kMaxJets]
-   Float_t         jetTowersArea[20];   //[kMaxJets]
-   Int_t           jetN90[20];   //[kMaxJets]
-   Int_t           jetN60[20];   //[kMaxJets]
-   Float_t         jetFHPD[20];   //[kMaxJets]
-   Float_t         jetFRBX[20];   //[kMaxJets]
-   Float_t         jetN90Hits[20];   //[kMaxJets]
+   Float_t         jetPt[20];   //[nJets]
+   Float_t         jetE[20];   //[nJets]
+   Float_t         jetP[20];   //[nJets]
+   Float_t         jetEta[20];   //[nJets]
+   Float_t         jetPhi[20];   //[nJets]
+   Float_t         jetCharge[20];   //[nJets]
+   Int_t           jetNtrk[20];   //[nJets]
+   UChar_t         jetIsCaloJet[20];   //[nJets]
+   UChar_t         jetIsPFJet[20];   //[nJets]
+   UChar_t         jetIsBasicJet[20];   //[nJets]
+   Float_t         jetMaxEInEmTowers[20];   //[nJets]
+   Float_t         jetMaxEInHadTowers[20];   //[nJets]
+   Float_t         jetEnergyFractionHadronic[20];   //[nJets]
+   Float_t         jetEmEnergyFraction[20];   //[nJets]
+   Float_t         jetHadEnergyInHB[20];   //[nJets]
+   Float_t         jetHadEnergyInHO[20];   //[nJets]
+   Float_t         jetHadEnergyInHE[20];   //[nJets]
+   Float_t         jetHadEnergyInHF[20];   //[nJets]
+   Float_t         jetEmEnergyInEB[20];   //[nJets]
+   Float_t         jetEmEnergyInEE[20];   //[nJets]
+   Float_t         jetEmEnergyInHF[20];   //[nJets]
+   Float_t         jetTowersArea[20];   //[nJets]
+   Int_t           jetN90[20];   //[nJets]
+   Int_t           jetN60[20];   //[nJets]
+   Float_t         jetFHPD[20];   //[nJets]
+   Float_t         jetFRBX[20];   //[nJets]
+   Float_t         jetN90Hits[20];   //[nJets]
    Int_t           nPhotons;
    Int_t           kMaxPhotons;
-   Float_t         p[10];   //[kMaxPhotons]
-   Float_t         et[10];   //[kMaxPhotons]
-   Float_t         energy[10];   //[kMaxPhotons]
-   Float_t         momentumX[10];   //[kMaxPhotons]
-   Float_t         momentumY[10];   //[kMaxPhotons]
-   Float_t         momentumZ[10];   //[kMaxPhotons]
-   Float_t         pt[10];   //[kMaxPhotons]
-   Float_t         eta[10];   //[kMaxPhotons]
-   Float_t         phi[10];   //[kMaxPhotons]
-   Float_t         r9[10];   //[kMaxPhotons]
-   UChar_t         isEBGap[10];   //[kMaxPhotons]
-   UChar_t         isEEGap[10];   //[kMaxPhotons]
-   UChar_t         isEBEEGap[10];   //[kMaxPhotons]
-   UChar_t         isTransGap[10];   //[kMaxPhotons]
-   UChar_t         isEB[10];   //[kMaxPhotons]
-   UChar_t         isEE[10];   //[kMaxPhotons]
-   Float_t         rawEnergy[10];   //[kMaxPhotons]
-   Float_t         preshowerEnergy[10];   //[kMaxPhotons]
-   Int_t           numOfPreshClusters[10];   //[kMaxPhotons]
-   Int_t           clustersSize[10];   //[kMaxPhotons]
-   Float_t         phiWidth[10];   //[kMaxPhotons]
-   Float_t         etaWidth[10];   //[kMaxPhotons]
-   Float_t         scEta[10];   //[kMaxPhotons]
-   Float_t         scPhi[10];   //[kMaxPhotons]
-   Float_t         maxEnergyXtal[10];   //[kMaxPhotons]
-   Float_t         sigmaEtaEta[10];   //[kMaxPhotons]
-   Float_t         sigmaIetaIeta[10];   //[kMaxPhotons]
-   Float_t         r1x5[10];   //[kMaxPhotons]
-   Float_t         r2x5[10];   //[kMaxPhotons]
-   Float_t         e1x5[10];   //[kMaxPhotons]
-   Float_t         e2x5[10];   //[kMaxPhotons]
-   Float_t         eMax[10];   //[kMaxPhotons]
-   Float_t         e2nd[10];   //[kMaxPhotons]
-   Float_t         e2x2[10];   //[kMaxPhotons]
-   Float_t         e3x2[10];   //[kMaxPhotons]
-   Float_t         e3x3[10];   //[kMaxPhotons]
-   Float_t         e4x4[10];   //[kMaxPhotons]
-   Float_t         e5x5[10];   //[kMaxPhotons]
-   Float_t         e2x5Right[10];   //[kMaxPhotons]
-   Float_t         e2x5Left[10];   //[kMaxPhotons]
-   Float_t         e2x5Top[10];   //[kMaxPhotons]
-   Float_t         e2x5Bottom[10];   //[kMaxPhotons]
-   Float_t         eRight[10];   //[kMaxPhotons]
-   Float_t         eLeft[10];   //[kMaxPhotons]
-   Float_t         eTop[10];   //[kMaxPhotons]
-   Float_t         eBottom[10];   //[kMaxPhotons]
-   Float_t         covPhiPhi[10];   //[kMaxPhotons]
-   Float_t         covEtaPhi[10];   //[kMaxPhotons]
-   Float_t         covEtaEta[10];   //[kMaxPhotons]
-   Float_t         hadronicOverEm[10];   //[kMaxPhotons]
-   Float_t         hadronicDepth1OverEm[10];   //[kMaxPhotons]
-   Float_t         hadronicDepth2OverEm[10];   //[kMaxPhotons]
-   Float_t         trackIso[10];   //[kMaxPhotons]
-   Float_t         caloIso[10];   //[kMaxPhotons]
-   Float_t         ecalIso[10];   //[kMaxPhotons]
-   Float_t         hcalIso[10];   //[kMaxPhotons]
-   Float_t         ecalRecHitSumEtConeDR04[10];   //[kMaxPhotons]
-   Float_t         hcalTowerSumEtConeDR04[10];   //[kMaxPhotons]
-   Float_t         hcalDepth1TowerSumEtConeDR04[10];   //[kMaxPhotons]
-   Float_t         hcalDepth2TowerSumEtConeDR04[10];   //[kMaxPhotons]
-   Float_t         trkSumPtSolidConeDR04[10];   //[kMaxPhotons]
-   Float_t         trkSumPtHollowConeDR04[10];   //[kMaxPhotons]
-   Int_t           nTrkSolidConeDR04[10];   //[kMaxPhotons]
-   Int_t           nTrkHollowConeDR04[10];   //[kMaxPhotons]
-   Float_t         ecalRecHitSumEtConeDR03[10];   //[kMaxPhotons]
-   Float_t         hcalTowerSumEtConeDR03[10];   //[kMaxPhotons]
-   Float_t         hcalDepth1TowerSumEtConeDR03[10];   //[kMaxPhotons]
-   Float_t         hcalDepth2TowerSumEtConeDR03[10];   //[kMaxPhotons]
-   Float_t         trkSumPtSolidConeDR03[10];   //[kMaxPhotons]
-   Float_t         trkSumPtHollowConeDR03[10];   //[kMaxPhotons]
-   Int_t           nTrkSolidConeDR03[10];   //[kMaxPhotons]
-   Int_t           nTrkHollowConeDR03[10];   //[kMaxPhotons]
-   UChar_t         hasConversionTracks[10];   //[kMaxPhotons]
-   UChar_t         hasPixelSeed[10];   //[kMaxPhotons]
-   Int_t           nTracks[10];   //[kMaxPhotons]
-   UChar_t         isConverted[10];   //[kMaxPhotons]
-   Float_t         convPairInvariantMass[10];   //[kMaxPhotons]
-   Float_t         convpairCotThetaSeparation[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumMag[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumPerp[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumPhi[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumEta[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumX[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumY[10];   //[kMaxPhotons]
-   Float_t         convPairMomentumZ[10];   //[kMaxPhotons]
-   Float_t         convDistOfMinimumApproach[10];   //[kMaxPhotons]
-   Float_t         convDPhiTracksAtVtx[10];   //[kMaxPhotons]
-   Float_t         convDPhiTracksAtEcal[10];   //[kMaxPhotons]
-   Float_t         convDEtaTracksAtEcal[10];   //[kMaxPhotons]
-   UChar_t         convVtxValid[10];   //[kMaxPhotons]
-   Float_t         convVtxEta[10];   //[kMaxPhotons]
-   Float_t         convVtxPhi[10];   //[kMaxPhotons]
-   Float_t         convVtxR[10];   //[kMaxPhotons]
-   Float_t         convVtxX[10];   //[kMaxPhotons]
-   Float_t         convVtxY[10];   //[kMaxPhotons]
-   Float_t         convVtxZ[10];   //[kMaxPhotons]
-   Float_t         convVtxChi2[10];   //[kMaxPhotons]
-   Float_t         convVtxNdof[10];   //[kMaxPhotons]
-   Float_t         convMVALikelihood[10];   //[kMaxPhotons]
-   Float_t         convVtxChi2Prob[10];   //[kMaxPhotons]
-   Float_t         convEoverP[10];   //[kMaxPhotons]
-   Float_t         convzOfPrimaryVertexFromTracks[10];   //[kMaxPhotons]
-   UChar_t         isGenMatched[10];   //[kMaxPhotons]
-   Float_t         genMatchedPt[10];   //[kMaxPhotons]
-   Float_t         genMatchedEta[10];   //[kMaxPhotons]
-   Float_t         genMatchedPhi[10];   //[kMaxPhotons]
-   Int_t           genMomId[10];   //[kMaxPhotons]
-   Int_t           genGrandMomId[10];   //[kMaxPhotons]
-   Int_t           genNSiblings[10];   //[kMaxPhotons]
+   Float_t         p[7];   //[nPhotons]
+   Float_t         et[7];   //[nPhotons]
+   Float_t         energy[7];   //[nPhotons]
+   Float_t         momentumX[7];   //[nPhotons]
+   Float_t         momentumY[7];   //[nPhotons]
+   Float_t         momentumZ[7];   //[nPhotons]
+   Float_t         pt[7];   //[nPhotons]
+   Float_t         eta[7];   //[nPhotons]
+   Float_t         phi[7];   //[nPhotons]
+   Float_t         r9[7];   //[nPhotons]
+   UChar_t         isEBGap[7];   //[nPhotons]
+   UChar_t         isEEGap[7];   //[nPhotons]
+   UChar_t         isEBEEGap[7];   //[nPhotons]
+   UChar_t         isTransGap[7];   //[nPhotons]
+   UChar_t         isEB[7];   //[nPhotons]
+   UChar_t         isEE[7];   //[nPhotons]
+   Float_t         rawEnergy[7];   //[nPhotons]
+   Float_t         preshowerEnergy[7];   //[nPhotons]
+   Int_t           numOfPreshClusters[7];   //[nPhotons]
+   Int_t           clustersSize[7];   //[nPhotons]
+   Float_t         phiWidth[7];   //[nPhotons]
+   Float_t         etaWidth[7];   //[nPhotons]
+   Float_t         scEta[7];   //[nPhotons]
+   Float_t         scPhi[7];   //[nPhotons]
+   Float_t         maxEnergyXtal[7];   //[nPhotons]
+   Float_t         sigmaEtaEta[7];   //[nPhotons]
+   Float_t         sigmaIetaIeta[7];   //[nPhotons]
+   Float_t         r1x5[7];   //[nPhotons]
+   Float_t         r2x5[7];   //[nPhotons]
+   Float_t         e1x5[7];   //[nPhotons]
+   Float_t         e2x5[7];   //[nPhotons]
+   Float_t         eMax[7];   //[nPhotons]
+   Float_t         e2nd[7];   //[nPhotons]
+   Float_t         e2x2[7];   //[nPhotons]
+   Float_t         e3x2[7];   //[nPhotons]
+   Float_t         e3x3[7];   //[nPhotons]
+   Float_t         e4x4[7];   //[nPhotons]
+   Float_t         e5x5[7];   //[nPhotons]
+   Float_t         e2x5Right[7];   //[nPhotons]
+   Float_t         e2x5Left[7];   //[nPhotons]
+   Float_t         e2x5Top[7];   //[nPhotons]
+   Float_t         e2x5Bottom[7];   //[nPhotons]
+   Float_t         eRight[7];   //[nPhotons]
+   Float_t         eLeft[7];   //[nPhotons]
+   Float_t         eTop[7];   //[nPhotons]
+   Float_t         eBottom[7];   //[nPhotons]
+   Float_t         covPhiPhi[7];   //[nPhotons]
+   Float_t         covEtaPhi[7];   //[nPhotons]
+   Float_t         covEtaEta[7];   //[nPhotons]
+   Float_t         hadronicOverEm[7];   //[nPhotons]
+   Float_t         hadronicDepth1OverEm[7];   //[nPhotons]
+   Float_t         hadronicDepth2OverEm[7];   //[nPhotons]
+   Float_t         trackIso[7];   //[nPhotons]
+   Float_t         caloIso[7];   //[nPhotons]
+   Float_t         ecalIso[7];   //[nPhotons]
+   Float_t         hcalIso[7];   //[nPhotons]
+   Float_t         ecalRecHitSumEtConeDR04[7];   //[nPhotons]
+   Float_t         hcalTowerSumEtConeDR04[7];   //[nPhotons]
+   Float_t         hcalDepth1TowerSumEtConeDR04[7];   //[nPhotons]
+   Float_t         hcalDepth2TowerSumEtConeDR04[7];   //[nPhotons]
+   Float_t         trkSumPtSolidConeDR04[7];   //[nPhotons]
+   Float_t         trkSumPtHollowConeDR04[7];   //[nPhotons]
+   Int_t           nTrkSolidConeDR04[7];   //[nPhotons]
+   Int_t           nTrkHollowConeDR04[7];   //[nPhotons]
+   Float_t         ecalRecHitSumEtConeDR03[7];   //[nPhotons]
+   Float_t         hcalTowerSumEtConeDR03[7];   //[nPhotons]
+   Float_t         hcalDepth1TowerSumEtConeDR03[7];   //[nPhotons]
+   Float_t         hcalDepth2TowerSumEtConeDR03[7];   //[nPhotons]
+   Float_t         trkSumPtSolidConeDR03[7];   //[nPhotons]
+   Float_t         trkSumPtHollowConeDR03[7];   //[nPhotons]
+   Int_t           nTrkSolidConeDR03[7];   //[nPhotons]
+   Int_t           nTrkHollowConeDR03[7];   //[nPhotons]
+   UChar_t         hasConversionTracks[7];   //[nPhotons]
+   UChar_t         hasPixelSeed[7];   //[nPhotons]
+   UChar_t         isLoose[7];   //[nPhotons]
+   UChar_t         isTight[7];   //[nPhotons]
+   Int_t           nTracks[7];   //[nPhotons]
+   UChar_t         isConverted[7];   //[nPhotons]
+   Float_t         convPairInvariantMass[7];   //[nPhotons]
+   Float_t         convpairCotThetaSeparation[7];   //[nPhotons]
+   Float_t         convPairMomentumMag[7];   //[nPhotons]
+   Float_t         convPairMomentumPerp[7];   //[nPhotons]
+   Float_t         convPairMomentumPhi[7];   //[nPhotons]
+   Float_t         convPairMomentumEta[7];   //[nPhotons]
+   Float_t         convPairMomentumX[7];   //[nPhotons]
+   Float_t         convPairMomentumY[7];   //[nPhotons]
+   Float_t         convPairMomentumZ[7];   //[nPhotons]
+   Float_t         convDistOfMinimumApproach[7];   //[nPhotons]
+   Float_t         convDPhiTracksAtVtx[7];   //[nPhotons]
+   Float_t         convDPhiTracksAtEcal[7];   //[nPhotons]
+   Float_t         convDEtaTracksAtEcal[7];   //[nPhotons]
+   UChar_t         convVtxValid[7];   //[nPhotons]
+   Float_t         convVtxEta[7];   //[nPhotons]
+   Float_t         convVtxPhi[7];   //[nPhotons]
+   Float_t         convVtxR[7];   //[nPhotons]
+   Float_t         convVtxX[7];   //[nPhotons]
+   Float_t         convVtxY[7];   //[nPhotons]
+   Float_t         convVtxZ[7];   //[nPhotons]
+   Float_t         convVtxChi2[7];   //[nPhotons]
+   Float_t         convVtxNdof[7];   //[nPhotons]
+   Float_t         convMVALikelihood[7];   //[nPhotons]
+   Float_t         convVtxChi2Prob[7];   //[nPhotons]
+   Float_t         convEoverP[7];   //[nPhotons]
+   Float_t         convzOfPrimaryVertexFromTracks[7];   //[nPhotons]
+   UChar_t         isGenMatched[7];   //[nPhotons]
+   Float_t         genMatchedPt[7];   //[nPhotons]
+   Float_t         genMatchedEta[7];   //[nPhotons]
+   Float_t         genMatchedPhi[7];   //[nPhotons]
+   Int_t           genMomId[7];   //[nPhotons]
+   Int_t           genGrandMomId[7];   //[nPhotons]
+   Int_t           genNSiblings[7];   //[nPhotons]
+   Int_t           genIsConv[7];   //[nPhotons]
+   Float_t         genCalIso[7];   //[nPhotons]
+   Float_t         genTrkIso[7];   //[nPhotons]
 
    // List of branches
    TBranch        *b_run;   //!
@@ -247,6 +259,11 @@ public :
    TBranch        *b_kMaxL1Bits;   //!
    TBranch        *b_nL1Bits;   //!
    TBranch        *b_L1Bit;   //!
+   TBranch        *b_HLT_L1SingleEG5;   //!
+   TBranch        *b_HLT_L1SingleEG8;   //!
+   TBranch        *b_HLT_Photon10_L1R;   //!
+   TBranch        *b_HLT_Photon15_L1R;   //!
+   TBranch        *b_HLT_Photon20_L1R;   //!
    TBranch        *b_kMaxTrigFlag;   //!
    TBranch        *b_nHLTBits;   //!
    TBranch        *b_HLTBit;   //!
@@ -405,6 +422,8 @@ public :
    TBranch        *b_nTrkHollowConeDR03;   //!
    TBranch        *b_hasConversionTracks;   //!
    TBranch        *b_hasPixelSeed;   //!
+   TBranch        *b_isLoose;   //!
+   TBranch        *b_isTight;   //!
    TBranch        *b_nTracks;   //!
    TBranch        *b_isConverted;   //!
    TBranch        *b_convPairInvariantMass;   //!
@@ -440,6 +459,9 @@ public :
    TBranch        *b_genMomId;   //!
    TBranch        *b_genGrandMomId;   //!
    TBranch        *b_genNSiblings;   //!
+   TBranch        *b_genIsConv;   //!
+   TBranch        *b_genCalIso;   //!
+   TBranch        *b_genTrkIso;   //!
 
    separateTree(std::string filename);
    std::string inputFile_;
@@ -451,7 +473,6 @@ public :
    virtual void     Loop(int mode); // mode 0 = data, mode 1 = template
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   
 };
 
 #endif
@@ -472,6 +493,7 @@ separateTree::separateTree(std::string filename)
   tree = (TTree*)gDirectory->Get("Analysis");
   Init(tree);
 }
+
 
 separateTree::~separateTree()
 {
@@ -532,6 +554,11 @@ void separateTree::Init(TTree *tree)
    fChain->SetBranchAddress("kMaxL1Bits", &kMaxL1Bits, &b_kMaxL1Bits);
    fChain->SetBranchAddress("nL1Bits", &nL1Bits, &b_nL1Bits);
    fChain->SetBranchAddress("L1Bit", L1Bit, &b_L1Bit);
+   fChain->SetBranchAddress("HLT_L1SingleEG5", &HLT_L1SingleEG5, &b_HLT_L1SingleEG5);
+   fChain->SetBranchAddress("HLT_L1SingleEG8", &HLT_L1SingleEG8, &b_HLT_L1SingleEG8);
+   fChain->SetBranchAddress("HLT_Photon10_L1R", &HLT_Photon10_L1R, &b_HLT_Photon10_L1R);
+   fChain->SetBranchAddress("HLT_Photon15_L1R", &HLT_Photon15_L1R, &b_HLT_Photon15_L1R);
+   fChain->SetBranchAddress("HLT_Photon20_L1R", &HLT_Photon20_L1R, &b_HLT_Photon20_L1R);
    fChain->SetBranchAddress("kMaxTrigFlag", &kMaxTrigFlag, &b_kMaxTrigFlag);
    fChain->SetBranchAddress("nHLTBits", &nHLTBits, &b_nHLTBits);
    fChain->SetBranchAddress("HLTBit", HLTBit, &b_HLTBit);
@@ -690,6 +717,8 @@ void separateTree::Init(TTree *tree)
    fChain->SetBranchAddress("nTrkHollowConeDR03", nTrkHollowConeDR03, &b_nTrkHollowConeDR03);
    fChain->SetBranchAddress("hasConversionTracks", hasConversionTracks, &b_hasConversionTracks);
    fChain->SetBranchAddress("hasPixelSeed", hasPixelSeed, &b_hasPixelSeed);
+   fChain->SetBranchAddress("isLoose", isLoose, &b_isLoose);
+   fChain->SetBranchAddress("isTight", isTight, &b_isTight);
    fChain->SetBranchAddress("nTracks", nTracks, &b_nTracks);
    fChain->SetBranchAddress("isConverted", isConverted, &b_isConverted);
    fChain->SetBranchAddress("convPairInvariantMass", convPairInvariantMass, &b_convPairInvariantMass);
@@ -725,6 +754,9 @@ void separateTree::Init(TTree *tree)
    fChain->SetBranchAddress("genMomId", genMomId, &b_genMomId);
    fChain->SetBranchAddress("genGrandMomId", genGrandMomId, &b_genGrandMomId);
    fChain->SetBranchAddress("genNSiblings", genNSiblings, &b_genNSiblings);
+   fChain->SetBranchAddress("genIsConv", genIsConv, &b_genIsConv);
+   fChain->SetBranchAddress("genCalIso", genCalIso, &b_genCalIso);
+   fChain->SetBranchAddress("genTrkIso", genTrkIso, &b_genTrkIso);
    Notify();
 }
 
