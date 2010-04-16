@@ -1,7 +1,0 @@
-#!/bin/csh
-
-root -q -b exec_Dir.C\(\"$1\",\"$2\",true,false\)
-root -q -b exec_Dir.C\(\"$1\",\"$2\",false,false\)
-root -q -b exec_Dir.C\(\"$1\",\"$2\",true,true\)
-root -q -b exec_Dir.C\(\"$1\",\"$2\",false,true\)
-

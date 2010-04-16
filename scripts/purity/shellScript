@@ -1,3 +1,0 @@
-root.exe allPur.C
-mv isoOut.log isoOut.back
-exit
