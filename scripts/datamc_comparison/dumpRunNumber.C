@@ -1,4 +1,3 @@
-#include "tightSelection.h"
 #include <map>
 #include <string>
 #include <TChain.h>
