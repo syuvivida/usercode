@@ -61,6 +61,13 @@ private:
 
   // sanity check
   TH1F* fPtHat;
+  TH1F* fPtHard;
+  TH1F* fPtPho;
+  TH1F* fPtStablePho;
+
+  // isolation distribution
+  TH1F* histIsoDR04_all;
+  TH1F* histIsoDR04_goodpt;
 
   // for isolation
   TH1F* fIsoPt00;

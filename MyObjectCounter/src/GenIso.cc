@@ -13,7 +13,7 @@ GenIso::GenIso(const edm::ParameterSet& iConfig):
   _nIn(0), _nOut(0), _alg(iConfig),
   _pdgCode(iConfig.getUntrackedParameter<int>("pdgCode",22)),
   _etaMax(iConfig.getUntrackedParameter<double>("etaMax",2.5)),
-  _ptMin(iConfig.getUntrackedParameter<double>("ptMin",0.0)),
+  _ptMin(iConfig.getUntrackedParameter<double>("ptMin",15.0)),
   _isoMaxCut(iConfig.getUntrackedParameter<double>("isoMax",2.0))
 {  
 }
@@ -27,7 +27,14 @@ void GenIso::beginJob()
 {
   TFileDirectory results = TFileDirectory( fs->mkdir("GenIso") );
 
-  fPtHat = fs->make<TH1F>("fPtHat","Event pthat", 200,0.0,200.0);
+  fPtHat = fs->make<TH1F>("fPtHat","Event pthat", 200,0.0,100.0);
+  fPtPho = fs->make<TH1F>("fPtPho","Event pt of stable photon", 200,0.0,100.0);
+  fPtStablePho = fs->make<TH1F>("fPtStablePho","Event pt of stable photon", 200,0.0,100.0);
+  fPtHard = fs->make<TH1F>("fPtHard","Event pt of hard scattering photon", 200,0.0,100.0);
+
+  histIsoDR04_all = fs->make<TH1F>("histIsoDR04_all","Isolation for all photons",200,0.0,20.0) ;
+  histIsoDR04_goodpt = fs->make<TH1F>("histIsoDR04_goodpt","Isolation for photons with good pt",200,0.0,20.0);
+
 
   // angular separation between photons and jets
 
@@ -247,6 +254,7 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       if( (Index == 6 || Index==7) && it_gen->status()==3 
 	  && it_gen->pdgId()==22){
 	gamma_hard = it_gen;
+	fPtHard->Fill(it_gen->pt());
 	hasOut1   = true;
       }
       else if((Index == 6 || Index==7) && it_gen->status()==3
@@ -270,9 +278,11 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       // if this is a hard scattering photon
       if(genMomPID ==_pdgCode && it_gen->pdgId() == _pdgCode && 
  	 it_gen->mother()->status() == 3)
-//       if(genMomPID !=_pdgCode && it_gen->pdgId() == _pdgCode && 
-// 	 it_gen->mother()->status() == 3)
 	{
+	  fPtPho->Fill(it_gen->pt());
+ 	  if(it_gen->pt()>20.0 && fabs(it_gen->eta()) < 2.5)
+	    histIsoDR04_all->Fill(gen_caliso04);
+	  
 	  // assign variables for later use, look for the hardest photon
 	  if(genpt > stable_gammapt)
 	    {
@@ -288,6 +298,8 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     } // end of filling generator-level information    
   
+
+    fPtStablePho->Fill(stable_gammapt);
     // check only the first 8 particles
     bool ptMinMatchedToPtHat=false;
     bool ptMinDiffFromPtHat_plus =false;
@@ -305,7 +317,7 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       //      cout << "diffpt = " << diffpt << endl;
       
-      if(fabs(diffpt) < 0.1)
+      if(fabs(diffpt) < 0.2)
 	{
 	  //	  cout << "matched pthat!!" << endl;
 	  accept = true;
@@ -313,7 +325,8 @@ bool GenIso::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  detagj_match->Fill(deta);	  
 	  drgj_match  ->Fill(dr);
 	  ptMinMatchedToPtHat = true;
-
+ 	  if(stable_gammapt>20.0 && fabs(stable_gammaeta) < 2.5)
+	    histIsoDR04_goodpt->Fill(stable_gammacaliso04);
 	}
       
       else if(diffpt < -0.5)
