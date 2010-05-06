@@ -1,39 +1,50 @@
-#define separateTree_cxx
-#include "separateTree.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <iostream>
+#include <string>
 
-void separateTree::Loop(int mode)
+using namespace std;
+
+void separateTree(std::string inputFile_,int mode=0)
 {
-   if (fChain == 0) return;
 
+  // get the correct tree from input file
+   TFile *inf = new TFile(inputFile_.data());
+   TTree *fChain = (TTree*)inf->FindObjectAny("Analysis");
+   cout << "Input file is " << inputFile_ << endl;
+
+   // rename the output file
    std::string remword=".root";
    size_t pos = inputFile_.find(remword);
-  
+   std::string forOutput = inputFile_;  
    if(pos!= std::string::npos)
-     inputFile_.swap(inputFile_.erase(pos,remword.length()));   
+     forOutput.swap(forOutput.erase(pos,remword.length()));   
    std::string endfix = mode == 0 ? "_data.root" : "_template.root";
-   std::string outputFile_data = inputFile_ + endfix;
-   cout << "Saving "  << endfix << " tree" << endl;
-   TFile* newfile_data = new TFile(outputFile_data.data(),"recreate");
+   std::string outputFile = forOutput + endfix;
+
+   // now open new root file
+   TFile* newfile_data = new TFile(outputFile.data(),"recreate");
+   cout << "Output file " << outputFile << endl;
+
+   // clone tree
+   TTree* newtree = fChain->CloneTree(0);
    cout << "Saving "  << endfix << " tree" << endl;
 
    Long64_t nentries = fChain->GetEntries();
-   TTree* newtree = fChain->CloneTree(0);
-
-   Long64_t nbytes = 0, nb = 0;
    cout << "nentries = " << nentries << endl;
+
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-      Long64_t ientry = LoadTree(jentry);
-      if (ientry < 0) break;
-      nb = fChain->GetEntry(jentry);   nbytes += nb;
+     cout << jentry << endl;
+     fChain->GetEntry(jentry);
       // if (Cut(ientry) < 0) continue;
       if(jentry%2==mode)
 	newtree->Fill();
    }
 
-
+ 
    newtree->Print();
    newtree->AutoSave();
    delete newfile_data;
