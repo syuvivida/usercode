@@ -31,13 +31,14 @@ void separateTree(std::string inputFile_,int mode=0)
 
    // clone tree
    TTree* newtree = fChain->CloneTree(0);
+   newtree->SetMaxTreeSize(4000000000);
    cout << "Saving "  << endfix << " tree" << endl;
 
    Long64_t nentries = fChain->GetEntries();
    cout << "nentries = " << nentries << endl;
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-     cout << jentry << endl;
+//       cout << jentry << endl;
      fChain->GetEntry(jentry);
       // if (Cut(ientry) < 0) continue;
       if(jentry%2==mode)
