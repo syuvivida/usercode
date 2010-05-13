@@ -30,12 +30,12 @@ void call_fit_chi2(std::string filename)
   cout << "Finding " << histo << endl;
   TH1F *h_bkg  = (TH1F*)inf->FindObjectAny(histo.data());
 
-//   TH1F* h_data = h_sig->Clone();
+//   TH1F* h_data = (TH1F*)h_sig->Clone();
 //   h_data->Reset();
 //   h_data->Sumw2();
 //   h_data->Add(h_sig,h_bkg,1.0,1.0);
  
-  fit_chi2(h_data,h_sig,h_bkg);
+  fit_chi2(h_data,h_sig,h_bkg,forOutput);
 
 
 }

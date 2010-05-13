@@ -7,6 +7,7 @@
 TH1F* signal_pos;
 TH1F* background_pos;
 TH1F* data;
+TH1F* fit_result;
 
 
 // -- returns prediction and error on the prediction based on stat unc in templates
@@ -75,6 +76,9 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
     sum +=  delta2;
     
+    // for this round, set the fit content
+    fit_result->SetBinContent(i,theory_value);
+    fit_result->SetBinError(i,theory_err);
 
   }
   f=sum  ;
@@ -84,7 +88,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 
 // -- main function
-void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
+void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string prefix)
 {
   gStyle->SetOptStat(kFALSE);
   gStyle->SetCanvasColor(0);
@@ -103,6 +107,16 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
   scale = 1.0/(Double_t)data->Integral(0,1000); 
   cout << "scale for data = " << scale << endl;
   data->Scale(scale);
+
+
+  fit_result = (TH1F*)dataInput->Clone();
+  fit_result->SetName("fit_result");
+  fit_result->SetLineColor(8); 
+  fit_result->SetMarkerColor(8);
+  fit_result->SetLineStyle(2);
+  fit_result->Sumw2();
+  fit_result->Reset();
+
 
   signal_pos = (TH1F*)sigTemplate->Clone();
   signal_pos->SetName("signal_pos");
@@ -126,6 +140,7 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
   scale = 1.0/(Double_t)background_pos->Integral(0,1000); 
   cout << "scale for background template = " << scale << endl;
   background_pos->Scale(scale);
+
 
 
   TMinuit *gMinuit = new TMinuit(1);  //initialize TMinuit with a maximum of 5 (1param??) params
@@ -178,9 +193,11 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
 
       TH1F* background_display = (TH1F*)background_pos->Clone();
       background_display->SetName("background_display");
-      background_display->Scale(fsig/background_display->Integral(0,1000));
+      background_display->Scale((1-fsig)/background_display->Integral(0,1000));
       background_display->SetFillStyle(3001);
       background_display->Draw("histsame");
+
+      fit_result->Draw("histesame");
 
       char result[300];
       sprintf(result,"fsig = %.3lf #pm %.3lf",fsig,fsigerr);
@@ -192,12 +209,19 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
       leg->SetTextSize(0.045);
       leg->SetBorderSize(0);
       leg->AddEntry(data,"data");
+      leg->AddEntry(fit_result,"fit");
       leg->AddEntry(signal_display,"signal template");
       leg->AddEntry(background_display,"background template");
       leg->Draw("same");
 
-      c1->Print("test.gif");
-      c1->Print("test.C");
+      std::string outputFile = prefix + ".eps";
+      c1->Print(outputFile.data());
+
+      outputFile = prefix + ".gif";
+      c1->Print(outputFile.data());
+
+      outputFile = prefix + ".C";
+      c1->Print(outputFile.data());
     }
     
   else cout << "Fit failed!\n";
