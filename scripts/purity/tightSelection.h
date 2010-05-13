@@ -1,54 +1,49 @@
 #include <TCut.h>
 
 
-TCut basicCut    = "phoEt > 20 && phoEt < 80"
-  " && phoPos==0"
-  " && phoTrkIsoHollowDR04 < 3.4"
-  " && phoEcalIsoDR04 < (3+0.0013*phoEt) "
-  " && phoHcalIsoDR04 < 3.0"
-  " && phoHoverE < 0.054"
-  //  " && phoSigmaIEtaIEta < 0.01"
-  ;
+TCut loosePhoton356 = "pt > 5 && "
+  "( (isEB==1 && isEE==0 && "
+  " ecalRecHitSumEtConeDR04 < (2.5+0.004*pt) && "
+  " hcalTowerSumEtConeDR04  < 3.0 && "
+  " trkSumPtHollowConeDR04  < 9.0 && "
+  " hadronicOverEm < 0.15) || "
+  "  (isEB==0 && isEE==1 && "
+  " ecalRecHitSumEtConeDR04 < (3.0+0.0021*pt) && "
+  " hcalTowerSumEtConeDR04  < 3.5 && "
+  " trkSumPtHollowConeDR04  < 9.0 && "
+  " hadronicOverEm < 0.15) ) ";
+
+TCut allRSCut = "(isEB && !isEE && ecalRecHitSumEtConeDR04/et < 0.095 && "
+  "hcalTowerSumEtConeDR04/et < 0.045 && "
+  "trkSumPtHollowConeDR04/et < 0.045 && "
+  "hadronicOverEm < 0.045 && sigmaIetaIeta < 0.01) || "
+  "(isEE && !isEB && ecalRecHitSumEtConeDR04/et < 0.07  && "
+  "hcalTowerSumEtConeDR04/et < 0.025 && "
+  "trkSumPtHollowConeDR04/et < 0.025 && "
+  "hadronicOverEm < 0.015 && (ESRatio > 0.36 || ESRatio==-1))";
 
 
-/*
-TCut basicCut    = "phoEt > 20 && phoEt < 80"                                 
-  " && phoPos==1" 
-  " && abs(phoEta)<2.5"
-  " && phoTrkIsoHollowDR03 < 1.5+0.02*phoEt"
-  " && phoEcalIsoDR03 < 1.0+0.05*phoEt "
-  " && phoHcalIsoDR03 < 0.5+0.04*phoEt"
-  " && phoHoverE < 0.15"                                                       
-  ;                                                                             
-*/
+TCut rsCut = "(isEB && !isEE && isLoose && "
+  "hadronicOverEm < 0.045 && sigmaIetaIeta < 0.01) || "
+  "(isEE && !isEB && isLoose && "
+  "hadronicOverEm < 0.015 && (ESRatio > 0.36 || ESRatio==-1))";
 
-/*
-TCut basicCut    = "phoEt > 20 && phoEt < 30"                                 
-  " && phoPos==0"                                                             
-  " && phoR9 > 0.93"
-  " && phoTrkIsoHollowDR03 < 9.0"
-  " && phoEcalIsoDR03 < (5.0+0.04*phoEt) "                                  
-  " && phoHcalIsoDR03 < 5.0"                                       
-  " && phoHoverE < 0.15"                                        
-;                                                                             
-*/
+TCut hardScatterCut = "isGenMatched && genMomId==22"; 
+TCut fragCut = "isGenMatched==1 && abs(genMomId)<22 && genNSiblings>2";
+TCut decayCut = "(isGenMatched && abs(genMomId)>50) || !isGenMatched"; 
 
-TCut realCut = "phoGenIndex>=0 && phoGenMomPID==22";
+TCut basicCut = "isEB &&pt>15 && pt < 30 && !isEBGap && !isEEGap && !isEBEEGap" + rsCut;
 
-/*
+//TCut sigCut = "isGenMatched && genCalIsoDR04 < 5.0";  
+TCut sigCut = "isGenMatched && abs(genMomId) <= 22 && genCalIsoDR04 < 5.0"; 
+TCut bkgCut = !sigCut;
 
-x-sections
+TCut simpleCut = "hadronicOverEm < 0.15&& abs(eta)<2.5 && pt>17"; 
 
-photon+jets 
+TCut etaCut1 = "isEB && !isEE";
 
-20-30 5.718e+4 110000
-30-50 1.652e+4 104060
-50-80 2.723e+3 104060
-
-QCD
-
-20-30 0.2355e+9 0.0073 33305352
-30-80 0.0593e+9 0.059  40899325
+TCut etaCut2 = "isEE && !isEB";
 
 
-*/
+
+
