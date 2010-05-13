@@ -1,3 +1,9 @@
+#include <TH1.h>
+#include <TMinuit.h>
+#include <TStyle.h>
+#include <TLegend.h>
+#include <TCanvas.h>
+
 TH1F* signal_pos;
 TH1F* background_pos;
 TH1F* data;
@@ -87,7 +93,6 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
   gStyle->SetFrameBorderMode(0);
 
   Double_t scale=1.;
-  Double_t neve=0;
 
   data = (TH1F*)dataInput->Clone();
   data->SetName("data");
@@ -162,6 +167,8 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
       gMinuit->GetParameter(0, fsig, fsigerr);  
       cout << "Fsig = " << fsig << " +- " << fsigerr << endl;
 
+      TCanvas* c1 = new TCanvas("c1","",500,500);
+
       data->Draw();
       TH1F* signal_display = (TH1F*)signal_pos->Clone();
       signal_display->SetName("signal_display");
@@ -182,7 +189,7 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
       leg->SetHeader(result);
       leg->SetFillColor(0);
       leg->SetFillStyle(0);
-      leg->SetTextSize(0.05);
+      leg->SetTextSize(0.045);
       leg->SetBorderSize(0);
       leg->AddEntry(data,"data");
       leg->AddEntry(signal_display,"signal template");
