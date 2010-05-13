@@ -1,0 +1,16 @@
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt15_MultiPhotonAnalyzer.root 1.922e+05 1.22339e+06 15 30
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt30_MultiPhotonAnalyzer.root 2.007e+04 1.02679e+06 30 80
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt80_MultiPhotonAnalyzer.root 5.565e+02 1.28771e+06 80 170
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt170_MultiPhotonAnalyzer.root 2.437e+01 1.0894e+06 170 300
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt300_MultiPhotonAnalyzer.root 1.636e+00 1.03427e+06 300 470
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt470_MultiPhotonAnalyzer.root 1.360e-01 991179 470 800
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/PhotonJet_Pt800_MultiPhotonAnalyzer.root 3.477e-03 1.10064e+06 800 10000
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCDDiJet_Pt0to15_MultiPhotonAnalyzer.root 4.844e+10 2.22203e+06 0 15
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt15_MultiPhotonAnalyzer.root 8.762e+08 6.1905e+06 15 30
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt30_MultiPhotonAnalyzer.root 6.041e+07 5.26966e+06 30 80
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt80_MultiPhotonAnalyzer.root 9.238e+05 3.2218e+06 80 170
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt170_MultiPhotonAnalyzer.root 2.547e+04 3.17195e+06 170 300
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt300_MultiPhotonAnalyzer.root 1.256e+03 3.25766e+06 300 470
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt470_MultiPhotonAnalyzer.root 8.798e+01 2.1345e+06 470 800
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt800_MultiPhotonAnalyzer.root 2.186e+00 2.0817e+06 800 1400
+/mc/QCD_mess/36x_noLIPTIPCut_QCDPhoton_Ntuple/QCD_Pt1400_MultiPhotonAnalyzer.root 1.122e-02 1.18502e+06 1400 10000
