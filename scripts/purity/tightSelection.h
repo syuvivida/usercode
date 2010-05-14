@@ -34,8 +34,8 @@ TCut decayCut = "(isGenMatched && abs(genMomId)>50) || !isGenMatched";
 
 TCut basicCut = "isEB &&pt>15 && pt < 30 && !isEBGap && !isEEGap && !isEBEEGap" + rsCut;
 
-//TCut sigCut = "isGenMatched && genCalIsoDR04 < 5.0";  
-TCut sigCut = "isGenMatched && abs(genMomId) <= 22 && genCalIsoDR04 < 5.0"; 
+TCut sigCut = "isGenMatched && genCalIsoDR04 < 5.0";  
+//TCut sigCut = "isGenMatched && abs(genMomId) <= 22 && genCalIsoDR04 < 5.0"; 
 TCut bkgCut = !sigCut;
 
 TCut simpleCut = "hadronicOverEm < 0.15&& abs(eta)<2.5 && pt>17"; 

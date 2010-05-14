@@ -148,7 +148,7 @@ void produceHisto(std::string outputName="", std::string var="0.692-9.240*ecalIs
 
    std::string treeName = "Analysis";
 
-   // first phonal trees
+   // first photon trees
    fillTrees(phoFile,phoTree,treeName);
    const unsigned int nSize_pho = phoFile.size();
    if(phoTree.size()!= nSize_pho){cout << "error 1"<< endl; return;}
