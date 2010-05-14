@@ -1,0 +1,15 @@
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt15_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 1.922e+05 1.14339e+06 15 30
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt30_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 2.007e+04 786794 30 80 
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt80_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 5.565e+02 1.20771e+06 80 170
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt170_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 2.437e+01 1.1394e+06 170 300
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt300_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 1.636e+00 954266 300 470
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt470_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 1.360e-01 1.09118e+06 470 800
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/PhotonJet_Pt800_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 3.477e-03 835640 800 10000
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCDDiJet_Pt0to15_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 4.844e+10 2.19703e+06 0 15
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt15_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 8.762e+08 6.1905e+06 15 30
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt30_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 6.041e+07 5.26966e+06 30 80
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt80_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 9.238e+05 3.2218e+06 80 170
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt170_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 2.547e+04 3.17195e+06 170 300
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt300_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 1.256e+03 3.28266e+06 300 470
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt470_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 8.798e+01 2.1595e+06 470 800
+/mc/QCD_mess/MPA_357_V00-00-06_defaultTrkIso/QCD_Pt800_Spring10-START3X_V26_S09-v1_GEN-SIM-RECO_MultiPhotonAnalyzer.root 2.186e+00 2.1817e+06 800 10000
