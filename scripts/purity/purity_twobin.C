@@ -9,7 +9,7 @@ const int MAXBIN_ALLOWED=1000;
 void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 	      Double_t& ratio, Double_t& err)
 {
-
+  if(fabs(n1+n2)<1e-6){ratio=0;err=0;return;}
   ratio = (n1)/(n1+n2);
   
   err= pow(1/(n1+n2) - n1/(n1+n2)/(n1+n2),2)*n1err*n1err+
@@ -26,9 +26,8 @@ void sigFracErr(Double_t rd, Double_t rderr,
 		Double_t& sigfrac, Double_t& err)
 {
 
-  if(fabs(rs-rb)<1e-6)return;
+  if(fabs(rs-rb)<1e-6){sigfrac=0; err=0; return;}
   sigfrac = (rd-rb)/(rs-rb);
-  cout << "signal fraction = " << sigfrac << endl;
 
   err = pow(1/(rs-rb),2)*rderr*rderr + 
     pow((rd-rb)/(rs-rb)/(rs-rb),2)*rserr*rserr + 
@@ -46,13 +45,18 @@ void sigFracErr_inOneBin(int bin, Double_t rd, Double_t rderr,
 			 Double_t& sigfrac, Double_t& err)
 {
 
-  if(fabs(rs-rb)<1e-6)return;
+  if(fabs(rs-rb)<1e-6){sigfrac=0; err=0; return;}
   if(bin==1)
-    sigfrac = (rd-rb)*rs/(rs-rb)/rd;
+    {
+      if(fabs(rd)<1e-6){sigfrac=0; err=0; return;}
+      sigfrac = (rd-rb)*rs/(rs-rb)/rd;
+    }
   else
-    sigfrac = (rd-rb)*(1-rs)/(rs-rb)/(1-rd);
+    {
+      if(fabs(1-rd)<1e-6){sigfrac=0; err=0; return;}
+      sigfrac = (rd-rb)*(1-rs)/(rs-rb)/(1-rd);
+    }
 
-  cout << "signal fraction = " << sigfrac << endl;
 
   if(bin==1)
     err = pow(rs/(rs-rb)/rd -(rd-rb)*rs/(rs-rb)/rd/rd,2)*rderr*rderr + 
@@ -70,7 +74,7 @@ void sigFracErr_inOneBin(int bin, Double_t rd, Double_t rderr,
 
 
 
-void histoError(int MAX, TH1F* h, Double_t& bin1, Double_t& binerr1, 
+void histoError(int MAX, TH1D* h, Double_t& bin1, Double_t& binerr1, 
 		Double_t& bin2, Double_t&binerr2)
 {
 
@@ -98,22 +102,24 @@ void histoError(int MAX, TH1F* h, Double_t& bin1, Double_t& binerr1,
 
 }
 
-void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
-		   std::string outputName)
+void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate, 
+		   std::string outputName, Double_t& purity_central, Double_t& purity_central_err)
 {
   
+  purity_central = 0;
+  purity_central_err = 0;
 
-  TH1F* signal_pos;
-  TH1F* background_pos;
-  TH1F* data;
+  TH1D* signal_pos;
+  TH1D* background_pos;
+  TH1D* data;
 
   // the first bin is the signal fraction in the first bin,
   // the second bin is the signal fraction in total
-  TH1F* result = new TH1F("result","",3,-0.5,2.5);
+  TH1D* result = new TH1D("result","",3,-0.5,2.5);
 
   Double_t scale=1.;
 
-  data = (TH1F*)dataInput->Clone();
+  data = (TH1D*)dataInput->Clone();
   data->SetName("data");
   data->SetLineColor(1);
   data->SetMarkerColor(1);
@@ -124,7 +130,7 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   data->Scale(scale);
 
 
-  signal_pos = (TH1F*)sigTemplate->Clone();
+  signal_pos = (TH1D*)sigTemplate->Clone();
   signal_pos->SetName("signal_pos");
   signal_pos->SetLineColor(2);
   signal_pos->SetMarkerColor(2);
@@ -136,7 +142,7 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   signal_pos->Scale(scale);
 
 
-  background_pos = (TH1F*)bkgTemplate->Clone();
+  background_pos = (TH1D*)bkgTemplate->Clone();
   background_pos->SetName("background_pos");
   background_pos->SetLineColor(4);
   background_pos->SetMarkerColor(4);
@@ -150,15 +156,15 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   // now determine where to cut
 
-  TH1F* integral_signal = (TH1F*)sigTemplate->Clone();
+  TH1D* integral_signal = (TH1D*)sigTemplate->Clone();
   integral_signal->SetName("integral_signal");
   integral_signal->Reset();
 
-  TH1F* integral_background = (TH1F*)bkgTemplate->Clone();
+  TH1D* integral_background = (TH1D*)bkgTemplate->Clone();
   integral_background->SetName("integral_background");
   integral_background->Reset();
 
-  TH1F* integral_diff = (TH1F*)bkgTemplate->Clone();
+  TH1D* integral_diff = (TH1D*)bkgTemplate->Clone();
   integral_diff->SetName("integral_diff");
   integral_diff->Reset();
 
@@ -246,6 +252,9 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   cout << "Total signal fraction = " << signal_fraction << " +- " << 
     errfrac << endl;
 
+  purity_central = signal_fraction;
+  purity_central_err = errfrac;
+
   
   // signal_fraction within the first bin
   Double_t signal_fraction_iso1 = -1;
@@ -293,7 +302,7 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   signal_pos->Write();
   bkgTemplate->Write();
   background_pos->Write();
-  
+
   integral_signal->Write();
   integral_background->Write();
   integral_diff->Write();
