@@ -4,10 +4,10 @@
 #include <TLegend.h>
 #include <TCanvas.h>
 
-TH1F* signal_pos;
-TH1F* background_pos;
-TH1F* data;
-TH1F* fit_result;
+TH1D* signal_pos;
+TH1D* background_pos;
+TH1D* data;
+TH1D* fit_result;
 
 
 // -- returns prediction and error on the prediction based on stat unc in templates
@@ -88,7 +88,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 
 // -- main function
-void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string prefix)
+void fit_chi2(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate, std::string prefix, Double_t& sigFrac, Double_t& sigFrac_err)
 {
   gStyle->SetOptStat(kFALSE);
   gStyle->SetCanvasColor(0);
@@ -98,7 +98,7 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
 
   Double_t scale=1.;
 
-  data = (TH1F*)dataInput->Clone();
+  data = (TH1D*)dataInput->Clone();
   data->SetName("data");
   data->SetLineColor(1);
   data->SetMarkerColor(1);
@@ -109,7 +109,7 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
   data->Scale(scale);
 
 
-  fit_result = (TH1F*)dataInput->Clone();
+  fit_result = (TH1D*)dataInput->Clone();
   fit_result->SetName("fit_result");
   fit_result->SetLineColor(8); 
   fit_result->SetMarkerColor(8);
@@ -118,7 +118,7 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
   fit_result->Reset();
 
 
-  signal_pos = (TH1F*)sigTemplate->Clone();
+  signal_pos = (TH1D*)sigTemplate->Clone();
   signal_pos->SetName("signal_pos");
   signal_pos->SetLineColor(2);
   signal_pos->SetMarkerColor(2);
@@ -130,7 +130,7 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
   signal_pos->Scale(scale);
 
 
-  background_pos = (TH1F*)bkgTemplate->Clone();
+  background_pos = (TH1D*)bkgTemplate->Clone();
   background_pos->SetName("background_pos");
   background_pos->SetLineColor(4);
   background_pos->SetMarkerColor(4);
@@ -185,13 +185,13 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
       TCanvas* c1 = new TCanvas("c1","",500,500);
 
       data->Draw();
-      TH1F* signal_display = (TH1F*)signal_pos->Clone();
+      TH1D* signal_display = (TH1D*)signal_pos->Clone();
       signal_display->SetName("signal_display");
       signal_display->Scale(fsig/signal_display->Integral(0,1000));
       signal_display->SetFillStyle(3001);
       signal_display->Draw("histsame");
 
-      TH1F* background_display = (TH1F*)background_pos->Clone();
+      TH1D* background_display = (TH1D*)background_pos->Clone();
       background_display->SetName("background_display");
       background_display->Scale((1-fsig)/background_display->Integral(0,1000));
       background_display->SetFillStyle(3001);
@@ -201,6 +201,8 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
 
       char result[300];
       sprintf(result,"fsig = %.3lf #pm %.3lf",fsig,fsigerr);
+      sigFrac = fsig;
+      sigFrac_err = fsigerr;
 
       TLegend* leg = new TLegend(0.2,0.6,0.4,0.9);
       leg->SetHeader(result);
@@ -224,7 +226,11 @@ void fit_chi2(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, std::string
       c1->Print(outputFile.data());
     }
     
-  else cout << "Fit failed!\n";
+  else{
+    cout << "Fit failed!\n";
+    sigFrac = 0;
+    sigFrac_err = 0;
+  }
 
   
   return;
