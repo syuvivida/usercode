@@ -105,6 +105,7 @@ void fit_neve_chi2(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate, std::s
   data->SetMarkerColor(1);
   data->SetXTitle("Fisher's isolation [GeV]");
   data->Sumw2();
+  Double_t ndata = data->Integral(0,1000);
 //   scale = 1.0/(Double_t)data->Integral(0,1000); 
   cout << "scale for data = " << scale << endl;
   data->Scale(scale);
@@ -157,8 +158,8 @@ void fit_neve_chi2(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate, std::s
 
   Double_t vstart = 100;
   Double_t step = 0.1;
-  gMinuit->mnparm(0, "nsig", vstart, step, -10000,10000,ierflg);
-  gMinuit->mnparm(1, "nbkg", vstart, step, -10000,10000,ierflg);
+  gMinuit->mnparm(0, "nsig", vstart, step, 0,2*ndata,ierflg);
+  gMinuit->mnparm(1, "nbkg", vstart, step, 0,2*ndata,ierflg);
 
 
 
