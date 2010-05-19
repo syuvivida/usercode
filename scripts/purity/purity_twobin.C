@@ -113,8 +113,9 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
   TH1D* background_pos;
   TH1D* data;
 
-  // the first bin is the signal fraction in the first bin,
-  // the second bin is the signal fraction in total
+  // 0 is the signal fraction from the total sample,
+  // 1 is the signal fraction in the first bin,
+  // 2 is the signal fraction in the second bin
   TH1D* result = new TH1D("result","",3,-0.5,2.5);
 
   Double_t scale=1.;
