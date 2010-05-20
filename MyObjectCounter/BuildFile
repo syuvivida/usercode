@@ -12,6 +12,7 @@
 <use name=FWCore/ServiceRegistry>
 <use name=RecoEgamma/EgammaMCTools>
 <use name=HLTrigger/HLTcore>
+<use name=Geometry/CaloGeometry>
 <use name=root>
 <flags EDM_PLUGIN=1>
 <export>
@@ -29,5 +30,6 @@
   <use name=FWCore/ServiceRegistry>
   <use name=RecoEgamma/EgammaMCTools>
   <use name=HLTrigger/HLTcore>
+  <use name=Geometry/CaloGeometry>
   <use name=root>
 </export>
