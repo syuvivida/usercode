@@ -215,7 +215,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    if(mixPtHatHi.size()!= nSize_mix){cout << "error 4"<< endl; return;}
 
    double fBinsEta[]={0,1.45,1.7,2.5};
-   double fBinsPt[]={15,20,30,50,80,120,5000};
+   double fBinsPt[]={20,30,50,80,120};
    const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
    const int nEtaBin = 2; // 0~1.45, 1.55~2.5
    
@@ -267,35 +267,35 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoPho_1[ieta][ipt]->SetName(tmp);
        hIsoPho_1[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_1[ieta][ipt]->SetXTitle(var.data());
+       hIsoPho_1[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
 
        hIsoPho_2[ieta][ipt] = (TH1F*)hTemplate->Clone();
        histoName = "isoPho_2";
        sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoPho_2[ieta][ipt]->SetName(tmp);
        hIsoPho_2[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_2[ieta][ipt]->SetXTitle(var.data());
+       hIsoPho_2[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
 
        hIsoPho_3[ieta][ipt] = (TH1F*)hTemplate->Clone();
        histoName = "isoPho_3";
        sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoPho_3[ieta][ipt]->SetName(tmp);
        hIsoPho_3[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_3[ieta][ipt]->SetXTitle(var.data());
+       hIsoPho_3[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
 
        hIsoPho_4[ieta][ipt] = (TH1F*)hTemplate->Clone();
        histoName = "isoPho_4";
        sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoPho_4[ieta][ipt]->SetName(tmp);
        hIsoPho_4[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_4[ieta][ipt]->SetXTitle(var.data());
+       hIsoPho_4[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
 
        hIsoPho_5[ieta][ipt] = (TH1F*)hTemplate->Clone();
        histoName = "isoPho_5";
        sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoPho_5[ieta][ipt]->SetName(tmp);
        hIsoPho_5[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_5[ieta][ipt]->SetXTitle(var.data());
+       hIsoPho_5[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
 
 
        hIsoJet[ieta][ipt] = (TH1F*)hTemplate->Clone();
@@ -306,14 +306,14 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        hIsoJet[ieta][ipt]->SetXTitle(var.data());
 
        hIsoMixSig[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       sprintf(tmp,"TemplateS_Et_%d_%d_Eta_%.1f_%.1f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+       sprintf(tmp,"TemplateS_Et_%d_%d_Eta_%.2f_%.2f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
        hIsoMixSig[ieta][ipt]->SetName(tmp);
        hIsoMixSig[ieta][ipt]->SetTitle(kineCut.GetTitle());
        hIsoMixSig[ieta][ipt]->SetXTitle(var.data());
 
        hIsoMixBkg[ieta][ipt] = (TH1F*)hTemplate->Clone(); 
-       sprintf(tmp,"TemplateB_Et_%d_%d_Eta_%.1f_%.1f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+       sprintf(tmp,"TemplateB_Et_%d_%d_Eta_%.2f_%.2f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
        sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoMixBkg[ieta][ipt]->SetName(tmp);
@@ -322,7 +322,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
 
 
        hIsoMixData[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       sprintf(tmp,"Template_Et_%d_%d_Eta_%.1f_%.1f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+       sprintf(tmp,"Template_Et_%d_%d_Eta_%.2f_%.2f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
        hIsoMixData[ieta][ipt]->SetName(tmp);
        hIsoMixData[ieta][ipt]->SetTitle(kineCut.GetTitle());
@@ -461,7 +461,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        leg->AddEntry(hIsoPho_5[ieta][ipt],"genCalIsoDR04<5");
        leg->Draw("same");
     
-       sprintf(tmp,"/mc/QCD_mess/figures/%s_Template_Et_%d_%d_Eta_%.1f_%.1f",outputName.data(),
+       sprintf(tmp,"/mc/QCD_mess/figures/%s_Template_Et_%d_%d_Eta_%.2f_%.2f",outputName.data(),
 	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
 
