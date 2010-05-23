@@ -13,30 +13,45 @@ TCut loosePhoton356 = "pt > 5 && "
   " trkSumPtHollowConeDR04  < 9.0 && "
   " hadronicOverEm < 0.15) ) ";
 
-TCut allRSCut = "(isEB && !isEE && ecalRecHitSumEtConeDR04/et < 0.095 && "
-  "hcalTowerSumEtConeDR04/et < 0.045 && "
-  "trkSumPtHollowConeDR04/et < 0.045 && "
-  "hadronicOverEm < 0.045 && sigmaIetaIeta < 0.01) || "
-  "(isEE && !isEB && ecalRecHitSumEtConeDR04/et < 0.07  && "
-  "hcalTowerSumEtConeDR04/et < 0.025 && "
-  "trkSumPtHollowConeDR04/et < 0.025 && "
-  "hadronicOverEm < 0.015 && (ESRatio > 0.36 || ESRatio==-1))";
+
+TCut removeSpikeCut = "((isEB && (seedSeverity!=3 && seedSeverity!=4 ) && (seedRecoFlag != 2) ) || isEE)";
+
+TCut eventCut     = "( !TTBit[36] && !TTBit[37] && !TTBit[38] && !TTBit[39] && !vtxIsFake && vtxNdof > 4 && abs(vtxZ) <= 15) && HLT_Photon15_L1R";
+
+TCut rsCut = "( pt > 15.0 && abs(eta)<1.45 && hadronicOverEm <  0.05 && sigmaIetaIeta < 0.01 ) || "
+  "(pt > 15.0 && abs(eta) > 1.7 && abs(eta) < 2.5 && hadronicOverEm <  0.05 && abs(ESRatio) > 0.1)";
 
 
-TCut rsCut = "(isEB && !isEE && isLoose && "
-  "hadronicOverEm < 0.045 && sigmaIetaIeta < 0.01) || "
-  "(isEE && !isEB && isLoose && "
-  "hadronicOverEm < 0.015 && (ESRatio > 0.36 || ESRatio==-1))";
+TCut RSCut_EB = "pt > 15.0 && abs(eta)<1.45 &&"
+  " hadronicOverEm <  0.05 && "
+  " sigmaIetaIeta < 0.01";
 
-TCut hardScatterCut = "isGenMatched && genMomId==22"; 
-TCut fragCut = "isGenMatched==1 && abs(genMomId)<22 && genNSiblings>2";
+TCut RSCut_EE = "pt > 15.0 && abs(eta) > 1.7 && abs(eta) < 2.5 && "
+  //  "(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04) < 1.45 &&"
+  " hadronicOverEm <  0.05 && "
+  " abs(ESRatio) > 0.1";
+
+
+TCut hardScatterCut = "isGenMatched && genMomId==22 && genCalIsoDR04 < 5.0"; 
+TCut fragCut = "isGenMatched && abs(genMomId)<22 && genNSiblings>2 && genCalIsoDR04 < 5.0";
 TCut decayCut = "(isGenMatched && abs(genMomId)>50) || !isGenMatched"; 
 
-TCut basicCut = "isEB &&pt>15 && pt < 30 && !isEBGap && !isEEGap && !isEBEEGap" + rsCut;
+TCut IDCut = rsCut;
 
-TCut sigCut = "isGenMatched && genCalIsoDR04 < 5.0";  
-//TCut sigCut = "isGenMatched && abs(genMomId) <= 22 && genCalIsoDR04 < 5.0"; 
+TCut sigCut = "isGenMatched && abs(genMomId) <= 22 && genCalIsoDR04 < 10.0"; 
 TCut bkgCut = !sigCut;
+
+TCut sigCut1 = "isGenMatched && abs(genMomId)==22 && genCalIsoDR04 < 10.0";
+TCut sigCut2 = "isGenMatched && abs(genMomId)<= 22 && genCalIsoDR04 < 10.0";
+
+
+/*
+TCut sigCut1 = hardScatterCut;
+TCut sigCut2 = "isGenMatched && abs(genMomId)<= 22";
+TCut sigCut3 = "isGenMatched && genMomId==22 && genCalIsoDR04 < 5.0";
+TCut sigCut4 = "isGenMatched && abs(genMomId)<=22 && genCalIsoDR04 < 5.0";
+TCut sigCut5 = "isGenMatched && genCalIsoDR04 < 5.0";
+*/
 
 TCut simpleCut = "hadronicOverEm < 0.15&& abs(eta)<2.5 && pt>17"; 
 
