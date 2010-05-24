@@ -81,7 +81,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
 // calling functions, comparing the component of "direct" and "fragmentation" photons
 void fragDirect(std::string outputName="", std::string var=
 "(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
-	       int nbin=24,
+	       int nbin=20,
 	       double xmin=-1.0, double xmax=11.0, int genIsoCutValue=5,
 	       bool normalize=true )
 {
