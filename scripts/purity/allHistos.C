@@ -2,8 +2,7 @@
 #include <fstream>
 #include <TFile.h>
 #include <TTree.h>
-#include <TH1F.h>
-#include <TH2F.h>
+#include <TH1.h>
 #include <vector>
 #include <string>
 #include <TCanvas.h>
@@ -13,13 +12,21 @@
 
 using namespace std;
 const int MAXBIN_ALLOWED=1000;
+const double lumi = 0.1; // 100/nb
+// the pt and eta binning
+const double fBinsEta[]={0,1.45,1.7,2.5};
+const double fBinsPt[]={15,20,30,50,80,120};
+const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
+const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
+ 
 
 // calculate errors from weighted histograms
 void histoError(TH1F* h, double& total_value, double& total_err)
 {
 
   total_value = total_err = 0;
-  for(int i=0; i<= h->GetNbinsX()+1; i++)
+//   for(int i=0; i<= h->GetNbinsX()+1; i++)
+  for(int i=1; i<= h->GetNbinsX(); i++)
     {
       total_value += h->GetBinContent(i);
       total_err   += pow(h->GetBinError(i),2);
@@ -67,8 +74,9 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
    TH1F *hRes = (TH1F*)h->Clone();
    hRes->SetName("hRes");
    hRes->Sumw2();
-  
+
    char tmp[300];
+  
    for (unsigned int i=0; i<sigTree.size(); i++)
      {
        // first determine the pthat cut
@@ -84,7 +92,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
        htmp->Scale(sigWeight[i]);
        cout << "scale = " << sigWeight[i] << endl;
        cout << "After scaling htmp -> entries() " << htmp->GetEntries() << endl;
-       cout << "After scaling htmp -> Integral() " << htmp->Integral() << endl;
+       cout << "After scaling htmp -> Integral() " << htmp->Integral(0,MAXBIN_ALLOWED) << endl;
        cout << "After scaling htmp -> GetMean()  " << htmp->GetMean() << endl;
        cout << "After scaling htmp -> GetRMS()  " << htmp->GetRMS() << endl;
        hRes->Add(htmp);
@@ -94,7 +102,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
    h->Add(hRes);
    if(norm)h->Scale(1.0/(double)h->Integral(0,MAXBIN_ALLOWED));
    cout << "After scaling h-> entries() " << h->GetEntries() << endl;
-   cout << "After scaling h-> Integral() " << h->Integral() << endl;
+   cout << "After scaling h-> Integral() " << h->Integral(0,MAXBIN_ALLOWED) << endl;
    cout << "After scaling h -> GetMean()  " << h->GetMean() << endl;
    cout << "After scaling h -> GetRMS()  " << h->GetRMS() << endl;
    
@@ -104,13 +112,16 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
 
 // calling functions
 void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
-	       int nbin=40,
-	       double xmin=-1.0, double xmax=39.0,
-	       bool isData=false,bool normalize=true )
+	       int nbin=20,
+	       double xmin=-1.0, double xmax=11.0,
+	       bool isData=false,bool normalize=false)
 {
+  TH1F *hTemplate = new TH1F("hTemplate","",nbin,xmin,xmax);
+  char tmp[1000];
+
   if(outputName=="")outputName = var;
   cout << "output file prefix = " << outputName << endl;
-   vector<string> mixFile;
+  vector<string> mixFile;
    vector<double> mixWeight;
    vector<TTree*> mixTree;
    vector<int> mixPtHatLo;
@@ -129,12 +140,10 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    vector<int> jetPtHatHi;
 
 
-   double lumi = 1.0; // 1.0/pb
    FILE *fTable = fopen("inputFile.txt","r");
    
    int flag=1;   
    int nfile=0;
-   char tmp[1000];
    char filename[100];
    while (flag!=-1){
      // first reading input file
@@ -157,33 +166,33 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
      flag=fscanf(fTable,"%s",tmp);
      int ptHatHi=atof(tmp);
 
-    if (flag!=-1) {
-      cout <<filename<<" "<<cross<<" "<<nevt<< " " << ptHatLo << " " << ptHatHi << endl;
-      if(isPhotonJet)
-	{
-	  cout << "filling photon jet" << endl;
-	  phoFile.push_back(tempFile);
-	  phoWeight.push_back(scale);
-	  phoPtHatLo.push_back(ptHatLo);
-	  phoPtHatHi.push_back(ptHatHi);      
-	}
-      else
-	{
-	  cout << "filling dijet" << endl;
-	  jetFile.push_back(tempFile);
-	  jetWeight.push_back(scale);
-	  jetPtHatLo.push_back(ptHatLo);
-	  jetPtHatHi.push_back(ptHatHi);      
-	}
+     if (flag!=-1) {
+       cout <<filename<<" "<<cross<<" "<<nevt<< " " << ptHatLo << " " << ptHatHi << endl;
+       if(isPhotonJet)
+	 {
+	   cout << "filling photon jet" << endl;
+	   phoFile.push_back(tempFile);
+	   phoWeight.push_back(scale);
+	   phoPtHatLo.push_back(ptHatLo);
+	   phoPtHatHi.push_back(ptHatHi);      
+	 }
+       else
+	 {
+	   cout << "filling dijet" << endl;
+	   jetFile.push_back(tempFile);
+	   jetWeight.push_back(scale);
+	   jetPtHatLo.push_back(ptHatLo);
+	   jetPtHatHi.push_back(ptHatHi);      
+	 }
       
-      cout << "filling mixture" << endl;
-      mixFile.push_back(tempFile);
-      mixWeight.push_back(scale);
-      mixPtHatLo.push_back(ptHatLo);
-      mixPtHatHi.push_back(ptHatHi);      
+       cout << "filling mixture" << endl;
+       mixFile.push_back(tempFile);
+       mixWeight.push_back(scale);
+       mixPtHatLo.push_back(ptHatLo);
+       mixPtHatHi.push_back(ptHatHi);      
 
-      nfile++; 
-    }	 
+       nfile++; 
+     }	 
 	
    } 
 
@@ -214,26 +223,11 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    if(mixPtHatLo.size()!= nSize_mix){cout << "error 3"<< endl; return;}
    if(mixPtHatHi.size()!= nSize_mix){cout << "error 4"<< endl; return;}
 
-   double fBinsEta[]={0,1.45,1.7,2.5};
-   double fBinsPt[]={20,30,50,80,120};
-   const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
-   const int nEtaBin = 2; // 0~1.45, 1.55~2.5
    
-   TH1F *hTemplate = new TH1F("hTemplate","",nbin,xmin,xmax);
-
-   TH1F *hIsoPho[nEtaBin][nPtBin];
-   TH1F *hIsoJet[nEtaBin][nPtBin];
    TH1F *hIsoMixSig[nEtaBin][nPtBin];
    TH1F *hIsoMixBkg[nEtaBin][nPtBin];
    TH1F *hIsoMixData[nEtaBin][nPtBin];
    
-   // for comparison
-   TH1F *hIsoPho_1[nEtaBin][nPtBin];
-   TH1F *hIsoPho_2[nEtaBin][nPtBin];
-   TH1F *hIsoPho_3[nEtaBin][nPtBin];
-   TH1F *hIsoPho_4[nEtaBin][nPtBin];
-   TH1F *hIsoPho_5[nEtaBin][nPtBin];
-
 
    // purity
    TH1F *hTruthPurity[nEtaBin];
@@ -241,128 +235,70 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    // first looping over eta bins
    for(int ieta = 0; ieta < nEtaBin; ieta++){
 
-     TCut etaCut   = (ieta == 0)?  "abs(eta)<1.45": "abs(eta)>1.55 && abs(eta)<2.5";
-     sprintf(tmp,"hTruthPurity%02i",ieta);
+     sprintf(tmp,"abs(eta)>%.2lf && abs(eta)<%.2lf",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     TCut etaCut = tmp;
+
+     sprintf(tmp,"hTruthPurity_Eta_%.2f_%.2f",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
      hTruthPurity[ieta] = new TH1F(tmp,"",nPtBin, fBinsPt); 
-     hTruthPurity[ieta]->SetTitle(etaCut.GetTitle());
+
+     sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     hTruthPurity[ieta]->SetTitle(tmp);
      hTruthPurity[ieta]->SetXTitle("p_{T}(#gamma) [GeV/c]");
      
      // second, looping over pt bins
      for(int ipt=0; ipt < nPtBin; ipt++){
 
-       sprintf(tmp, "pt >= %d && pt <= %d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       sprintf(tmp, "pt >= %d && pt <  %d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
        TCut ptCut    = tmp;     
        TCut kineCut  = ptCut + etaCut;
-       TCut basicCut = ptCut + etaCut + rsCut;
-
-       hIsoPho[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       std::string histoName = "isoPho";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoPho[ieta][ipt]->SetName(tmp);
-       hIsoPho[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho[ieta][ipt]->SetXTitle(var.data());
-
-       hIsoPho_1[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       histoName = "isoPho_1";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoPho_1[ieta][ipt]->SetName(tmp);
-       hIsoPho_1[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_1[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
-
-       hIsoPho_2[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       histoName = "isoPho_2";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoPho_2[ieta][ipt]->SetName(tmp);
-       hIsoPho_2[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_2[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
-
-       hIsoPho_3[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       histoName = "isoPho_3";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoPho_3[ieta][ipt]->SetName(tmp);
-       hIsoPho_3[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_3[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
-
-       hIsoPho_4[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       histoName = "isoPho_4";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoPho_4[ieta][ipt]->SetName(tmp);
-       hIsoPho_4[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_4[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
-
-       hIsoPho_5[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       histoName = "isoPho_5";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoPho_5[ieta][ipt]->SetName(tmp);
-       hIsoPho_5[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoPho_5[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso");
-
-
-       hIsoJet[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       histoName = "isoJet";
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
-       hIsoJet[ieta][ipt]->SetName(tmp);
-       hIsoJet[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoJet[ieta][ipt]->SetXTitle(var.data());
+       TCut basicCut = eventCut+ ptCut + etaCut + rsCut + removeSpikeCut;
 
        hIsoMixSig[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       sprintf(tmp,"TemplateS_Et_%d_%d_Eta_%.2f_%.2f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+       sprintf(tmp,"TemplateS_Et_%d_%d_Eta_%.2f_%.2f",
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
        hIsoMixSig[ieta][ipt]->SetName(tmp);
-       hIsoMixSig[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoMixSig[ieta][ipt]->SetXTitle(var.data());
+       sprintf(tmp,"%d < p_{T}(#gamma) < %d GeV, %.2f < |#eta(#gamma)| < %.2f",
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       hIsoMixSig[ieta][ipt]->SetTitle(tmp);
+       hIsoMixSig[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
 
        hIsoMixBkg[ieta][ipt] = (TH1F*)hTemplate->Clone(); 
-       sprintf(tmp,"TemplateB_Et_%d_%d_Eta_%.2f_%.2f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+       sprintf(tmp,"TemplateB_Et_%d_%d_Eta_%.2f_%.2f",
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
-       sprintf(tmp,"%s%02i%02i",histoName.data(),ieta,ipt);
        hIsoMixBkg[ieta][ipt]->SetName(tmp);
-       hIsoMixBkg[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoMixBkg[ieta][ipt]->SetXTitle(var.data());
+       sprintf(tmp,"%d < p_{T}(#gamma) < %d GeV, %.2f < |#eta(#gamma)| < %.2f",
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       hIsoMixBkg[ieta][ipt]->SetTitle(tmp);
+       hIsoMixBkg[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
 
 
        hIsoMixData[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       sprintf(tmp,"Template_Et_%d_%d_Eta_%.2f_%.2f",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+       sprintf(tmp,"Template_Et_%d_%d_Eta_%.2f_%.2f",
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
        hIsoMixData[ieta][ipt]->SetName(tmp);
-       hIsoMixData[ieta][ipt]->SetTitle(kineCut.GetTitle());
-       hIsoMixData[ieta][ipt]->SetXTitle(var.data());
+       sprintf(tmp,"%d < p_{T}(#gamma) < %d GeV, %.2f < |#eta(#gamma)| < %.2f",
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       hIsoMixData[ieta][ipt]->SetTitle(tmp);
+       hIsoMixData[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
    
-
-       hIsoPho[ieta][ipt]->SetMarkerColor(2);
-       hIsoPho[ieta][ipt]->SetLineColor(2);
-       hIsoJet[ieta][ipt]->SetMarkerColor(1);
-       hIsoJet[ieta][ipt]->SetLineColor(1);
-       hIsoMixSig[ieta][ipt]->SetMarkerColor(5);
-       hIsoMixSig[ieta][ipt]->SetLineColor(5);
-       hIsoMixBkg[ieta][ipt]->SetMarkerColor(4);
-       hIsoMixBkg[ieta][ipt]->SetLineColor(4);
-
-       cout << "making histograms from photon+jet MC samples" << endl;
-       TCut allCut   = basicCut + sigCut; 
-       makePlot(phoTree,phoWeight,phoPtHatLo,phoPtHatHi,Form("%s",var.data()),allCut,hIsoPho[ieta][ipt],normalize);
-      
-       allCut = basicCut + sigCut1;
-       makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoPho_1[ieta][ipt],normalize);
-
-       allCut = basicCut + sigCut2;
-       makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoPho_2[ieta][ipt],normalize);
-
-       allCut = basicCut + sigCut3;
-       makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoPho_3[ieta][ipt],normalize);
-
-       allCut = basicCut + sigCut4;
-       makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoPho_4[ieta][ipt],normalize);
-
-       allCut = basicCut + sigCut5;
-       makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoPho_5[ieta][ipt],normalize);
-
-       cout << "making histograms from dijet MC samples" << endl;
-       allCut = basicCut + decayCut;
-       makePlot(jetTree,jetWeight,jetPtHatLo,jetPtHatHi,Form("%s",var.data()),allCut,hIsoJet[ieta][ipt],normalize);
+       hIsoMixSig[ieta][ipt]->SetLineColor(kBlack);
+       hIsoMixSig[ieta][ipt]->SetMarkerColor(kBlack);
+       hIsoMixBkg[ieta][ipt]->SetMarkerColor(kRed);
+       hIsoMixBkg[ieta][ipt]->SetLineColor(kRed);
+       hIsoMixData[ieta][ipt]->SetMarkerColor(kBlue);
+       hIsoMixData[ieta][ipt]->SetLineColor(kBlue);
 
        cout << "making histograms from mixed MC signal samples" << endl;     
-       allCut = basicCut + sigCut;
+       TCut allCut = basicCut + sigCut;
        makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoMixSig[ieta][ipt],normalize);
 
        cout << "making histograms from mixed MC background samples" << endl;     
@@ -370,16 +306,13 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoMixBkg[ieta][ipt],normalize);
    
 
-
-       cout << "hIsoPho[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoPho[ieta][ipt]->Integral() << endl;
-       cout << "hIsoJet[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoJet[ieta][ipt]->Integral() << endl;
-       cout << "hIsoMixSig[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixSig[ieta][ipt]->Integral() << endl;
-       cout << "hIsoMixBkg[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixBkg[ieta][ipt]->Integral() << endl;
+       cout << "hIsoMixSig[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixSig[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
+       cout << "hIsoMixBkg[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixBkg[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
 
        hIsoMixData[ieta][ipt]->Reset();
        hIsoMixData[ieta][ipt]->Sumw2();
        hIsoMixData[ieta][ipt]->Add(hIsoMixSig[ieta][ipt],hIsoMixBkg[ieta][ipt],1.0,1.0);
-       cout << "hIsoMixData[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixData[ieta][ipt]->Integral() << endl;
+       cout << "hIsoMixData[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixData[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
 
      }// end of looping over pt bins
    } // end of looping over eta bins
@@ -408,7 +341,6 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
 
        cout << "purity = " << purity << " +- " << purityErr << endl;
 
-
        hTruthPurity[ieta]->SetBinContent(ipt+1,purity);
        hTruthPurity[ieta]->SetBinError(ipt+1,purityErr);
        
@@ -417,10 +349,10 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
 
    // display the comparison
 
-   TLegend* leg = new TLegend(0.421,0.606,0.621,0.905);
+   TLegend* leg = new TLegend(0.609,0.722,0.889,0.896);
    leg->SetFillColor(0);
    leg->SetFillStyle(0);
-   leg->SetTextSize(0.03);
+   leg->SetTextSize(0.040);
    leg->SetBorderSize(0);
 
    TCanvas* c1 = new TCanvas("c1","",500,500);
@@ -428,37 +360,14 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    for(int ieta = 0; ieta < nEtaBin; ieta++){
      for(int ipt=0; ipt < nPtBin; ipt++){
 
-       hIsoPho_1[ieta][ipt]->Draw("histe");
-       hIsoPho_2[ieta][ipt]->Draw("histesame");
-       hIsoPho_3[ieta][ipt]->Draw("histesame");
-       hIsoPho_4[ieta][ipt]->Draw("histesame");
-       hIsoPho_5[ieta][ipt]->Draw("histesame");
-
-       hIsoPho_1[ieta][ipt]->SetMarkerColor(kBlue);
-       hIsoPho_1[ieta][ipt]->SetLineColor(kBlue);
-
-       hIsoPho_2[ieta][ipt]->SetMarkerColor(kRed);
-       hIsoPho_2[ieta][ipt]->SetLineColor(kRed);
-       hIsoPho_2[ieta][ipt]->SetLineStyle(2);
-
-       hIsoPho_3[ieta][ipt]->SetMarkerColor(kGreen+2);
-       hIsoPho_3[ieta][ipt]->SetLineColor(kGreen+2);
-
-       hIsoPho_4[ieta][ipt]->SetMarkerColor(kBlack);
-       hIsoPho_4[ieta][ipt]->SetLineColor(kBlack);
-
-       hIsoPho_5[ieta][ipt]->SetMarkerColor(kViolet-5);
-       hIsoPho_5[ieta][ipt]->SetLineColor(kViolet-5);
-       hIsoPho_5[ieta][ipt]->SetLineStyle(2);
-
+       hIsoMixData[ieta][ipt]->Draw("histe");
+       hIsoMixSig[ieta][ipt]->Draw("histe,same");
+       hIsoMixBkg[ieta][ipt]->Draw("histe,same");
 
        leg->Clear();
-       leg->SetHeader("#gamma + jet and Dijet MC");
-       leg->AddEntry(hIsoPho_1[ieta][ipt],"genMomId==22");
-       leg->AddEntry(hIsoPho_2[ieta][ipt],"genMomId<=22");
-       leg->AddEntry(hIsoPho_3[ieta][ipt],"genMomId==22 && genCalIsoDR04<5");
-       leg->AddEntry(hIsoPho_4[ieta][ipt],"genMomId<=22 && genCalIsoDR04<5");
-       leg->AddEntry(hIsoPho_5[ieta][ipt],"genCalIsoDR04<5");
+       leg->AddEntry(hIsoMixData[ieta][ipt],"MC Data");
+       leg->AddEntry(hIsoMixSig[ieta][ipt],"Signal");
+       leg->AddEntry(hIsoMixBkg[ieta][ipt],"Background");
        leg->Draw("same");
     
        sprintf(tmp,"/mc/QCD_mess/figures/%s_Template_Et_%d_%d_Eta_%.2f_%.2f",outputName.data(),
@@ -483,21 +392,13 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    for(int ieta = 0; ieta < nEtaBin; ieta++){
      hTruthPurity[ieta]->Write();
      for(int ipt=0; ipt < nPtBin; ipt++){
-       hIsoPho[ieta][ipt]->Write();
-       hIsoPho_1[ieta][ipt]->Write();
-       hIsoPho_2[ieta][ipt]->Write();
-       hIsoPho_3[ieta][ipt]->Write();
-       hIsoPho_4[ieta][ipt]->Write();
-       hIsoPho_5[ieta][ipt]->Write();
-
-       hIsoJet[ieta][ipt]->Write();
        hIsoMixSig[ieta][ipt]->Write();
        hIsoMixBkg[ieta][ipt]->Write();
        hIsoMixData[ieta][ipt]->Write();
 
      } // end of looping over pt bins
    } // end of looping over eta bins
-
+   
    outFile->Close();
-
+   
 }
