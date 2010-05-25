@@ -74,7 +74,7 @@ void sigFracErr_inOneBin(int bin, Double_t rd, Double_t rderr,
 
 
 
-void histoError(int MAX, TH1D* h, Double_t& bin1, Double_t& binerr1, 
+void histoError(int MAX, TH1F* h, Double_t& bin1, Double_t& binerr1, 
 		Double_t& bin2, Double_t&binerr2)
 {
 
@@ -102,25 +102,24 @@ void histoError(int MAX, TH1D* h, Double_t& bin1, Double_t& binerr1,
 
 }
 
-void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate, 
+void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
 		   std::string outputName, Double_t& purity_central, Double_t& purity_central_err)
 {
   
   purity_central = 0;
   purity_central_err = 0;
 
-  TH1D* signal_pos;
-  TH1D* background_pos;
-  TH1D* data;
+  TH1F* signal_pos;
+  TH1F* background_pos;
+  TH1F* data;
 
-  // 0 is the signal fraction from the total sample,
-  // 1 is the signal fraction in the first bin,
-  // 2 is the signal fraction in the second bin
-  TH1D* result = new TH1D("result","",3,-0.5,2.5);
+  // the first bin is the signal fraction in the first bin,
+  // the second bin is the signal fraction in total
+  TH1F* result = new TH1F("result","",3,-0.5,2.5);
 
   Double_t scale=1.;
 
-  data = (TH1D*)dataInput->Clone();
+  data = (TH1F*)dataInput->Clone();
   data->SetName("data");
   data->SetLineColor(1);
   data->SetMarkerColor(1);
@@ -131,7 +130,7 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
   data->Scale(scale);
 
 
-  signal_pos = (TH1D*)sigTemplate->Clone();
+  signal_pos = (TH1F*)sigTemplate->Clone();
   signal_pos->SetName("signal_pos");
   signal_pos->SetLineColor(2);
   signal_pos->SetMarkerColor(2);
@@ -143,7 +142,7 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
   signal_pos->Scale(scale);
 
 
-  background_pos = (TH1D*)bkgTemplate->Clone();
+  background_pos = (TH1F*)bkgTemplate->Clone();
   background_pos->SetName("background_pos");
   background_pos->SetLineColor(4);
   background_pos->SetMarkerColor(4);
@@ -157,15 +156,15 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
 
   // now determine where to cut
 
-  TH1D* integral_signal = (TH1D*)sigTemplate->Clone();
+  TH1F* integral_signal = (TH1F*)sigTemplate->Clone();
   integral_signal->SetName("integral_signal");
   integral_signal->Reset();
 
-  TH1D* integral_background = (TH1D*)bkgTemplate->Clone();
+  TH1F* integral_background = (TH1F*)bkgTemplate->Clone();
   integral_background->SetName("integral_background");
   integral_background->Reset();
 
-  TH1D* integral_diff = (TH1D*)bkgTemplate->Clone();
+  TH1F* integral_diff = (TH1F*)bkgTemplate->Clone();
   integral_diff->SetName("integral_diff");
   integral_diff->Reset();
 
@@ -184,6 +183,7 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
   
 
   int maxbin = integral_diff->GetMaximumBin();
+  //  maxbin=10;
   cout << "Maximum efficiency difference is at " << 
     integral_diff->GetBinLowEdge(maxbin) 
        << endl;
@@ -285,13 +285,16 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
     errfrac_iso2 << endl;
 
 
+//   purity_central = signal_fraction_iso1;
+//   purity_central_err = errfrac_iso1;
+
   result->SetBinContent(2, signal_fraction_iso1);
   result->SetBinError(2, errfrac_iso1   );
 
   result->SetBinContent(3, signal_fraction_iso2);
   result->SetBinError(3, errfrac_iso2   );
 
-
+  /*
   // dump histogram to a root file
   std::string histoFile = outputName + "_2bin.root";
 
@@ -308,7 +311,7 @@ void purity_twobin(TH1D* dataInput, TH1D* sigTemplate, TH1D* bkgTemplate,
   integral_background->Write();
   integral_diff->Write();
   outFile->Close();
-
+  */
 
 
 }
