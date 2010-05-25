@@ -312,8 +312,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   TLegend *tleg = new TLegend(0.4, 0.65, 0.95, 0.9);
   char text[50];
-  sprintf(text,hdata->GetTitle());
-  tleg->SetHeader(text);
+  tleg->SetHeader(dataInput->GetTitle());
   tleg->SetFillColor(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);
@@ -338,14 +337,12 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   printf("----- fit results with signal projection   ----------- \n");
 
   //   ftemplate->Close();
-  cout << "here 9" << endl;
 
   Double_t* fitted = new Double_t[4];
   fitted[0] = para[0];
   fitted[1] = errpara[0];
   fitted[2] = para[1];
   fitted[3] = errpara[1];
-  cout << "here 10" << endl;
   return fitted;
 }
 
