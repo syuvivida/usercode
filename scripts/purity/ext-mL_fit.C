@@ -288,9 +288,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   //gPad->SetLogy();
   hdata->SetLineColor(1);
   hdata->SetNdivisions(505,"XY");
-  hdata->SetXTitle("comb. ISO (GeV)");
+  hdata->SetXTitle("ecalIso+hcalIso+trackIso (GeV)");
   hdata->SetYTitle("Entries");
-  hdata->SetTitleOffset(1.4,"Y");
+//   hdata->SetTitleOffset(1.4,"Y");
   hdata->SetTitle();
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
@@ -331,7 +331,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   cout << hdata->GetName() << endl;
   char fname[300];
-  sprintf(fname,"plots/SBfit_Ifit_%s.pdf",hdata->GetName());
+  sprintf(fname,"plots/Ifit_%s.pdf",hdata->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
