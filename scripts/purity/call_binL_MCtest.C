@@ -131,7 +131,7 @@ void call_binL_MCtest(){
 
   TFile *inf_template = new TFile("/mc/QCD_mess/pcncu18_figures/template_sumIso_histo.root");
 
-  //TFile *inf_template = new TFile("/mc/QCD_mess/pcncu18_figures/fakedata_sumIso_histo.root");
+  //  TFile *inf_template = new TFile("/mc/QCD_mess/pcncu18_figures/fakedata_sumIso_histo.root");
   
   char tmp[1000];
   for(int ieta = 0; ieta < nEtaBin; ieta++){
@@ -169,17 +169,15 @@ void call_binL_MCtest(){
 
 
   for(int ieta = 0; ieta < nEtaBin; ieta++){
-     for(int ipt=0; ipt < nPtBin; ipt++){
-       
-       
+    for(int ipt=0; ipt < nPtBin; ipt++){
        Double_t*fitResult;
        fitResult = Ifit(hTemplate_data[ieta][ipt],
 			hTemplate_S[ieta][ipt],
 			hTemplate_B[ieta][ipt]);
-       Double_t nsigfit = fitResult[0]*2.0;
-       Double_t errnsigfit = fitResult[1]*2.0;
-       Double_t nbkgfit = fitResult[2]*2.0;
-       Double_t errnbkgfit = fitResult[3]*2.0;
+       Double_t nsigfit = fitResult[0];
+       Double_t errnsigfit = fitResult[1];
+       Double_t nbkgfit = fitResult[2];
+       Double_t errnbkgfit = fitResult[3];
 
        Double_t purityfit = 0;
        Double_t errpurityfit = 0;
@@ -201,8 +199,7 @@ void call_binL_MCtest(){
 	 nsig_err_twobin_EE[ipt]= errnsigfit;
 
        }
-
-     }
+    }
   }
 
   
