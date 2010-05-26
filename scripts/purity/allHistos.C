@@ -26,6 +26,7 @@ void histoError(TH1F* h, double& total_value, double& total_err)
 
   total_value = total_err = 0;
 //   for(int i=0; i<= h->GetNbinsX()+1; i++)
+//     {
   for(int i=1; i<= h->GetNbinsX(); i++)
     {
       total_value += h->GetBinContent(i);
@@ -113,7 +114,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
 // calling functions
 void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
 	       int nbin=20,
-	       double xmin=-1.0, double xmax=11.0,
+	       double xmin=-1.0, double xmax=11.0, double split = 1.0,
 	       bool isData=false,bool normalize=false)
 {
   TH1F *hTemplate = new TH1F("hTemplate","",nbin,xmin,xmax);
@@ -158,7 +159,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
      // read in number of events
      flag=fscanf(fTable,"%s",tmp);
      double nevt=atof(tmp);
-     double scale =lumi*cross/nevt;
+     double scale =lumi*split*cross/nevt;
 
      flag=fscanf(fTable,"%s",tmp);
      int ptHatLo=atof(tmp);
@@ -370,7 +371,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        leg->AddEntry(hIsoMixBkg[ieta][ipt],"Background");
        leg->Draw("same");
     
-       sprintf(tmp,"/mc/QCD_mess/figures/%s_Template_Et_%d_%d_Eta_%.2f_%.2f",outputName.data(),
+       sprintf(tmp,"figures/%s_Template_Et_%d_%d_Eta_%.2f_%.2f",outputName.data(),
 	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
 	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
 
