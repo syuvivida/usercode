@@ -15,37 +15,15 @@ using namespace std;
 
 #define NPAR 2
 
-TF1* fchi2;
-//TH1F* h1;
-TF1* bsFin;
-
-// Remember to change the values of xh and xl in all_tree.C too!!!
-//Double_t xh = 6.5;
-//Double_t xl = 4.5;
-Double_t xl = -1.;
-Double_t xh = 1.;
-Double_t bin_size = 0.05;
-
 const double _two_pi = 2.0 * TMath::Pi();
-Double_t fit_lo_edge = -1.;
-Double_t fit_hi_edge = 1.;
-
 
 vector<Double_t> dataColl;
 vector<Double_t> sigColl;
 vector<Double_t> bkgColl;
 
-vector<Double_t> totalColl;
-vector<Double_t> ctauColl;
-
 vector<Double_t> info;
 vector<Double_t> info_err;
 
-//par[0] = fs Jpsi signal fraction;
-//-----mass part-----------------------------------------------------
-//par[1] = g norm; par[2] g1 mean; par[3] g1 width; 
-//par[4] g2 ratio;  par[5] g2 mean; par[6] g2 width;
-//par[7] bg norm; par[8] bg slope;
 
 void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
@@ -126,33 +104,37 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   sigColl.clear();
   bkgColl.clear();
 
-  totalColl.clear();
-  ctauColl.clear();
 
   TH1F *hsum = new TH1F();
   float ntemplate = 1.;
   float sigfrac = 0.1;
   TH1F *hsum_norm = new TH1F();
-  TH1F *hdata = new TH1F();
+  TH1F *hdata;
+  TH1F *hsig  = (TH1F*)sigTemplate->Clone();
+  hsig->SetName("hsig");
+
+  TH1F *hbkg  = (TH1F*)bkgTemplate->Clone();
+  hbkg->SetName("hbkg");
 
   float ndata=0;
   if ( fit_data>0 ) {
     hdata = (TH1F*)dataInput->Clone();
+    hdata -> SetName("hdata");
     ndata = hdata->Integral();
   }else {
-    hsum = (TH1F*)sigTemplate->Clone();
-    hsum->Add(bkgTemplate,1);
+    hsum = (TH1F*)hsig->Clone();
+    hsum->Add(hbkg,1);
     cout << "For histogram " << sigTemplate->GetName() << " and " << bkgTemplate->GetName() << " sum = " << 
       hsum->Integral() << endl;
 
     if (hsum->Integral()>1.) ntemplate = hsum->Integral();
-    sigfrac = sigTemplate->Integral()/ntemplate;
+    sigfrac = hsig->Integral()/ntemplate;
 
     hsum_norm = (TH1F*)hsum->Clone();  
     hsum_norm->Scale(1./hsum->Integral());
 
     hdata = (TH1F*)hsum_norm->Clone();
-    //ndata = (int) gRandom->Poisson(hsum->Integral());
+    hdata -> SetName("hdata");
     ndata=ntemplate;
     hdata->FillRandom(hsum_norm, ndata);
   }
@@ -167,18 +149,18 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   }
     
   printf(" --------- before the fit ------------- \n");
-  printf("Nsig %2.3f, Nbg %2.3f, Ntemplate %3.3f \n", sigTemplate->Integral(), bkgTemplate->Integral(), ntemplate);
-//   printf("Purity %2.3f, init size %4.3f,  test sample size %4d\n", sigTemplate->Integral()/hsum->Integral(), hsum->Integral(), ndata);
+  printf("Nsig %2.3f, Nbg %2.3f, Ntemplate %3.3f \n", hsig->Integral(), hbkg->Integral(), ntemplate);
+//   printf("Purity %2.3f, init size %4.3f,  test sample size %4d\n", hsig->Integral()/hsum->Integral(), hsum->Integral(), ndata);
   printf(" -------------------------------------- \n");
 
   int nbins = hdata->GetNbinsX();
 
-  sigTemplate->Scale(1./sigTemplate->Integral());
-  bkgTemplate->Scale(1./bkgTemplate->Integral());  
+  hsig->Scale(1./hsig->Integral());
+  hbkg->Scale(1./hbkg->Integral());  
   for (int ibin=1; ibin<=nbins; ibin++) {
     dataColl.push_back(hdata->GetBinContent(ibin));
-    sigColl.push_back(sigTemplate->GetBinContent(ibin));
-    bkgColl.push_back(bkgTemplate->GetBinContent(ibin));    
+    sigColl.push_back(hsig->GetBinContent(ibin));
+    bkgColl.push_back(hbkg->GetBinContent(ibin));    
   }
   printf( " -----  Got %d, %d, %d events for fit ----- \n ", dataColl.size(),
 	  sigColl.size(), bkgColl.size() );  
@@ -233,21 +215,8 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	
       }
       printf(" fitted yield %2.3f \n", (para[0]+para[1])/ndata );
-
       info.push_back(sigColl.size());
 
-      //do minos if fit sucessed.
-//       printf("         ---------------------------------------------------------\n");
-//       printf("          Now call for minos step \n");
-//       printf("         ---------------------------------------------------------\n");
-      
-//       arglist[0] = 200; // number of iteration
-//       arglist[1] = 1;
-//       gMinuit->mnexcm("MINOS", arglist ,2,ierflg);
-//       printf("         --------------------------------------------------------- \n");
-//       printf("         Done Minos.  ierr = %d \n", ierflg);
-//       Double_t amin;
-//       gMinuit->mnprin(1,amin);
     }
   else {
     printf(" *********** Fit failed! ************\n");
@@ -272,17 +241,17 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
     yerr[i] = 0.;
   }
 
-  sigTemplate->Scale(para[0]);
-  bkgTemplate->Scale(para[1]);
-  TH1F *hfit = (TH1F*)sigTemplate->Clone();
-  hfit->Add(bkgTemplate);
+  hsig->Scale(para[0]);
+  hbkg->Scale(para[1]);
+  TH1F *hfit = (TH1F*)hsig->Clone();
+  hfit->Add(hbkg);
 
 
-  sigTemplate->SetLineColor(1);
-  sigTemplate->SetFillColor(5);
-  sigTemplate->SetFillStyle(3001);
+  hsig->SetLineColor(1);
+  hsig->SetFillColor(5);
+  hsig->SetFillStyle(3001);
 
-  bkgTemplate->SetLineWidth(2);
+  hbkg->SetLineWidth(2);
   // plot
   c1->Draw();  
   //gPad->SetLogy();
@@ -290,24 +259,24 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hdata->SetNdivisions(505,"XY");
   hdata->SetXTitle("ecalIso+hcalIso+trackIso (GeV)");
   hdata->SetYTitle("Entries");
-//   hdata->SetTitleOffset(1.4,"Y");
   hdata->SetTitle();
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
   hdata->SetMaximum(hdata->GetMaximum()*1.4);
   hdata->Draw("p e");
-  sigTemplate->Draw("hist same");
-  bkgTemplate->SetMarkerStyle(0);
-  bkgTemplate->SetFillColor(8);
-  bkgTemplate->SetLineWidth(1);
-  bkgTemplate->SetFillStyle(3013);
-  bkgTemplate->SetError(yerr);
-  bkgTemplate->Draw("hist same");
+  hsig->Draw("hist same");
+  hbkg->SetMarkerStyle(0);
+  hbkg->SetFillColor(8);
+  hbkg->SetLineWidth(1);
+  hbkg->SetFillStyle(3013);
+  hbkg->SetError(yerr);
+  hbkg->Draw("hist same");
   hfit->SetMarkerStyle(0);
   hfit->SetLineColor(1);
   hfit->SetLineWidth(2);
   hfit->SetError(yerr);
   hfit->Draw("hist same");
+
 
 
   TLegend *tleg = new TLegend(0.4, 0.65, 0.95, 0.9);
@@ -321,28 +290,45 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   sprintf(text,"Fitted %5.1f events",hfit->Integral());
   tleg->AddEntry(hfit,text,"l");
   sprintf(text,"SIG %5.1f #pm %5.1f events",para[0], errpara[0]);
-  tleg->AddEntry(sigTemplate,text,"f");
+  tleg->AddEntry(hsig,text,"f");
   sprintf(text,"BKG %5.1f #pm %5.1f events",para[1], errpara[1]);
-  tleg->AddEntry(bkgTemplate,text,"f");
+  tleg->AddEntry(hbkg,text,"f");
   tleg->Draw();
 
   gPad->RedrawAxis();
 
 
-  cout << hdata->GetName() << endl;
+  cout << dataInput->GetName() << endl;
   char fname[300];
-  sprintf(fname,"plots/Ifit_%s.pdf",hdata->GetName());
+  sprintf(fname,"plots/Ifit_%s.pdf",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
 
   //   ftemplate->Close();
+  
+  int purityMaxBin = hsig->FindBin(5.0)-1;
+  Double_t scale_signal = hsig->Integral(1,purityMaxBin)/hsig->Integral();
+  Double_t integral_signal = scale_signal*para[0];
+  Double_t integral_signal_err = scale_signal*errpara[0];
 
-  Double_t* fitted = new Double_t[4];
+  Double_t scale_background = hbkg->Integral(1,purityMaxBin)/hbkg->Integral();
+  Double_t integral_background = scale_background*para[1];
+  Double_t integral_background_err = scale_background*errpara[1];
+  
+  Double_t* fitted = new Double_t[8];
   fitted[0] = para[0];
   fitted[1] = errpara[0];
   fitted[2] = para[1];
   fitted[3] = errpara[1];
+
+  // for integral up to 5 GeV
+  fitted[4] = integral_signal;
+  fitted[5] = integral_signal_err;
+  fitted[6] = integral_background;
+  fitted[7] = integral_background_err;
+
+
   return fitted;
 }
 
