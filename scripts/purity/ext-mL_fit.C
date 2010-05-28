@@ -309,12 +309,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   
   int purityMaxBin = hsig->FindBin(5.0)-1;
   Double_t scale_signal = hsig->Integral(1,purityMaxBin)/hsig->Integral();
-  Double_t integral_signal = scale_signal*para[0];
-  Double_t integral_signal_err = scale_signal*errpara[0];
-
   Double_t scale_background = hbkg->Integral(1,purityMaxBin)/hbkg->Integral();
-  Double_t integral_background = scale_background*para[1];
-  Double_t integral_background_err = scale_background*errpara[1];
   
   Double_t* fitted = new Double_t[8];
   fitted[0] = para[0];
@@ -323,11 +318,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   fitted[3] = errpara[1];
 
   // for integral up to 5 GeV
-  fitted[4] = integral_signal;
-  fitted[5] = integral_signal_err;
-  fitted[6] = integral_background;
-  fitted[7] = integral_background_err;
-
+  fitted[4] = para[0]*scale_signal;
+  fitted[5] = errpara[0]*scale_signal;
+  fitted[6] = para[1]*scale_background;
+  fitted[7] = errpara[1]*scale_background;
 
   return fitted;
 }
