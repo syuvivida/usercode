@@ -209,6 +209,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hdata->SetNdivisions(505,"XY");
   hdata->SetXTitle("ecalIso+hcalIso+trackIso (GeV)");
   hdata->SetYTitle("Entries");
+  hdata->SetTitle("");
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
   hdata->SetMaximum(hdata->GetMaximum()*1.4);
