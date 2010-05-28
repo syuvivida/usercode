@@ -85,8 +85,8 @@ void call_allfitters_MCtest(){
 
   TFile* inf_data = new TFile("template_comb3Iso_test.root");
 
-  //  TFile* inf_template = new TFile("template_comb3Iso_template.root");
-  TFile* inf_template = new TFile("template_comb3Iso_test.root");
+  TFile* inf_template = new TFile("template_comb3Iso_template.root");
+ // TFile* inf_template = new TFile("template_comb3Iso_test.root");
 
   char* dec[2] = {"EB","EE"};
   char tmp[1000];
