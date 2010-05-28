@@ -13,19 +13,17 @@
 
 using namespace std;
 
-#define NPAR 2
+#define NPARBIN 2
 
-const double _two_pi = 2.0 * TMath::Pi();
+vector<Double_t> dataCollBin;
+vector<Double_t> sigCollBin;
+vector<Double_t> bkgCollBin;
 
-vector<Double_t> dataColl;
-vector<Double_t> sigColl;
-vector<Double_t> bkgColl;
-
-vector<Double_t> info;
-vector<Double_t> info_err;
+vector<Double_t> infoBin;
+vector<Double_t> infoBin_err;
 
 
-void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
+void fcnBin(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
 
   Double_t Lsum=0.;
@@ -33,12 +31,12 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   Double_t fs = par[0];
   Double_t fb = par[1];
 
-  for ( int i=0; i<dataColl.size(); i++ ) {
-    Nevt += dataColl[i];
+  for ( int i=0; i<dataCollBin.size(); i++ ) {
+    Nevt += dataCollBin[i];
     //PDF for signal and background
-    Double_t Ls = sigColl[i];
-    Double_t Lb = bkgColl[i];	
-    for (int data=0; data<dataColl[i]; data++) {	
+    Double_t Ls = sigCollBin[i];
+    Double_t Lb = bkgCollBin[i];	
+    for (int data=0; data<dataCollBin[i]; data++) {	
       //Get Log Likelihood
       Lsum += TMath::Log( (fs*Ls + fb*Lb) / (fs+fb) );
     }
@@ -47,7 +45,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   
 }
 
-void pulltest(int ptbin=15, char EBEE[10]="EB", float input=0.5){
+void pulltestBin(int ptbin=15, char EBEE[10]="EB", float input=0.5){
 
 
   TH1F *h1 = new TH1F("h1","",100,-10., 10.);
@@ -62,12 +60,12 @@ void pulltest(int ptbin=15, char EBEE[10]="EB", float input=0.5){
   for (int i=0; i<nexp; i++) {
     Ifit(ptbin,EBEE);
     Nevt=0.;
-    for ( int ii=0; ii<dataColl.size(); ii++ ) {
-      Nevt += dataColl[ii];
+    for ( int ii=0; ii<dataCollBin.size(); ii++ ) {
+      Nevt += dataCollBin[ii];
     }
-    printf("fit purity %2.2f +- %2.2f err with %d events. \n", info[0], info_err[0], Nevt);
-    h1->Fill((info[0]/Nevt-input)/(info_err[0]/Nevt));
-    h2->Fill(info[0]);
+    printf("fit purity %2.2f +- %2.2f err with %d events. \n", infoBin[0], infoBin_err[0], Nevt);
+    h1->Fill((infoBin[0]/Nevt-input)/(infoBin_err[0]/Nevt));
+    h2->Fill(infoBin[0]);
   }    
 
   TCanvas *c2 = new TCanvas("c2","",1000,500);
@@ -94,15 +92,15 @@ void pulltest(int ptbin=15, char EBEE[10]="EB", float input=0.5){
 
 
 //___________________________________________________________________________
-Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
+Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
 	       int fit_data=1)
 {
 
   TCanvas *c1 = new TCanvas("HF1", "Histos1", 0, 0, 600, 600);
   double count=0;
-  dataColl.clear();
-  sigColl.clear();
-  bkgColl.clear();
+  dataCollBin.clear();
+  sigCollBin.clear();
+  bkgCollBin.clear();
 
 
   TH1F *hsum = new TH1F();
@@ -158,13 +156,13 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hsig->Scale(1./hsig->Integral());
   hbkg->Scale(1./hbkg->Integral());  
   for (int ibin=1; ibin<=nbins; ibin++) {
-    dataColl.push_back(hdata->GetBinContent(ibin));
-    sigColl.push_back(hsig->GetBinContent(ibin));
-    bkgColl.push_back(hbkg->GetBinContent(ibin));    
+    dataCollBin.push_back(hdata->GetBinContent(ibin));
+    sigCollBin.push_back(hsig->GetBinContent(ibin));
+    bkgCollBin.push_back(hbkg->GetBinContent(ibin));    
   }
-  printf( " -----  Got %d, %d, %d events for fit ----- \n ", dataColl.size(),
-	  sigColl.size(), bkgColl.size() );  
-  if ( dataColl.size() != sigColl.size() || sigColl.size()!=bkgColl.size() ) {
+  printf( " -----  Got %d, %d, %d events for fit ----- \n ", dataCollBin.size(),
+	  sigCollBin.size(), bkgCollBin.size() );  
+  if ( dataCollBin.size() != sigCollBin.size() || sigCollBin.size()!=bkgCollBin.size() ) {
     printf(" error ...  inconsistent hit collection size \n");
     return;
   }
@@ -175,9 +173,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   vstart[0] = sigfrac*ndata;
   vstart[1] = (1-sigfrac)*ndata;
  
-  TMinuit *gMinuit = new TMinuit(NPAR);  
+  TMinuit *gMinuit = new TMinuit(NPARBIN);  
   gMinuit->Command("SET STR 1");
-  gMinuit->SetFCN(fcn);
+  gMinuit->SetFCN(fcnBin);
   Double_t arglist[10];
   Int_t ierflg = 0;
   
@@ -200,22 +198,22 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   printf (" -------------------------------------------- \n");
   printf("Finished.  ierr = %2.2f \n", ierflg);
 
-  info.clear();
-  info_err.clear();
+  infoBin.clear();
+  infoBin_err.clear();
 
-  double para[NPAR+1],errpara[NPAR+1];
+  double para[NPARBIN+1],errpara[NPARBIN+1];
   if ( ierflg == 0 ) 
     {
-      for(int j=0; j<=NPAR-1;j++) {
+      for(int j=0; j<=NPARBIN-1;j++) {
         gMinuit->GetParameter(j, para[j],errpara[j]);
-        para[NPAR] = dataColl.size();
-        info.push_back(para[j]);
-        info_err.push_back(errpara[j]);
+        para[NPARBIN] = dataCollBin.size();
+        infoBin.push_back(para[j]);
+        infoBin_err.push_back(errpara[j]);
         printf("Parameter (yeild) %d = %f +- %f\n",j,para[j],errpara[j]);
 	
       }
       printf(" fitted yield %2.3f \n", (para[0]+para[1])/ndata );
-      info.push_back(sigColl.size());
+      infoBin.push_back(sigCollBin.size());
 
     }
   else {
