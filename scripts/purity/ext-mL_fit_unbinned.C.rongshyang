@@ -377,6 +377,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    hdata->SetNdivisions(505,"XY");
    hdata->SetXTitle("comb. ISO (GeV)");
    hdata->SetYTitle("Entries");
+   hdata->SetTitle("");
    hdata->SetMarkerStyle(8);
    hdata->SetMinimum(0.);
    if ( hdata->GetMaximum()<15.) hdata->SetMaximum(20.);
