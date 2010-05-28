@@ -7,6 +7,7 @@
 #include <string>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <TGraphAsymmErrors.h>
 #include <string>
 #include "tightSelection.h"
 
@@ -18,16 +19,15 @@ const double fBinsEta[]={0,1.45,1.7,2.5};
 const double fBinsPt[]={15,20,30,50,80,120};
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
+
  
 
 // calculate errors from weighted histograms
-void histoError(TH1F* h, double& total_value, double& total_err)
+void histoError(TH1F* h, int maxbin, double& total_value, double& total_err)
 {
 
   total_value = total_err = 0;
-//   for(int i=0; i<= h->GetNbinsX()+1; i++)
-//     {
-  for(int i=1; i<= h->GetNbinsX(); i++)
+  for(int i=1; i<= maxbin; i++)
     {
       total_value += h->GetBinContent(i);
       total_err   += pow(h->GetBinError(i),2);
@@ -159,7 +159,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
      // read in number of events
      flag=fscanf(fTable,"%s",tmp);
      double nevt=atof(tmp);
-     double scale =lumi*split*cross/nevt;
+     double scale = isData? 1.0 : lumi*split*cross/nevt;
 
      flag=fscanf(fTable,"%s",tmp);
      int ptHatLo=atof(tmp);
@@ -230,8 +230,6 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    TH1F *hIsoMixData[nEtaBin][nPtBin];
    
 
-   // purity
-   TH1F *hTruthPurity[nEtaBin];
   
    // first looping over eta bins
    for(int ieta = 0; ieta < nEtaBin; ieta++){
@@ -240,15 +238,6 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
 	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
      TCut etaCut = tmp;
 
-     sprintf(tmp,"hTruthPurity_Eta_%.2f_%.2f",
-	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
-     hTruthPurity[ieta] = new TH1F(tmp,"",nPtBin, fBinsPt); 
-
-     sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f",
-	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
-     hTruthPurity[ieta]->SetTitle(tmp);
-     hTruthPurity[ieta]->SetXTitle("p_{T}(#gamma) [GeV/c]");
-     
      // second, looping over pt bins
      for(int ipt=0; ipt < nPtBin; ipt++){
 
@@ -298,6 +287,9 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        hIsoMixData[ieta][ipt]->SetMarkerColor(kBlue);
        hIsoMixData[ieta][ipt]->SetLineColor(kBlue);
 
+
+       //====================== Making histograms ====================== //
+       
        cout << "making histograms from mixed MC signal samples" << endl;     
        TCut allCut = basicCut + sigCut;
        makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoMixSig[ieta][ipt],normalize);
@@ -319,8 +311,35 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
    } // end of looping over eta bins
 
 
+
+   // settings for purity TGraphAsymmetryErrors
+   double fBinsPtMidPoint[nPtBin]={0};
+   double fBinsPtError[nPtBin]={0};
+   
+   for(int ipt=0; ipt < nPtBin; ipt++)
+     {
+       fBinsPtMidPoint[ipt] = 0.5*(fBinsPt[ipt+1]+fBinsPt[ipt]);
+       fBinsPtError[ipt] = 0.5*(fBinsPt[ipt+1]-fBinsPt[ipt]);
+     }
+
+   // purity
+   TGraphAsymmErrors *hTruthPurity[nEtaBin];
+   TGraphAsymmErrors *hTruthPurity5GeV[nEtaBin];
+
+
+   int histoMaxBin = hTemplate->GetNbinsX();
+   int histoMaxBin5GeV = hTemplate->FindBin(5.0)-1;
+
+   cout << "histoMaxBin = " << histoMaxBin << " and histoMaxBin5GeV = " << histoMaxBin5GeV << endl;
+
    // calculate MC truth purity
    for(int ieta = 0; ieta < nEtaBin; ieta++){
+
+     double fYPurity[nPtBin]={0};
+     double fYPurityErr[nPtBin]={0};
+     double fYPurity5GeV[nPtBin]={0};
+     double fYPurityErr5GeV[nPtBin]={0};
+
      for(int ipt=0; ipt < nPtBin; ipt++){
 
        double nsig     = 0;
@@ -328,8 +347,8 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        double nsig_err = 0;
        double nbkg_err = 0;
 
-       histoError(hIsoMixSig[ieta][ipt],nsig,nsig_err);
-       histoError(hIsoMixBkg[ieta][ipt],nbkg,nbkg_err);
+       histoError(hIsoMixSig[ieta][ipt],histoMaxBin,nsig,nsig_err);
+       histoError(hIsoMixBkg[ieta][ipt],histoMaxBin,nbkg,nbkg_err);
  
        cout << "nsig = " << nsig << " +- " << nsig_err << endl;
        cout << "nbkg = " << nbkg << " +- " << nbkg_err << endl;
@@ -339,14 +358,66 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
        double purityErr = 0;
 
        ratioErr(nsig,nsig_err,nbkg,nbkg_err,purity,purityErr);
-
+       fYPurity[ipt]    = purity;
+       fYPurityErr[ipt] = purityErr;
        cout << "purity = " << purity << " +- " << purityErr << endl;
 
-       hTruthPurity[ieta]->SetBinContent(ipt+1,purity);
-       hTruthPurity[ieta]->SetBinError(ipt+1,purityErr);
-       
-     }
-   }
+
+       double nsig5GeV = 0;
+       double nbkg5GeV = 0;       
+       double nsig_err5GeV = 0;
+       double nbkg_err5GeV = 0;
+
+       histoError(hIsoMixSig[ieta][ipt],histoMaxBin5GeV,nsig5GeV,nsig_err5GeV);
+       histoError(hIsoMixBkg[ieta][ipt],histoMaxBin5GeV,nbkg5GeV,nbkg_err5GeV);
+ 
+       cout << "nsig = " << nsig5GeV << " +- " << nsig_err5GeV << endl;
+       cout << "nbkg = " << nbkg5GeV << " +- " << nbkg_err5GeV << endl;
+
+
+       if((nsig5GeV+nbkg5GeV) < 1e-6)continue;
+       double purity5GeV = 0;
+       double purityErr5GeV = 0;
+
+       ratioErr(nsig5GeV,nsig_err5GeV,nbkg5GeV,nbkg_err5GeV,purity5GeV,purityErr5GeV);
+       fYPurity5GeV[ipt]    = purity5GeV;
+       fYPurityErr5GeV[ipt] = purityErr5GeV;
+       cout << "purity for isolation < 5 GeV = " << purity5GeV << " +- " << purityErr5GeV << endl;
+
+     } // end of loop over pt bins
+
+     
+   // now define purity histogram
+     hTruthPurity[ieta] = new TGraphAsymmErrors(nPtBin,fBinsPtMidPoint,fYPurity,
+						fBinsPtError,fBinsPtError,
+						fYPurityErr,fYPurityErr);
+     sprintf(tmp,"hTruthPurity_Eta_%.2f_%.2f",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     hTruthPurity[ieta] -> SetName(tmp);
+     sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     hTruthPurity[ieta]->SetTitle(tmp);
+     hTruthPurity[ieta]->GetXaxis()->SetTitle("p_{T}(#gamma) [GeV/c]");
+     hTruthPurity[ieta]->GetYaxis()->SetTitle("MC Truth Purity");
+
+
+   // now define purity histogram for isolation < 5 GeV
+     hTruthPurity5GeV[ieta] = new TGraphAsymmErrors(nPtBin,fBinsPtMidPoint,fYPurity5GeV,
+						    fBinsPtError,fBinsPtError,
+						    fYPurityErr5GeV,fYPurityErr5GeV);
+     sprintf(tmp,"hTruthPurity5GeV_Eta_%.2f_%.2f",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     hTruthPurity5GeV[ieta] -> SetName(tmp);
+     sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f for isolation < 5 GeV",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     hTruthPurity5GeV[ieta]->SetTitle(tmp);
+     hTruthPurity5GeV[ieta]->GetXaxis()->SetTitle("p_{T}(#gamma) [GeV/c]");
+     hTruthPurity5GeV[ieta]->GetYaxis()->SetTitle("MC Truth Purity for Iso < 5 GeV");
+
+   } // end of loop over eta bins
+
+
+
 
    // display the comparison
 
@@ -392,6 +463,7 @@ void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeD
 
    for(int ieta = 0; ieta < nEtaBin; ieta++){
      hTruthPurity[ieta]->Write();
+     hTruthPurity5GeV[ieta]->Write();
      for(int ipt=0; ipt < nPtBin; ipt++){
        hIsoMixSig[ieta][ipt]->Write();
        hIsoMixBkg[ieta][ipt]->Write();
