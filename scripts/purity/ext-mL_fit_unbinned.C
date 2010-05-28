@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <TMinuit.h>
-#include "vector.h"
+#include <vector>
 #include <TMath.h>
 #include "TVirtualFitter.h"
 #include "TFile.h"
@@ -27,6 +27,73 @@ vector<Double_t> Para;
 
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
+
+
+Double_t g(Double_t *v, Double_t *par)
+{
+  Double_t arg = 0;
+  arg = (v[0] - par[2]) / par[3];
+  
+  //Double_t area = par[1]/(par[3]*sqrt(2*3.1415926));
+  Double_t norm_area = 1/(par[3]*sqrt(2*3.1415926));
+  Double_t gaus = norm_area*TMath::Exp(-0.5*arg*arg);
+
+  if (gaus<=0) gaus=1e-10;
+  return gaus;
+}
+
+Double_t exp_conv (Double_t *v, Double_t *par)
+{
+  Double_t ctau = par[1];
+  //Double_t sigma = par[14];
+  Double_t sigma = par[3]; //using narrow prompt width
+  Double_t x = v[0]-par[2];
+
+  Double_t arg1 = TMath::Exp( 0.5*sigma*sigma/ctau/ctau - x/ctau );
+  Double_t arg2 = 1.0 - TMath::Freq( (sigma/ctau - x/sigma) );
+  //Double_t func = 1.0/ctau * arg1 * arg2;
+  Double_t func = par[0]/ctau * arg1 * arg2;
+
+  if (func<=0) func=1e-10;
+  return func;
+}
+
+Double_t exp_conv_norm(Double_t *v, Double_t *par)
+{
+  Double_t func = exp_conv(v,par) / SigPDFnorm;
+  if (func<=0) func=1e-10;
+  return func;
+}
+
+Double_t expinv_power(Double_t *v, Double_t *par){
+
+  Double_t x = v[0]-par[6];
+  Double_t func=0.;
+  if (x>0.) {
+    Double_t fitval = 1.- TMath::Exp(par[5]*x);
+    //func = par[4] * (1-par[9]*x) *TMath::Power(1-par[7]*x,par[8]) * fitval;
+    func = par[4] * TMath::Power(1-par[7]*x,par[8]) * fitval;
+    //func = par[4] * fitval;
+  }
+  return func;
+}
+
+Double_t expinv_power_norm (Double_t *v, Double_t *par)
+{
+  Double_t func = expinv_power(v,par)/BkgPDFnorm;
+  if (func<=0) func=1e-10;
+  return func;
+}
+
+Double_t sum_norm(Double_t *v, Double_t *par)
+{
+  Double_t func1 = exp_conv(v,par) / SigPDFnorm;
+  Double_t func2 = expinv_power(v,par)/BkgPDFnorm;
+  Double_t func = func1+func2;
+  if (func<=0) func=1e-10;
+  return func;
+}
+
 
 void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
@@ -51,50 +118,6 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   f=2*( -1*Lsum + (fs+fb) - Nevt*TMath::Log(fs+fb) );
 }
 
-void pulltest(int ptbin=15, char EBEE[10]="EB", float input=0.5){
-
-
-  TH1F *h1 = new TH1F("h1","",100,-10., 10.);
-  TH1F *h2 = new TH1F("h2","",3000, 0., 3000);
-
-  h1->SetNdivisions(505,"XY");
-  h2->SetNdivisions(505,"XY");
-
-  int nexp=1000;
-  Double_t Nevt=0.;
-
-  for (int i=0; i<nexp; i++) {
-    Ifit(ptbin,EBEE);
-    Nevt=0.;
-    for ( int ii=0; ii<dataColl.size(); ii++ ) {
-      Nevt += dataColl[ii];
-    }
-    printf("fit purity %2.2f +- %2.2f err with %d events. \n", info[0], info_err[0], Nevt);
-    h1->Fill((info[0]/Nevt-input)/(info_err[0]/Nevt));
-    h2->Fill(info[0]);
-  }    
-
-  TCanvas *c2 = new TCanvas("c2","",1000,500);
-  c2->Divide(2,1);
-  c2->cd(1);
-  char txt[100];
-  sprintf(txt, "(purity-input)/error");
-  h1->SetXTitle(txt);
-  h1->Fit("gaus");
-  h1->Draw();
-  c2->cd(2);
-  sprintf(txt, "fitted signal (input %d)", input*Nevt);
-  h2->SetXTitle(txt);
-  h2->Fit("gaus");
-  h2->GetXaxis()->SetRangeUser(0., Nevt*1.2);
-  if ( input >0.8 )  h2->GetXaxis()->SetRangeUser(0., Nevt*1.4);
-  h2->Draw();  
-  sprintf(txt, "plots/extmLfit_pull_%s_pt%d.pdf", EBEE, ptbin);
-  c2->SaveAs(txt);
-
-  
-}
-
 
 
 //___________________________________________________________________________
@@ -116,10 +139,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   fitted[0] = fitted[1] = fitted[2] = fitted[3] = 0.0;
   fitted[4] = fitted[5] = fitted[6] = fitted[7] = 0.0;
 
-  TH1F* hsig = sigTemplate->Clone();
+  TH1F* hsig = (TH1F*)sigTemplate->Clone();
   hsig->SetName("hsig");
 
-  TH1F* hbkg = bkgTemplate->Clone();
+  TH1F* hbkg = (TH1F*)bkgTemplate->Clone();
   hbkg->SetName("hbkg");
 
   hsig->SetLineColor(1);
@@ -175,7 +198,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
   if ( fit_status > 0 ) {
      printf("fit signal template failed. QUIT \n");
-     return;
+     return fitted;
   }
 
   Para.push_back(f1->GetParameter(0));
@@ -218,7 +241,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
   if ( fit_status > 0 ) {
     printf("fit background template failed. QUIT \n");
-    return;
+    return fitted;
   }
 
   Para.push_back(f3->GetParameter(4));
@@ -308,7 +331,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   arglist[1] = 1.;
   gMinuit->mnexcm("MIGRAD", arglist ,2,ierflg);
   printf (" -------------------------------------------- \n");
-  printf("Finished.  ierr = %2.2f \n", ierflg);
+  printf("Finished.  ierr = %d \n", ierflg);
 
   info.clear();
   info_err.clear();
@@ -354,7 +377,6 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    hdata->SetNdivisions(505,"XY");
    hdata->SetXTitle("comb. ISO (GeV)");
    hdata->SetYTitle("Entries");
-   hdata->SetTitle();
    hdata->SetMarkerStyle(8);
    hdata->SetMinimum(0.);
    if ( hdata->GetMaximum()<15.) hdata->SetMaximum(20.);
@@ -432,67 +454,3 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 }
 
 
-Double_t g(Double_t *v, Double_t *par)
-{
-  Double_t arg = 0;
-  arg = (v[0] - par[2]) / par[3];
-  
-  //Double_t area = par[1]/(par[3]*sqrt(2*3.1415926));
-  Double_t norm_area = 1/(par[3]*sqrt(2*3.1415926));
-  Double_t gaus = norm_area*TMath::Exp(-0.5*arg*arg);
-
-  if (gaus<=0) gaus=1e-10;
-  return gaus;
-}
-
-Double_t exp_conv (Double_t *v, Double_t *par)
-{
-  Double_t ctau = par[1];
-  //Double_t sigma = par[14];
-  Double_t sigma = par[3]; //using narrow prompt width
-  Double_t x = v[0]-par[2];
-
-  Double_t arg1 = TMath::Exp( 0.5*sigma*sigma/ctau/ctau - x/ctau );
-  Double_t arg2 = 1.0 - TMath::Freq( (sigma/ctau - x/sigma) );
-  //Double_t func = 1.0/ctau * arg1 * arg2;
-  Double_t func = par[0]/ctau * arg1 * arg2;
-
-  if (func<=0) func=1e-10;
-  return func;
-}
-
-Double_t exp_conv_norm(Double_t *v, Double_t *par)
-{
-  Double_t func = exp_conv(v,par) / SigPDFnorm;
-  if (func<=0) func=1e-10;
-  return func;
-}
-
-Double_t expinv_power(Double_t *v, Double_t *par){
-
-  Double_t x = v[0]-par[6];
-  Double_t func=0.;
-  if (x>0.) {
-    Double_t fitval = 1.- TMath::Exp(par[5]*x);
-    //func = par[4] * (1-par[9]*x) *TMath::Power(1-par[7]*x,par[8]) * fitval;
-    func = par[4] * TMath::Power(1-par[7]*x,par[8]) * fitval;
-    //func = par[4] * fitval;
-  }
-  return func;
-}
-
-Double_t expinv_power_norm (Double_t *v, Double_t *par)
-{
-  Double_t func = expinv_power(v,par)/BkgPDFnorm;
-  if (func<=0) func=1e-10;
-  return func;
-}
-
-Double_t sum_norm(Double_t *v, Double_t *par)
-{
-  Double_t func1 = exp_conv(v,par) / SigPDFnorm;
-  Double_t func2 = expinv_power(v,par)/BkgPDFnorm;
-  Double_t func = func1+func2;
-  if (func<=0) func=1e-10;
-  return func;
-}

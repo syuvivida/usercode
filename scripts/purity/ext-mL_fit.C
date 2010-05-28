@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <TMinuit.h>
-#include "vector.h"
+#include <vector>
 #include <TMath.h>
 #include "TVirtualFitter.h"
 #include "TFile.h"
@@ -23,6 +23,7 @@ vector<Double_t> infoBin;
 vector<Double_t> infoBin_err;
 
 
+
 void fcnBin(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
 
@@ -31,7 +32,7 @@ void fcnBin(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   Double_t fs = par[0];
   Double_t fb = par[1];
 
-  for ( int i=0; i<dataCollBin.size(); i++ ) {
+  for (unsigned int i=0; i<dataCollBin.size(); i++ ) {
     Nevt += dataCollBin[i];
     //PDF for signal and background
     Double_t Ls = sigCollBin[i];
@@ -45,51 +46,6 @@ void fcnBin(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   
 }
 
-void pulltestBin(int ptbin=15, char EBEE[10]="EB", float input=0.5){
-
-
-  TH1F *h1 = new TH1F("h1","",100,-10., 10.);
-  TH1F *h2 = new TH1F("h2","",3000, 0., 3000);
-
-  h1->SetNdivisions(505,"XY");
-  h2->SetNdivisions(505,"XY");
-
-  int nexp=1000;
-  Double_t Nevt=0.;
-
-  for (int i=0; i<nexp; i++) {
-    Ifit(ptbin,EBEE);
-    Nevt=0.;
-    for ( int ii=0; ii<dataCollBin.size(); ii++ ) {
-      Nevt += dataCollBin[ii];
-    }
-    printf("fit purity %2.2f +- %2.2f err with %d events. \n", infoBin[0], infoBin_err[0], Nevt);
-    h1->Fill((infoBin[0]/Nevt-input)/(infoBin_err[0]/Nevt));
-    h2->Fill(infoBin[0]);
-  }    
-
-  TCanvas *c2 = new TCanvas("c2","",1000,500);
-  c2->Divide(2,1);
-  c2->cd(1);
-  char txt[100];
-  sprintf(txt, "(purity-input)/error");
-  h1->SetXTitle(txt);
-  h1->Fit("gaus");
-  h1->Draw();
-  c2->cd(2);
-  sprintf(txt, "fitted signal (input %d)", input*Nevt);
-  h2->SetXTitle(txt);
-  h2->Fit("gaus");
-  h2->GetXaxis()->SetRangeUser(0., Nevt*1.2);
-  if ( input >0.8 )  h2->GetXaxis()->SetRangeUser(0., Nevt*1.4);
-  h2->Draw();  
-  sprintf(txt, "plots/extmLfit_pull_%s_pt%d.pdf", EBEE, ptbin);
-  c2->SaveAs(txt);
-
-  
-}
-
-
 
 //___________________________________________________________________________
 Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
@@ -97,11 +53,12 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 {
 
   TCanvas *c1 = new TCanvas("HF1", "Histos1", 0, 0, 600, 600);
-  double count=0;
   dataCollBin.clear();
   sigCollBin.clear();
   bkgCollBin.clear();
 
+  Double_t* fitted = new Double_t[8];
+  fitted[0] = fitted[1] = fitted[2] = fitted[3] = fitted[4] = fitted[5] = fitted[6] = fitted[7] = 0.0;
 
   TH1F *hsum = new TH1F();
   float ntemplate = 1.;
@@ -138,11 +95,6 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   }
   if(ndata==0) {
     printf(" ---  no events in the fit \n");
-    Double_t* fitted = new Double_t[4];
-    fitted[0] = 0.;
-    fitted[1] = 0.;
-    fitted[2] = 0.;
-    fitted[3] = 0.;
     return fitted;
   }
     
@@ -164,7 +116,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	  sigCollBin.size(), bkgCollBin.size() );  
   if ( dataCollBin.size() != sigCollBin.size() || sigCollBin.size()!=bkgCollBin.size() ) {
     printf(" error ...  inconsistent hit collection size \n");
-    return;
+    return fitted;
   }
 
   //--------------------------------------------------
@@ -196,7 +148,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   arglist[1] = 1.;
   gMinuit->mnexcm("MIGRAD", arglist ,2,ierflg);
   printf (" -------------------------------------------- \n");
-  printf("Finished.  ierr = %2.2f \n", ierflg);
+  printf("Finished.  ierr = %d \n", ierflg);
 
   infoBin.clear();
   infoBin_err.clear();
@@ -257,7 +209,6 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hdata->SetNdivisions(505,"XY");
   hdata->SetXTitle("ecalIso+hcalIso+trackIso (GeV)");
   hdata->SetYTitle("Entries");
-  hdata->SetTitle();
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
   hdata->SetMaximum(hdata->GetMaximum()*1.4);
@@ -309,7 +260,6 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   Double_t scale_signal = hsig->Integral(1,purityMaxBin)/hsig->Integral();
   Double_t scale_background = hbkg->Integral(1,purityMaxBin)/hbkg->Integral();
   
-  Double_t* fitted = new Double_t[8];
   fitted[0] = para[0];
   fitted[1] = errpara[0];
   fitted[2] = para[1];

@@ -4,10 +4,8 @@
 
 using namespace std;
 
-const int MAXBIN_ALLOWED=1000;
-
-void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
-	      Double_t& ratio, Double_t& err)
+void ratioErrTwoBin(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
+		    Double_t& ratio, Double_t& err)
 {
   if(fabs(n1+n2)<1e-6){ratio=0;err=0;return;}
   ratio = (n1)/(n1+n2);
@@ -102,20 +100,21 @@ void histoError(int MAX, TH1F* h, Double_t& bin1, Double_t& binerr1,
 
 }
 
-void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
-		   std::string outputName, Double_t& purity_central, Double_t& purity_central_err)
+Double_t* purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
 {
-  
-  purity_central = 0;
-  purity_central_err = 0;
+  Double_t* result = new Double_t[6];
+  result[0] = result[1] = result[2] = result[3] = 0.0;
+  result[4] = result[5] = 0.0;
 
+  int totalnbin = dataInput->GetNbinsX();
+  cout << "totalbin = " << totalnbin << endl;
+  cout << "signal template has " << sigTemplate->GetNbinsX() << endl;
+  cout << "background template has " << bkgTemplate->GetNbinsX() << endl;
+  
   TH1F* signal_pos;
   TH1F* background_pos;
   TH1F* data;
 
-  // the first bin is the signal fraction in the first bin,
-  // the second bin is the signal fraction in total
-  TH1F* result = new TH1F("result","",3,-0.5,2.5);
 
   Double_t scale=1.;
 
@@ -125,7 +124,7 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   data->SetMarkerColor(1);
   data->SetXTitle("Fisher's isolation [GeV]");
   data->Sumw2();
-  scale = 1.0/(Double_t)data->Integral(0,MAXBIN_ALLOWED); 
+  scale = 1.0/(Double_t)data->Integral(); 
   cout << "scale for data = " << scale << endl;
   data->Scale(scale);
 
@@ -137,7 +136,7 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   signal_pos->SetFillColor(2);
   signal_pos->SetXTitle("Fisher's isolation [GeV]");
   signal_pos->Sumw2();
-  scale = 1.0/(Double_t)signal_pos->Integral(0,MAXBIN_ALLOWED); 
+  scale = 1.0/(Double_t)signal_pos->Integral(); 
   cout << "scale for signal template = " << scale << endl;
   signal_pos->Scale(scale);
 
@@ -149,7 +148,7 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   background_pos->SetFillColor(4);
   background_pos->SetXTitle("Fisher's isolation [GeV]");
   background_pos->Sumw2();
-  scale = 1.0/(Double_t)background_pos->Integral(0,MAXBIN_ALLOWED); 
+  scale = 1.0/(Double_t)background_pos->Integral(); 
   cout << "scale for background template = " << scale << endl;
   background_pos->Scale(scale);
 
@@ -170,8 +169,8 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   for(int i=1; i<= integral_signal->GetNbinsX(); i++){
      
-    Double_t sigEff = signal_pos->Integral(i,MAXBIN_ALLOWED);
-    Double_t bkgEff = background_pos->Integral(i,MAXBIN_ALLOWED);
+    Double_t sigEff = signal_pos->Integral(i,totalnbin);
+    Double_t bkgEff = background_pos->Integral(i,totalnbin);
     integral_signal->SetBinContent(i,sigEff);
     integral_background->SetBinContent(i,bkgEff);
     
@@ -183,7 +182,6 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   
 
   int maxbin = integral_diff->GetMaximumBin();
-  //  maxbin=10;
   cout << "Maximum efficiency difference is at " << 
     integral_diff->GetBinLowEdge(maxbin) 
        << endl;
@@ -200,13 +198,13 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   ndata1 = nsig1 = nbkg1 = ndata2 = nsig2 = nbkg2 = 0;
   ndata1err = nsig1err = nbkg1err = ndata2err = nsig2err = nbkg2err = 0;
 
-  ndata1 = dataInput->Integral(0, maxbin);
-  nsig1  = sigTemplate->Integral(0, maxbin);
-  nbkg1  = bkgTemplate->Integral(0, maxbin);
+  ndata1 = dataInput->Integral(1, maxbin);
+  nsig1  = sigTemplate->Integral(1, maxbin);
+  nbkg1  = bkgTemplate->Integral(1, maxbin);
 
-  ndata2 = dataInput->Integral(maxbin+1, MAXBIN_ALLOWED);
-  nsig2  = sigTemplate->Integral(maxbin+1, MAXBIN_ALLOWED);
-  nbkg2  = bkgTemplate->Integral(maxbin+1, MAXBIN_ALLOWED);
+  ndata2 = dataInput->Integral(maxbin+1, totalnbin);
+  nsig2  = sigTemplate->Integral(maxbin+1, totalnbin);
+  nbkg2  = bkgTemplate->Integral(maxbin+1, totalnbin);
 
   cout << ndata1 << "\t" << nsig1 << "\t" << nbkg1 << endl;
   cout << ndata2 << "\t" << nsig2 << "\t" << nbkg2 << endl;
@@ -238,23 +236,20 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   Double_t errratsig;
   Double_t errratbkg;  
 
-  ratioErr(ndata1,ndata1err,ndata2,ndata2err,ratdat,errratdat);
-  ratioErr(nsig1,nsig1err,nsig2,nsig2err,ratsig,errratsig);
-  ratioErr(nbkg1,nbkg1err,nbkg2,nbkg2err,ratbkg,errratbkg);
+  ratioErrTwoBin(ndata1,ndata1err,ndata2,ndata2err,ratdat,errratdat);
+  ratioErrTwoBin(nsig1,nsig1err,nsig2,nsig2err,ratsig,errratsig);
+  ratioErrTwoBin(nbkg1,nbkg1err,nbkg2,nbkg2err,ratbkg,errratbkg);
 
   sigFracErr(ratdat, errratdat,
 	     ratsig, errratsig,
 	     ratbkg, errratbkg,
 	     signal_fraction, errfrac);
 
-  result->SetBinContent(1, signal_fraction);
-  result->SetBinError(1, errfrac);
-
   cout << "Total signal fraction = " << signal_fraction << " +- " << 
     errfrac << endl;
 
-  purity_central = signal_fraction;
-  purity_central_err = errfrac;
+  result[0] = signal_fraction;
+  result[1] = errfrac;
 
   
   // signal_fraction within the first bin
@@ -284,34 +279,12 @@ void purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
     " +- " << 
     errfrac_iso2 << endl;
 
+  result[2] = signal_fraction_iso1;
+  result[3] = errfrac_iso1;
 
-//   purity_central = signal_fraction_iso1;
-//   purity_central_err = errfrac_iso1;
+  result[4] = signal_fraction_iso2;
+  result[5] = errfrac_iso2;
 
-  result->SetBinContent(2, signal_fraction_iso1);
-  result->SetBinError(2, errfrac_iso1   );
-
-  result->SetBinContent(3, signal_fraction_iso2);
-  result->SetBinError(3, errfrac_iso2   );
-
-  /*
-  // dump histogram to a root file
-  std::string histoFile = outputName + "_2bin.root";
-
-  TFile* outFile = new TFile(histoFile.data(),"recreate");
-  result->Write();
-  dataInput->Write();
-  data->Write();
-  sigTemplate->Write();
-  signal_pos->Write();
-  bkgTemplate->Write();
-  background_pos->Write();
-
-  integral_signal->Write();
-  integral_background->Write();
-  integral_diff->Write();
-  outFile->Close();
-  */
-
+  return result;
 
 }
