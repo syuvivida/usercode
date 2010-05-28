@@ -14,30 +14,11 @@
 using namespace std;
 
 #define NPAR 2
-#define datapoint 1890
-
-TF1* fchi2;
-//TH1F* h1;
-TF1* bsFin;
-
-// Remember to change the values of xh and xl in all_tree.C too!!!
-//Double_t xh = 6.5;
-//Double_t xl = 4.5;
-Double_t xl = -1.;
-Double_t xh = 1.;
-Double_t bin_size = 0.05;
-
-const double _two_pi = 2.0 * TMath::Pi();
-Double_t fit_lo_edge = -1.;
-Double_t fit_hi_edge = 1.;
 
 
 vector<Double_t> dataColl;
 vector<Double_t> sigColl;
 vector<Double_t> bkgColl;
-
-vector<Double_t> totalColl;
-vector<Double_t> ctauColl;
 
 vector<Double_t> info;
 vector<Double_t> info_err;
@@ -46,12 +27,6 @@ vector<Double_t> Para;
 
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
-
-//par[0] = fs Jpsi signal fraction;
-//-----mass part-----------------------------------------------------
-//par[1] = g norm; par[2] g1 mean; par[3] g1 width; 
-//par[4] g2 ratio;  par[5] g2 mean; par[6] g2 width;
-//par[7] bg norm; par[8] bg slope;
 
 void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
@@ -135,30 +110,35 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   sigColl.clear();
   bkgColl.clear();
 
-  totalColl.clear();
-  ctauColl.clear();
-
   Para.clear();
 
-  Double_t* fitted = new Double_t[4];
-  fitted[0] = 0.;    fitted[1] = 0.;    fitted[2] = 0.;    fitted[3] = 0.;
+  Double_t* fitted = new Double_t[8];
+  fitted[0] = fitted[1] = fitted[2] = fitted[3] = 0.0;
+  fitted[4] = fitted[5] = fitted[6] = fitted[7] = 0.0;
 
-  sigTemplate->SetLineColor(1);
-  bkgTemplate->SetLineColor(1);
+  TH1F* hsig = sigTemplate->Clone();
+  hsig->SetName("hsig");
 
-  TH1F *hsum = (TH1F*)sigTemplate->Clone();
-  hsum->Add(bkgTemplate,1);
+  TH1F* hbkg = bkgTemplate->Clone();
+  hbkg->SetName("hbkg");
+
+  hsig->SetLineColor(1);
+  hbkg->SetLineColor(1);
+
+  TH1F *hsum = (TH1F*)hsig->Clone();
+  hsum->Add(hbkg,1);
   float ntemplate = 1.;
   if (hsum->Integral()>1.) ntemplate = hsum->Integral();
-  float sigfrac = sigTemplate->Integral()/ntemplate;
+  float sigfrac = hsig->Integral()/ntemplate;
 
   TH1F *hsum_norm = (TH1F*)hsum->Clone();  
   hsum_norm->Scale(1./hsum->Integral());
 
-  TH1F *hdata = new TH1F();
+  TH1F *hdata;
   int ndata=0;
   if ( fit_data==1 ) {
     hdata = (TH1F*)dataInput->Clone();
+    hdata -> SetName("hdata");
     ndata = hdata->Integral();    
     for(int ibin=1; ibin<=hdata->GetNbinsX(); ibin++){
       for(int ipoint=0; ipoint<hdata->GetBinContent(ibin); ipoint++) {
@@ -178,19 +158,19 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   c10->Divide(2,1);
   c10->cd(1);
   
-  sigTemplate->Scale(1./sigTemplate->Integral()); 
-  bkgTemplate->Scale(1./bkgTemplate->Integral());  
+  hsig->Scale(1./hsig->Integral()); 
+  hbkg->Scale(1./hbkg->Integral());  
   
   double par[20] = {1., 1., 0.5, 0.3,
-		    bkgTemplate->GetMaximum(),-.3,-1., 0.01, 0.5, 0.01, 1., 1.};
+		    hbkg->GetMaximum(),-.3,-1., 0.01, 0.5, 0.01, 1., 1.};
   int fit_status;
 
   TF1 *f1 = new TF1("f1", exp_conv, -1., 11., 12);
   f1->SetParameters(par);
 
   c10->cd(1);
-  fit_status = sigTemplate->Fit(f1);
-  sigTemplate->Draw();
+  fit_status = hsig->Fit(f1);
+  hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
   if ( fit_status > 0 ) {
@@ -232,9 +212,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->FixParameter(2,f3->GetParameter(2));
   f3->FixParameter(3,f3->GetParameter(3));
 
-  bkgTemplate->SetMaximum(bkgTemplate->GetMaximum()*3.);
-  fit_status = bkgTemplate->Fit(f3,"b");
-  bkgTemplate->Draw();
+  hbkg->SetMaximum(hbkg->GetMaximum()*3.);
+  fit_status = hbkg->Fit(f3,"b");
+  hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
   if ( fit_status > 0 ) {
     printf("fit background template failed. QUIT \n");
@@ -265,19 +245,24 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   printf(" BKG PDF area %2.3f \n", f12->Integral(-1.,11.));
 
 
+  //======= Determine the ratio of isolation < 5 GeV to isolation < 11 GeV
+  double purityMaxReach   = 5.0;
+  double scale_signal     = f11->Integral(-1,purityMaxReach);
+  double scale_background = f12->Integral(-1,purityMaxReach);
+
+  cout << "scale_signal = " << scale_signal << endl;
+  cout << "scale_background =" << scale_background << endl;
+
+
   c1->cd();
   printf(" --------- before the fit ------------- \n");
-  printf("Nsig %2.3f, Nbg %2.3f, Ntemplate %3.3f \n", sigTemplate->Integral(), bkgTemplate->Integral(), ntemplate);
-  printf("Purity %2.3f, init size %4.3f,  fit sample size %4d\n", sigTemplate->Integral()/hsum->Integral(), hsum->Integral(), ndata);
+  printf("Nsig %2.3f, Nbg %2.3f, Ntemplate %3.3f \n", hsig->Integral(), hbkg->Integral(), ntemplate);
+  printf("Purity %2.3f, init size %4.3f,  fit sample size %4d\n", hsig->Integral()/hsum->Integral(), hsum->Integral(), ndata);
   printf(" -------------------------------------- \n");
 
 
   printf( " -----  Got %d, %d, %d events for fit ----- \n ", dataColl.size(),
 	  sigColl.size(), bkgColl.size() );  
-//   if ( dataColl.size() != sigColl.size() || sigColl.size()!=bkgColl.size() ) {
-//     printf(" error ...  inconsistent hit collection size \n");
-//     return fitted;
-//   }
 
   //========== Dump fit parameters
   for(unsigned int ipara = 0; ipara < Para.size(); ipara++)
@@ -426,18 +411,23 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    gPad->RedrawAxis();
 
   char fname[1000];
-  sprintf(fname,"plots/unbinned_Ifit_%s.pdf",hdata->GetName());
+  sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
-
-//   ftemplate->Close();
 
 
   fitted[0] = para[0];
   fitted[1] = errpara[0];
   fitted[2] = para[1];
   fitted[3] = errpara[1];
+
+  fitted[4] = para[0]*scale_signal;
+  fitted[5] = errpara[0]*scale_signal;
+  fitted[6] = para[1]*scale_background;
+  fitted[7] = errpara[1]*scale_background;
+
+
   return fitted;
 }
 
