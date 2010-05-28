@@ -1,3 +1,25 @@
+/*==============================================================================================     
+                  
+  Produce histograms for combined isolation                                                                          
+  
+                                                                                                                     
+  std::string outputName = "FileName";// prefix for output file name                                                 
+  std::string var;                    // variables for making histograms    
+  int nbin;                           // total number of bins
+  double xmin, double xmax;           // minimum and maximum of histograms 
+  double split;                      // if 1.0 for unsplit and original MC samples, 2.0 for split MC samples
+  bool isData;                       // if running on data, no scaling for histograms
+  bool normalize;                   // store the histogram by normalizing the integrated area to 1.0 
+      
+  allHistos(std::string outputName="";
+  std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
+  int nbin=20,
+  double xmin=-1.0, double xmax=11.0, double split = 1.0,
+  bool isData=false,bool normalize=false)
+
+  ==============================================================================================*/
+
+
 #include <iostream>
 #include <fstream>
 #include <TFile.h>
@@ -112,7 +134,8 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
 
 
 // calling functions
-void allHistos(std::string outputName="", std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
+void allHistos(std::string outputName="", 
+	       std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
 	       int nbin=20,
 	       double xmin=-1.0, double xmax=11.0, double split = 1.0,
 	       bool isData=false,bool normalize=false)
