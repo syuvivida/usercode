@@ -28,6 +28,9 @@ vector<Double_t> Para;
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
 
+Double_t FixParEB[8]={0};
+Double_t FixParEE[8]={0};
+
 
 Double_t g(Double_t *v, Double_t *par)
 {
@@ -122,6 +125,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 //___________________________________________________________________________
 Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
+	       int fix_parameters=0,
 	       int fit_data=1)
 {
 
@@ -237,12 +241,13 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
   fit_status = hbkg->Fit(f3,"b");
+  fit_status = hbkg->Fit(f3,"b");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
-  if ( fit_status > 0 ) {
-    printf("fit background template failed. QUIT \n");
-    return fitted;
-  }
+//   if ( fit_status > 0 ) {
+//     printf("fit background template failed. QUIT \n");
+//     return fitted;
+//   }
 
   Para.push_back(f3->GetParameter(4));
   Para.push_back(f3->GetParameter(5));
@@ -250,7 +255,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   Para.push_back(f3->GetParameter(7)); 
   Para.push_back(f3->GetParameter(8)); 
   BkgPDFnorm = f3->Integral(-1.,11);
-
+  c10->SaveAs(Form("plots/PDF_Fit_%s.gif",dataInput->GetName()));
 
   //test PDFs
   TCanvas *c11 = new TCanvas("c11","",1000,500);
@@ -288,12 +293,45 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	  sigColl.size(), bkgColl.size() );  
 
   //========== Dump fit parameters
+  cout << "Before fixing the parameters " << endl;
+  for(unsigned int ipara = 0; ipara < Para.size(); ipara++)
+    {
+      cout << "Parameter " << ipara << " = " << Para[ipara] << endl;
+      if(histoName.find("1.45")!= std::string::npos && 
+	 histoName.find("15_20")!=std::string::npos)
+	{
+	  FixParEB[ipara]=Para[ipara];
+	}
+      else if(histoName.find("1.70")!= std::string::npos && 
+	 histoName.find("15_20")!=std::string::npos)
+	{
+	  FixParEE[ipara]=Para[ipara];
+	}
+      
+    }
+
+  if(fix_parameters==1)
+    {
+      Para.clear();
+      if(histoName.find("1.45")!= std::string::npos)
+	{
+	  for(int i=0; i<8;i++)
+	    Para.push_back(FixParEB[i]);
+	}
+      else if(histoName.find("1.70")!= std::string::npos)
+	{
+	  for(int i=0; i<8;i++)
+	    Para.push_back(FixParEE[i]);
+	}
+
+    } // end of resetting parameters
+
+  cout << "After fixing the parameters " << endl;
   for(unsigned int ipara = 0; ipara < Para.size(); ipara++)
     {
       cout << "Parameter " << ipara << " = " << Para[ipara] << endl;
 
     }
-
 
   //--------------------------------------------------
   //init parameters for fit
@@ -434,7 +472,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    gPad->RedrawAxis();
 
   char fname[1000];
-  sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
+//   sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
+  sprintf(fname,"plots/unbinned_Ifit_%s.eps",dataInput->GetName());
+  c1->SaveAs(fname);
+  sprintf(fname,"plots/unbinned_Ifit_%s.gif",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
