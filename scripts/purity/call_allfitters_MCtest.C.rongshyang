@@ -5,7 +5,6 @@
 #include <TH1.h>
 #include <string>
 #include <TGraph.h>
-#include <TGraphErrors.h>
 #include <TGraphAsymmErrors.h>
 #include <TMath.h> 
 #include <TCanvas.h>
@@ -83,16 +82,15 @@ void call_allfitters_MCtest(){
   TH1F* hdata_B[nEtaBin][nPtBin];
   TH1F* hdata_data[nEtaBin][nPtBin];
 
+
   TFile* inf_data = new TFile("template_comb3Iso_test.root");
 
   TFile* inf_template = new TFile("template_comb3Iso_template.root");
- // TFile* inf_template = new TFile("template_comb3Iso_test.root");
-
+  
   char* dec[2] = {"EB","EE"};
   char tmp[1000];
   for(int ieta = 0; ieta < nEtaBin; ieta++){
      for(int ipt=0; ipt < nPtBin; ipt++){
-
        // getting histograms from data root file
        sprintf(tmp,"h_%s_comb3Iso_EGdata_pt%d",dec[ieta],(int)fBinsPt[ipt]);
        cout << "looking for histogram " << tmp << " in file " << 
@@ -147,14 +145,31 @@ void call_allfitters_MCtest(){
       if(nsig_mc[ieta][ipt]+nbkg_mc[ieta][ipt] < 1e-6)continue;
       mcpurity[ieta][ipt] = nsig_mc[ieta][ipt]/(nsig_mc[ieta][ipt]+nbkg_mc[ieta][ipt]);
 
-      // 2nd, get two bin result
-      Double_t* TwoBinResult;
-      TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
-				   hTemplate_S[ieta][ipt],
-				   hTemplate_B[ieta][ipt]);
+      // 2nd, get unbinned fit
+      Double_t* FuncFitResult;
+      FuncFitResult = Ifit(hdata_data[ieta][ipt],
+			   hTemplate_S[ieta][ipt],
+			   hTemplate_B[ieta][ipt]);
 
-      purity_2bin[ieta][ipt]     = TwoBinResult[0];
-      purity_err_2bin[ieta][ipt] = TwoBinResult[1];
+ 
+      Double_t nsigfunc    = FuncFitResult[0];
+      Double_t errnsigfunc = FuncFitResult[1];
+      Double_t nbkgfunc    = FuncFitResult[2];
+      Double_t errnbkgfunc = FuncFitResult[3];
+
+      Double_t purityfunc = 0;
+      Double_t errpurityfunc = 0;
+ 
+      ratioErr(nsigfunc, errnsigfunc, nbkgfunc, errnbkgfunc,
+	       purityfunc, errpurityfunc);
+
+      purity_func[ieta][ipt]    = purityfunc;
+      purity_err_func[ieta][ipt]= errpurityfunc;
+      nsig_func[ieta][ipt]      = nsigfunc;
+      nsig_err_func[ieta][ipt]  = errnsigfunc;
+      nbkg_func[ieta][ipt]      = nbkgfunc;
+      nbkg_err_func[ieta][ipt]  = errnbkgfunc;
+
 
       // 3rd, get template fit result
       Double_t* TemplateFitResult;
@@ -182,30 +197,16 @@ void call_allfitters_MCtest(){
       nbkg_err_template[ieta][ipt]  = errnbkgtemplate;
 
 
-      // 4th, get unbinned fit
-      Double_t* FuncFitResult;
-      FuncFitResult = Ifit(hdata_data[ieta][ipt],
-			   hTemplate_S[ieta][ipt],
-			   hTemplate_B[ieta][ipt]);
 
- 
-      Double_t nsigfunc    = FuncFitResult[0];
-      Double_t errnsigfunc = FuncFitResult[1];
-      Double_t nbkgfunc    = FuncFitResult[2];
-      Double_t errnbkgfunc = FuncFitResult[3];
+      // 4th, get two bin result
+      Double_t* TwoBinResult;
+      TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
+				   hTemplate_S[ieta][ipt],
+				   hTemplate_B[ieta][ipt]);
 
-      Double_t purityfunc = 0;
-      Double_t errpurityfunc = 0;
- 
-      ratioErr(nsigfunc, errnsigfunc, nbkgfunc, errnbkgfunc,
-	       purityfunc, errpurityfunc);
+      purity_2bin[ieta][ipt]     = TwoBinResult[0];
+      purity_err_2bin[ieta][ipt] = TwoBinResult[1];
 
-      purity_func[ieta][ipt]    = purityfunc;
-      purity_err_func[ieta][ipt]= errpurityfunc;
-      nsig_func[ieta][ipt]      = nsigfunc;
-      nsig_err_func[ieta][ipt]  = errnsigfunc;
-      nbkg_func[ieta][ipt]      = nbkgfunc;
-      nbkg_err_func[ieta][ipt]  = errnbkgfunc;
     
 
     } // end of loop over pt bins
@@ -247,24 +248,40 @@ void call_allfitters_MCtest(){
   h2->SetXTitle("p_{T} (GeV)");
   h2->SetYTitle("purity");
   h2->Draw();
+
   TGraph *tg_mc_purity_EB = new TGraph(nPtBin, fBinsPtMidPoint, mcpurity[0]);
+  tg_mc_purity_EB->SetName("tg_mc_purity_EB");
   tg_mc_purity_EB->SetMarkerSize(1.);
   tg_mc_purity_EB->Draw("p same");
-  TGraphErrors *tgrs_purity_EB = new TGraphErrors(nPtBin, fBinsPtMidPoint, purity_func[0], fBinsPtError, purity_err_func[0]);
+  TGraphAsymmErrors *tgrs_purity_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+							    purity_func[0], 
+							    fBinsPtError, fBinsPtError, 
+							    purity_err_func[0], purity_err_func[0]);
+  tgrs_purity_EB->SetName("tgrs_purity_EB");
   tgrs_purity_EB->SetMarkerColor(4);
   tgrs_purity_EB->SetMarkerStyle(25);
   tgrs_purity_EB->SetLineColor(4);
   tgrs_purity_EB->SetLineWidth(2);
   tgrs_purity_EB->Draw("p e same");
 
-  TGraphErrors *tgrs_purity_template_EB = new TGraphErrors(nPtBin, fBinsPtMidPoint, purity_template[0], fBinsPtError, purity_err_template[0]);
+  TGraphAsymmErrors *tgrs_purity_template_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+								     purity_template[0], 
+								     fBinsPtError,fBinsPtError, 
+								     purity_err_template[0],
+								     purity_err_template[0]);
+  tgrs_purity_template_EB->SetName("tgrs_purity_template_EB");
   tgrs_purity_template_EB->SetMarkerColor(6);
   tgrs_purity_template_EB->SetMarkerStyle(26);
   tgrs_purity_template_EB->SetLineColor(6);
   tgrs_purity_template_EB->SetLineWidth(2);
   tgrs_purity_template_EB->Draw("p e same");
 
-  TGraphErrors *tgrs_purity_twobin_EB = new TGraphErrors(nPtBin, fBinsPtMidPoint, purity_2bin[0], fBinsPtError, purity_err_2bin[0]);
+  TGraphAsymmErrors *tgrs_purity_twobin_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+								   purity_2bin[0], 
+								   fBinsPtError,fBinsPtError, 
+								   purity_err_2bin[0],
+								   purity_err_2bin[0]);
+  tgrs_purity_twobin_EB->SetName("tgrs_purity_twobin_EB");
   tgrs_purity_twobin_EB->SetMarkerColor(kGreen);
   tgrs_purity_twobin_EB->SetMarkerStyle(3 );
   tgrs_purity_twobin_EB->SetLineColor(kGreen);
@@ -296,24 +313,39 @@ void call_allfitters_MCtest(){
   c2->Draw();
   h2->Draw();
   TGraph *tg_mc_purity_EE = new TGraph(nPtBin, fBinsPtMidPoint, mcpurity[1]);
+  tg_mc_purity_EE->SetName("tg_mc_purity_EE");
   tg_mc_purity_EE->SetMarkerSize(1.);
   tg_mc_purity_EE->Draw("p same");
-  TGraphErrors *tgrs_purity_EE = new TGraphErrors(nPtBin, fBinsPtMidPoint, purity_func[1], fBinsPtError, purity_err_func[1]);
+
+  TGraphAsymmErrors *tgrs_purity_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+							    purity_func[1], 
+							    fBinsPtError, fBinsPtError, 
+							    purity_err_func[1],purity_err_func[1]);
+  tgrs_purity_EE->SetName("tgrs_purity_EE");
   tgrs_purity_EE->SetMarkerColor(4);
   tgrs_purity_EE->SetMarkerStyle(25);
   tgrs_purity_EE->SetLineColor(4);
   tgrs_purity_EE->SetLineWidth(2);
   tgrs_purity_EE->Draw("p e same");
 
-
-  TGraphErrors *tgrs_purity_template_EE = new TGraphErrors(nPtBin, fBinsPtMidPoint, purity_template[1], fBinsPtError, purity_err_template[1]);
+  TGraphAsymmErrors *tgrs_purity_template_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+								     purity_template[1], 
+								     fBinsPtError,fBinsPtError, 
+								     purity_err_template[1],
+								     purity_err_template[1]);
+  tgrs_purity_template_EE->SetName("tgrs_purity_template_EE");
   tgrs_purity_template_EE->SetMarkerColor(6);
   tgrs_purity_template_EE->SetMarkerStyle(26);
   tgrs_purity_template_EE->SetLineColor(6);
   tgrs_purity_template_EE->SetLineWidth(2);
   tgrs_purity_template_EE->Draw("p e same");
 
-  TGraphErrors *tgrs_purity_twobin_EE = new TGraphErrors(nPtBin, fBinsPtMidPoint, purity_2bin[1], fBinsPtError, purity_err_2bin[1]);
+  TGraphAsymmErrors *tgrs_purity_twobin_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+								   purity_2bin[1], 
+								   fBinsPtError, fBinsPtError,
+								   purity_err_2bin[1], 
+								   purity_err_2bin[1]);
+  tgrs_purity_twobin_EE->SetName("tgrs_purity_twobin_EE");
   tgrs_purity_twobin_EE->SetMarkerColor(kGreen);
   tgrs_purity_twobin_EE->SetMarkerStyle(3);
   tgrs_purity_twobin_EE->SetLineColor(kGreen);
@@ -349,16 +381,26 @@ void call_allfitters_MCtest(){
   h3->SetYTitle("Signal yield / bin");
   h3->Draw();
   TGraph *tg_mc_sig_EB = new TGraph(nPtBin, fBinsPtMidPoint, nsig_mc[0]);
+  tg_mc_sig_EB->SetName("tg_mc_sig_EB");
   tg_mc_sig_EB->SetMarkerSize(1);
   tg_mc_sig_EB->Draw("p same");
-  TGraphErrors *tgrs_sig_EB = new TGraphErrors(nPtBin, fBinsPtMidPoint, nsig_func[0], fBinsPtError, nsig_err_func[0]);
+
+  TGraphAsymmErrors *tgrs_sig_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_func[0], 
+							 fBinsPtError, fBinsPtError, 
+							 nsig_err_func[0], nsig_err_func[0]);
+  tgrs_sig_EB->SetName("tgrs_sig_EB");
   tgrs_sig_EB->SetMarkerColor(4);
   tgrs_sig_EB->SetMarkerStyle(25);
   tgrs_sig_EB->SetLineColor(4);
   tgrs_sig_EB->SetLineWidth(2);
   tgrs_sig_EB->Draw("p e same");
 
-  TGraphErrors *tgrs_sig_template_EB = new TGraphErrors(nPtBin, fBinsPtMidPoint, nsig_template[0], fBinsPtError, nsig_err_template[0]);
+  TGraphAsymmErrors *tgrs_sig_template_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+								  nsig_template[0], 
+								  fBinsPtError,fBinsPtError, 
+								  nsig_err_template[0],
+								  nsig_err_template[0]);
+  tgrs_sig_template_EB->SetName("tgrs_sig_template_EB");
   tgrs_sig_template_EB->SetMarkerColor(6);
   tgrs_sig_template_EB->SetMarkerStyle(26);
   tgrs_sig_template_EB->SetLineColor(6);
@@ -387,15 +429,26 @@ void call_allfitters_MCtest(){
 
   h3->Draw();
   TGraph *tg_mc_sig_EE = new TGraph(nPtBin, fBinsPtMidPoint, nsig_mc[1]);
+  tg_mc_sig_EE->SetName("tg_mc_sig_EE");
   tg_mc_sig_EE->SetMarkerSize(1.);
   tg_mc_sig_EE->Draw("p same");
-  TGraphErrors *tgrs_sig_EE = new TGraphErrors(nPtBin, fBinsPtMidPoint, nsig_func[1], fBinsPtError, nsig_err_func[1]);
+
+  TGraphAsymmErrors *tgrs_sig_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_func[1], 
+							 fBinsPtError,fBinsPtError, 
+							 nsig_err_func[1],nsig_err_func[1]);
+  tgrs_sig_EE->SetName("tgrs_sig_EE");
   tgrs_sig_EE->SetMarkerColor(4);
   tgrs_sig_EE->SetMarkerStyle(25);
   tgrs_sig_EE->SetLineColor(4);
   tgrs_sig_EE->SetLineWidth(2);
   tgrs_sig_EE->Draw("p e same");
-  TGraphErrors *tgrs_sig_template_EE = new TGraphErrors(nPtBin, fBinsPtMidPoint, nsig_template[1], fBinsPtError, nsig_err_template[1]);
+
+  TGraphAsymmErrors *tgrs_sig_template_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+								  nsig_template[1], 
+								  fBinsPtError,fBinsPtError, 
+								  nsig_err_template[1],
+								  nsig_err_template[1]);
+  tgrs_sig_template_EE->SetName("tgrs_sig_template_EE");
   tgrs_sig_template_EE->SetMarkerColor(6);
   tgrs_sig_template_EE->SetMarkerStyle(26);
   tgrs_sig_template_EE->SetLineColor(6);
@@ -419,5 +472,28 @@ void call_allfitters_MCtest(){
   c4->SaveAs("plots/allfitter_yield_EE.gif");
   c4->SaveAs("plots/allfitter_yield_EE.pdf");
   c4->SaveAs("plots/allfitter_yield_EE.C");
+
+  TFile* outFile = new TFile("isotemplate_yield_rongshyang.root","recreate"); 
+  tg_mc_purity_EB->Write();
+  tgrs_purity_EB->Write();
+  tgrs_purity_template_EB->Write();
+  tgrs_purity_twobin_EB->Write();
+
+  tg_mc_purity_EE->Write();
+  tgrs_purity_EE->Write();
+  tgrs_purity_template_EE->Write();
+  tgrs_purity_twobin_EE->Write();
+
+  tg_mc_sig_EB->Write();
+  tgrs_sig_EB->Write();
+  tgrs_sig_template_EB->Write();
+
+  tg_mc_sig_EE->Write();
+  tgrs_sig_EE->Write();
+  tgrs_sig_template_EE->Write();
+
+  outFile->Close();
+
+
 
 }
