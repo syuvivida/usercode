@@ -153,8 +153,8 @@ void call_allfitters_eiko(bool fitData=false, bool doEffCorr=false, double lumi=
 
 //   std::string dataFile     = fitData? "fakedata_sumIso_histo.root": "fakedata_sumIso_histo.root"; 
 //   std::string templateFile = fitData? "template_sumIso_histo.root": "template_sumIso_histo.root";
-  std::string dataFile     = fitData? "template_sumIso_histo.root": "template_sumIso_histo.root";
-  std::string templateFile = fitData? "fakedata_sumIso_histo.root": "fakedata_sumIso_histo.root";
+  std::string dataFile     = fitData? "mydata_sumIso_histo.root": "template_sumIso_histo.root";
+  std::string templateFile = fitData? "mydata_sumIso_histo.root": "fakedata_sumIso_histo.root";
 
   TFile* inf_data = new TFile(dataFile.data());
   TFile* inf_template = new TFile(templateFile.data());
@@ -269,7 +269,7 @@ void call_allfitters_eiko(bool fitData=false, bool doEffCorr=false, double lumi=
       if(fitData)
 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
 			     hTemplate_S[ieta][ipt],
-			     hTemplate_B[ieta][ipt],1,"EGdata_comb3Iso_et_0531.dat",
+			     hTemplate_B[ieta][ipt],0,"EGdata_comb3Iso_et_0531.dat",
 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
 			     fBinsPt[ipt],fBinsPt[ipt+1]);	
       else

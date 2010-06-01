@@ -8,6 +8,7 @@
 #include <vector>
 #include <TMath.h>
 #include "TVirtualFitter.h"
+#include <TPaveText.h>
 #include "TFile.h"
 #include "chi2Nbins.h"
 
@@ -435,16 +436,29 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f13->SetLineColor(1);
   f13->Draw("same");
   
+
+  printf("fit area %3.2f; sig area %3.2f; bg area %3.2f\n", f13->Integral(-1,11)/hdata->GetBinWidth(2),  f11->Integral(-1,11)/hdata->GetBinWidth(2),f12->Integral(-1,11)/hdata->GetBinWidth(2));
+
   char text[1000];
   // get chi2/NDF  
   double chi2ForThisBin=0;
   int nbinForThisBin=0;
   chi2Nbins(f13, hdata, chi2ForThisBin, nbinForThisBin);
-  printf("fit area %3.2f; sig area %3.2f; bg area %3.2f\n", f13->Integral(-1,11)/hdata->GetBinWidth(2),  f11->Integral(-1,11)/hdata->GetBinWidth(2),f12->Integral(-1,11)/hdata->GetBinWidth(2));
 
-  TLegend *tleg = new TLegend(0.5, 0.65, 0.95, 0.92);
-  tleg->SetHeader(Form("%s, #chi^{2}/NDF = %.1f/%d",
-		       dataInput->GetTitle(),chi2ForThisBin, nbinForThisBin));
+  TPaveText *pavetex = new TPaveText(0.485, 0.87, 0.95, 0.92,"NDCBR");
+  pavetex->SetBorderSize(0);
+  pavetex->SetFillColor(0);
+  pavetex->SetFillStyle(0);
+  pavetex->SetLineWidth(3);
+  pavetex->SetTextAlign(12);
+  pavetex->SetTextSize(0.03);
+  pavetex->AddText(Form("#chi^{2}/NDF=%.1f/%d",chi2ForThisBin, nbinForThisBin));
+  pavetex->Draw();
+
+  TLegend *tleg = new TLegend(0.485, 0.60, 0.95, 0.87);
+  tleg->SetHeader(dataInput->GetTitle());
+
+  tleg->SetTextSize(0.03);
   tleg->SetFillColor(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);
@@ -464,7 +478,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   char fname[1000];
   sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
   c1->SaveAs(fname);
-  sprintf(fname,"plots/unbinned_Ifit_%s.png",dataInput->GetName());
+  sprintf(fname,"plots/unbinned_Ifit_%s.gif",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");

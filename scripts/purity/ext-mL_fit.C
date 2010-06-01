@@ -8,6 +8,7 @@
 #include <vector>
 #include <TMath.h>
 #include "TVirtualFitter.h"
+#include <TPaveText.h>
 #include "TFile.h"
 #include "chi2Nbins.h"
 
@@ -230,11 +231,22 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   double chi2ForThisBin=0;
   int nbinForThisBin=0;
   chi2NbinsHisto(hfit, hdata, chi2ForThisBin, nbinForThisBin);
-  char text[1000];
-  TLegend *tleg = new TLegend(0.5, 0.65, 0.95, 0.92);
-  tleg->SetHeader(Form("%s, #chi^{2}/NDF = %.1f/%d",
-		       dataInput->GetTitle(),chi2ForThisBin, nbinForThisBin));
+  TPaveText *pavetex = new TPaveText(0.485, 0.87, 0.95, 0.92,"NDCBR");
+  pavetex->SetBorderSize(0);
+  pavetex->SetFillColor(0);
+  pavetex->SetFillStyle(0);
+  pavetex->SetLineWidth(3);
+  pavetex->SetTextAlign(12);
+  pavetex->SetTextSize(0.03);
+  pavetex->AddText(Form("#chi^{2}/NDF=%.1f/%d",chi2ForThisBin, nbinForThisBin));
+  pavetex->Draw();
 
+
+  char text[1000];
+  TLegend *tleg = new TLegend(0.485, 0.60, 0.95, 0.87);
+  tleg->SetHeader(dataInput->GetTitle());
+
+  tleg->SetTextSize(0.03);
   tleg->SetFillColor(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);
@@ -255,7 +267,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   char fname[300];
   sprintf(fname,"plots/Ifit_%s.pdf",dataInput->GetName());
   c1->SaveAs(fname);
-  sprintf(fname,"plots/Ifit_%s.png",dataInput->GetName());
+  sprintf(fname,"plots/Ifit_%s.gif",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
