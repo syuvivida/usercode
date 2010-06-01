@@ -255,6 +255,8 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   char fname[300];
   sprintf(fname,"plots/Ifit_%s.pdf",dataInput->GetName());
   c1->SaveAs(fname);
+  sprintf(fname,"plots/Ifit_%s.png",dataInput->GetName());
+  c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
 

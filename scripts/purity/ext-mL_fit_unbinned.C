@@ -219,10 +219,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
-  if ( fit_status > 0 ) {
-     printf("fit signal template failed. QUIT \n");
-     return fitted;
-  }
+//   if ( fit_status > 0 ) {
+//      printf("fit signal template failed. QUIT \n");
+//      return fitted;
+//   }
 
   Para.push_back(f1->GetParameter(0));
   Para.push_back(f1->GetParameter(1));
@@ -262,10 +262,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   fit_status = hbkg->Fit(f3,"b");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
-  if ( fit_status > 0 ) {
-    printf("fit background template failed. QUIT \n");
-    return fitted;
-  }
+//   if ( fit_status > 0 ) {
+//     printf("fit background template failed. QUIT \n");
+//     return fitted;
+//   }
 
   Para.push_back(f3->GetParameter(4));
   Para.push_back(f3->GetParameter(5));
@@ -463,6 +463,8 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   char fname[1000];
   sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
+  c1->SaveAs(fname);
+  sprintf(fname,"plots/unbinned_Ifit_%s.png",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
