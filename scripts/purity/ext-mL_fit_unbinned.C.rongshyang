@@ -122,7 +122,9 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 //___________________________________________________________________________
 Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
-	       int fit_data=1)
+	       int fit_data=1, std::string dataText="EGdata_comb3Iso_et_0531.dat",
+	       double etamin=-1., double etamax=-1.,
+	       double ptmin=-1., double ptmax=-1.)
 {
 
   std::string histoName = dataInput->GetName();
@@ -159,18 +161,39 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   TH1F *hdata;
   int ndata=0;
-  if ( fit_data==1 ) {
-    hdata = (TH1F*)dataInput->Clone();
-    hdata -> SetName("hdata");
+  hdata = (TH1F*)dataInput->Clone();
+  hdata -> SetName("hdata");
+
+  // for weighted MC
+  if(fit_data==0){
     ndata = hdata->Integral();    
     for(int ibin=1; ibin<=hdata->GetNbinsX(); ibin++){
       for(int ipoint=0; ipoint<hdata->GetBinContent(ibin); ipoint++) {
 	dataColl.push_back(hdata->GetBinCenter(ibin));
       }
     }
+  }
+  // for real data
+  else if(fit_data==1){
+    FILE *infile =  fopen(dataText.data(),"r");  
+    float xdata, xdata1, xdata2; // combined isolation, pt, eta
+
+    cout << "Requiring data within pt = " << ptmin << "--- " << ptmax << endl;
+    cout << "Requiring data within eta = " << etamin << "--- " << etamax << endl;
+    int flag = 1;
+    while (flag!=-1){
+      flag =fscanf(infile,"%f %f %f",&xdata, &xdata1, &xdata2);
+      if( xdata1 >= ptmin && xdata1 < ptmax && xdata<11. && 
+	  fabs(xdata2) > etamin && fabs(xdata2) < etamax)
+	{
+ 	  dataColl.push_back(xdata);
+ 	  hdata->Fill(xdata);
+ 	}
+    } // keep reading files as long as text exists
     ndata = dataColl.size();
   }
-
+  cout << "There are " << ndata << " data points " << endl;
+  
   if(ndata==0) {
     printf(" ---  no evetns in the fit \n");
     return fitted;
