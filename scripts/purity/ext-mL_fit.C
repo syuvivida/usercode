@@ -9,7 +9,7 @@
 #include <TMath.h>
 #include "TVirtualFitter.h"
 #include "TFile.h"
-
+#include "chi2Nbins.h"
 
 using namespace std;
 
@@ -227,11 +227,14 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hfit->SetError(yerr);
   hfit->Draw("hist same");
 
+  double chi2ForThisBin=0;
+  int nbinForThisBin=0;
+  chi2NbinsHisto(hfit, hdata, chi2ForThisBin, nbinForThisBin);
+  char text[1000];
+  TLegend *tleg = new TLegend(0.5, 0.65, 0.95, 0.92);
+  tleg->SetHeader(Form("%s, #chi^{2}/NDF = %.1f/%d",
+		       dataInput->GetTitle(),chi2ForThisBin, nbinForThisBin));
 
-
-  TLegend *tleg = new TLegend(0.4, 0.65, 0.95, 0.9);
-  char text[50];
-  tleg->SetHeader(dataInput->GetTitle());
   tleg->SetFillColor(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);

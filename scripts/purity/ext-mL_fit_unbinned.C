@@ -9,6 +9,7 @@
 #include <TMath.h>
 #include "TVirtualFitter.h"
 #include "TFile.h"
+#include "chi2Nbins.h"
 
 
 using namespace std;
@@ -187,7 +188,6 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	  fabs(xdata2) > etamin && fabs(xdata2) < etamax)
 	{
  	  dataColl.push_back(xdata);
- 	  hdata->Fill(xdata);
  	}
     } // keep reading files as long as text exists
     ndata = dataColl.size();
@@ -435,26 +435,31 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f13->SetLineColor(1);
   f13->Draw("same");
   
+  char text[1000];
+  // get chi2/NDF  
+  double chi2ForThisBin=0;
+  int nbinForThisBin=0;
+  chi2Nbins(f13, hdata, chi2ForThisBin, nbinForThisBin);
   printf("fit area %3.2f; sig area %3.2f; bg area %3.2f\n", f13->Integral(-1,11)/hdata->GetBinWidth(2),  f11->Integral(-1,11)/hdata->GetBinWidth(2),f12->Integral(-1,11)/hdata->GetBinWidth(2));
 
-   TLegend *tleg = new TLegend(0.5, 0.65, 0.95, 0.92);
-   char text[50];
-   tleg->SetHeader(dataInput->GetTitle());
-   tleg->SetFillColor(0);
-   tleg->SetShadowColor(0);
-   tleg->SetBorderSize(0);
-   sprintf(text,"Data %5.1f events",hdata->Integral());
-   tleg->AddEntry(hdata,text,"pl");
-   sprintf(text,"Fitted %5.1f events",f13->Integral(-1,11)/hdata->GetBinWidth(2));
-   tleg->AddEntry(f13,text,"l");
-   sprintf(text,"SIG %5.1f #pm %5.1f events",para[0], errpara[0]);
-   tleg->AddEntry(f11,text,"f");
-   sprintf(text,"BKG %5.1f #pm %5.1f events",para[1], errpara[1]);
-   tleg->AddEntry(f12,text,"f");
-   tleg->Draw();
+  TLegend *tleg = new TLegend(0.5, 0.65, 0.95, 0.92);
+  tleg->SetHeader(Form("%s, #chi^{2}/NDF = %.1f/%d",
+		       dataInput->GetTitle(),chi2ForThisBin, nbinForThisBin));
+  tleg->SetFillColor(0);
+  tleg->SetShadowColor(0);
+  tleg->SetBorderSize(0);
+  sprintf(text,"Data %5.1f events",hdata->Integral());
+  tleg->AddEntry(hdata,text,"pl");
+  sprintf(text,"Fitted %5.1f events",f13->Integral(-1,11)/hdata->GetBinWidth(2));
+  tleg->AddEntry(f13,text,"l");
+  sprintf(text,"SIG %5.1f #pm %5.1f events",para[0], errpara[0]);
+  tleg->AddEntry(f11,text,"f");
+  sprintf(text,"BKG %5.1f #pm %5.1f events",para[1], errpara[1]);
+  tleg->AddEntry(f12,text,"f");
+  tleg->Draw();
 
 
-   gPad->RedrawAxis();
+  gPad->RedrawAxis();
 
   char fname[1000];
   sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
