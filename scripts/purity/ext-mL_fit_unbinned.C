@@ -28,9 +28,6 @@ vector<Double_t> Para;
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
 
-Double_t FixParEB[8]={0};
-Double_t FixParEE[8]={0};
-
 
 Double_t g(Double_t *v, Double_t *par)
 {
@@ -125,8 +122,9 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 //___________________________________________________________________________
 Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
-	       int fix_parameters=0,
-	       int fit_data=1)
+	       int fit_data=1, std::string dataText="EGdata_comb3Iso_et_0531.dat",
+	       double etamin=-1., double etamax=-1.,
+	       double ptmin=-1., double ptmax=-1.)
 {
 
   std::string histoName = dataInput->GetName();
@@ -163,18 +161,39 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   TH1F *hdata;
   int ndata=0;
-  if ( fit_data==1 ) {
-    hdata = (TH1F*)dataInput->Clone();
-    hdata -> SetName("hdata");
+  hdata = (TH1F*)dataInput->Clone();
+  hdata -> SetName("hdata");
+
+  // for weighted MC
+  if(fit_data==0){
     ndata = hdata->Integral();    
     for(int ibin=1; ibin<=hdata->GetNbinsX(); ibin++){
       for(int ipoint=0; ipoint<hdata->GetBinContent(ibin); ipoint++) {
 	dataColl.push_back(hdata->GetBinCenter(ibin));
       }
     }
+  }
+  // for real data
+  else if(fit_data==1){
+    FILE *infile =  fopen(dataText.data(),"r");  
+    float xdata, xdata1, xdata2; // combined isolation, pt, eta
+
+    cout << "Requiring data within pt = " << ptmin << "--- " << ptmax << endl;
+    cout << "Requiring data within eta = " << etamin << "--- " << etamax << endl;
+    int flag = 1;
+    while (flag!=-1){
+      flag =fscanf(infile,"%f %f %f",&xdata, &xdata1, &xdata2);
+      if( xdata1 >= ptmin && xdata1 < ptmax && xdata<11. && 
+	  fabs(xdata2) > etamin && fabs(xdata2) < etamax)
+	{
+ 	  dataColl.push_back(xdata);
+ 	  hdata->Fill(xdata);
+ 	}
+    } // keep reading files as long as text exists
     ndata = dataColl.size();
   }
-
+  cout << "There are " << ndata << " data points " << endl;
+  
   if(ndata==0) {
     printf(" ---  no evetns in the fit \n");
     return fitted;
@@ -219,14 +238,14 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->SetParLimits(7,0.,0.09);
 //   f3->SetParLimits(8,0.4,0.6);
   
-  if(histoName.find("1.70")!= std::string::npos && 
-     histoName.find("50_80")!=std::string::npos)
+  if(etamin > 1.55 && fabs(ptmin-50.)<1e-6 && 
+     fabs(ptmax-80.)<1e-6)
     {
       cout << "find EE in pt bin 50--80" << endl;
       f3->FixParameter(5,-0.1);
     }
-  if(histoName.find("1.45")!=std::string::npos && 
-     histoName.find("80_120")!=std::string::npos)
+  if(etamax < 1.55 && fabs(ptmin-80.)<1e-6 && 
+     fabs(ptmax-120.)<1e-6)
     {
       cout << "find EB in pt bin 80--120" << endl;
       f3->FixParameter(5,-0.1);
@@ -241,13 +260,12 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
   fit_status = hbkg->Fit(f3,"b");
-  fit_status = hbkg->Fit(f3,"b");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
-//   if ( fit_status > 0 ) {
-//     printf("fit background template failed. QUIT \n");
-//     return fitted;
-//   }
+  if ( fit_status > 0 ) {
+    printf("fit background template failed. QUIT \n");
+    return fitted;
+  }
 
   Para.push_back(f3->GetParameter(4));
   Para.push_back(f3->GetParameter(5));
@@ -255,7 +273,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   Para.push_back(f3->GetParameter(7)); 
   Para.push_back(f3->GetParameter(8)); 
   BkgPDFnorm = f3->Integral(-1.,11);
-  c10->SaveAs(Form("plots/PDF_Fit_%s.gif",dataInput->GetName()));
+
 
   //test PDFs
   TCanvas *c11 = new TCanvas("c11","",1000,500);
@@ -293,45 +311,12 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	  sigColl.size(), bkgColl.size() );  
 
   //========== Dump fit parameters
-  cout << "Before fixing the parameters " << endl;
-  for(unsigned int ipara = 0; ipara < Para.size(); ipara++)
-    {
-      cout << "Parameter " << ipara << " = " << Para[ipara] << endl;
-      if(histoName.find("1.45")!= std::string::npos && 
-	 histoName.find("15_20")!=std::string::npos)
-	{
-	  FixParEB[ipara]=Para[ipara];
-	}
-      else if(histoName.find("1.70")!= std::string::npos && 
-	 histoName.find("15_20")!=std::string::npos)
-	{
-	  FixParEE[ipara]=Para[ipara];
-	}
-      
-    }
-
-  if(fix_parameters==1)
-    {
-      Para.clear();
-      if(histoName.find("1.45")!= std::string::npos)
-	{
-	  for(int i=0; i<8;i++)
-	    Para.push_back(FixParEB[i]);
-	}
-      else if(histoName.find("1.70")!= std::string::npos)
-	{
-	  for(int i=0; i<8;i++)
-	    Para.push_back(FixParEE[i]);
-	}
-
-    } // end of resetting parameters
-
-  cout << "After fixing the parameters " << endl;
   for(unsigned int ipara = 0; ipara < Para.size(); ipara++)
     {
       cout << "Parameter " << ipara << " = " << Para[ipara] << endl;
 
     }
+
 
   //--------------------------------------------------
   //init parameters for fit
@@ -420,8 +405,8 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    hdata->SetMinimum(0.);
    if ( hdata->GetMaximum()<15.) hdata->SetMaximum(20.);
    else hdata->SetMaximum(hdata->GetMaximum()*1.2);
-   if(histoName.find("1.70")!= std::string::npos && 
-      histoName.find("15_20")!= std::string::npos)
+   if(etamin > 1.55 && fabs(ptmin-15.)<1e-6 && 
+      fabs(ptmax-20.)<1e-6)
      hdata->SetMaximum(hdata->GetMaximum()*1.2);
 
    hdata->Draw("p e");
@@ -472,10 +457,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    gPad->RedrawAxis();
 
   char fname[1000];
-//   sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
-  sprintf(fname,"plots/unbinned_Ifit_%s.eps",dataInput->GetName());
-  c1->SaveAs(fname);
-  sprintf(fname,"plots/unbinned_Ifit_%s.gif",dataInput->GetName());
+  sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
   c1->SaveAs(fname);
 
   printf("----- fit results with signal projection   ----------- \n");
