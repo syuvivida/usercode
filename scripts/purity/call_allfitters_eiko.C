@@ -1,5 +1,5 @@
 /*==============================================================================================
-  Use Rong-Shyang's style histograms to call template binned likelihood fitter, unbined fitter, 
+  Use Eiko's style histograms to call template binned likelihood fitter, unbined fitter, 
  two-bin fitter and compare results with MC truth. In addition, signal yields are saved in 
  txt and tex formats.
 
@@ -151,8 +151,10 @@ void call_allfitters_eiko(bool fitData=false, bool doEffCorr=false, double lumi=
   TH1F* hdata_data[nEtaBin][nPtBin];
 
 
-  std::string dataFile     = fitData? "fakedata_sumIso_histo.root": "fakedata_sumIso_histo.root";
-  std::string templateFile = fitData? "template_sumIso_histo.root": "template_sumIso_histo.root";
+//   std::string dataFile     = fitData? "fakedata_sumIso_histo.root": "fakedata_sumIso_histo.root"; 
+//   std::string templateFile = fitData? "template_sumIso_histo.root": "template_sumIso_histo.root";
+  std::string dataFile     = fitData? "template_sumIso_histo.root": "template_sumIso_histo.root";
+  std::string templateFile = fitData? "fakedata_sumIso_histo.root": "fakedata_sumIso_histo.root";
 
   TFile* inf_data = new TFile(dataFile.data());
   TFile* inf_template = new TFile(templateFile.data());
