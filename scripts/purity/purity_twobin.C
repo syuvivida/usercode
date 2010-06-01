@@ -77,7 +77,7 @@ void histoError(int MAX, TH1F* h, Double_t& bin1, Double_t& binerr1,
 {
 
   bin1 = binerr1 = bin2 = binerr2 = 0;
-  for(int i=0; i<= h->GetNbinsX()+1; i++)
+  for(int i=1; i<= h->GetNbinsX(); i++)
     {
       if(i < MAX+1)
 	{
@@ -100,7 +100,7 @@ void histoError(int MAX, TH1F* h, Double_t& bin1, Double_t& binerr1,
 
 }
 
-Double_t* purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
+Double_t* purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, int maxbin=-1)
 {
   Double_t* result = new Double_t[6];
   result[0] = result[1] = result[2] = result[3] = 0.0;
@@ -180,8 +180,8 @@ Double_t* purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate)
 
   }
   
-
-  int maxbin = integral_diff->GetMaximumBin();
+  if(maxbin<0)
+    maxbin = integral_diff->GetMaximumBin();
   cout << "Maximum efficiency difference is at " << 
     integral_diff->GetBinLowEdge(maxbin) 
        << endl;
