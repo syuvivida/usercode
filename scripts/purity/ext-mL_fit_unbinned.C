@@ -404,11 +404,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
    hdata->SetTitle("");
    hdata->SetMarkerStyle(8);
    hdata->SetMinimum(0.);
-   if ( hdata->GetMaximum()<15.) hdata->SetMaximum(20.);
-   else hdata->SetMaximum(hdata->GetMaximum()*1.2);
-   if(etamin > 1.55 && fabs(ptmin-15.)<1e-6 && 
-      fabs(ptmax-20.)<1e-6)
-     hdata->SetMaximum(hdata->GetMaximum()*1.2);
+   hdata->SetMaximum(hdata->GetMaximum()*1.5);
 
    hdata->Draw("p e");
 
@@ -445,7 +441,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   int nbinForThisBin=0;
   chi2Nbins(f13, hdata, chi2ForThisBin, nbinForThisBin);
 
-  TPaveText *pavetex = new TPaveText(0.485, 0.87, 0.95, 0.92,"NDCBR");
+  TPaveText *pavetex = new TPaveText(0.43, 0.87, 0.90, 0.92,"NDCBR");
   pavetex->SetBorderSize(0);
   pavetex->SetFillColor(0);
   pavetex->SetFillStyle(0);
@@ -455,7 +451,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   pavetex->AddText(Form("#chi^{2}/NDF=%.1f/%d",chi2ForThisBin, nbinForThisBin));
   pavetex->Draw();
 
-  TLegend *tleg = new TLegend(0.485, 0.60, 0.95, 0.87);
+  TLegend *tleg = new TLegend(0.43, 0.60, 0.90, 0.87);
   tleg->SetHeader(dataInput->GetTitle());
 
   tleg->SetTextSize(0.03);

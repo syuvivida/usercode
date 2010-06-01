@@ -213,7 +213,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hdata->SetTitle("");
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
-  hdata->SetMaximum(hdata->GetMaximum()*1.4);
+  hdata->SetMaximum(hdata->GetMaximum()*1.5);
   hdata->Draw("p e");
   hsig->Draw("hist same");
   hbkg->SetMarkerStyle(0);
@@ -231,7 +231,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   double chi2ForThisBin=0;
   int nbinForThisBin=0;
   chi2NbinsHisto(hfit, hdata, chi2ForThisBin, nbinForThisBin);
-  TPaveText *pavetex = new TPaveText(0.485, 0.87, 0.95, 0.92,"NDCBR");
+  TPaveText *pavetex = new TPaveText(0.43, 0.87, 0.90, 0.92,"NDCBR");
   pavetex->SetBorderSize(0);
   pavetex->SetFillColor(0);
   pavetex->SetFillStyle(0);
@@ -243,7 +243,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
 
   char text[1000];
-  TLegend *tleg = new TLegend(0.485, 0.60, 0.95, 0.87);
+  TLegend *tleg = new TLegend(0.43, 0.60, 0.90, 0.87);
   tleg->SetHeader(dataInput->GetTitle());
 
   tleg->SetTextSize(0.03);
