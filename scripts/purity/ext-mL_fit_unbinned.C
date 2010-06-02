@@ -216,7 +216,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f1->SetParameters(par);
 
   c10->cd(1);
-  fit_status = hsig->Fit(f1);
+  fit_status = hsig->Fit(f1,"LL");
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
@@ -238,6 +238,13 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->SetParLimits(6,-1.,2.);
   f3->SetParLimits(7,0.,0.09);
 //   f3->SetParLimits(8,0.4,0.6);
+
+//   if(etamin > 1.55 && fabs(ptmin-15.)<1e-6 && 
+//      fabs(ptmax-20.)<1e-6)
+//     {
+//       cout << "find EE in pt bin 15--20" << endl;
+//       f3->FixParameter(5,-0.1);
+//     }
   
   if(etamin > 1.55 && fabs(ptmin-50.)<1e-6 && 
      fabs(ptmax-80.)<1e-6)
@@ -260,7 +267,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->FixParameter(3,f3->GetParameter(3));
 
   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
-  fit_status = hbkg->Fit(f3,"b");
+  fit_status = hbkg->Fit(f3,"LLb");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
 //   if ( fit_status > 0 ) {
@@ -274,7 +281,8 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   Para.push_back(f3->GetParameter(7)); 
   Para.push_back(f3->GetParameter(8)); 
   BkgPDFnorm = f3->Integral(-1.,11);
-
+  c10->SaveAs(Form("plots/PDFFit_%s.gif",dataInput->GetName()));
+  
 
   //test PDFs
   TCanvas *c11 = new TCanvas("c11","",1000,500);
