@@ -413,6 +413,7 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   TLegend *tleg = new TLegend(0.15, 0.65, 0.55, 0.92);
   tleg->SetHeader("EB Photons");
   tleg->SetFillColor(0);
+  tleg->SetFillStyle(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);
   tleg->AddEntry(tg_mc_purity_EB,"MC truth","p");
@@ -476,6 +477,7 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   TLegend *tleg2 = new TLegend(0.15, 0.65, 0.55, 0.92);
   tleg2->SetHeader("EE Photons");
   tleg2->SetFillColor(0);
+  tleg2->SetFillStyle(0);
   tleg2->SetShadowColor(0);
   tleg2->SetBorderSize(0);
   tleg2->AddEntry(tg_mc_purity_EE,"MC truth","p");
@@ -537,6 +539,7 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   TLegend *tleg3 = new TLegend(0.193, 0.168, 0.642, 0.437);
   tleg3->SetHeader("EB Photons");
   tleg3->SetFillColor(0);
+  tleg3->SetFillStyle(0);
   tleg3->SetShadowColor(0);
   tleg3->SetBorderSize(0);
   tleg3->AddEntry(tg_mc_sig_EB,"MC truth","p");
@@ -595,6 +598,7 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   TLegend *tleg4 = new TLegend(0.193, 0.168, 0.642, 0.437);
   tleg4->SetHeader("EE Photons");
   tleg4->SetFillColor(0);
+  tleg4->SetFillStyle(0);
   tleg4->SetShadowColor(0);
   tleg4->SetBorderSize(0);
   tleg4->AddEntry(tg_mc_sig_EE,"MC truth","p");
