@@ -64,6 +64,8 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
 	
   cout << "do efficiency correction = " << doEffCorr << endl;
   cout << "fit data = " << fitData << endl;
+  std::string isDataName = fitData? "data": "MC";
+
   setTDRStyle();
   // settings for purity TGraphAsymmetryErrors
   double fBinsPtMidPoint[nPtBin]={0};
@@ -279,9 +281,15 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
 
   ofstream fout;
   fout.open("yield.txt");
+
+  ofstream fout2;
+  fout2.open("purity.txt");
  
   ofstream texout;
   texout.open("yield.tex");
+
+  ofstream texout2;
+  texout2.open("purity.tex");
  
   // printing out the results
   for(int ieta=0; ieta < nEtaBin; ieta++){
@@ -297,8 +305,14 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
       fout << Form("%d:%d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]) << " ";
       fout << Form("& %.1f +- %.1f", nsig_mc[ieta][ipt],0.) << " ";
 
+      fout2 << Form("%d:%d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]) << " ";
+      fout2 << Form("& %.3f +- %.3f", mcpurity[ieta][ipt],0.) << " ";
+
       texout << Form("%d:%d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]) << " ";
       texout << Form("& %.1f $\\pm$ %.1f", nsig_mc[ieta][ipt],0.) << " ";
+
+      texout2 << Form("%d:%d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]) << " ";
+      texout2 << Form("& %.3f $\\pm$ %.3f", mcpurity[ieta][ipt],0.) << " ";
 
       cout << " Unbinned fit result : " << endl;
       cout << " purity = " << purity_func[ieta][ipt] << " +- " << purity_err_func[ieta][ipt] << endl;
@@ -306,8 +320,11 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
       cout << " nbkg = " <<   nbkg_func[ieta][ipt] << " +- " << nbkg_err_func[ieta][ipt] << endl;
       cout << endl;
 
-      fout << Form("& %.1f +- %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
+      fout  << Form("& %.1f +- %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
+      fout2 << Form("& %.3f +- %.3f", purity_func[ieta][ipt], purity_err_func[ieta][ipt]) << " ";
+
       texout << Form("& %.1f $\\pm$ %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
+      texout2 << Form("& %.3f $\\pm$ %.3f", purity_func[ieta][ipt], purity_err_func[ieta][ipt]) << " ";
 
       cout << " Template fit result : " << endl;
       cout << " purity = " << purity_template[ieta][ipt] << " +- " << purity_err_template[ieta][ipt] << endl;
@@ -316,22 +333,32 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
       cout << endl;
 
       fout << Form("& %.1f +- %.1f", nsig_template[ieta][ipt], nsig_err_template[ieta][ipt]) << " ";
+      fout2 << Form("& %.3f +- %.3f", purity_template[ieta][ipt], purity_err_template[ieta][ipt]) << " ";
+
       texout << Form("& %.1f $\\pm$ %.1f", nsig_template[ieta][ipt], nsig_err_template[ieta][ipt]) << " ";
+      texout2 << Form("& %.3f $\\pm$ %.3f", purity_template[ieta][ipt], purity_err_template[ieta][ipt]) << " ";
 
       cout << " Two-bin result : " << endl;
       cout << " purity = " << purity_2bin[ieta][ipt] << " +- " << purity_err_2bin[ieta][ipt] << endl;
       cout << " nsig = " <<   nsig_2bin[ieta][ipt] << " +- " << nsig_err_2bin[ieta][ipt] << endl;
 
       fout << Form("& %.1f +- %.1f", nsig_2bin[ieta][ipt], nsig_err_2bin[ieta][ipt]) << " ";
+      fout2 << Form("& %.3f +- %.3f", purity_2bin[ieta][ipt], purity_err_2bin[ieta][ipt]) << " ";
 
       texout << "\\\\" << endl;
       fout << endl;
+
+      texout2 << "\\\\" << endl;
+      fout2 << endl;
 
     }
   }
 
   texout.close();
   fout.close();
+
+  texout2.close();
+  fout2.close();
   
   TCanvas *c1 = new TCanvas("c1","",600,600);
   c1->Draw();
@@ -394,10 +421,10 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   tleg->AddEntry(tgrs_purity_twobin_EB,"two bin","pl");
   tleg->Draw();
 
-  c1->SaveAs("plots/allfitter_purity_EB.eps");
-  c1->SaveAs("plots/allfitter_purity_EB.gif"); 
-  c1->SaveAs("plots/allfitter_purity_EB.pdf");
-  c1->SaveAs("plots/allfitter_purity_EB.C");
+
+  c1->SaveAs(Form("plots/%s_allfitter_purity_EB.eps",isDataName.data()));
+  c1->SaveAs(Form("plots/%s_allfitter_purity_EB.gif",isDataName.data()));
+  c1->SaveAs(Form("plots/%s_allfitter_purity_EB.C",isDataName.data()));
   
 
   TCanvas *c2 = new TCanvas("c2","",600,600);
@@ -457,10 +484,9 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   tleg2->AddEntry(tgrs_purity_twobin_EE,"two bin","pl");
   tleg2->Draw();
 
-  c2->SaveAs("plots/allfitter_purity_EE.eps");
-  c2->SaveAs("plots/allfitter_purity_EE.gif");
-  c2->SaveAs("plots/allfitter_purity_EE.pdf");
-  c2->SaveAs("plots/allfitter_purity_EE.C");
+  c2->SaveAs(Form("plots/%s_allfitter_purity_EE.eps",isDataName.data()));
+  c2->SaveAs(Form("plots/%s_allfitter_purity_EE.gif",isDataName.data()));
+  c2->SaveAs(Form("plots/%s_allfitter_purity_EE.C",isDataName.data()));
 
 
   TCanvas *c3 = new TCanvas("c3","",600,600);
@@ -519,10 +545,9 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   tleg3->AddEntry(tgrs_sig_twobin_EB,"two bin","pl");
   tleg3->Draw();
 
-  c3->SaveAs("plots/allfitter_yield_EB.eps");
-  c3->SaveAs("plots/allfitter_yield_EB.gif");
-  c3->SaveAs("plots/allfitter_yield_EB.pdf");
-  c3->SaveAs("plots/allfitter_yield_EB.C");
+  c3->SaveAs(Form("plots/%s_allfitter_yield_EB.eps",isDataName.data()));
+  c3->SaveAs(Form("plots/%s_allfitter_yield_EB.gif",isDataName.data()));
+  c3->SaveAs(Form("plots/%s_allfitter_yield_EB.C",isDataName.data()));
 
   TCanvas *c4 = new TCanvas("c4","",600,600);
   c4->Draw();
@@ -578,11 +603,9 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   tleg4->AddEntry(tgrs_sig_twobin_EE,"two bin","pl");
   tleg4->Draw();
 
-
-  c4->SaveAs("plots/allfitter_yield_EE.eps");
-  c4->SaveAs("plots/allfitter_yield_EE.gif");
-  c4->SaveAs("plots/allfitter_yield_EE.pdf");
-  c4->SaveAs("plots/allfitter_yield_EE.C");
+  c4->SaveAs(Form("plots/%s_allfitter_yield_EE.eps",isDataName.data()));
+  c4->SaveAs(Form("plots/%s_allfitter_yield_EE.gif",isDataName.data()));
+  c4->SaveAs(Form("plots/%s_allfitter_yield_EE.C",isDataName.data()));
 
   TFile* outFile = new TFile("isotemplate_yield_rongshyang.root","recreate"); 
   tg_mc_purity_EB->Write();

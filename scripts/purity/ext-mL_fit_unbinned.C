@@ -216,7 +216,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f1->SetParameters(par);
 
   c10->cd(1);
-  fit_status = hsig->Fit(f1,"LL");
+  fit_status = hsig->Fit(f1,"");
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
@@ -267,7 +267,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->FixParameter(3,f3->GetParameter(3));
 
   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
-  fit_status = hbkg->Fit(f3,"LLb");
+  fit_status = hbkg->Fit(f3,"b");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
 //   if ( fit_status > 0 ) {
@@ -480,7 +480,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   gPad->RedrawAxis();
 
   char fname[1000];
-  sprintf(fname,"plots/unbinned_Ifit_%s.pdf",dataInput->GetName());
+  sprintf(fname,"plots/unbinned_Ifit_%s.eps",dataInput->GetName());
   c1->SaveAs(fname);
   sprintf(fname,"plots/unbinned_Ifit_%s.gif",dataInput->GetName());
   c1->SaveAs(fname);

@@ -265,7 +265,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   cout << dataInput->GetName() << endl;
   char fname[300];
-  sprintf(fname,"plots/Ifit_%s.pdf",dataInput->GetName());
+  sprintf(fname,"plots/Ifit_%s.eps",dataInput->GetName());
   c1->SaveAs(fname);
   sprintf(fname,"plots/Ifit_%s.gif",dataInput->GetName());
   c1->SaveAs(fname);
