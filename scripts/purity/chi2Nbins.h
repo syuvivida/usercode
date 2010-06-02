@@ -94,8 +94,8 @@ void chi2NbinsHisto( const TH1F* htheory, const TH1F *hist, double& chi2, int& n
     
     chi2 += binChi2;
 
-    printf( "%d) [%d, %d] [%f, %f] data: %f theo: %f chi2: %f total: %f \n ", 
-	    nBins, i, i, lowEdge, highEdge,nEvts, theory, binChi2, chi2);
+    printf( "%d) [%d, %d] [%f, %f] data: %f theo: %f theoErr: %f chi2: %f total: %f \n ", 
+	    nBins, i, i, lowEdge, highEdge,nEvts, theory, theoryErr, binChi2, chi2);
     
     nBins++;
 
@@ -108,6 +108,51 @@ void chi2NbinsHisto( const TH1F* htheory, const TH1F *hist, double& chi2, int& n
   nbins = NDF;
 }
 
+void chi2NbinsCompare( const TH1F* h1, const TH1F *h2, double& chi2, int& nbins ){
+
+  printf( "Chi2 Calculation: \n");
+
+  chi2 = 0;
+  nbins = 0;
+
+  int nBins = 0;
+  double evtThresh = 1e-6;
+
+  double h1Err, h1Value, h2Err, h2Value, lowEdge, highEdge, binChi2;
+
+  double  binWidth    = h1 -> GetXaxis() -> GetBinWidth(1);
+
+  for ( int i = 1; i <= h1 -> GetNbinsX(); i++){
+ 
+    h1Value = h1 -> GetBinContent(i);
+    h1Err   = h1 -> GetBinError(i);
+
+    h2Value = h2 -> GetBinContent(i);
+    h2Err   = h2 -> GetBinError(i);
+
+    if ( h1Value < evtThresh && h2Value  < evtThresh) continue;
+    if ( h1Err < 1e-6 && h2Err  < 1e-6) continue;
+    lowEdge   = h1 -> GetXaxis() -> GetBinLowEdge( i );
+    highEdge  = h1 -> GetXaxis() -> GetBinUpEdge( i );
+
+    binChi2 = (h1Value - h2Value) / sqrt(h1Err*h1Err+h2Err*h2Err);
+    binChi2 *= binChi2;
+    
+    chi2 += binChi2;
+
+    printf( "%d) [%d, %d] [%f, %f] h1: %f h2: %f h1Err: %f h2Err: %f chi2: %f total: %f \n ", 
+	    nBins, i, i, lowEdge, highEdge,h1Value, h2Value, h1Err, h2Err, binChi2, chi2);
+    
+    nBins++;
+
+  }
+  
+
+  int NDF = nBins;
+
+  printf("Fit chi2/NDF = %f/%d, prob: %f\n", chi2, NDF, TMath::Prob(chi2,NDF)*100);
+  nbins = NDF;
+}
 
 
 
