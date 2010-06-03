@@ -132,8 +132,11 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   TH1F* hdata_data[nEtaBin][nPtBin];
 
 
-  std::string dataFile     = fitData? "template_comb3Iso_template_0531.root":"template_comb3Iso_test.root";
-  std::string templateFile = fitData? "template_comb3Iso_template_0531.root":"template_comb3Iso_template.root";
+//   std::string dataFile     = fitData? "template_comb3Iso_template_0531.root":"template_comb3Iso_test.root";
+//   std::string templateFile = fitData? "template_comb3Iso_template_0531.root":"template_comb3Iso_template.root";
+
+  std::string dataFile     = fitData? "RS_100603_fix.root":"template_comb3Iso_test.root";
+  std::string templateFile = fitData? "RS_100603_fix.root":"template_comb3Iso_template.root";
 
   TFile* inf_data = new TFile(dataFile.data());
   TFile* inf_template = new TFile(templateFile.data());
@@ -183,13 +186,28 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
      }
   }
 
+  ofstream signal_mean;
+  signal_mean.open("signal_mean.dat");
 
+  ofstream signal_meanerr;
+  signal_meanerr.open("signal_meanerr.dat");
+
+  ofstream signal_width;
+  signal_width.open("signal_width.dat");
+
+  ofstream signal_widtherr;
+  signal_widtherr.open("signal_widtherr.dat");
 
   for(int ieta = 0; ieta < nEtaBin; ieta++){
     for(int ipt=0; ipt < nPtBin; ipt++){
 
-      double scaleEff = doEffCorr? eff[ieta][ipt]: 1.0;
+      signal_mean << hTemplate_S[ieta][ipt]->GetMean() << ", ";
+      signal_meanerr << hTemplate_S[ieta][ipt]->GetMeanError() << ", ";
+      signal_width << hTemplate_S[ieta][ipt]->GetRMS() << ", ";
+      signal_widtherr << hTemplate_S[ieta][ipt]->GetRMSError() << ", ";
 
+      double scaleEff = doEffCorr? eff[ieta][ipt]: 1.0;
+      
       // 1st, get MC truth
       nsig_mc[ieta][ipt]  = fitData? 
 	hTemplate_S[ieta][ipt]->Integral()/scaleEff * (lumi/100.0):
@@ -277,6 +295,10 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
 
     } // end of loop over pt bins
   } // end of loop over eta bins
+  signal_mean.close();
+  signal_width.close();
+  signal_meanerr.close();
+  signal_widtherr.close();
 
 
   ofstream fout;
