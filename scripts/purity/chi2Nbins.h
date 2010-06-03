@@ -88,6 +88,8 @@ void chi2NbinsHisto( const TH1F* htheory, const TH1F *hist, double& chi2, int& n
 
     theory       = htheory->GetBinContent(i);
     theoryErr    = sqrt(theory);
+
+    if(theoryErr < 1e-6)continue;
     
     binChi2 = (nEvts - theory) / theoryErr;
     binChi2 *= binChi2;
