@@ -211,7 +211,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f1->SetParameters(par);
 
   c10->cd(1);
-  fit_status = hsig->Fit(f1,"");
+  fit_status = hsig->Fit(f1,"LL","",-1,5.0);
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
@@ -254,7 +254,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->FixParameter(3,f3->GetParameter(3));
 
   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
-  fit_status = hbkg->Fit(f3,"b");
+  fit_status = hbkg->Fit(f3,"bLL");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
 //   if ( fit_status > 0 ) {
@@ -337,11 +337,11 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   gMinuit->mnparm(1,  "background yield"  , vstart[1],  step[1], 0., ndata*2. , ierflg);
   
 
-  printf(" --------------------------------------------------------- \n");
-  printf(" Setting stragety = 2 \n ----------------------\n");
+//   printf(" --------------------------------------------------------- \n");
+//   printf(" Setting stragety = 2 \n ----------------------\n");
   
-  arglist[0] = 2;
-  gMinuit->mnexcm("SET STRAT", arglist ,1,ierflg);
+//   arglist[0] = 2;
+//   gMinuit->mnexcm("SET STRAT", arglist ,1,ierflg);
 
   printf(" --------------------------------------------------------- \n");
   printf(" Now ready for minimization step \n ----------------------\n");
