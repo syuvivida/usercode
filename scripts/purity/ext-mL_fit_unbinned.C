@@ -36,7 +36,6 @@ Double_t g(Double_t *v, Double_t *par)
   Double_t arg = 0;
   arg = (v[0] - par[2]) / par[3];
   
-  //Double_t area = par[1]/(par[3]*sqrt(2*3.1415926));
   Double_t norm_area = 1/(par[3]*sqrt(2*3.1415926));
   Double_t gaus = norm_area*TMath::Exp(-0.5*arg*arg);
 
@@ -47,13 +46,11 @@ Double_t g(Double_t *v, Double_t *par)
 Double_t exp_conv (Double_t *v, Double_t *par)
 {
   Double_t ctau = par[1];
-  //Double_t sigma = par[14];
   Double_t sigma = par[3]; //using narrow prompt width
   Double_t x = v[0]-par[2];
 
   Double_t arg1 = TMath::Exp( 0.5*sigma*sigma/ctau/ctau - x/ctau );
   Double_t arg2 = 1.0 - TMath::Freq( (sigma/ctau - x/sigma) );
-  //Double_t func = 1.0/ctau * arg1 * arg2;
   Double_t func = par[0]/ctau * arg1 * arg2;
 
   if (func<=0) func=1e-10;
@@ -73,9 +70,7 @@ Double_t expinv_power(Double_t *v, Double_t *par){
   Double_t func=0.;
   if (x>0.) {
     Double_t fitval = 1.- TMath::Exp(par[5]*x);
-    //func = par[4] * (1-par[9]*x) *TMath::Power(1-par[7]*x,par[8]) * fitval;
     func = par[4] * TMath::Power(1-par[7]*x,par[8]) * fitval;
-    //func = par[4] * fitval;
   }
   return func;
 }
@@ -237,14 +232,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->SetParLimits(5,-10.,1.);
   f3->SetParLimits(6,-1.,2.);
   f3->SetParLimits(7,0.,0.09);
-//   f3->SetParLimits(8,0.4,0.6);
 
-//   if(etamin > 1.55 && fabs(ptmin-15.)<1e-6 && 
-//      fabs(ptmax-20.)<1e-6)
-//     {
-//       cout << "find EE in pt bin 15--20" << endl;
-//       f3->FixParameter(5,-0.1);
-//     }
   
   if(etamin > 1.55 && fabs(ptmin-50.)<1e-6 && 
      fabs(ptmax-80.)<1e-6)
@@ -259,7 +247,6 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
       f3->FixParameter(5,-0.1);
     }
 
-//    f3->FixParameter(6,-0.05);
   f3->FixParameter(8,0.5);
   f3->FixParameter(0,f3->GetParameter(0));
   f3->FixParameter(1,f3->GetParameter(1));
