@@ -58,7 +58,7 @@ void chi2Nbins( TF1 *func, const TH1F *hist, double& chi2, int& nbins ){
 
   printf("Function has %d parameters, %d are fixed, really: %d pars.\n", npar, fixed, npar - fixed);
 
-  int NDF = nBins;
+  int NDF = nBins-2;
 
   printf("Fit chi2/NDF = %f/%d, prob: %f\n", chi2, NDF, TMath::Prob(chi2,NDF)*100);
   nbins = NDF;
