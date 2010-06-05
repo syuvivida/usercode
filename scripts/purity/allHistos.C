@@ -8,14 +8,12 @@
   int nbin;                           // total number of bins
   double xmin, double xmax;           // minimum and maximum of histograms 
   double split;                      // if 1.0 for unsplit and original MC samples, 2.0 for split MC samples
-  bool isData;                       // if running on data, no scaling for histograms
   bool normalize;                   // store the histogram by normalizing the integrated area to 1.0 
       
   allHistos(std::string outputName="";
   std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
   int nbin=20,
-  double xmin=-1.0, double xmax=11.0, double split = 1.0,
-  bool isData=false,bool normalize=false)
+  double xmin=-1.0, double xmax=11.0, double split = 1.0,bool normalize=false)
 
   ==============================================================================================*/
 
@@ -38,7 +36,7 @@ const int MAXBIN_ALLOWED=1000;
 const double lumi = 0.1; // 100/nb
 // the pt and eta binning
 const double fBinsEta[]={0,1.45,1.7,2.5};
-const double fBinsPt[]={15,20,30,50,80,120};
+const double fBinsPt[]={15,20,30,50,80,120,180,250,500};
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
@@ -96,6 +94,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
 {
    TH1F *hRes = (TH1F*)h->Clone();
    hRes->SetName("hRes");
+   hRes->Reset();
    hRes->Sumw2();
 
    char tmp[300];
@@ -104,12 +103,16 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
      {
        // first determine the pthat cut
        
-       sprintf(tmp, "ptHat >= %d && ptHat <= %d",ptHatLo[i], ptHatHi[i]);
+       if(ptHatLo[i]>0 && ptHatHi[i]>0)
+	 sprintf(tmp, "ptHat >= %d && ptHat <= %d",ptHatLo[i], ptHatHi[i]);
+       else
+	 sprintf(tmp, "pt>0");	 
        TCut ptHatCut = tmp;
        TCut allCut = cut + ptHatCut;
        cout << "Current cut = " << allCut.GetTitle() << endl;
        TH1F *htmp = (TH1F*)h->Clone();
        htmp->SetName("htmp");
+       htmp->Reset();
        sigTree[i]->Draw(Form("%s>>htmp",var.data()),allCut);
        htmp->Sumw2();
        htmp->Scale(sigWeight[i]);
@@ -138,7 +141,7 @@ void allHistos(std::string outputName="",
 	       std::string var="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
 	       int nbin=20,
 	       double xmin=-1.0, double xmax=11.0, double split = 1.0,
-	       bool isData=false,bool normalize=false)
+	       bool normalize=false)
 {
   TH1F *hTemplate = new TH1F("hTemplate","",nbin,xmin,xmax);
   char tmp[1000];
@@ -163,6 +166,11 @@ void allHistos(std::string outputName="",
    vector<int> jetPtHatLo;
    vector<int> jetPtHatHi;
 
+   vector<string> dataFile;
+   vector<double> dataWeight;
+   vector<TTree*> dataTree;
+   vector<int> dataPtHatLo;
+   vector<int> dataPtHatHi;
 
    FILE *fTable = fopen("inputFile.txt","r");
    
@@ -174,15 +182,19 @@ void allHistos(std::string outputName="",
      flag=fscanf(fTable,"%s",filename);
      std::string tempFile = filename;
 
+     bool isData      = false;
      bool isPhotonJet = false;
-     if(tempFile.find("PhotonJet") != std::string::npos)isPhotonJet=true;
+
+     if(tempFile.find("EGData")    != std::string::npos)isData     =true;
+     else if(tempFile.find("PhotonJet") != std::string::npos)isPhotonJet=true;
+
      // read in x-section
      flag=fscanf(fTable,"%s",tmp);
      double cross=atof(tmp);
      // read in number of events
      flag=fscanf(fTable,"%s",tmp);
      double nevt=atof(tmp);
-     double scale = isData? 1.0 : lumi*split*cross/nevt;
+     double scale = lumi*split*cross/nevt;
 
      flag=fscanf(fTable,"%s",tmp);
      int ptHatLo=atof(tmp);
@@ -191,8 +203,15 @@ void allHistos(std::string outputName="",
      int ptHatHi=atof(tmp);
 
      if (flag!=-1) {
-       cout <<filename<<" "<<cross<<" "<<nevt<< " " << ptHatLo << " " << ptHatHi << endl;
-       if(isPhotonJet)
+       if(isData)
+	 {
+	   cout << "filling data" << endl;
+	   dataFile.push_back(tempFile);
+	   dataWeight.push_back(1.0);
+	   dataPtHatLo.push_back(-1);
+	   dataPtHatHi.push_back(-1);      
+	 }
+       else if(isPhotonJet)
 	 {
 	   cout << "filling photon jet" << endl;
 	   phoFile.push_back(tempFile);
@@ -209,11 +228,14 @@ void allHistos(std::string outputName="",
 	   jetPtHatHi.push_back(ptHatHi);      
 	 }
       
-       cout << "filling mixture" << endl;
-       mixFile.push_back(tempFile);
-       mixWeight.push_back(scale);
-       mixPtHatLo.push_back(ptHatLo);
-       mixPtHatHi.push_back(ptHatHi);      
+       if(!isData){
+	 cout << "filling mixture" << endl;
+	 mixFile.push_back(tempFile);
+	 mixWeight.push_back(scale);
+	 mixPtHatLo.push_back(ptHatLo);
+	 mixPtHatHi.push_back(ptHatHi);      
+       }
+       cout <<filename<<" "<<cross<<" "<<nevt<< " " << ptHatLo << " " << ptHatHi << endl;
 
        nfile++; 
      }	 
@@ -221,6 +243,14 @@ void allHistos(std::string outputName="",
    } 
 
    std::string treeName = "Analysis";
+
+   // fill data trees
+   fillTrees(dataFile,dataTree,treeName);
+   const unsigned int nSize_data = dataFile.size();
+   if(dataTree.size()!= nSize_data){cout << "error 1"<< endl; return;}
+   if(dataWeight.size()!= nSize_data){cout << "error 2"<< endl; return;}
+   if(dataPtHatLo.size()!= nSize_data){cout << "error 3"<< endl; return;}
+   if(dataPtHatHi.size()!= nSize_data){cout << "error 4"<< endl; return;}
 
    // first photon trees
    fillTrees(phoFile,phoTree,treeName);
@@ -251,7 +281,20 @@ void allHistos(std::string outputName="",
    TH1F *hIsoMixSig[nEtaBin][nPtBin];
    TH1F *hIsoMixBkg[nEtaBin][nPtBin];
    TH1F *hIsoMixData[nEtaBin][nPtBin];
-   
+   TH1F *hIsoMixSBMC[nEtaBin][nPtBin];
+   TH1F *hIsoMixSBData[nEtaBin][nPtBin];
+   TH1F *hIsoAllSBData[nEtaBin];
+
+   // making templates for spikes
+   TH1F *hIsoSpikeData;
+   hIsoSpikeData = (TH1F*)hTemplate->Clone();
+   hIsoSpikeData->SetName("hIsoSpikeData");
+   hIsoSpikeData->Reset();
+   hIsoSpikeData->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
+   cout << "making histograms for spikes " << endl;
+   TCut basicSpikeCut = eventCut + rsCutEB + spikeCut;
+   makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,Form("%s",var.data()),
+	    basicSpikeCut,hIsoSpikeData,normalize);
 
   
    // first looping over eta bins
@@ -260,46 +303,88 @@ void allHistos(std::string outputName="",
      sprintf(tmp,"abs(eta)>%.2lf && abs(eta)<%.2lf",
 	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
      TCut etaCut = tmp;
-
+     
+     hIsoAllSBData[ieta] = (TH1F*)hTemplate->Clone();
+     sprintf(tmp,"hIsoAllSBData_Eta_%.2lf_%.2lf",
+	     fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+     hIsoAllSBData[ieta]->SetName(tmp);
+     hIsoAllSBData[ieta]->Reset();
+     hIsoAllSBData[ieta]->Sumw2();
+     hIsoAllSBData[ieta]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
+     
      // second, looping over pt bins
      for(int ipt=0; ipt < nPtBin; ipt++){
 
        sprintf(tmp, "pt >= %d && pt <  %d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       //====================== Defining cuts ====================== //
+
        TCut ptCut    = tmp;     
-       TCut kineCut  = ptCut + etaCut;
-       TCut basicCut = eventCut+ ptCut + etaCut + rsCut + removeSpikeCut;
+       TCut IDCut    = ieta==0? rsCutEB: rsCutEE;
+       TCut IDSidebandCut = ieta==0? rsCutSidebandEB : rsCutSidebandEE;
+       TCut basicCut   = eventCut+ ptCut + etaCut + IDCut + removeSpikeCut;
+       TCut basicSBCut = eventCut+ ptCut + etaCut + IDSidebandCut + removeSpikeCut;
+
+       //====================== booking histograms ====================== //
 
        hIsoMixSig[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       sprintf(tmp,"TemplateS_Et_%d_%d_Eta_%.2f_%.2f",
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       sprintf(tmp,"TemplateS_Eta_%.2f_%.2f_Et_%d_%d",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]); 
+
        hIsoMixSig[ieta][ipt]->SetName(tmp);
-       sprintf(tmp,"%d < p_{T}(#gamma) < %d GeV, %.2f < |#eta(#gamma)| < %.2f",
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       hIsoMixSig[ieta][ipt]->Reset();
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
        hIsoMixSig[ieta][ipt]->SetTitle(tmp);
        hIsoMixSig[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
 
        hIsoMixBkg[ieta][ipt] = (TH1F*)hTemplate->Clone(); 
-       sprintf(tmp,"TemplateB_Et_%d_%d_Eta_%.2f_%.2f",
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       sprintf(tmp,"TemplateB_Eta_%.2f_%.2f_Et_%d_%d",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
        hIsoMixBkg[ieta][ipt]->SetName(tmp);
-       sprintf(tmp,"%d < p_{T}(#gamma) < %d GeV, %.2f < |#eta(#gamma)| < %.2f",
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       hIsoMixBkg[ieta][ipt]->Reset();
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
        hIsoMixBkg[ieta][ipt]->SetTitle(tmp);
        hIsoMixBkg[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
 
+       hIsoMixSBData[ieta][ipt] = (TH1F*)hTemplate->Clone(); 
+       sprintf(tmp,"TemplateSBData_Eta_%.2f_%.2f_Et_%d_%d",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       hIsoMixSBData[ieta][ipt]->SetName(tmp);
+       hIsoMixSBData[ieta][ipt]->Reset();
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       hIsoMixSBData[ieta][ipt]->SetTitle(tmp);
+       hIsoMixSBData[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
+
+       hIsoMixSBMC[ieta][ipt] = (TH1F*)hTemplate->Clone(); 
+       sprintf(tmp,"TemplateSBMC_Eta_%.2f_%.2f_Et_%d_%d",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       hIsoMixSBMC[ieta][ipt]->SetName(tmp);
+       hIsoMixSBMC[ieta][ipt]->Reset();
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       hIsoMixSBMC[ieta][ipt]->SetTitle(tmp);
+       hIsoMixSBMC[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
+
 
        hIsoMixData[ieta][ipt] = (TH1F*)hTemplate->Clone();
-       sprintf(tmp,"Template_Et_%d_%d_Eta_%.2f_%.2f",
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       sprintf(tmp,"Template_Eta_%.2f_%.2f_Et_%d_%d",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
        hIsoMixData[ieta][ipt]->SetName(tmp);
-       sprintf(tmp,"%d < p_{T}(#gamma) < %d GeV, %.2f < |#eta(#gamma)| < %.2f",
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       hIsoMixData[ieta][ipt]->Reset();
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f,%d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
        hIsoMixData[ieta][ipt]->SetTitle(tmp);
        hIsoMixData[ieta][ipt]->SetXTitle("ecalIso+hcalIso+trackIso [GeV]");
    
@@ -307,9 +392,12 @@ void allHistos(std::string outputName="",
        hIsoMixSig[ieta][ipt]->SetMarkerColor(kBlack);
        hIsoMixBkg[ieta][ipt]->SetMarkerColor(kRed);
        hIsoMixBkg[ieta][ipt]->SetLineColor(kRed);
+       hIsoMixSBData[ieta][ipt]->SetMarkerColor(kRed);
+       hIsoMixSBData[ieta][ipt]->SetLineColor(kRed);
+       hIsoMixSBMC[ieta][ipt]->SetMarkerColor(kRed);
+       hIsoMixSBMC[ieta][ipt]->SetLineColor(kRed);
        hIsoMixData[ieta][ipt]->SetMarkerColor(kBlue);
        hIsoMixData[ieta][ipt]->SetLineColor(kBlue);
-
 
        //====================== Making histograms ====================== //
        
@@ -320,16 +408,34 @@ void allHistos(std::string outputName="",
        cout << "making histograms from mixed MC background samples" << endl;     
        allCut = basicCut + bkgCut;
        makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoMixBkg[ieta][ipt],normalize);
-   
+
+       cout << "making histogram for mixed sideband MC background samples" << endl;
+       allCut = basicSBCut + bkgCut;
+       makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,Form("%s",var.data()),allCut,hIsoMixSBMC[ieta][ipt],normalize);
+     
 
        cout << "hIsoMixSig[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixSig[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
        cout << "hIsoMixBkg[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixBkg[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
 
-       hIsoMixData[ieta][ipt]->Reset();
-       hIsoMixData[ieta][ipt]->Sumw2();
-       hIsoMixData[ieta][ipt]->Add(hIsoMixSig[ieta][ipt],hIsoMixBkg[ieta][ipt],1.0,1.0);
-       cout << "hIsoMixData[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixData[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
+       if(dataTree.size()>0)
+	 {
+	   cout << "making histograms for data samples" << endl;
+	   allCut = basicCut;
+	   makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,Form("%s",var.data()),allCut,hIsoMixData[ieta][ipt],normalize);
+	   cout << "making histogram for sideband background data" << endl;
+	   allCut = basicSBCut;
+	   makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,Form("%s",var.data()),allCut,hIsoMixSBData[ieta][ipt],normalize);
 
+	   cout << "making histogram for all sideband background data" << endl;
+	   hIsoAllSBData[ieta]->Add(hIsoMixSBData[ieta][ipt],1.0);	   
+	 }
+       else
+	 {
+	   hIsoMixData[ieta][ipt]->Reset();
+	   hIsoMixData[ieta][ipt]->Sumw2();
+	   hIsoMixData[ieta][ipt]->Add(hIsoMixSig[ieta][ipt],hIsoMixBkg[ieta][ipt],1.0,1.0);
+	   cout << "hIsoMixData[" << ieta << "][" << ipt << "]->Integral()  = " << hIsoMixData[ieta][ipt]->Integral(0,MAXBIN_ALLOWED) << endl;
+	 }
      }// end of looping over pt bins
    } // end of looping over eta bins
 
@@ -440,8 +546,8 @@ void allHistos(std::string outputName="",
    } // end of loop over eta bins
 
 
-
-
+   
+   
    // display the comparison
 
    TLegend* leg = new TLegend(0.609,0.722,0.889,0.896);
@@ -465,9 +571,9 @@ void allHistos(std::string outputName="",
        leg->AddEntry(hIsoMixBkg[ieta][ipt],"Background");
        leg->Draw("same");
     
-       sprintf(tmp,"figures/%s_Template_Et_%d_%d_Eta_%.2f_%.2f",outputName.data(),
-	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1],
-	       fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
+       sprintf(tmp,"figures/%s_Template_Eta_%.2f_%.2f_Et_%d_%d",outputName.data(),
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
 
        std::string histoName = tmp;
        std::string canvasName = histoName + ".eps"; 
@@ -484,13 +590,20 @@ void allHistos(std::string outputName="",
 
    TFile* outFile = new TFile(histoFile.data(),"recreate");
 
+   hIsoSpikeData->Write();
+
    for(int ieta = 0; ieta < nEtaBin; ieta++){
      hTruthPurity[ieta]->Write();
      hTruthPurity5GeV[ieta]->Write();
+     
+     hIsoAllSBData[ieta]->Write();
+
      for(int ipt=0; ipt < nPtBin; ipt++){
        hIsoMixSig[ieta][ipt]->Write();
        hIsoMixBkg[ieta][ipt]->Write();
        hIsoMixData[ieta][ipt]->Write();
+       hIsoMixSBData[ieta][ipt]->Write();
+       hIsoMixSBMC[ieta][ipt]->Write();
 
      } // end of looping over pt bins
    } // end of looping over eta bins
