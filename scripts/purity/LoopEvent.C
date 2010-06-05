@@ -45,6 +45,8 @@ void LoopEvent::Loop()
 	   && !(pt[i] > 15.0 && fabs(eta[i]) > 1.7 && fabs(eta[i]) < 2.5 
 		&& hadronicOverEm[i] <  0.05 && fabs(ESRatio[i]) > 0.1 && sumIso < 11.0))continue;
 	
+	if(isEB[i] && sigmaIetaIeta[i]<0.002)continue;
+
 	fout << sumIso << " " << pt[i] << " " << eta[i] << endl;
 	ntotal++;
       }
