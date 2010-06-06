@@ -104,7 +104,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
        // first determine the pthat cut
        
        if(ptHatLo[i]>0 && ptHatHi[i]>0)
-	 sprintf(tmp, "ptHat >= %d && ptHat <= %d",ptHatLo[i], ptHatHi[i]);
+	 sprintf(tmp, "pt >= %d && pt <= %d",ptHatLo[i], ptHatHi[i]);
        else
 	 sprintf(tmp, "pt>0");	 
        TCut ptHatCut = tmp;
