@@ -110,9 +110,15 @@ void proj_comb(bool sumw2=false)
     TH1F *h_comb3IsoSB[N_CATEGORIES][N_SAMPLES][SB_TYPE];
 
     TH2F *h_comb3Iso_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_comb3IsoSB_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH2F *h_ecalIso_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH2F *h_ecalIsoSB_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
-    TH2F *h_comb3IsoSB_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_hcalIso_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_trkIso_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_r9_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_SIEIE_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_HoverE_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+    TH2F *h_ESRatio_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
 
     TH1F *h_ecalIsoEt[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH1F *h_hcalIsoEt[N_CATEGORIES][N_SAMPLES][SB_TYPE];
@@ -189,6 +195,32 @@ void proj_comb(bool sumw2=false)
     	    	h_trkIso[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
 		if(sumw2)h_trkIso[cate][file][type]->Sumw2();
 
+		// added by Eiko
+	    	sprintf(buffer,"h_%s_hcalIso_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+    	    	h_hcalIso_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    
+		if(sumw2)h_hcalIso_et[cate][file][type]->Sumw2();
+
+	    	sprintf(buffer,"h_%s_trkIso_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+    	    	h_trkIso_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    
+		if(sumw2)h_trkIso_et[cate][file][type]->Sumw2();
+
+	    	sprintf(buffer,"h_%s_r9_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+    	    	h_r9_et[cate][file][type] = new TH2F(buffer,buffer,  110, 0., 1.1, 60, 0., 300.);		    
+		if(sumw2)h_r9_et[cate][file][type]->Sumw2();
+
+	    	sprintf(buffer,"h_%s_SIEIE_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+    	    	h_SIEIE_et[cate][file][type] = new TH2F(buffer,buffer,  50, 0., 0.05, 60, 0., 300.);		    
+		if(sumw2)h_SIEIE_et[cate][file][type]->Sumw2();
+
+	    	sprintf(buffer,"h_%s_ESRatio_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+    	    	h_ESRatio_et[cate][file][type] = new TH2F(buffer,buffer, 48, -0.1000000001,1.0999999999, 60, 0., 300.);		    
+		if(sumw2)h_ESRatio_et[cate][file][type]->Sumw2();
+
+	    	sprintf(buffer,"h_%s_HoverE_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+    	    	h_HoverE_et[cate][file][type] = new TH2F(buffer,buffer, 40, -0.02,0.18, 60, 0., 300.);		    
+		if(sumw2)h_HoverE_et[cate][file][type]->Sumw2();
+
+		// 
 	    	sprintf(buffer,"h_%s_comb3Iso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_comb3Iso[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
 		if(sumw2)h_comb3Iso[cate][file][type]->Sumw2();
@@ -385,6 +417,7 @@ void proj_comb(bool sumw2=false)
 // 		  if ( _isSigMC==1 && !(EvtInfo.isGenMatched[ipho]==1&&EvtInfo.genCalIsoDR04[ipho]<5.0) ) continue;
 // 		  if ( _isBkgMC==1 && EvtInfo.genCalIsoDR04[ipho]<=5.0 ) continue;			  		  
   		  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.isGenMatched[ipho]==1&& TMath::Abs(EvtInfo.genMomId[ipho])<=22&&EvtInfo.genCalIsoDR04[ipho]<5.0) ) type=0;
+//   		  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.isGenMatched[ipho]==1&& TMath::Abs(EvtInfo.genMomId[ipho])<=22) ) type=0;
  		  else if(_isSigMC==1 || _isBkgMC==1) type=1;
 		  
 		  int good_LS=0;
@@ -484,15 +517,18 @@ void proj_comb(bool sumw2=false)
 
  		    h_hcalIso[cate][file][type]->Fill(EvtInfo.hcalTowerSumEtConeDR04[ipho],scaling_factor); 
  		    h_hcalIsoEt[cate][file][type]->Fill(EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho],scaling_factor);
+		    h_hcalIso_et[cate][file][type]->Fill(EvtInfo.hcalTowerSumEtConeDR04[ipho], EvtInfo.et[ipho],scaling_factor);
 
   		    h_trkIso[cate][file][type]->Fill(EvtInfo.trkSumPtHollowConeDR04[ipho],scaling_factor);  		
   		    h_trkIsoEt[cate][file][type]->Fill(EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho],scaling_factor);
+		    h_trkIso_et[cate][file][type]->Fill(EvtInfo.trkSumPtHollowConeDR04[ipho], EvtInfo.et[ipho],scaling_factor);
 
 		    h_comb3Iso[cate][file][type]->Fill(comb3Iso, scaling_factor); 
 		    h_comb3IsoEt[cate][file][type]->Fill(comb3Iso, scaling_factor); 
 		    h_et_noIso[cate][file][type]->Fill(EvtInfo.et[ipho],scaling_factor);  
 		    h_comb3Iso_et[cate][file][type]->Fill(comb3Iso, EvtInfo.et[ipho], scaling_factor); 
 		    h_r9_noIso[cate][file][type]->Fill(EvtInfo.r9[ipho],scaling_factor);  
+		    h_r9_et[cate][file][type]->Fill(EvtInfo.r9[ipho], EvtInfo.et[ipho],scaling_factor);
 
 		    if(_isData==1)fprintf(ffISO,"%f  %f %f \n",comb3Iso, EvtInfo.et[ipho], EvtInfo.eta[ipho]);
 		  }
@@ -537,18 +573,27 @@ void proj_comb(bool sumw2=false)
 //  		    h_trkIsoEt[cate][file][type]->Fill(EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho],scaling_factor);  		
 //  		  }
 		  if ((cut_bits & (~(1<<_HOVERE)))==0)
-		    h_HoverE[cate][file][type]->Fill(EvtInfo.hadronicOverEm[ipho],scaling_factor);  		
+		    {
+		      h_HoverE[cate][file][type]->Fill(EvtInfo.hadronicOverEm[ipho],scaling_factor);  		
+		      h_HoverE_et[cate][file][type]->Fill(EvtInfo.hadronicOverEm[ipho], EvtInfo.et[ipho],scaling_factor);
+		    }
 
 		  if ((cut_bits & (~(1<<_HOVERE |1<<_HCALISO | 1<<_ECALISO | 1<<_TRKISO )))==0)
 		    h_HoverE_noIso[cate][file][type]->Fill(EvtInfo.hadronicOverEm[ipho],scaling_factor);  		
 
 		  if ((cut_bits & (~(1<<_SIEIE)))==0)
-		    h_SIEIE[cate][file][type]->Fill(EvtInfo.sigmaIetaIeta[ipho],scaling_factor);  		
+		    {
+		      h_SIEIE[cate][file][type]->Fill(EvtInfo.sigmaIetaIeta[ipho],scaling_factor);  		
+		      h_SIEIE_et[cate][file][type]->Fill(EvtInfo.sigmaIetaIeta[ipho], EvtInfo.et[ipho],scaling_factor);
+		    }
 		  if ((cut_bits & (~(1<<_SIEIE |1<<_HCALISO | 1<<_ECALISO | 1<<_TRKISO )))==0)
 		    h_SIEIE_noIso[cate][file][type]->Fill(EvtInfo.sigmaIetaIeta[ipho],scaling_factor);  		
 
 		  if ((cut_bits & (~(1<<_ESRATIO)))==0)
-		    h_ESRatio[cate][file][type]->Fill(TMath::Abs(EvtInfo.ESRatio[ipho]),scaling_factor);  		
+		    {
+		      h_ESRatio[cate][file][type]->Fill(TMath::Abs(EvtInfo.ESRatio[ipho]),scaling_factor);  		
+		      h_ESRatio_et[cate][file][type]->Fill(TMath::Abs(EvtInfo.ESRatio[ipho]), EvtInfo.et[ipho],scaling_factor);
+		    }
 		  if ((cut_bits & (~(1<<_ESRATIO |1<<_HCALISO | 1<<_ECALISO | 1<<_TRKISO )))==0)
 		    h_ESRatio_noIso[cate][file][type]->Fill(TMath::Abs(EvtInfo.ESRatio[ipho]),scaling_factor);  		
 		  
@@ -598,6 +643,15 @@ void proj_comb(bool sumw2=false)
 	  h_ecalIso[cate][_sig_sum][type]->Add(h_ecalIso[cate][file][type]);
 	  h_ecalIsoSB[cate][_sig_sum][type]->Add(h_ecalIsoSB[cate][file][type]);
 	  h_ecalIso_et[cate][_sig_sum][type]->Add(h_ecalIso_et[cate][file][type]);
+
+	  // added by Eiko
+	  h_hcalIso_et[cate][_sig_sum][type]->Add(h_hcalIso_et[cate][file][type]);
+	  h_trkIso_et[cate][_sig_sum][type]->Add(h_trkIso_et[cate][file][type]);
+	  h_SIEIE_et[cate][_sig_sum][type]->Add(h_SIEIE_et[cate][file][type]);
+	  h_r9_et[cate][_sig_sum][type]->Add(h_r9_et[cate][file][type]);
+	  h_HoverE_et[cate][_sig_sum][type]->Add(h_HoverE_et[cate][file][type]);
+	  h_ESRatio_et[cate][_sig_sum][type]->Add(h_ESRatio_et[cate][file][type]);
+
 	  h_ecalIsoSB_et[cate][_sig_sum][type]->Add(h_ecalIsoSB_et[cate][file][type]);
 	  h_hcalIso[cate][_sig_sum][type]->Add(h_hcalIso[cate][file][type]);
 	  h_comb3Iso[cate][_sig_sum][type]->Add(h_comb3Iso[cate][file][type]);
@@ -637,6 +691,15 @@ void proj_comb(bool sumw2=false)
 	  h_ecalIso[cate][_bkg_sum][type]->Add(h_ecalIso[cate][file][type]);
 	  h_ecalIsoSB[cate][_bkg_sum][type]->Add(h_ecalIsoSB[cate][file][type]);
 	  h_ecalIso_et[cate][_bkg_sum][type]->Add(h_ecalIso_et[cate][file][type]);
+
+	  // added by Eiko
+	  h_hcalIso_et[cate][_bkg_sum][type]->Add(h_hcalIso_et[cate][file][type]);
+	  h_trkIso_et[cate][_bkg_sum][type]->Add(h_trkIso_et[cate][file][type]);
+	  h_SIEIE_et[cate][_bkg_sum][type]->Add(h_SIEIE_et[cate][file][type]);
+	  h_r9_et[cate][_bkg_sum][type]->Add(h_r9_et[cate][file][type]);
+	  h_HoverE_et[cate][_bkg_sum][type]->Add(h_HoverE_et[cate][file][type]);
+	  h_ESRatio_et[cate][_bkg_sum][type]->Add(h_ESRatio_et[cate][file][type]);
+
 	  h_ecalIsoSB_et[cate][_bkg_sum][type]->Add(h_ecalIsoSB_et[cate][file][type]);
 	  h_hcalIso[cate][_bkg_sum][type]->Add(h_hcalIso[cate][file][type]);
 	  h_comb3Iso[cate][_bkg_sum][type]->Add(h_comb3Iso[cate][file][type]);
