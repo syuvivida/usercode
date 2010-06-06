@@ -91,7 +91,7 @@ struct sample_t sample[N_SAMPLES] = {
 {"background sum",		     "bkg_sum", 	     -1.     ,-1    },
 };
 
-void proj_comb()
+void proj_comb(bool sumw2=false)
 {      
 
     TFile *fout = new TFile("proj_comb.root","recreate");
@@ -139,83 +139,113 @@ void proj_comb()
 	    
 	    	sprintf(buffer,"h_%s_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_et[cate][file][type] = new TH1F(buffer,buffer,  60, 0., 300.);
-	     
+		if(sumw2)h_et[cate][file][type]->Sumw2();
+		  
 	    	sprintf(buffer,"h_%s_et_noIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_et_noIso[cate][file][type] = new TH1F(buffer,buffer,  60, 0., 300.);	       
+		if(sumw2)h_et_noIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_eta_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_eta[cate][file][type] = new TH1F(buffer,buffer,  60, -3.,3.);	       
+		if(sumw2)h_eta[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_phi_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_phi[cate][file][type] = new TH1F(buffer,buffer,  60, TMath::Pi()*-1.1, TMath::Pi()*1.1);	       
-	    
+		if(sumw2)h_phi[cate][file][type]->Sumw2();
+		
 	    	sprintf(buffer,"h_%s_r9_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_r9[cate][file][type] = new TH1F(buffer,buffer,  110, 0.,1.1);		    
+		if(sumw2)h_r9[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_r9_noIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_r9_noIso[cate][file][type] = new TH1F(buffer,buffer,  110, 0.,1.1);		    
+		if(sumw2)h_r9_noIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ecalIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_ecalIso[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
+		if(sumw2)h_ecalIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ecalIsoSB_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_ecalIsoSB[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
+		if(sumw2)h_ecalIsoSB[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ecalIso_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_ecalIso_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    
+		if(sumw2)h_ecalIso_et[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ecalIsoSB_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
-    	    	h_ecalIsoSB_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    
+    	    	h_ecalIsoSB_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    	
+		if(sumw2)h_ecalIsoSB_et[cate][file][type]->Sumw2();
+		
 	    	sprintf(buffer,"h_%s_comb3IsoSB_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
-    	    	h_comb3IsoSB_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    
+    	    	h_comb3IsoSB_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		   
+		if(sumw2)h_comb3IsoSB_et[cate][file][type]->Sumw2();
+
 	    	sprintf(buffer,"h_%s_hcalIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_hcalIso[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
+		if(sumw2)h_hcalIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_trkIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_trkIso[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
+		if(sumw2)h_trkIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_comb3Iso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_comb3Iso[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
+		if(sumw2)h_comb3Iso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_comb3IsoSB_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_comb3IsoSB[cate][file][type] = new TH1F(buffer,buffer,  120, -1., 11.);		    
+		if(sumw2)h_comb3IsoSB[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_comb3Iso_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_comb3Iso_et[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 60, 0., 300.);		    
+		if(sumw2)h_comb3Iso_et[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ecalIsoEt_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_ecalIsoEt[cate][file][type] = new TH1F(buffer,buffer,  80, -0.05,0.35);		    
+		if(sumw2)h_ecalIsoEt[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_hcalIsoEt_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_hcalIsoEt[cate][file][type] = new TH1F(buffer,buffer,  80, -0.05,0.35);		    
+		if(sumw2)h_hcalIsoEt[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_trkIsoEt_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_trkIsoEt[cate][file][type] = new TH1F(buffer,buffer,  80, -0.05,0.35);		    
+		if(sumw2)h_trkIsoEt[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_comb3IsoEt_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_comb3IsoEt[cate][file][type] = new TH1F(buffer,buffer,  120, -0.1,1.1);		    
+		if(sumw2)h_comb3IsoEt[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_HoverE_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_HoverE[cate][file][type] = new TH1F(buffer,buffer,  40, -0.02,0.18);		    
+		if(sumw2)h_HoverE[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_SEE_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_SEE[cate][file][type] = new TH1F(buffer,buffer,  50, 0.,0.1);		    
+		if(sumw2)h_SEE[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_SIEIE_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_SIEIE[cate][file][type] = new TH1F(buffer,buffer,  50, 0.,0.05);		    
+		if(sumw2)h_SIEIE[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ESRatio_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_ESRatio[cate][file][type] = new TH1F(buffer,buffer,  48, -0.1000000001,1.0999999999);		    
+		if(sumw2)h_ESRatio[cate][file][type]->Sumw2();
+
 		//noiso
 	    	sprintf(buffer,"h_%s_HoverE_noIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_HoverE_noIso[cate][file][type] = new TH1F(buffer,buffer,  40, -0.02,0.18);		    
+		if(sumw2)h_HoverE_noIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_SIEIE_noIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_SIEIE_noIso[cate][file][type] = new TH1F(buffer,buffer,  50, 0.,0.05);		    
+		if(sumw2)h_SIEIE_noIso[cate][file][type]->Sumw2();
 
 	    	sprintf(buffer,"h_%s_ESRatio_noIso_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_ESRatio_noIso[cate][file][type] = new TH1F(buffer,buffer,  48, -0.1000000001,1.0999999999);		    
-	    
+		if(sumw2)h_ESRatio_noIso[cate][file][type]->Sumw2();
+
 	    	evtcount[cate][file][type][0] = evtcount[cate][file][type][1] = 0.; 
 	    }	
 	    sigcount[file][0][0] = sigcount[file][0][1] = 0.;
@@ -406,9 +436,12 @@ void proj_comb()
 //  		    if ( EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EB_ECALISO_MAX) cut_bits |= (1<<_ECALISO);
 //  		    if ( EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EB_HCALISO_MAX) cut_bits |= (1<<_HCALISO);
 //    		    if ( EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] > EB_TRKISO_MAX) cut_bits |= (1<<_TRKISO);
- 		    if ( comb3Iso > EB_ECALISO_MAX ) cut_bits |= (1<<_ECALISO);
+ 
+		    if ( comb3Iso > EB_ECALISO_MAX ) cut_bits |= (1<<_ECALISO);
   		    if ( EvtInfo.hadronicOverEm[ipho] > EB_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
    		    if ( EvtInfo.sigmaIetaIeta[ipho] > EB_SIEIE_MAX) cut_bits |= (1<<_SIEIE);
+
+
 		  }
 
 
