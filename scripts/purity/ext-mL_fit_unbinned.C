@@ -124,6 +124,8 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	       double ptmin=-1., double ptmax=-1.)
 {
 
+  cout << "Input files are " << dataInput->GetName() << "\t" << sigTemplate->GetName() << "\t" << bkgTemplate->GetName() << endl;
+
   std::string histoName = dataInput->GetName();
 
   TCanvas *c1 = new TCanvas("HF1", "Histos1", 0, 0, 600, 600);
@@ -211,7 +213,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f1->SetParameters(par);
 
   c10->cd(1);
-  fit_status = hsig->Fit(f1,"LL","",-1,5.0);
+//   fit_status = hsig->Fit(f1,"","",-1.,5.0);
+//   fit_status = hsig->Fit(f1,"","",-1,5.0);
+  fit_status = hsig->Fit(f1,"LL","",-1,11.0);
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
@@ -219,6 +223,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 //      printf("fit signal template failed. QUIT \n");
 //      return fitted;
 //   }
+
+  double shift = etamin > 1.55?  (1.47754e-01-1.93012e-01): (5.54196e-01-4.66620e-01); //EE, EB
+  double scaleWidth = etamin >1.55? (1.96952e-01/2.34272e-01): (2.25069e-01/2.03141e-01); // EE, EB
 
   Para.push_back(f1->GetParameter(0));
   Para.push_back(f1->GetParameter(1));
@@ -337,11 +344,11 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   gMinuit->mnparm(1,  "background yield"  , vstart[1],  step[1], 0., ndata*2. , ierflg);
   
 
-//   printf(" --------------------------------------------------------- \n");
-//   printf(" Setting stragety = 2 \n ----------------------\n");
-  
-//   arglist[0] = 2;
-//   gMinuit->mnexcm("SET STRAT", arglist ,1,ierflg);
+  printf(" --------------------------------------------------------- \n");
+  printf(" Setting stragety = 2 \n ----------------------\n");
+
+  arglist[0] = 2;
+  gMinuit->mnexcm("SET STRAT", arglist ,1,ierflg);
 
   printf(" --------------------------------------------------------- \n");
   printf(" Now ready for minimization step \n ----------------------\n");

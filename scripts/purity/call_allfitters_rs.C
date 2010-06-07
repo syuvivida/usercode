@@ -46,6 +46,8 @@ const double fBinsPt[]={15,20,30,50,80,120};
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
+const int REBINNINGS=6;
+
 void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 	      Double_t& ratio, Double_t& err)
 {
@@ -60,10 +62,11 @@ void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 }
 
 
-void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.02){
+void call_allfitters_rs(bool fitData=false, bool useSpike=false,bool doEffCorr=false, double lumi=8.02){
 	
   cout << "do efficiency correction = " << doEffCorr << endl;
   cout << "fit data = " << fitData << endl;
+  cout << "use spike template = " << useSpike << endl;
   std::string isDataName = fitData? "data": "MC";
 
   setTDRStyle();
@@ -132,11 +135,12 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
   TH1F* hdata_data[nEtaBin][nPtBin];
 
 
-//   std::string dataFile     = fitData? "template_comb3Iso_template_0531.root":"template_comb3Iso_test.root";
-//   std::string templateFile = fitData? "template_comb3Iso_template_0531.root":"template_comb3Iso_template.root";
+  
+//   std::string dataFile     = fitData? "RS_100604_fix.root":"template_comb3Iso_test.root";
+//   std::string templateFile = fitData? "RS_100604_fix.root":"template_comb3Iso_template.root";
+  std::string dataFile     = fitData? "template_comb3Iso.root":"template_comb3Iso_test.root";
+  std::string templateFile = fitData? "template_comb3Iso.root":"template_comb3Iso_template.root";
 
-  std::string dataFile     = fitData? "RS_100603_fix.root":"template_comb3Iso_test.root";
-  std::string templateFile = fitData? "RS_100603_fix.root":"template_comb3Iso_template.root";
 
   TFile* inf_data = new TFile(dataFile.data());
   TFile* inf_template = new TFile(templateFile.data());
@@ -149,19 +153,25 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
        cout << "looking for histogram " << tmp << " in file " << 
 	 inf_data->GetName() << endl;
        hdata_data[ieta][ipt] = (TH1F*)inf_data->FindObjectAny(tmp);
-       hdata_data[ieta][ipt]->Rebin(6);
+       hdata_data[ieta][ipt]->Rebin(REBINNINGS);
+       // setting titles
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       hdata_data[ieta][ipt]->SetTitle(tmp);
+
 
        sprintf(tmp,"h_%s_comb3Iso_sig_pt%d",dec[ieta],(int)fBinsPt[ipt]);
        cout << "looking for histogram " << tmp << " in file " << 
 	 inf_data->GetName() << endl;
        hdata_S[ieta][ipt] = (TH1F*)inf_data->FindObjectAny(tmp);
-       hdata_S[ieta][ipt]->Rebin(6);
+       hdata_S[ieta][ipt]->Rebin(REBINNINGS);
 
        sprintf(tmp,"h_%s_comb3Iso_bkg_pt%d",dec[ieta],(int)fBinsPt[ipt]);
        cout << "looking for histogram " << tmp << " in file " << 
 	 inf_data->GetName() << endl;
        hdata_B[ieta][ipt] = (TH1F*)inf_data->FindObjectAny(tmp);
-       hdata_B[ieta][ipt]->Rebin(6);
+       hdata_B[ieta][ipt]->Rebin(REBINNINGS);
 
 
        // getting histogram for template root file
@@ -169,22 +179,41 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
        cout << "looking for histogram " << tmp << " in file " << 
 	 inf_template->GetName() << endl;
        hTemplate_data[ieta][ipt] = (TH1F*)inf_template->FindObjectAny(tmp);
-       hTemplate_data[ieta][ipt]->Rebin(6);
+       hTemplate_data[ieta][ipt]->Rebin(REBINNINGS);
+       sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
+	       fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+	       (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
+       hTemplate_data[ieta][ipt]->SetTitle(tmp);
 
        sprintf(tmp,"h_%s_comb3Iso_sig_pt%d",dec[ieta],(int)fBinsPt[ipt]);
        cout << "looking for histogram " << tmp << " in file " << 
 	 inf_template->GetName() << endl;
        hTemplate_S[ieta][ipt] = (TH1F*)inf_template->FindObjectAny(tmp);
-       hTemplate_S[ieta][ipt]->Rebin(6);
+       hTemplate_S[ieta][ipt]->Rebin(REBINNINGS);
 
        sprintf(tmp,"h_%s_comb3Iso_bkg_pt%d",dec[ieta],(int)fBinsPt[ipt]);
        cout << "looking for histogram " << tmp << " in file " << 
 	 inf_template->GetName() << endl;
        hTemplate_B[ieta][ipt] = (TH1F*)inf_template->FindObjectAny(tmp);
-       hTemplate_B[ieta][ipt]->Rebin(6);
+       hTemplate_B[ieta][ipt]->Rebin(REBINNINGS);
 
      }
   }
+
+  // files for data driven methods
+//   std::string SBFile       = "RS_100603_fixSB.root";
+  std::string SBFile       = "spike_withID.root";
+  TFile* inf_dataSB = new TFile(SBFile.data());
+  TH1F* hdata_Spike  = (TH1F*)inf_dataSB->FindObjectAny("h_EB_comb3Iso_EGdata_SIG");
+  hdata_Spike->Rebin(REBINNINGS);
+  cout << "looking for histogram " << hdata_Spike->GetName() << " in file " << 
+	 inf_dataSB->GetName() << endl;
+
+//   TH1F* hdata_SB     = (TH1F*)inf_dataSB->FindObjectAny("h_EB_comb3Iso_data_SB");
+//   hdata_SB->Rebin(REBINNINGS);
+//   cout << "looking for histogram " << hdata_SB->GetName() << " in file " << 
+// 	 inf_dataSB->GetName() << endl;
+
 
   ofstream signal_mean;
   signal_mean.open("signal_mean.dat");
@@ -222,16 +251,22 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
 
       // 2nd, get unbinned fit
       Double_t* FuncFitResult;
-      if(fitData)
-	FuncFitResult = Ifit(hdata_data[ieta][ipt],
-			     hTemplate_S[ieta][ipt],
-			     hTemplate_B[ieta][ipt],1,"EGdata_comb3Iso_et_0531.dat",
-			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-			     fBinsPt[ipt],fBinsPt[ipt+1]);	
+      if(fitData && !useSpike)
+ 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
+ 			     hTemplate_S[ieta][ipt],
+ 			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+ 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+ 			     fBinsPt[ipt],fBinsPt[ipt+1]);	
+      else if(fitData && useSpike)
+  	FuncFitResult = Ifit(hdata_data[ieta][ipt],
+  			     hdata_Spike,
+  			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+  			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+  			     fBinsPt[ipt],fBinsPt[ipt+1]);	
       else
 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
 			     hTemplate_S[ieta][ipt],
-			     hTemplate_B[ieta][ipt],0,"EGdata_comb3Iso_et_0531.dat",
+			     hTemplate_B[ieta][ipt],0,"RS_100604_fix.dat",
 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
 			     fBinsPt[ipt],fBinsPt[ipt+1]);	
  
@@ -256,9 +291,14 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
 
       // 3rd, get template fit result
       Double_t* TemplateFitResult;
-      TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
-				  hTemplate_S[ieta][ipt],
-				  hTemplate_B[ieta][ipt]);
+      if(!useSpike)
+       TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
+ 				  hTemplate_S[ieta][ipt],
+ 				  hTemplate_B[ieta][ipt]);
+      else
+	TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
+				    hdata_Spike,
+				    hTemplate_B[ieta][ipt]);
 
  
       Double_t nsigtemplate    = TemplateFitResult[0]/scaleEff;
@@ -283,9 +323,14 @@ void call_allfitters_rs(bool fitData=false, bool doEffCorr=false, double lumi=8.
 
       // 4th, get two bin result
       Double_t* TwoBinResult;
-      TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
-				   hTemplate_S[ieta][ipt],
-				   hTemplate_B[ieta][ipt]);
+      if(!useSpike)
+       TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
+				    hTemplate_S[ieta][ipt],
+				    hTemplate_B[ieta][ipt]);
+      else
+	TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
+				     hdata_Spike,
+				     hTemplate_B[ieta][ipt]);
 
       Double_t ndata = hdata_data[ieta][ipt]->Integral();
       purity_2bin[ieta][ipt]     = TwoBinResult[0];

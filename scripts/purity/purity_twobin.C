@@ -107,6 +107,8 @@ Double_t* purity_twobin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, i
   result[4] = result[5] = 0.0;
 
   int totalnbin = dataInput->GetNbinsX();
+  cout << "Input files are " << dataInput->GetName() << "\t" << sigTemplate->GetName() << "\t" << bkgTemplate->GetName() << endl;
+
   cout << "totalbin = " << totalnbin << endl;
   cout << "signal template has " << sigTemplate->GetNbinsX() << endl;
   cout << "background template has " << bkgTemplate->GetNbinsX() << endl;

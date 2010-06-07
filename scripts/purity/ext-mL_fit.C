@@ -53,6 +53,8 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	       int fit_data=1)
 {
 
+  cout << "Input files are " << dataInput->GetName() << "\t" << sigTemplate->GetName() << "\t" << bkgTemplate->GetName() << endl;
+
   TCanvas *c1 = new TCanvas("HF1", "Histos1", 0, 0, 600, 600);
   dataCollBin.clear();
   sigCollBin.clear();
