@@ -30,6 +30,68 @@ vector<Double_t> Para;
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
 
+Double_t SBDataPar[12]=
+  {
+    6.00430e-01,
+    1.58383e+00,
+    4.11561e-01,
+    3.08534e-01,
+    6.06736e-02,
+    -1.43427e+00,
+    4.07869e-01,
+    2.54334e-09,
+    5.00000e-01,
+    1.00000e-02,
+    1.00000e+00,
+    1.00000e+00
+  };
+
+
+
+Double_t SBMCPar[2][12]=
+  {
+    {
+    6.00430e-01,
+    1.58383e+00,
+    4.11561e-01,
+    3.08534e-01,
+    9.73145e-02,
+    -3.61109e-01,
+    -3.27514e-01,
+    7.03607e-02,
+    5.00000e-01,
+    1.00000e-02,
+    1.00000e+00,
+    1.00000e+00},
+    {
+      5.97359e-01,
+      1.03330e+00,
+      -8.68587e-02,
+      2.71848e-01,
+      7.96045e-02,
+      -5.64353e-01,
+      -6.97898e-01,
+      6.16726e-02,
+      5.00000e-01,
+      1.00000e-02,
+      1.00000e+00,
+      1.00000e+00}
+   
+   // pt20
+//     6.00430e-01,
+//     1.58383e+00,
+//     4.11561e-01,
+//     3.08534e-01,
+//     9.10649e-02,
+//     -3.90619e-01,
+//     -3.18373e-01,
+//     6.42629e-02,
+//     5.00000e-01,
+//     1.00000e-02,
+//     1.00000e+00,
+//     1.00000e+00,
+  };
+
 
 Double_t g(Double_t *v, Double_t *par)
 {
@@ -121,7 +183,8 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate, 
 	       int fit_data=1, std::string dataText="EGdata_comb3Iso_et_0531.dat",
 	       double etamin=-1., double etamax=-1.,
-	       double ptmin=-1., double ptmax=-1.)
+	       double ptmin=-1., double ptmax=-1.,
+	       TH1F* bkgMCTemplate=NULL)
 {
 
   cout << "Input files are " << dataInput->GetName() << "\t" << sigTemplate->GetName() << "\t" << bkgTemplate->GetName() << endl;
@@ -146,6 +209,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   TH1F* hbkg = (TH1F*)bkgTemplate->Clone();
   hbkg->SetName("hbkg");
 
+
   hsig->SetLineColor(1);
   hbkg->SetLineColor(1);
 
@@ -162,6 +226,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   int ndata=0;
   hdata = (TH1F*)dataInput->Clone();
   hdata -> SetName("hdata");
+
 
   // for weighted MC
   if(fit_data==0){
@@ -215,7 +280,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   c10->cd(1);
 //   fit_status = hsig->Fit(f1,"","",-1.,5.0);
 //   fit_status = hsig->Fit(f1,"","",-1,5.0);
-  fit_status = hsig->Fit(f1,"LL","",-1,11.0);
+  fit_status = hsig->Fit(f1,"LL","",-1,5.0);
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
@@ -232,6 +297,76 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   Para.push_back(f1->GetParameter(2));
   Para.push_back(f1->GetParameter(3)); 
 
+
+  // for fitting signal region background MC
+  TF1 *fMC = new TF1("fMC", expinv_power, -1., 11., 12);
+  fMC->SetParameters(f1->GetParameters());
+  fMC->SetParLimits(5,-10.,1.);
+  fMC->SetParLimits(6,-1.,2.);
+  fMC->SetParLimits(7,0.,0.09);
+
+  if(etamin > 1.55 && fabs(ptmin-50.)<1e-6 && 
+     fabs(ptmax-80.)<1e-6)
+    {
+      cout << "find EE in pt bin 50--80" << endl;
+      fMC->FixParameter(5,-0.1);
+    }
+  if(etamax < 1.55 && fabs(ptmin-80.)<1e-6 && 
+     fabs(ptmax-120.)<1e-6)
+    {
+      cout << "find EB in pt bin 80--120" << endl;
+      fMC->FixParameter(5,-0.1);
+    }
+
+  fMC->FixParameter(8,0.5);
+  fMC->FixParameter(0,fMC->GetParameter(0));
+  fMC->FixParameter(1,fMC->GetParameter(1));
+  fMC->FixParameter(2,fMC->GetParameter(2));
+  fMC->FixParameter(3,fMC->GetParameter(3));
+
+  if(bkgMCTemplate!=NULL){
+
+  // for SBMC
+    TF1 *fSBMC = new TF1("fSBMC", expinv_power, -1., 11., 12);
+    for(int ipar=0;ipar<12;ipar++)
+      {
+	if(etamin>1.55)
+	  fSBMC->SetParameter(ipar,SBMCPar[1][ipar]);
+	else
+	  fSBMC->SetParameter(ipar,SBMCPar[0][ipar]);
+      
+      }
+
+    TH1F* hbkg_MC = (TH1F*)bkgMCTemplate->Clone();
+    hbkg_MC->SetName("hbkg_MC");
+    hbkg_MC->Scale(1./hbkg_MC->Integral());
+    hbkg_MC->SetMaximum(hbkg_MC->GetMaximum()*3.);
+    fit_status = hbkg_MC->Fit(fMC,"bLL");
+    hbkg_MC->Draw();
+
+    cout << "fMC integral = " << fMC->Integral(-1,11.) << endl;
+    cout << "fSBMC integral = " << fSBMC->Integral(-1,11.) << endl;
+
+    // now scale the original background data 
+    //   TF1* flinear = new TF1("flinear","1.09-0.06065*x",-1.,11.);
+
+    for(int i=1;i<=hbkg->GetNbinsX(); i++)
+      {
+        float binCenter = hbkg->GetBinCenter(i);
+        float scale = fSBMC->Eval(binCenter)<1e-6? 1.0:
+	  fMC->Eval(binCenter)/fSBMC->Eval(binCenter);
+//         if(etamin > 1.55)scale = 1.0;       
+        cout << "scale = " << scale << endl;
+        float value = hbkg->GetBinContent(i);
+        float err = hbkg->GetBinError(i);     
+        hbkg->SetBinContent(i,value*scale);
+        hbkg->SetBinError(i,err*scale);      
+      }
+  }
+
+  cout << "Now hbkg->Integral()= " << hbkg->Integral() << endl;
+  hbkg->Scale(1.0/(float)hbkg->Integral());
+  cout << "Now hbkg->Integral()= " << hbkg->Integral() << endl;
   c10->cd(2);
   
   TF1 *f3 = new TF1("f3", expinv_power, -1., 11., 12);
@@ -425,6 +560,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f12->SetLineWidth(1);
   f12->SetFillStyle(3013);
   f12->Draw("same");
+  
+  for(int i=0;i<12;i++)cout << "f12 parameter " << i << "= " << f12->GetParameter(i) << endl;
+
 
   TF1 *f13 = new TF1("f13",sum_norm, -1, 11,12);
   f13->SetParameters(f12->GetParameters());

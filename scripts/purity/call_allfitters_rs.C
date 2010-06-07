@@ -62,11 +62,11 @@ void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 }
 
 
-void call_allfitters_rs(bool fitData=false, bool useSpike=false,bool doEffCorr=false, double lumi=8.02){
+void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr=false, double lumi=8.02){
 	
   cout << "do efficiency correction = " << doEffCorr << endl;
   cout << "fit data = " << fitData << endl;
-  cout << "use spike template = " << useSpike << endl;
+  cout << "use dataDriven = " << dataDriven << endl;
   std::string isDataName = fitData? "data": "MC";
 
   setTDRStyle();
@@ -201,18 +201,25 @@ void call_allfitters_rs(bool fitData=false, bool useSpike=false,bool doEffCorr=f
   }
 
   // files for data driven methods
-//   std::string SBFile       = "RS_100603_fixSB.root";
-  std::string SBFile       = "spike_withID.root";
-  TFile* inf_dataSB = new TFile(SBFile.data());
-  TH1F* hdata_Spike  = (TH1F*)inf_dataSB->FindObjectAny("h_EB_comb3Iso_EGdata_SIG");
+  std::string SpikeFile       = "spike_withID.root";
+  TFile* inf_dataSpike = new TFile(SpikeFile.data());
+  TH1F* hdata_Spike  = (TH1F*)inf_dataSpike->FindObjectAny("h_EB_comb3Iso_EGdata_SIG");
   hdata_Spike->Rebin(REBINNINGS);
   cout << "looking for histogram " << hdata_Spike->GetName() << " in file " << 
-	 inf_dataSB->GetName() << endl;
+	 inf_dataSpike->GetName() << endl;
 
-//   TH1F* hdata_SB     = (TH1F*)inf_dataSB->FindObjectAny("h_EB_comb3Iso_data_SB");
-//   hdata_SB->Rebin(REBINNINGS);
-//   cout << "looking for histogram " << hdata_SB->GetName() << " in file " << 
-// 	 inf_dataSB->GetName() << endl;
+
+  std::string SBFile       = "template_comb3Iso.root";
+  TFile* inf_dataSB = new TFile(SBFile.data());
+  TH1F* hdata_SB[nEtaBin];
+  for(int ieta=0; ieta < 2; ieta++)
+    {
+      sprintf(tmp,"h_%s_comb3IsoSB_EGdata_pt15",dec[ieta]);
+       cout << "looking for histogram " << tmp << " in file " << 
+	 inf_dataSB->GetName() << endl;
+       hdata_SB[ieta]= (TH1F*)inf_dataSB->FindObjectAny(tmp);
+       hdata_SB[ieta]->Rebin(REBINNINGS);
+    }
 
 
   ofstream signal_mean;
@@ -251,18 +258,29 @@ void call_allfitters_rs(bool fitData=false, bool useSpike=false,bool doEffCorr=f
 
       // 2nd, get unbinned fit
       Double_t* FuncFitResult;
-      if(fitData && !useSpike)
+      if(fitData && !dataDriven)
  	FuncFitResult = Ifit(hdata_data[ieta][ipt],
  			     hTemplate_S[ieta][ipt],
  			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
  			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
  			     fBinsPt[ipt],fBinsPt[ipt+1]);	
-      else if(fitData && useSpike)
+
+      else if(fitData && dataDriven && ieta==0)
   	FuncFitResult = Ifit(hdata_data[ieta][ipt],
-  			     hdata_Spike,
-  			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+    			     hdata_Spike,
+    			     hdata_SB[ieta],1,"RS_100604_fix.dat",
   			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-  			     fBinsPt[ipt],fBinsPt[ipt+1]);	
+  			     fBinsPt[ipt],fBinsPt[ipt+1],
+ 			     hTemplate_B[ieta][ipt]
+			     );	
+
+      else if(fitData && dataDriven && ieta==1)
+   	FuncFitResult = Ifit(hdata_data[ieta][ipt],
+   			     hTemplate_S[ieta][ipt],
+    			     hdata_SB[ieta],1,"RS_100604_fix.dat",
+   			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+   			     fBinsPt[ipt],fBinsPt[ipt+1],
+			     hTemplate_B[ieta][ipt]);	
       else
 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
 			     hTemplate_S[ieta][ipt],
@@ -291,14 +309,19 @@ void call_allfitters_rs(bool fitData=false, bool useSpike=false,bool doEffCorr=f
 
       // 3rd, get template fit result
       Double_t* TemplateFitResult;
-      if(!useSpike)
+      if(!dataDriven)
        TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
  				  hTemplate_S[ieta][ipt],
  				  hTemplate_B[ieta][ipt]);
-      else
+      else if(dataDriven && ieta==0)
 	TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
-				    hdata_Spike,
-				    hTemplate_B[ieta][ipt]);
+ 				    hdata_Spike,
+ 				    hdata_SB[ieta]);
+      else if(dataDriven && ieta==1)
+  	TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
+  				    hTemplate_S[ieta][ipt],
+//   				    hTemplate_B[ieta][ipt]);
+ 				    hdata_SB[ieta]);
 
  
       Double_t nsigtemplate    = TemplateFitResult[0]/scaleEff;
@@ -323,14 +346,19 @@ void call_allfitters_rs(bool fitData=false, bool useSpike=false,bool doEffCorr=f
 
       // 4th, get two bin result
       Double_t* TwoBinResult;
-      if(!useSpike)
+      if(!dataDriven)
        TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
 				    hTemplate_S[ieta][ipt],
 				    hTemplate_B[ieta][ipt]);
-      else
+      else if(dataDriven && ieta==0)
 	TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
-				     hdata_Spike,
-				     hTemplate_B[ieta][ipt]);
+// 				     hdata_Spike,
+				     hTemplate_S[ieta][ipt],
+ 				     hdata_SB[ieta]);
+      else if(dataDriven && ieta==1)
+	TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
+				     hTemplate_S[ieta][ipt],
+				     hdata_SB[ieta]);
 
       Double_t ndata = hdata_data[ieta][ipt]->Integral();
       purity_2bin[ieta][ipt]     = TwoBinResult[0];
