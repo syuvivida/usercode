@@ -136,10 +136,10 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
 
   
-//   std::string dataFile     = fitData? "RS_100604_fix.root":"template_comb3Iso_test.root";
-//   std::string templateFile = fitData? "RS_100604_fix.root":"template_comb3Iso_template.root";
-  std::string dataFile     = fitData? "template_comb3Iso.root":"template_comb3Iso_test.root";
-  std::string templateFile = fitData? "template_comb3Iso.root":"template_comb3Iso_template.root";
+  std::string dataFile     = fitData? "TightEESBData_template.root":"template_comb3Iso_test.root";
+  std::string templateFile = fitData? "TightEESBData_template.root":"template_comb3Iso_template.root";
+//   std::string dataFile     = fitData? "template_comb3Iso.root":"template_comb3Iso_test.root";
+//   std::string templateFile = fitData? "template_comb3Iso.root":"template_comb3Iso_template.root";
 
 
   TFile* inf_data = new TFile(dataFile.data());
@@ -209,7 +209,8 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 	 inf_dataSpike->GetName() << endl;
 
 
-  std::string SBFile       = "template_comb3Iso.root";
+//   std::string SBFile       = "template_comb3Iso.root";
+  std::string SBFile       = "TightEESBData_template.root";
   TFile* inf_dataSB = new TFile(SBFile.data());
   TH1F* hdata_SB[nEtaBin];
   for(int ieta=0; ieta < 2; ieta++)
@@ -280,7 +281,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
     			     hdata_SB[ieta],1,"RS_100604_fix.dat",
    			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
    			     fBinsPt[ipt],fBinsPt[ipt+1],
-			     hTemplate_B[ieta][ipt]);	
+ 			     hTemplate_B[ieta][ipt]);	
       else
 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
 			     hTemplate_S[ieta][ipt],

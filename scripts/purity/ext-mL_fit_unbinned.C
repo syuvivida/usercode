@@ -64,18 +64,19 @@ Double_t SBMCPar[2][12]=
     1.00000e+00,
     1.00000e+00},
     {
-      5.97359e-01,
-      1.03330e+00,
-      -8.68587e-02,
-      2.71848e-01,
-      7.96045e-02,
-      -5.64353e-01,
-      -6.97898e-01,
-      6.16726e-02,
+      5.98523e-01,
+      9.87927e-01,
+      -7.52450e-02,
+      2.82392e-01,
+      7.60784e-02,
+      -7.59068e-01,
+      -9.74272e-02,
+      5.49309e-02,
       5.00000e-01,
       1.00000e-02,
       1.00000e+00,
-      1.00000e+00}
+      1.00000e+00
+    }
    
    // pt20
 //     6.00430e-01,
@@ -355,7 +356,6 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
         float binCenter = hbkg->GetBinCenter(i);
         float scale = fSBMC->Eval(binCenter)<1e-6? 1.0:
 	  fMC->Eval(binCenter)/fSBMC->Eval(binCenter);
-//         if(etamin > 1.55)scale = 1.0;       
         cout << "scale = " << scale << endl;
         float value = hbkg->GetBinContent(i);
         float err = hbkg->GetBinError(i);     
