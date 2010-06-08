@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#define NPAR 2
+#define NPAR 4
 
 
 vector<Double_t> dataColl;
@@ -26,6 +26,7 @@ vector<Double_t> info;
 vector<Double_t> info_err;
 
 vector<Double_t> Para;
+vector<Double_t> ParaErr;
 
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
@@ -92,6 +93,18 @@ Double_t SBMCPar[2][12]=
 //     1.00000e+00,
 //     1.00000e+00,
   };
+
+Double_t normgauss(Double_t x, Double_t mean, Double_t sig)
+{
+  Double_t pull = (x-mean)/sig;
+  Double_t rs = 1.0/sig; 
+  const Double_t rroot2pi = 0.5*M_2_SQRTPI*M_SQRT1_2, rn_sig = rs*rroot2pi;
+
+  Double_t value = rn_sig*exp(-0.5*pull*pull);
+  
+  return value;
+
+}
 
 
 Double_t g(Double_t *v, Double_t *par)
@@ -160,13 +173,30 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
   Double_t Lsum=0.;
   Double_t Nevt=dataColl.size();
-  Double_t fs = par[0];
-  Double_t fb = par[1];
+  Double_t fs    = par[0];
+  Double_t fb    = par[1];
+  Double_t peak  = par[2];
+  Double_t width = par[3];
 
   double tmppar[12];
   for(int i=0; i<12; i++){
     tmppar[i] = Para[i];
   }
+  tmppar[2] = peak;
+  tmppar[3] = width;
+
+  const double mean_width = Para[3];//0.3258;
+  const double sig_width = 0.001;//0.5*ParaErr[3];//0.6703;
+  const double mean_peak = Para[2];//0.451;
+  const double sig_peak = 0.001;//0.5*ParaErr[2];//0.767;
+
+  const double constrain_width=
+    TMath::Log(normgauss(width, mean_width, sig_width));
+
+  const double constrain_peak=
+    TMath::Log(normgauss(peak, mean_peak, sig_peak));
+
+
   for ( int i=0; i<dataColl.size(); i++ ) {
     //PDF for signal and background
     Double_t x = dataColl[i];
@@ -175,7 +205,9 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
     //Get Log Likelihood		  
     Lsum += TMath::Log( (fs*Ls + fb*Lb) / (fs+fb) );
   }
-  f=2*( -1*Lsum + (fs+fb) - Nevt*TMath::Log(fs+fb) );
+  f=2*( -1*Lsum + (fs+fb) - Nevt*TMath::Log(fs+fb) 
+   	- constrain_width-constrain_peak
+	);
 }
 
 
@@ -199,6 +231,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   bkgColl.clear();
 
   Para.clear();
+  ParaErr.clear();
 
   Double_t* fitted = new Double_t[8];
   fitted[0] = fitted[1] = fitted[2] = fitted[3] = 0.0;
@@ -279,24 +312,28 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f1->SetParameters(par);
 
   c10->cd(1);
-//   fit_status = hsig->Fit(f1,"","",-1.,5.0);
-//   fit_status = hsig->Fit(f1,"","",-1,5.0);
+  //   fit_status = hsig->Fit(f1,"","",-1.,5.0);
+  //   fit_status = hsig->Fit(f1,"","",-1,5.0);
   fit_status = hsig->Fit(f1,"LL","",-1,5.0);
   hsig->Draw();
   SigPDFnorm = f1->Integral(-1.,11.);
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
-//   if ( fit_status > 0 ) {
-//      printf("fit signal template failed. QUIT \n");
-//      return fitted;
-//   }
+  //   if ( fit_status > 0 ) {
+  //      printf("fit signal template failed. QUIT \n");
+  //      return fitted;
+  //   }
 
-  double shift = etamin > 1.55?  (1.47754e-01-1.93012e-01): (5.54196e-01-4.66620e-01); //EE, EB
-  double scaleWidth = etamin >1.55? (1.96952e-01/2.34272e-01): (2.25069e-01/2.03141e-01); // EE, EB
 
   Para.push_back(f1->GetParameter(0));
   Para.push_back(f1->GetParameter(1));
   Para.push_back(f1->GetParameter(2));
   Para.push_back(f1->GetParameter(3)); 
+
+
+  ParaErr.push_back(f1->GetParError(0));
+  ParaErr.push_back(f1->GetParError(1));
+  ParaErr.push_back(f1->GetParError(2));
+  ParaErr.push_back(f1->GetParError(3)); 
 
 
   // for fitting signal region background MC
@@ -327,7 +364,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   if(bkgMCTemplate!=NULL){
 
-  // for SBMC
+    // for SBMC
     TF1 *fSBMC = new TF1("fSBMC", expinv_power, -1., 11., 12);
     for(int ipar=0;ipar<12;ipar++)
       {
@@ -399,16 +436,24 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   fit_status = hbkg->Fit(f3,"bLL");
   hbkg->Draw();
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
-//   if ( fit_status > 0 ) {
-//     printf("fit background template failed. QUIT \n");
-//     return fitted;
-//   }
+  //   if ( fit_status > 0 ) {
+  //     printf("fit background template failed. QUIT \n");
+  //     return fitted;
+  //   }
 
   Para.push_back(f3->GetParameter(4));
   Para.push_back(f3->GetParameter(5));
   Para.push_back(f3->GetParameter(6));
   Para.push_back(f3->GetParameter(7)); 
   Para.push_back(f3->GetParameter(8)); 
+
+  ParaErr.push_back(f3->GetParError(4));
+  ParaErr.push_back(f3->GetParError(5));
+  ParaErr.push_back(f3->GetParError(6));
+  ParaErr.push_back(f3->GetParError(7)); 
+  ParaErr.push_back(f3->GetParError(8)); 
+
+
   BkgPDFnorm = f3->Integral(-1.,11);
   c10->SaveAs(Form("plots/PDFFit_%s.gif",dataInput->GetName()));
   
@@ -458,7 +503,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   //--------------------------------------------------
   //init parameters for fit
-  Double_t vstart[10] = {1., 1.};
+  Double_t vstart[10] = {1., 1.,Para[2],Para[3]};
   vstart[0] = sigfrac*ndata;
   vstart[1] = (1-sigfrac)*ndata;
  
@@ -473,10 +518,12 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   arglist[0] = 1;
   gMinuit->mnexcm("SET PRINT", arglist ,1,ierflg);
 
-  Double_t step[] = { 0.1, 0.1,};
+  Double_t step[] = { 0.1, 0.1,0.01,0.01};
 
   gMinuit->mnparm(0,  "Signal yield"  , vstart[0],  step[0], 0., ndata*2.  , ierflg);
   gMinuit->mnparm(1,  "background yield"  , vstart[1],  step[1], 0., ndata*2. , ierflg);
+  gMinuit->mnparm(2,  "Signal peak",    vstart[2], step[2],-0.5,1.0,ierflg);
+  gMinuit->mnparm(3,  "Signal width",   vstart[3], step[3],0.,1.0,ierflg);
   
 
   printf(" --------------------------------------------------------- \n");
@@ -535,28 +582,39 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   // plot
   c1->Draw();  
   //gPad->SetLogy();
-   hdata->SetNdivisions(505,"XY");
-   hdata->SetXTitle("comb. ISO (GeV)");
-   hdata->SetYTitle("Entries");
-   hdata->SetTitle("");
-   hdata->SetMarkerStyle(8);
-   hdata->SetMinimum(0.);
-   hdata->SetMaximum(hdata->GetMaximum()*1.5);
+  hdata->SetNdivisions(505,"XY");
+  hdata->SetXTitle("Iso_{ECAL}+Iso_{HCAL}+Iso_{TRK} (GeV)");
+  hdata->SetYTitle("Entries");
+  hdata->SetTitle("");
+  hdata->SetMarkerStyle(8);
+  hdata->SetMinimum(0.);
+  hdata->SetMaximum(hdata->GetMaximum()*1.5);
 
-   hdata->Draw("p e");
+  hdata->Draw("p e");
 
+  Double_t fittedPeak, fittedPeakErr, fittedWidth, fittedWidthErr; 
+  gMinuit->GetParameter(2,fittedPeak,fittedPeakErr);
+  gMinuit->GetParameter(3,fittedWidth,fittedWidthErr);
+
+  cout << "Fitted signal peak = " << fittedPeak << endl;
+  cout << "Fitted signal width =" << fittedWidth<< endl;
+
+  f11->SetParameter(2,fittedPeak);
+  f11->SetParameter(3,fittedWidth);
   f11->SetParameter(0, para[0]*f11->GetParameter(0)/f11->Integral(-1,11)*hdata->GetBinWidth(2));
   f11->SetFillColor(5);
   f11->SetLineColor(1);
-  //f11->SetFillColor(603);
   f11->SetLineWidth(1);
   f11->SetFillStyle(3001);
   f11->Draw("same");
 
+
+  f12->SetParameter(2,fittedPeak);
+  f12->SetParameter(3,fittedWidth);
+
   f12->SetParameter(4, para[1]*f12->GetParameter(4)/f12->Integral(-1,11)*hdata->GetBinWidth(2));
   f12->SetFillColor(8);
   f12->SetLineColor(1);
-  //f12->SetFillColor(603);
   f12->SetLineWidth(1);
   f12->SetFillStyle(3013);
   f12->Draw("same");
@@ -570,6 +628,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f13->SetParameter(4, para[1]*f12->GetParameter(4)/f12->Integral(-1,11)*hdata->GetBinWidth(2));  
   f13->SetLineWidth(2);
   f13->SetLineColor(1);
+  f13->SetNpx(2500);
   f13->Draw("same");
   
 
