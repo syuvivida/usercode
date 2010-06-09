@@ -186,9 +186,9 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   tmppar[3] = width;
 
   const double mean_width = Para[3];//0.3258;
-  const double sig_width = 0.001;//0.5*ParaErr[3];//0.6703;
+  const double sig_width = 0.5*ParaErr[3];//0.6703;
   const double mean_peak = Para[2];//0.451;
-  const double sig_peak = 0.001;//0.5*ParaErr[2];//0.767;
+  const double sig_peak = 0.5*ParaErr[2];//0.767;
 
   const double constrain_width=
     TMath::Log(normgauss(width, mean_width, sig_width));
@@ -206,7 +206,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
     Lsum += TMath::Log( (fs*Ls + fb*Lb) / (fs+fb) );
   }
   f=2*( -1*Lsum + (fs+fb) - Nevt*TMath::Log(fs+fb) 
-   	- constrain_width-constrain_peak
+     	- constrain_width-constrain_peak
 	);
 }
 
