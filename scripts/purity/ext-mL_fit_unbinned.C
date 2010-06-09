@@ -217,7 +217,8 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	       int fit_data=1, std::string dataText="EGdata_comb3Iso_et_0531.dat",
 	       double etamin=-1., double etamax=-1.,
 	       double ptmin=-1., double ptmax=-1.,
-	       TH1F* bkgMCTemplate=NULL)
+	       TH1F* bkgMCTemplate=NULL, 
+	       double* scaleNumber=NULL)
 {
 
   cout << "Input files are " << dataInput->GetName() << "\t" << sigTemplate->GetName() << "\t" << bkgTemplate->GetName() << endl;
@@ -394,12 +395,14 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
         float scale = fSBMC->Eval(binCenter)<1e-6? 1.0:
 	  fMC->Eval(binCenter)/fSBMC->Eval(binCenter);
         cout << "scale = " << scale << endl;
+	scaleNumber[i-1]=scale;
         float value = hbkg->GetBinContent(i);
         float err = hbkg->GetBinError(i);     
         hbkg->SetBinContent(i,value*scale);
         hbkg->SetBinError(i,err*scale);      
       }
   }
+
 
   cout << "Now hbkg->Integral()= " << hbkg->Integral() << endl;
   hbkg->Scale(1.0/(float)hbkg->Integral());

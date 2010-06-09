@@ -348,6 +348,8 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       mcpurity_err[ieta][ipt] = errpuritymc;
 
       
+      Double_t scaleNumber[20];
+      for(int i=0;i<20;i++)scaleNumber[i]=1.;
 
       // 2nd, get unbinned fit
       Double_t* FuncFitResult;
@@ -356,15 +358,17 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
  			     hTemplate_S[ieta][ipt],
  			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
  			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
- 			     fBinsPt[ipt],fBinsPt[ipt+1]);	
-
+ 			     fBinsPt[ipt],fBinsPt[ipt+1],
+			     NULL,
+			     scaleNumber);	
       else if(fitData && dataDriven && ieta==0)
   	FuncFitResult = Ifit(hdata_data[ieta][ipt], 
      			     hdata_Spike,
    			     hdata_SB[ieta],1,"RS_100604_fix.dat",
   			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
   			     fBinsPt[ipt],fBinsPt[ipt+1],
- 			     hTemplate_B[ieta][ipt]
+ 			     hTemplate_B[ieta][ipt],
+			     scaleNumber
 			     );	
 
       else if(fitData && dataDriven && ieta==1)
@@ -373,21 +377,27 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
     			     hdata_SB[ieta],1,"RS_100604_fix.dat",
    			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
    			     fBinsPt[ipt],fBinsPt[ipt+1],
- 			     hTemplate_B[ieta][ipt]);	
+ 			     hTemplate_B[ieta][ipt],
+			     scaleNumber);	
+
       else if(!fitData && dataDriven)
    	FuncFitResult = Ifit(hdata_data[ieta][ipt],
    			     hTemplate_S[ieta][ipt],
     			     hdata_SB[ieta],0,"RS_100604_fix.dat",
    			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
    			     fBinsPt[ipt],fBinsPt[ipt+1],
-  			     hTemplate_B[ieta][ipt]
+  			     hTemplate_B[ieta][ipt],
+			     scaleNumber
 			     );	
       else
 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
 			     hTemplate_S[ieta][ipt],
 			     hTemplate_B[ieta][ipt],0,"RS_100604_fix.dat",
 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-			     fBinsPt[ipt],fBinsPt[ipt+1]);	
+			     fBinsPt[ipt],fBinsPt[ipt+1],
+			     NULL, scaleNumber);	
+
+
  
       Double_t nsigfunc    = FuncFitResult[0]/scaleEff;
       Double_t errnsigfunc = FuncFitResult[1]/scaleEff;
@@ -414,6 +424,17 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
 
       // 3rd, get Template Fit result
+
+      // modified the data-driven template first
+      TH1F* hModifiedSB = (TH1F*)hdata_SB[ieta]->Clone();
+      for(int ibin=1; ibin <=20; ibin++)
+	{
+	  float value = hModifiedSB->GetBinContent(ibin);
+	  float err = hModifiedSB->GetBinError(ibin);     
+	  hModifiedSB->SetBinContent(ibin,value*scaleNumber[ibin-1]);
+	  hModifiedSB->SetBinError(ibin,err*scaleNumber[ibin-1]);   
+	}
+
       Double_t* TemplateFitResult;
       if(!dataDriven)
        TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
@@ -422,17 +443,16 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       else if(dataDriven && !fitData)
 	TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
 				    hTemplate_S[ieta][ipt],
-				    hdata_SB[ieta]);
+				    hModifiedSB);
 
       else if(dataDriven && ieta==0)
 	TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
  				    hdata_Spike,
- 				    hdata_SB[ieta]);
+  				    hModifiedSB);
       else if(dataDriven && ieta==1)
   	TemplateFitResult = IfitBin(hdata_data[ieta][ipt],
   				    hTemplate_S[ieta][ipt],
-//   				    hTemplate_B[ieta][ipt]);
- 				    hdata_SB[ieta]);
+  				    hModifiedSB);
 
  
       Double_t nsigtemplate    = TemplateFitResult[0]/scaleEff;
@@ -473,11 +493,11 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       else if(dataDriven && ieta==0)
 	TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
 				     hTemplate_S[ieta][ipt],
- 				     hdata_SB[ieta],IntegralBin);
+  				     hModifiedSB,IntegralBin);
       else if(dataDriven && ieta==1)
 	TwoBinResult = purity_twobin(hdata_data[ieta][ipt],
 				     hTemplate_S[ieta][ipt],
-				     hdata_SB[ieta],IntegralBin);
+ 				     hModifiedSB,IntegralBin);
 
       Double_t ndata = hdata_data[ieta][ipt]->Integral(1,IntegralBin);
       purity_2bin[ieta][ipt]     = TwoBinResult[2];

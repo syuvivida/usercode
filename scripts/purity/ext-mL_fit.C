@@ -110,6 +110,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   hsig->Scale(1./hsig->Integral());
   hbkg->Scale(1./hbkg->Integral());  
+
   for (int ibin=1; ibin<=nbins; ibin++) {
     dataCollBin.push_back(hdata->GetBinContent(ibin));
     sigCollBin.push_back(hsig->GetBinContent(ibin));
@@ -210,7 +211,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   //gPad->SetLogy();
   hdata->SetLineColor(1);
   hdata->SetNdivisions(505,"XY");
-  hdata->SetXTitle("ecalIso+hcalIso+trackIso (GeV)");
+  hdata->SetXTitle("Iso_{ECAL}+Iso_{HCAL}+Iso_{TRK} (GeV)");
   hdata->SetYTitle("Entries");
   hdata->SetTitle("");
   hdata->SetMarkerStyle(8);
