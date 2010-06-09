@@ -170,6 +170,10 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   double nsig_2bin[nEtaBin][nPtBin]={{0}};
   double nsig_err_2bin[nEtaBin][nPtBin]={{0}};
 
+  TH1F* hOutputData[nEtaBin][nPtBin];
+  TH1F* hOutputSig[nEtaBin][nPtBin];
+  TH1F* hOutputBkg[nEtaBin][nPtBin];
+
 
   TH1F* hTemplate_S[nEtaBin][nPtBin];
   TH1F* hTemplate_B[nEtaBin][nPtBin];
@@ -434,6 +438,29 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 	  hModifiedSB->SetBinContent(ibin,value*scaleNumber[ibin-1]);
 	  hModifiedSB->SetBinError(ibin,err*scaleNumber[ibin-1]);   
 	}
+
+      hOutputData[ieta][ipt]= (TH1F*)hdata_data[ieta][ipt]->Clone();
+      hOutputData[ieta][ipt]->SetName(
+				      Form("hOutputData_%s_pt%d",
+					   dec[ieta],
+					   (int)fBinsPt[ipt]));
+
+      if(ieta==0)
+	hOutputSig[ieta][ipt] = (TH1F*)hdata_Spike->Clone();
+      else
+	hOutputSig[ieta][ipt] = (TH1F*)hTemplate_S[ieta][ipt]->Clone();
+      hOutputSig[ieta][ipt]->SetName(
+					 Form("hOutputSig_%s_pt%d",
+					      dec[ieta],
+					      (int)fBinsPt[ipt]));
+     
+
+      hOutputBkg[ieta][ipt] = (TH1F*)hModifiedSB->Clone();
+      hOutputBkg[ieta][ipt]->SetName(
+					 Form("hOutputBkg_%s_pt%d",
+					      dec[ieta],
+					      (int) fBinsPt[ipt]));
+     
 
       Double_t* TemplateFitResult;
       if(!dataDriven)
@@ -873,6 +900,16 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   c4->SaveAs(Form("plots/%s_allfitter_yield_EE.C",isDataName.data()));
 
   TFile* outFile = new TFile("isotemplate_yield_rongshyang.root","recreate"); 
+  
+  for(int ieta=0;ieta<nEtaBin; ieta++){
+    
+    for(int ipt=0; ipt<nPtBin; ipt++){
+      hOutputData[ieta][ipt]->Write();
+      hOutputSig[ieta][ipt]->Write();
+      hOutputBkg[ieta][ipt]->Write();
+    }
+  }
+
   tg_mc_purity_EB->Write();
   tgrs_purity_EB->Write();
   tgrs_purity_template_EB->Write();
