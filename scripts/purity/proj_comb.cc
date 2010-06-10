@@ -91,10 +91,13 @@ struct sample_t sample[N_SAMPLES] = {
 {"background sum",		     "bkg_sum", 	     -1.     ,-1    },
 };
 
-void proj_comb(bool sumw2=false)
+void proj_comb(bool sumw2=true)
 {      
 
     TFile *fout = new TFile("proj_comb.root","recreate");
+
+    // add nphoton distributions
+    TH1F *h_npho[N_CATEGORIES][N_SAMPLES][SB_TYPE];
 	
     TH1F *h_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH1F *h_et_noIso[N_CATEGORIES][N_SAMPLES][SB_TYPE];
@@ -137,11 +140,17 @@ void proj_comb(bool sumw2=false)
     double evtcount[N_CATEGORIES][N_SAMPLES][SB_TYPE][2];
     double sigcount[N_SAMPLES][SB_TYPE][2];
      
+
     char buffer[128];
     
     for(int file=0; file<N_SAMPLES; file++) { 
     	for(int cate=0; cate<N_CATEGORIES; cate++) {
 	    for(int type=0; type<SB_TYPE; type++) {
+
+	      sprintf(buffer,"h_%s_npho_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+	      h_npho[cate][file][type] = new TH1F(buffer,buffer, 7,-0.5,6.5);
+		if(sumw2)h_npho[cate][file][type]->Sumw2();
+		  
 	    
 	    	sprintf(buffer,"h_%s_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
     	    	h_et[cate][file][type] = new TH1F(buffer,buffer,  60, 0., 300.);
@@ -355,21 +364,25 @@ void proj_comb(bool sumw2=false)
 	TRandom2 *trd = new TRandom2();
 	printf(" %d entries to be loaded \n", root->GetEntries());
    	for(int entry=0;entry<root->GetEntries();entry++) {
-//       	for(int entry=0;entry<100000;entry++) {
                 root->GetEntry(entry);
+		
+
+		int nphoPerEvent_EB = 0;
+		int nphoPerEvent_EE = 0;
+
  		double tr = trd->Uniform(0,1);
 		if (entry%100==0)
 		printf("%4.1f%% done.\r",(float)entry/(float)root->GetEntriesFast()*100.);		
 
 		double FACTORS[20];
 
-		FACTORS [ 0] =  5.;//2.1;
+		FACTORS [ 0] =  11.;//5.;//2.1;
 		FACTORS [ 1] =  0.0 ;
 		FACTORS [ 2] =  0.0 ;
 		FACTORS [ 3] =  0.0500 ;
 		FACTORS [ 4] =  0.0100 ;
 
-		FACTORS [ 5] =  5.;//1.45;
+		FACTORS [ 5] =  11.;//5.;//1.45;
 		FACTORS [ 6] =  0.00 ;
 		FACTORS [ 7] =  0.00 ;
 		FACTORS [ 8] =  0.0500 ;
@@ -408,16 +421,15 @@ void proj_comb(bool sumw2=false)
 
 // 		if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.ptHat < pthat_min || EvtInfo.ptHat > pthat_max) ) continue;
 		int type=0; // for signal or background type	
-		
+	
+		bool findLeadingPhoton=false;
+	
 		for ( int ipho=0; ipho<EvtInfo.nPhotons; ipho++) {
 
 		  int cut_bits = 0;
 		  
 		  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.et[ipho] < pthat_min || EvtInfo.et[ipho] > pthat_max) ) continue;
-// 		  if ( _isSigMC==1 && !(EvtInfo.isGenMatched[ipho]==1&&EvtInfo.genCalIsoDR04[ipho]<5.0) ) continue;
-// 		  if ( _isBkgMC==1 && EvtInfo.genCalIsoDR04[ipho]<=5.0 ) continue;			  		  
   		  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.isGenMatched[ipho]==1&& TMath::Abs(EvtInfo.genMomId[ipho])<=22&&EvtInfo.genCalIsoDR04[ipho]<5.0) ) type=0;
-//   		  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.isGenMatched[ipho]==1&& TMath::Abs(EvtInfo.genMomId[ipho])<=22) ) type=0;
  		  else if(_isSigMC==1 || _isBkgMC==1) type=1;
 		  
 		  int good_LS=0;
@@ -428,20 +440,16 @@ void proj_comb(bool sumw2=false)
 // 		  if ( _isData==1 && good_LS!=1 ) continue;
 		  
 		  if ( EvtInfo.et[ipho]<15. ) continue;
-//  		  if ( EvtInfo.isLoose[ipho] != 1 ) continue;
-// 		  if ( EvtInfo.isEBGap[ipho]==1 || EvtInfo.isEEGap[ipho]==1 || EvtInfo.isEBEEGap[ipho]==1 ) continue;
 		  
 		  if ( TMath::Abs(EvtInfo.eta[ipho]) > 1.45 && TMath::Abs(EvtInfo.eta[ipho]) < 1.7 ) continue;
 		  if ( TMath::Abs(EvtInfo.eta[ipho] > 2.5) ) continue;
 
 		  //do selection after selection
 		  Naccept++;
-		  //if ( _isData==0 && SPLITSAMPLE==1 && tr>0.5) {
 		  if ( _isData==0 && SPLITSAMPLE==1 && Naccept%2==1) {
 		    reject++;
 		    continue; // read even events for testing}
 		  }
-		  //if ( _isData==0 && SPLITSAMPLE==2 && tr<0.5) {
 		  if ( _isData==0 && SPLITSAMPLE==2 && Naccept%2==0) {
 		    reject++;
 		    continue; // read odd events for template
@@ -450,12 +458,12 @@ void proj_comb(bool sumw2=false)
 		  double comb3Iso = EvtInfo.ecalRecHitSumEtConeDR04[ipho] + 
 		    EvtInfo.hcalTowerSumEtConeDR04[ipho] + EvtInfo.trkSumPtHollowConeDR04[ipho] ;
 
+		  if(comb3Iso > 11.0)continue;
+
 		  int cate = -1;
 		  if ( TMath::Abs(EvtInfo.eta[ipho])<1.45 ) {
 		    cate = _EB;
 		    //remove EB spike by Swiss-cross or 1st bin of sigmaietaieta
-// 		    if ( _isData==1 && 1-((EvtInfo.eRight[ipho]+EvtInfo.eLeft[ipho]+EvtInfo.eTop[ipho]+EvtInfo.eBottom[ipho])/EvtInfo.eMax[ipho]) > 0.95 ) continue;
-		    
 		    if ( _isData==1 && EvtInfo.isEB[ipho] && 
 			 !(EvtInfo.seedSeverity[ipho]!=3&&EvtInfo.seedSeverity[ipho]!=4&&EvtInfo.seedRecoFlag[ipho]!=2) ) continue;
  		    if ( EvtInfo.sigmaIetaIeta[ipho]<0.002 ) continue;
@@ -471,8 +479,8 @@ void proj_comb(bool sumw2=false)
 //    		    if ( EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] > EB_TRKISO_MAX) cut_bits |= (1<<_TRKISO);
  
 		    if ( comb3Iso > EB_ECALISO_MAX ) cut_bits |= (1<<_ECALISO);
-  		    if ( EvtInfo.hadronicOverEm[ipho] > EB_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
-   		    if ( EvtInfo.sigmaIetaIeta[ipho] > EB_SIEIE_MAX) cut_bits |= (1<<_SIEIE);
+		    if ( EvtInfo.hadronicOverEm[ipho] > EB_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
+		    if ( EvtInfo.sigmaIetaIeta[ipho] > EB_SIEIE_MAX) cut_bits |= (1<<_SIEIE);
 
 
 		  }
@@ -484,33 +492,18 @@ void proj_comb(bool sumw2=false)
 //   		    if ( EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EE_HCALISO_MAX) cut_bits |= (1<<_HCALISO);
 //    		    if ( EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] > EE_TRKISO_MAX) cut_bits |= (1<<_TRKISO);
  		    if ( comb3Iso > EE_ECALISO_MAX ) cut_bits |= (1<<_ECALISO);
-   		    if ( EvtInfo.hadronicOverEm[ipho] > EE_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
-   		    if ( TMath::Abs(EvtInfo.ESRatio[ipho]) < EE_ESRATIO_MIN ) cut_bits |= (1<<_ESRATIO);
+		    if ( EvtInfo.hadronicOverEm[ipho] > EE_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
+		    if ( TMath::Abs(EvtInfo.ESRatio[ipho]) < EE_ESRATIO_MIN ) cut_bits |= (1<<_ESRATIO);
 		  }
 
 		  if ( cate==-1 ) continue; 
 
-//  		  float ecalhcal_fisher = 0.324 +
-//  		    EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] * (-1.541) +
-//  		    EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] *( -0.943 );
-//  		  if  ( TMath::Abs(EvtInfo.eta[ipho])>1.55 ) {
-//  		    ecalhcal_fisher = 0.635 +
-//  		      EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] * (-6.803) +
-//  		      EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] *( -5.264 );
-//  		  }
-// 		  float ecalhcal_fisher = 0.607 +
-// 		    EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] * (-2.490) +
-// 		    EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] *(-1.181) +
-// 		    EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] *(-0.948);
-// 		  if  ( TMath::Abs(EvtInfo.eta[ipho])>1.55 ) {
-// 		    ecalhcal_fisher = 0.557 +
-// 		      EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] * (-5.010) +
-// 		      EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] *( -4.202 ) +
-// 		      EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] *(-0.206);
-// 		  }
 
-
+// 		  if ((cut_bits & (~(1<<_ECALISO)))==0 && !findLeadingPhoton){
 		  if ((cut_bits & (~(1<<_ECALISO)))==0){
+		    
+		    findLeadingPhoton=true;
+
 		    h_ecalIso[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho],scaling_factor);
 		    h_ecalIsoEt[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho],scaling_factor);
 		    h_ecalIso_et[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho], EvtInfo.et[ipho],scaling_factor);
@@ -556,7 +549,8 @@ void proj_comb(bool sumw2=false)
 		  }
 		  if ( cate == _EE ) {
 		    if (  (cut_bits & (~(1<<_ECALISO | 1<<_ESRATIO)))==0 ) {
-		      if ( TMath::Abs(EvtInfo.ESRatio[ipho])<0.05 ) {
+// 		      if ( TMath::Abs(EvtInfo.ESRatio[ipho])<0.05 ) {
+		      if ( EvtInfo.sigmaIetaIeta[ipho] > 0.05 && EvtInfo.sigmaIetaIeta[ipho] < 0.06 ) {
 			h_comb3IsoSB[cate][file][type]->Fill(comb3Iso, scaling_factor); 
 			h_comb3IsoSB_et[cate][file][type]->Fill(comb3Iso, EvtInfo.et[ipho], scaling_factor); 
 		      }
@@ -598,6 +592,9 @@ void proj_comb(bool sumw2=false)
 		    h_ESRatio_noIso[cate][file][type]->Fill(TMath::Abs(EvtInfo.ESRatio[ipho]),scaling_factor);  		
 		  
 		  if (cut_bits!=0) continue; //do the full cut, book et, and do counting
+
+		  if(cate==_EB)nphoPerEvent_EB ++;
+		  if(cate==_EE)nphoPerEvent_EE ++;
 		
 		  h_et[cate][file][type]->Fill(EvtInfo.et[ipho],scaling_factor);  
 		  h_eta[cate][file][type]->Fill(EvtInfo.eta[ipho],scaling_factor);  
@@ -608,7 +605,11 @@ void proj_comb(bool sumw2=false)
 		  evtcount[cate][file][type][0]+=1.;		
 		  if (cate==_EB || cate==_EE) sigcount[file][type][0]+=1.;	
 		}//end of ipho loop
-        }	
+
+		h_npho[_EB][file][type]->Fill(nphoPerEvent_EB);
+		h_npho[_EE][file][type]->Fill(nphoPerEvent_EE);
+
+        } // end of looping over entries	
 	
 	printf("100.0%% done.\n");
 	
@@ -629,11 +630,14 @@ void proj_comb(bool sumw2=false)
 
 	if(_isData==1) fclose(ffISO);
 	delete f1;	
-    }
+    } // end of loop over files
 	
     for(int file=_PhoJet15; file<=_QCD170; file++) {		
       for(int type=0; type<SB_TYPE; type++) {	  
         for(int cate=0; cate<N_CATEGORIES; cate++) {
+
+	  
+	  h_npho         [cate][_sig_sum][type]->Add(h_npho[cate][file][type]);
 	  h_et           [cate][_sig_sum][type]->Add(h_et[cate][file][type]);
 	  h_et_noIso     [cate][_sig_sum][type]->Add(h_et_noIso[cate][file][type]);
 	  h_eta          [cate][_sig_sum][type]->Add(h_eta[cate][file][type]);
@@ -682,6 +686,7 @@ void proj_comb(bool sumw2=false)
     for(int file=_PhoJet15; file<=_QCD170; file++) {		
 	for(int type=0; type<SB_TYPE; type++) {	  
 	  for(int cate=0; cate<N_CATEGORIES; cate++) {	
+	  h_npho         [cate][_bkg_sum][type]->Add(h_npho[cate][file][type]);
 	  h_et     [cate][_bkg_sum][type]->Add(h_et     [cate][file][type]);
 	  h_et_noIso     [cate][_bkg_sum][type]->Add(h_et_noIso     [cate][file][type]);
 	  h_eta    [cate][_bkg_sum][type]->Add(h_eta    [cate][file][type]);
