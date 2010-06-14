@@ -28,6 +28,7 @@
 #include <TH2.h>
 #include <TH1.h>
 #include <string>
+#include <TGraph.h>
 #include <TGraphAsymmErrors.h>
 #include <TMath.h> 
 #include <TCanvas.h>
@@ -48,17 +49,43 @@ const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 const int REBINNINGS=6;
 
 double tempNumbers[10][2]={
-  {7158.5 , 147.3},
-  {4788.7 , 109.5} ,
-  {896.7 , 40.8},
-  {222.8 , 17.0},
-  {27.1 , 6.1},
-  {6712.3 , 127.6},
-  {3619.0 , 92.8},
-  {559.7 , 33.9},
-  {161.9 , 15.5},
-  {17.1 , 4.8}
+//   {7158.5 , 147.3},
+//   {4788.7 , 109.5} ,
+//   {896.7 , 40.8},
+//   {222.8 , 17.0},
+//   {27.1 , 6.1},
+//   {6712.3 , 127.6},
+//   {3619.0 , 92.8},
+//   {559.7 , 33.9},
+//   {161.9 , 15.5},
+//   {17.1 , 4.8}
+
+  {1066.5 , 67.8},
+  {257.8 , 34.4},
+  {106.2 , 14.9},
+  {22.2 , 5.6},
+  {3.1 , 1.7},
+  {860.6 , 58.1},
+  {230.7 , 30.2},
+  {78.8 , 12.5},
+  {16.8 , 5.0},
+  {0.8 , 1.0},
+
 };
+
+double sysNumbers[10][2]={
+   {1241.6, 64.6},
+   {333.2, 32.8},
+   {92.5, 14.7},
+   {18.9, 5.6},
+   {3.1, 1.7},
+   {624.0 , 58.5},
+   {169.5 , 29.1},
+   {58.9 , 12.9},
+   {16.8 , 5.0},
+   {0.7,  1.0}
+};
+
 
 double tempPurityNumbers[10][2]={
   {0.296 +- 0.004},
@@ -186,8 +213,6 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   
   std::string dataFile     = fitData? "TightEESBData_template.root":"fakedata_template.root";
   std::string templateFile = fitData? "TightEESBData_template.root":"template_template.root";
-//   std::string dataFile     = fitData? "template_comb3Iso.root":"template_comb3Iso_test.root";
-//   std::string templateFile = fitData? "template_comb3Iso.root":"template_comb3Iso_template.root";
 
 
   TFile* inf_data = new TFile(dataFile.data());
@@ -370,18 +395,21 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
      			     hdata_Spike,
    			     hdata_SB[ieta],1,"RS_100604_fix.dat",
   			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-  			     fBinsPt[ipt],fBinsPt[ipt+1],
- 			     hTemplate_B[ieta][ipt],
+  			     fBinsPt[ipt],fBinsPt[ipt+1],		       
+// 			     hTemplate_B[ieta][ipt],
+			     NULL,
 			     scaleNumber
 			     );	
 
       else if(fitData && dataDriven && ieta==1)
    	FuncFitResult = Ifit(hdata_data[ieta][ipt],
-   			     hTemplate_S[ieta][ipt],
-    			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
-   			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+   			     hTemplate_S[ieta][ipt],  
+//  			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+ 			     hdata_SB[ieta],1,"RS_100604_fix.dat",
+ 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
    			     fBinsPt[ipt],fBinsPt[ipt+1],
- 			     NULL,
+  			     hTemplate_B[ieta][ipt],
+//  			     NULL,
 			     scaleNumber);	
 
       else if(!fitData && dataDriven)
@@ -421,8 +449,10 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
       purity_func[ieta][ipt]    = purityfunc;
       purity_err_func[ieta][ipt]= errpurityfunc;
-      nsig_func[ieta][ipt]      = nsigfunc;
-      nsig_err_func[ieta][ipt]  = errnsigfunc;
+//       nsig_func[ieta][ipt]      = nsigfunc;
+//       nsig_err_func[ieta][ipt]  = errnsigfunc;
+      nsig_func[ieta][ipt]      = tempNumbers[ieta*5+ipt][0];
+      nsig_err_func[ieta][ipt]  = tempNumbers[ieta*5+ipt][1];
       nbkg_func[ieta][ipt]      = nbkgfunc;
       nbkg_err_func[ieta][ipt]  = errnbkgfunc;
 
@@ -430,11 +460,10 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       // 3rd, get Template Fit result
 
       // modified the data-driven template first
-      TH1F* hModifiedSB = ieta==0? 
-	(TH1F*)hdata_SB[ieta]->Clone():
-	(TH1F*)hTemplate_B[ieta][ipt]->Clone();
+      TH1F* hModifiedSB = (ieta==0)? (TH1F*)hdata_SB[ieta]->Clone():(TH1F*)hTemplate_B[ieta][ipt]->Clone();
       for(int ibin=1; ibin <=20; ibin++)
 	{
+	  cout << "scaleNumber[" <<ibin-1 <<"]=" << scaleNumber[ibin-1] << endl;
 	  float value = hModifiedSB->GetBinContent(ibin);
 	  float err = hModifiedSB->GetBinError(ibin);     
 	  hModifiedSB->SetBinContent(ibin,value*scaleNumber[ibin-1]);
@@ -502,12 +531,12 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
 //       purity_template[ieta][ipt]    = tempPurityNumbers[ipt+ieta*5][0];
 //       purity_err_template[ieta][ipt]= tempPurityNumbers[ipt+ieta*5][1];
-//       nsig_template[ieta][ipt]      = tempNumbers[ipt+ieta*5][0];
-//       nsig_err_template[ieta][ipt]  = tempNumbers[ipt+ieta*5][1];
+      nsig_template[ieta][ipt]      = sysNumbers[ipt+ieta*5][0];
+      nsig_err_template[ieta][ipt]  = sysNumbers[ipt+ieta*5][1];
       purity_template[ieta][ipt]    = puritytemplate;
       purity_err_template[ieta][ipt]= errpuritytemplate;
-      nsig_template[ieta][ipt]      = nsigtemplate;
-      nsig_err_template[ieta][ipt]  = errnsigtemplate;
+//       nsig_template[ieta][ipt]      = nsigtemplate;
+//       nsig_err_template[ieta][ipt]  = errnsigtemplate;
       nbkg_template[ieta][ipt]      = nbkgtemplate;
       nbkg_err_template[ieta][ipt]  = errnbkgtemplate;
 
@@ -635,7 +664,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tg_mc_purity_EB->SetName("tg_mc_purity_EB");
   tg_mc_purity_EB->SetMarkerSize(1.);
   tg_mc_purity_EB->SetLineWidth(2);
-  tg_mc_purity_EB->Draw("p e same");
+//   tg_mc_purity_EB->Draw("p e same");
 
 
   TGraphAsymmErrors *tgrs_purity_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
@@ -674,15 +703,16 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 //   tgrs_purity_twobin_EB->Draw("p e same");
 
   tgrs_purity_template_EB->Draw("p e same");
-  tg_mc_purity_EB->Draw("p same");
+//   tg_mc_purity_EB->Draw("p same");
 
-  TLegend *tleg = new TLegend(0.15, 0.65, 0.55, 0.92);
+//   TLegend *tleg = new TLegend(0.15, 0.65, 0.55, 0.92);
+  TLegend *tleg = new TLegend(0.15, 0.70, 0.55, 0.92);
   tleg->SetHeader("EB Photons");
   tleg->SetFillColor(0);
   tleg->SetFillStyle(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);
-  tleg->AddEntry(tg_mc_purity_EB,"MC Prediction","pl");
+//   tleg->AddEntry(tg_mc_purity_EB,"MC Prediction","pl");
   tleg->AddEntry(tgrs_purity_EB,"Function Fit","pl");
 //   tleg->AddEntry(tgrs_purity_template_EB,"Function Fit with #sigma_{i#etai#eta} SB","pl");
   tleg->AddEntry(tgrs_purity_template_EB,"Template Fit","pl");
@@ -706,7 +736,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tg_mc_purity_EE->SetName("tg_mc_purity_EE");
   tg_mc_purity_EE->SetMarkerSize(1.);
   tg_mc_purity_EE->SetLineWidth(2);
-  tg_mc_purity_EE->Draw("p e same");
+//   tg_mc_purity_EE->Draw("p e same");
 
 
   TGraphAsymmErrors *tgrs_purity_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
@@ -745,15 +775,16 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 //   tgrs_purity_twobin_EE->Draw("p e same");
 
   tgrs_purity_template_EE->Draw("p e same");
-  tg_mc_purity_EE->Draw("p same");
+//   tg_mc_purity_EE->Draw("p same");
 
-  TLegend *tleg2 = new TLegend(0.15, 0.65, 0.55, 0.92);
+//   TLegend *tleg2 = new TLegend(0.15, 0.65, 0.55, 0.92);
+  TLegend *tleg2 = new TLegend(0.15, 0.70, 0.55, 0.92);
   tleg2->SetHeader("EE Photons");
   tleg2->SetFillColor(0);
   tleg2->SetFillStyle(0);
   tleg2->SetShadowColor(0);
   tleg2->SetBorderSize(0);
-  tleg2->AddEntry(tg_mc_purity_EE,"MC Prediction","pl");
+//   tleg2->AddEntry(tg_mc_purity_EE,"MC Prediction","pl");
   tleg2->AddEntry(tgrs_purity_EE,"Function Fit","pl");
 //   tleg2->AddEntry(tgrs_purity_template_EE,"Function Fit with #sigma_{i#etai#eta} SB","pl");
   tleg2->AddEntry(tgrs_purity_template_EE,"Template Fit","pl");
@@ -782,30 +813,36 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tg_mc_sig_EB->SetName("tg_mc_sig_EB");
   tg_mc_sig_EB->SetMarkerSize(1.);
   tg_mc_sig_EB->SetLineWidth(2);
-  tg_mc_sig_EB->Draw("p e same");
+//   tg_mc_sig_EB->Draw("p e same");
 
 
-  TGraphAsymmErrors *tgrs_sig_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_func[0], 
-							 fBinsPtError, fBinsPtError, 
-							 nsig_err_func[0], nsig_err_func[0]);
+//   TGraphAsymmErrors *tgrs_sig_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_func[0], 
+// 							 fBinsPtError, fBinsPtError, 
+// 							 nsig_err_func[0], nsig_err_func[0]);
+  TGraph *tgrs_sig_EB = new TGraph(nPtBin, fBinsPtMidPoint, nsig_func[0]);
+
   tgrs_sig_EB->SetName("tgrs_sig_EB");
   tgrs_sig_EB->SetMarkerColor(4);
   tgrs_sig_EB->SetMarkerStyle(25);
   tgrs_sig_EB->SetLineColor(4);
   tgrs_sig_EB->SetLineWidth(2);
-  tgrs_sig_EB->Draw("p e same");
+//   tgrs_sig_EB->Draw("p e same");
+  tgrs_sig_EB->Draw("p   same");
 
-  TGraphAsymmErrors *tgrs_sig_template_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
-								  nsig_template[0], 
-								  fBinsPtError,fBinsPtError, 
-								  nsig_err_template[0],
-								  nsig_err_template[0]);
+//   TGraphAsymmErrors *tgrs_sig_template_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+// 								  nsig_template[0], 
+// 								  fBinsPtError,fBinsPtError, 
+// 								  nsig_err_template[0],
+// 								  nsig_err_template[0]);
+  TGraph *tgrs_sig_template_EB = new TGraph(nPtBin, fBinsPtMidPoint, 
+					    nsig_template[0]);
   tgrs_sig_template_EB->SetName("tgrs_sig_template_EB");
   tgrs_sig_template_EB->SetMarkerColor(6);
   tgrs_sig_template_EB->SetMarkerStyle(26);
   tgrs_sig_template_EB->SetLineColor(6);
   tgrs_sig_template_EB->SetLineWidth(2);
-  tgrs_sig_template_EB->Draw("p e same");
+//   tgrs_sig_template_EB->Draw("p e same");
+  tgrs_sig_template_EB->Draw("p  same");
 
   TGraphAsymmErrors *tgrs_sig_twobin_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_2bin[0], 
 								fBinsPtError, fBinsPtError, 
@@ -823,9 +860,11 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tleg3->SetFillStyle(0);
   tleg3->SetShadowColor(0);
   tleg3->SetBorderSize(0);
-  tleg3->AddEntry(tg_mc_sig_EB,"MC Prediction","pl");
-  tleg3->AddEntry(tgrs_sig_EB,"Function Fit","pl");
-  tleg3->AddEntry(tgrs_sig_template_EB,"Template Fit","pl");
+//   tleg3->AddEntry(tg_mc_sig_EB,"MC Prediction","pl");
+  tleg3->AddEntry(tgrs_sig_EB,"Central Value","p");
+  tleg3->AddEntry(tgrs_sig_template_EB,"Template Variation","p");
+//   tleg3->AddEntry(tgrs_sig_EB,"Function Fit","pl");
+//   tleg3->AddEntry(tgrs_sig_template_EB,"Template Fit","pl");
 //   tleg3->AddEntry(tgrs_sig_template_EB,"Function Fit with #sigma_{i#etai#eta} SB","pl");
 //   tleg3->AddEntry(tgrs_sig_twobin_EB,"two bin","pl");
   tleg3->Draw();
@@ -847,31 +886,36 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tg_mc_sig_EE->SetName("tg_mc_sig_EE");
   tg_mc_sig_EE->SetMarkerSize(1.);
   tg_mc_sig_EE->SetLineWidth(2);
-  tg_mc_sig_EE->Draw("p e same");
+//   tg_mc_sig_EE->Draw("p e same");
 
 
 
-  TGraphAsymmErrors *tgrs_sig_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_func[1], 
-							 fBinsPtError,fBinsPtError, 
-							 nsig_err_func[1],nsig_err_func[1]);
+//   TGraphAsymmErrors *tgrs_sig_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_func[1], 
+// 							 fBinsPtError,fBinsPtError, 
+// 							 nsig_err_func[1],nsig_err_func[1]);
+  TGraph *tgrs_sig_EE = new TGraph(nPtBin, fBinsPtMidPoint, nsig_func[1]);
   tgrs_sig_EE->SetName("tgrs_sig_EE");
   tgrs_sig_EE->SetMarkerColor(4);
   tgrs_sig_EE->SetMarkerStyle(25);
   tgrs_sig_EE->SetLineColor(4);
   tgrs_sig_EE->SetLineWidth(2);
-  tgrs_sig_EE->Draw("p e same");
+//   tgrs_sig_EE->Draw("p e same");
+  tgrs_sig_EE->Draw("p  same");
 
-  TGraphAsymmErrors *tgrs_sig_template_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
-								  nsig_template[1], 
-								  fBinsPtError,fBinsPtError, 
-								  nsig_err_template[1],
-								  nsig_err_template[1]);
+//   TGraphAsymmErrors *tgrs_sig_template_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, 
+// 								  nsig_template[1], 
+// 								  fBinsPtError,fBinsPtError, 
+// 								  nsig_err_template[1],
+// 								  nsig_err_template[1]);
+  TGraph *tgrs_sig_template_EE = new TGraph(nPtBin, fBinsPtMidPoint, 
+					    nsig_template[1]);
   tgrs_sig_template_EE->SetName("tgrs_sig_template_EE");
   tgrs_sig_template_EE->SetMarkerColor(6);
   tgrs_sig_template_EE->SetMarkerStyle(26);
   tgrs_sig_template_EE->SetLineColor(6);
   tgrs_sig_template_EE->SetLineWidth(2);
-  tgrs_sig_template_EE->Draw("p e same");
+//   tgrs_sig_template_EE->Draw("p e same");
+  tgrs_sig_template_EE->Draw("p  same");
 
   TGraphAsymmErrors *tgrs_sig_twobin_EE = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_2bin[1], 
 							   fBinsPtError, fBinsPtError, 
@@ -890,9 +934,11 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tleg4->SetFillStyle(0);
   tleg4->SetShadowColor(0);
   tleg4->SetBorderSize(0);
-  tleg4->AddEntry(tg_mc_sig_EE,"MC Prediction","pl");
-  tleg4->AddEntry(tgrs_sig_EE,"Function Fit","pl");
-  tleg4->AddEntry(tgrs_sig_template_EE,"Template Fit","pl");
+  tleg4->AddEntry(tgrs_sig_EE,"Central Value","p");
+  tleg4->AddEntry(tgrs_sig_template_EE,"Template Variation","p");
+//   tleg4->AddEntry(tg_mc_sig_EE,"MC Prediction","pl");
+//   tleg4->AddEntry(tgrs_sig_EE,"Function Fit","pl");
+//   tleg4->AddEntry(tgrs_sig_template_EE,"Template Fit","pl");
 //   tleg4->AddEntry(tgrs_sig_template_EE,"Function Fit with #sigma_{i#etai#eta} SB","pl");
 //   tleg4->AddEntry(tgrs_sig_twobin_EE,"two bin","pl");
   tleg4->Draw();
