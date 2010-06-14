@@ -88,9 +88,9 @@ void plotNPho()
   tleg2->Draw();
 
 
-  c1->Print("npho_aftershowershapeID_EE.eps");
-  c1->Print("npho_aftershowershapeID_EE.gif");
-  c1->Print("npho_aftershowershapeID_EE.pdf");
+  c2->Print("npho_aftershowershapeID_EE.eps");
+  c2->Print("npho_aftershowershapeID_EE.gif");
+  c2->Print("npho_aftershowershapeID_EE.pdf");
   
 
 
