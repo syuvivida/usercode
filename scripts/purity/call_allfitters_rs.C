@@ -533,6 +533,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   } // end of loop over eta bins
 
 
+
   ofstream fout;
   std::string corr= doEffCorr? "_corr":"";
   fout.open(Form("yield%s.txt",corr.data()));
@@ -545,7 +546,11 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
   ofstream texout2;
   texout2.open(Form("purity%s.tex",corr.data()));
- 
+
+
+  ofstream yieldOut;
+  yieldOut.open(Form("yield%s.dat",corr.data()));
+
   // printing out the results
   for(int ieta=0; ieta < nEtaBin; ieta++){
     for(int ipt=0; ipt < nPtBin; ipt++){
@@ -577,6 +582,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
       fout  << Form("& %.1f +- %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
       fout2 << Form("& %.3f +- %.3f", purity_func[ieta][ipt], purity_err_func[ieta][ipt]) << " ";
+      yieldOut << Form("%.1f %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << endl;
 
       texout << Form("& %.1f $\\pm$ %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
       texout2 << Form("& %.3f $\\pm$ %.3f", purity_func[ieta][ipt], purity_err_func[ieta][ipt]) << " ";
@@ -614,6 +620,8 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
   texout2.close();
   fout2.close();
+
+  yieldOut.close();
   
   TCanvas *c1 = new TCanvas("c1","",600,600);
   c1->Draw();
