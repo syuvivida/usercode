@@ -10,6 +10,7 @@
 #include <TLegend.h>
 #include <string>
 #include "TCut.h"
+#include "tightSelection.h"
 
 using namespace std;
 
@@ -86,10 +87,6 @@ void MC_eff_Plot()
    char *var2 = "eta";
 
 
-   TCut eventCut     = "( !TTBit[36] && !TTBit[37] && !TTBit[38] && !TTBit[39] && !vtxIsFake && vtxNdof > 4 && abs(vtxZ) <= 15) && HLT_Photon15_L1R";
-
-   TCut sigCut = "isGenMatched && abs(genMomId) <= 22 && genCalIsoDR04 < 5.0"; 
-   
    TCut kineCut[2];
    kineCut[0] = "pt > 15.0 && abs(eta) < 1.45";
    kineCut[1] = "pt > 15.0 && abs(eta) > 1.7 && abs(eta) < 2.5";
@@ -97,8 +94,8 @@ void MC_eff_Plot()
 
    TCut IDCut[2];
    
-   IDCut[0] = "hadronicOverEm <  0.05 && sigmaIetaIeta < 0.01 && (seedSeverity!=3 && seedSeverity!=4 ) && (seedRecoFlag != 2)";
-   IDCut[1] = "hadronicOverEm <  0.05 && abs(ESRatio) > 0.1";
+   IDCut[0] = rsCutEB;
+   IDCut[1] = rsCutEE;
 
    TCut preSelection[2];
    TCut phoSelection_pass[2];
@@ -108,10 +105,10 @@ void MC_eff_Plot()
    for(int idec=0; idec<2; idec++){
      
      // photon selection for Denominator
-     preSelection[idec] = kineCut[idec] + sigCut + eventCut;
+     preSelection[idec] = kineCut[idec] + sigCut;
      // photon selections for Numerator
-     phoSelection_pass[idec] = preSelection[idec] + IDCut[idec];
-     phoSelection_fail[idec] = preSelection[idec] + (!IDCut[idec]);
+     phoSelection_pass[idec] = preSelection[idec] +  (IDCut[idec] + eventCut);
+     phoSelection_fail[idec] = preSelection[idec] + !(IDCut[idec] + eventCut);
 
    }
 
