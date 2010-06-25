@@ -1,11 +1,19 @@
+#include <TH2.h>
+#include <TH1.h>
+#include <TFile.h>
+#include <iostream>
+#include <string>
+#include <TCanvas.h>
+
+using namespace std;
+
 void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
 
 
-
-    TFile *f = new TFile(filename);   
-    TFile *f1 = new TFile(filename);
-    cout << "projecting " << f->GetName() << endl;
-    cout << "projecting " << f1->GetName() << endl;
+  TFile *f = new TFile(filename);   
+  TFile *f1 = new TFile(filename);
+  cout << "projecting " << f->GetName() << endl;
+  cout << "projecting " << f1->GetName() << endl;
 
   TH2F *h_EB_sig = (TH2F*)f->Get("h_EB_comb3Iso_et_sig_sum_SIG");
   TH2F *h_EB_bkg = (TH2F*)f->Get("h_EB_comb3Iso_et_bkg_sum_BKG");
@@ -33,9 +41,9 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   TH1F *h_EB_comb3Iso_EGdata_pt15 = (TH1F*)h_EB_comb3Iso_EGdata_pt15->Clone();
   TH1F *h_EB_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt15->Clone();
 
-//   h_EB_sig->RebinY(2);
-//   h_EB_bkg->RebinY(2);
-//   h_EB_EGdata->RebinY(2);
+  //   h_EB_sig->RebinY(2);
+  //   h_EB_bkg->RebinY(2);
+  //   h_EB_EGdata->RebinY(2);
 
   //pt20-30 bin5-6
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt20", 5,6);
@@ -124,9 +132,9 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   TH1F *h_EE_comb3Iso_EGdata_pt15 = (TH1F*)h_EE_comb3Iso_EGdata_pt15->Clone();
   TH1F *h_EE_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt15->Clone();
 
-//   h_EE_sig->RebinY(2);
-//   h_EE_bkg->RebinY(2);
-//   h_EE_EGdata->RebinY(2);
+  //   h_EE_sig->RebinY(2);
+  //   h_EE_bkg->RebinY(2);
+  //   h_EE_EGdata->RebinY(2);
 
   //pt20-30 bin5-6
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt20", 5,6);
@@ -356,10 +364,9 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_comb3Iso_sig_pt120->SetLineColor(4);
   h_EE_comb3Iso_sig_pt120->Draw("hist e same");
 
-
-  std::string outputFile = "template_comb3Iso.root";
-  cout << "producing " << outputFile.data() << endl;
-  TFile *fout = new TFile(outputFile.data(),"recreate");
+  std::string dataMC = mctest==0? "SBData" : "SBMC";
+  TFile *fout = new TFile(Form("%sTemplate_%s",dataMC.data(),filename),"recreate");
+  cout << "producing " << fout->GetName() << endl;
 
   h_EB_comb3Iso_sig_pt15->Write();
   h_EB_comb3Iso_bkg_pt15->Write();
