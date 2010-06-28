@@ -5,6 +5,7 @@
 #include "format.h"
 #include "TMath.h"
 #include "TRandom2.h"
+#include <fstream>
 
 #define W_MASS          80.403
 #define Z_MASS          91.1876
@@ -90,6 +91,9 @@ struct sample_t sample[N_SAMPLES] = {
 {"signal sum",			     "sig_sum", 	     -1.     ,-1    },
 {"background sum",		     "bkg_sum", 	     -1.     ,-1    },
 };
+
+
+using namespace std;
 
 void proj_comb(bool sumw2=true)
 {      
@@ -295,6 +299,9 @@ void proj_comb(bool sumw2=true)
     }
     
     printf(" %d samples need to be projected \n", N_SAMPLES );
+    ofstream dumpInfo;
+    
+
     for(int file=0; file<N_SAMPLES; file++) {
     
     	if (sample[file].xsec<0.) continue;
@@ -359,6 +366,8 @@ void proj_comb(bool sumw2=true)
 		
 	FILE *ffISO;
 	if (_isData==1)  ffISO = fopen("EGdata.dat","w");
+	if (_isData==1)  dumpInfo.open("IsoInfo.dat");
+
 
 	int Naccept=0; int reject=0;
 	TRandom2 *trd = new TRandom2();
@@ -410,12 +419,7 @@ void proj_comb(bool sumw2=true)
 		_ESRATIO
 		};
 		
-		// Trigger bit, single electron or single muon
-// 		bool accept = false;
-// 		if (EvtInfo.TrgBook[0]==1) accept = true;
-// 		if (EvtInfo.TrgBook[2]==1) accept = true;
-// 		if (!accept) cut_bits |= (1<<_HLT);
- 		if ( EvtInfo.HLT_Photon15_L1R != true ) continue;
+ 		if ( EvtInfo.HLT_Photon10_L1R != true ) continue;
 
  		if ( _isData==1 && !(!EvtInfo.TTBit[36] && !EvtInfo.TTBit[37] && !EvtInfo.TTBit[38] && !EvtInfo.TTBit[39] && !EvtInfo.vtxIsFake && EvtInfo.vtxNdof > 4 && TMath::Abs(EvtInfo.vtxZ) <= 15) ) continue;
 
@@ -502,8 +506,6 @@ void proj_comb(bool sumw2=true)
 // 		  if ((cut_bits & (~(1<<_ECALISO)))==0 && !findLeadingPhoton){
 		  if ((cut_bits & (~(1<<_ECALISO)))==0){
 		    
-		    findLeadingPhoton=true;
-
 		    h_ecalIso[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho],scaling_factor);
 		    h_ecalIsoEt[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho],scaling_factor);
 		    h_ecalIso_et[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho], EvtInfo.et[ipho],scaling_factor);
@@ -524,7 +526,26 @@ void proj_comb(bool sumw2=true)
 		    h_r9_et[cate][file][type]->Fill(EvtInfo.r9[ipho], EvtInfo.et[ipho],scaling_factor);
 
 		    if(_isData==1)fprintf(ffISO,"%f  %f %f \n",comb3Iso, EvtInfo.et[ipho], EvtInfo.eta[ipho]);
+		    if(_isData==1 && EvtInfo.et[ipho]>15.0 && EvtInfo.et[ipho]<120.0 
+		       && (fabs(EvtInfo.eta[ipho]) < 1.45  || 
+			   (fabs(EvtInfo.eta[ipho]) < 2.50 && fabs(EvtInfo.eta[ipho]) > 1.70))			               && !findLeadingPhoton)
+		      dumpInfo << EvtInfo.run << " " << EvtInfo.event << " " << ipho;
+
+		    else if(_isData==1 && EvtInfo.et[ipho]>15.0 && EvtInfo.et[ipho]<120.0 
+			    && (fabs(EvtInfo.eta[ipho]) < 1.45  || 
+				(fabs(EvtInfo.eta[ipho]) < 2.50 && fabs(EvtInfo.eta[ipho]) > 1.70))
+			    && findLeadingPhoton)
+		      dumpInfo << ", " << ipho;
+
+		    if(_isData==1 && EvtInfo.et[ipho]>15.0 && EvtInfo.et[ipho]<120.0 
+		       && (fabs(EvtInfo.eta[ipho]) < 1.45  || 
+			   (fabs(EvtInfo.eta[ipho]) < 2.50 && fabs(EvtInfo.eta[ipho]) > 1.70)
+			   )
+		       )
+		      findLeadingPhoton=true;
+		    
 		  }
+		
 
 		  if ((cut_bits & (~(1<<_ECALISO | 1<<_HOVERE)))==0 && (cut_bits & 1<<_HOVERE)){
 		    h_ecalIsoSB[cate][file][type]->Fill(EvtInfo.ecalRecHitSumEtConeDR04[ipho],scaling_factor);
@@ -605,6 +626,8 @@ void proj_comb(bool sumw2=true)
 		  evtcount[cate][file][type][0]+=1.;		
 		  if (cate==_EB || cate==_EE) sigcount[file][type][0]+=1.;	
 		}//end of ipho loop
+
+		if(_isData==1 && findLeadingPhoton)dumpInfo << endl;
 
 		h_npho[_EB][file][type]->Fill(nphoPerEvent_EB);
 		h_npho[_EE][file][type]->Fill(nphoPerEvent_EE);
@@ -763,6 +786,8 @@ void proj_comb(bool sumw2=true)
     		
     fout->cd();
     fout->Write();
+    
+    dumpInfo.close();
 
     TH1F* hcombIsoSpike = (TH1F*)h_comb3Iso[0][7][0]->Clone();
     TH1F* hecalIsoSpike = (TH1F*)h_ecalIso[0][7][0]->Clone();
