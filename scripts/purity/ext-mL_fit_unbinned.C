@@ -274,10 +274,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   c10->Divide(2,1);
   c10->cd(1);
   
-  hsig->Scale(1./hsig->Integral()); 
-  hbkg->Scale(1./hbkg->Integral());  
+//   hsig->Scale(1./hsig->Integral()); 
+//   hbkg->Scale(1./hbkg->Integral());  
   
-  double par[20] = {1., 1., 0.5, 0.3,
+  double par[20] = {hsig->GetMaximum(), 1., 0.5, 0.3,
 		    hbkg->GetMaximum(),-.3,-1., 0.01, 0.5, 0.01, 1., 1.};
   int fit_status;
 
@@ -285,7 +285,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f1->SetParameters(par);
 
   c10->cd(1);
-  fit_status = hsig->Fit(f1,"LL","",-1,5.0);
+  fit_status = hsig->Fit(f1,"","",-1,5.0);
   hsig->Draw();
   printf("status %d, sig area %3.3f \n", fit_status,f1->Integral(-1.,11.));
 //   if ( fit_status > 0 ) {
@@ -349,7 +349,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
     hbkg_MC->SetName("hbkg_MC");
     hbkg_MC->Scale(1./hbkg_MC->Integral());
     hbkg_MC->SetMaximum(hbkg_MC->GetMaximum()*3.);
-    fit_status = hbkg_MC->Fit(fMC,"bLL");
+    fit_status = hbkg_MC->Fit(fMC,"b");
     hbkg_MC->Draw();
 
     cout << "fMC integral = " << fMC->Integral(-1,11.) << endl;
@@ -372,7 +372,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   }
 
   cout << "Now hbkg->Integral()= " << hbkg->Integral() << endl;
-  hbkg->Scale(1.0/(float)hbkg->Integral());
+//   hbkg->Scale(1.0/(float)hbkg->Integral());
   cout << "Now hbkg->Integral()= " << hbkg->Integral() << endl;
   c10->cd(2);
   
@@ -402,9 +402,10 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   f3->FixParameter(2,f3->GetParameter(2));
   f3->FixParameter(3,f3->GetParameter(3));
 
-  hbkg->SetMaximum(hbkg->GetMaximum()*3.);
-  fit_status = hbkg->Fit(f3,"bLL");
-  hbkg->Draw();
+//   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
+  fit_status = hbkg->Fit(f3,"b");
+  hbkg->SetMaximum(5000);
+  hbkg->Draw("e");
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
 //   if ( fit_status > 0 ) {
 //     printf("fit background template failed. QUIT \n");
