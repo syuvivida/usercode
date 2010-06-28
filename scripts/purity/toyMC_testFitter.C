@@ -25,22 +25,22 @@ const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
 const int REBINNINGS=1;
 
-const int NEXP = 1000 ;
+const int NEXP = 1000;
 
 Double_t nsig_data[nEtaBin][nPtBin]=
   {
      {
-       964.3,
-       274.1,
-       112.0,
-       22.8,
+       983.3,
+       278.2,
+       93.7,
+       21.5,
        3.0
      },
      {
-       548.7,
-       210.8,
-       70.7,
-       14.9,
+       702.7,
+       208.0,
+       58.1,
+       15.7,
        0.8
      }
 
@@ -61,23 +61,9 @@ void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 }
 
 
-Double_t sigPar[12]={0.58544,1.39853,0.482806,0.263328,64.9728,-1.28153,-0.108433,0.0446752,0.5,0.01,1,1};
-
 
 void toyMC_testFitter(){
 	
-
-  TF1 *fsig = new TF1("fsig", exp_conv, -1., 11., 12);
-  for(int ipar=0; ipar<4; ipar++)
-    fsig->SetParameter(ipar,sigPar[ipar]);
-
-
-  TF1 *fbkg = new TF1("fbkg", expinv_power, -1., 11., 12);
-  for(int ipar=0;ipar<12;ipar++)
-    {
-      fbkg->SetParameter(ipar,sigPar[ipar]);
-    }
-
 
   char tmp[1000];
   setTDRStyle();
@@ -180,90 +166,145 @@ void toyMC_testFitter(){
 
 
   TH1F* htoyMC_data = (TH1F*)hdata_data[0][0]->Clone();
-  htoyMC_data->SetName("htoyMC_data");
+//   htoyMC_data->SetName("htoyMC_data");
   htoyMC_data->Reset();
   
   TH1F* htoyMC_sig  = (TH1F*)hTemplate_S[0][0]->Clone();
-  htoyMC_sig->SetName("htoyMC_sig");
+//   htoyMC_sig->SetName("htoyMC_sig");
   htoyMC_sig->Reset();
 
   TH1F* htoyMC_bkg  = (TH1F*)hTemplate_B[0][0]->Clone();
-  htoyMC_bkg->SetName("htoyMC_bkg");
+//   htoyMC_bkg->SetName("htoyMC_bkg");
   htoyMC_bkg->Reset();
+
+  TH1F* hfit_sig;
+  TH1F* hfit_bkg;
 
 
   for(int ieta=0; ieta< nEtaBin; ieta++){
     for(int ipt=0; ipt < nPtBin; ipt++){
 
+      // first obtain fit for the template
+      hfit_sig  = (TH1F*)hTemplate_S[ieta][ipt]->Clone();
+      hfit_sig  -> SetName("hfit_sig");
+      if(ieta==0)
+	hfit_sig  -> Rebin(2);      
+//       hfit_sig->Scale(1.0/(float)hfit_sig->Integral());
 
-      // loops over toys
-      for(int iexp=0; iexp<NEXP; iexp++){
-	htoyMC_data->Reset();
-	htoyMC_sig->Reset();
-	htoyMC_bkg->Reset();
+      hfit_bkg  = (TH1F*)hTemplate_B[ieta][ipt]->Clone();
+      hfit_bkg  -> SetName("hfit_bkg");
+      if(ieta==0)
+	hfit_bkg  -> Rebin(2);
+//       hfit_bkg->Scale(1.0/(float)hfit_bkg->Integral());
 
-	UInt_t nowSeed = (unsigned long)gSystem->Now();
-	gRandom->SetSeed(nowSeed);
-	int ndata = gRandom->Poisson(hdata_data[ieta][ipt]->Integral());      
-	int nsig  = gRandom->Poisson(nsig_data[ieta][ipt]);
-	int nbkg  = ndata - nsig;
+      double sigPar[20] = {hfit_sig->GetMaximum(), 1., 0.5, 0.3,
+			hfit_bkg->GetMaximum(),-.3,-1., 0.01, 0.5, 0.01, 1., 1.};
 
-	htoyMC_data->FillRandom(hTemplate_S[ieta][ipt],nsig);
-	htoyMC_data->FillRandom(hTemplate_B[ieta][ipt],nbkg);
+      TF1 *fsig = new TF1("fsig", exp_conv, -1., 11., 12);
+      fsig->SetParameters(sigPar);
+      
+      hfit_sig->Fit(fsig,"","",-1,5.0);
+      
+      TF1 *fbkg = new TF1("fbkg", expinv_power, -1., 11., 12);
 
-	htoyMC_sig  = (TH1F*)hTemplate_S[ieta][ipt]->Clone();
+      fbkg->SetParameters(fsig->GetParameters());
+      fbkg->SetParLimits(5,-10.,1.);
+      fbkg->SetParLimits(6,-1.,2.);
+      fbkg->SetParLimits(7,0.,0.09);
 
-	htoyMC_bkg  = (TH1F*)hTemplate_B[ieta][ipt]->Clone();
+      if(ieta==1 && ipt==3)
+	{
+// 	  cout << "find EE in pt bin 50--80" << endl;
+	  fbkg->FixParameter(5,-0.1);
+	}
+      if(ieta==0 && ipt==4)
+	{
+// 	  cout << "find EB in pt bin 80--120" << endl;
+	  fbkg->FixParameter(5,-0.1);
+	}
 
-	cout << "ndata = " << ndata << "\t nsig = " << nsig << " \t nbkg = " << 
-	  nbkg << endl;
+      fbkg->FixParameter(8,0.5);
+      fbkg->FixParameter(0,fbkg->GetParameter(0)); 
+      fbkg->FixParameter(1,fbkg->GetParameter(1));
+      fbkg->FixParameter(2,fbkg->GetParameter(2));
+      fbkg->FixParameter(3,fbkg->GetParameter(3));
 
-	Double_t scaleEff = 1.0;
-	Double_t scaleNumber[20];
-	for(int i=0;i<20;i++)scaleNumber[i]=1.;
+      hfit_bkg->Fit(fbkg,"b");
 
-
-	// 2nd, get unbinned fit
-// 	Double_t* FuncFitResult;
-
-// 	FuncFitResult = Ifit(htoyMC_data,
-// 			     htoyMC_sig,
-// 			     htoyMC_bkg,0,"RS_100604_fix.dat",
-// 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-// 			     fBinsPt[ipt],fBinsPt[ipt+1],
-// 			     NULL//,
-// 			     //			     scaleNumber
-// 			     );	
-
+//       for(int i=0;i<12;i++)cout << "parameter " << i << " = " << 
+// 	fbkg->GetParameter(i) << endl;
  
-
-// 	Double_t nsigfunc    = FuncFitResult[0]/scaleEff;
-// 	Double_t errnsigfunc = FuncFitResult[1]/scaleEff;
-// 	Double_t nbkgfunc    = FuncFitResult[2]/scaleEff;
-// 	Double_t errnbkgfunc = FuncFitResult[3]/scaleEff;
-  
-      
-// 	Double_t pull = (nsigfunc - nsig_data[ieta][ipt])/nsig_data[ieta][ipt];
-// // 	Double_t pull = (nsigfunc - nsig_data[ieta][ipt])/errnsigfunc;
-      
- 	Double_t* TemplateFitResult;
- 	TemplateFitResult = IfitBin(htoyMC_data,
- 				    htoyMC_sig,
- 				    htoyMC_bkg);
+       htoyMC_sig  = (TH1F*)hTemplate_S[ieta][ipt]->Clone();
+       htoyMC_bkg  = (TH1F*)hTemplate_B[ieta][ipt]->Clone();
 
 
- 	Double_t nsigtemplate    = TemplateFitResult[0]/scaleEff;
- 	Double_t errnsigtemplate = TemplateFitResult[1]/scaleEff;
- 	Double_t nbkgtemplate    = TemplateFitResult[2]/scaleEff;
- 	Double_t errnbkgtemplate = TemplateFitResult[3]/scaleEff;
+       // loops over toys
+       for(int iexp=0; iexp<NEXP; iexp++){
+ 	htoyMC_data->Reset();
 
-  	Double_t pull = (nsigtemplate - nsig_data[ieta][ipt])/errnsigtemplate;
-      
-      
-	htoyResult_pull[ieta][ipt]->Fill(pull);
+ 	UInt_t nowSeed = (unsigned long)gSystem->Now();
+ 	gRandom->SetSeed(nowSeed);
+  	int ndata = hdata_data[ieta][ipt]->Integral();
+ 	int nsig  = gRandom->Poisson(nsig_data[ieta][ipt]);
+ 	int nbkg  = gRandom->Poisson(ndata - nsig_data[ieta][ipt]);
 
-      } // end loops of toys
+ // 	htoyMC_data->FillRandom(hTemplate_S[ieta][ipt],nsig);
+ // 	htoyMC_data->FillRandom(hTemplate_B[ieta][ipt],nbkg);
+ 	htoyMC_data->FillRandom("fsig",nsig);
+ 	htoyMC_data->FillRandom("fbkg",nbkg);
+
+
+	htoyMC_data->Draw();
+
+ 	cout << "ndata = " << ndata << "\t nsig = " << nsig << " \t nbkg = " << 
+ 	  nbkg << endl;
+
+ 	Double_t scaleNumber[20];
+ 	for(int i=0;i<20;i++)scaleNumber[i]=1.;
+
+
+  	// 2nd, get unbinned fit
+  	Double_t* FuncFitResult;
+
+  	FuncFitResult = Ifit(htoyMC_data,
+  			     htoyMC_sig,
+  			     htoyMC_bkg,0,"EGdata_100628.dat",
+  			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
+  			     fBinsPt[ipt],fBinsPt[ipt+1],
+  			     NULL
+  			     );	
+
+
+
+  	Double_t nsigfunc    = FuncFitResult[0];
+  	Double_t errnsigfunc = FuncFitResult[1];
+  	Double_t nbkgfunc    = FuncFitResult[2];
+  	Double_t errnbkgfunc = FuncFitResult[3];
+
+
+   	Double_t pull = (nsigfunc - nsig_data[ieta][ipt])/errnsigfunc;
     
+//  //  	Double_t* TemplateFitResult;
+//  //  	TemplateFitResult = IfitBin(htoyMC_data,
+//  //  				    htoyMC_sig,
+//  //  				    htoyMC_bkg);
+
+
+//  //  	Double_t nsigtemplate    = TemplateFitResult[0];
+//  //  	Double_t errnsigtemplate = TemplateFitResult[1];
+//  //  	Double_t nbkgtemplate    = TemplateFitResult[2];
+//  //  	Double_t errnbkgtemplate = TemplateFitResult[3];
+
+//  //   	Double_t pull = (nsigtemplate - nsig_data[ieta][ipt])/errnsigtemplate;
+    
+    
+  	htoyResult_pull[ieta][ipt]->Fill(pull);
+
+       } // end loops of toys
+    
+      delete fsig;
+      delete fbkg;
+
     } // end of loop over pt bins
 
   } 
