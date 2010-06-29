@@ -45,7 +45,7 @@ const double fBinsPt[]={15,20,30,50,80,120};
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
-const int REBINNINGS=6;
+const int REBINNINGS=3;
 
 double tempNumbers[10][2]={
   {7158.5 , 147.3},
@@ -184,8 +184,9 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
 
   
-  std::string dataFile     = fitData? "TightEESBData_template.root":"fakedata_template.root";
-  std::string templateFile = fitData? "TightEESBData_template.root":"template_template.root";
+  std::string dataFile     = fitData? "SBDataTemplate_HLT_Photon10_CombineMC_noErr.root":"fakedata_template.root";
+  std::string templateFile = fitData? "SBDataTemplate_HLT_Photon10_CombineMC_noErr.root":"template_template.root";
+//   std::string templateFile = fitData? "YJSBMCTemplate_HLT_Photon10_separateBin.root":"template_template.root";
 
 
   TFile* inf_data = new TFile(dataFile.data());
@@ -247,7 +248,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   }
 
   // files for data driven methods
-  std::string SpikeFile       = "spike_withID.root";
+  std::string SpikeFile       = "spike_HLT_Photon10.root";
   TFile* inf_dataSpike = new TFile(SpikeFile.data());
   TH1F* hdata_Spike  = (TH1F*)inf_dataSpike->FindObjectAny("h_EB_comb3Iso_EGdata_SIG");
   hdata_Spike->Rebin(REBINNINGS);
@@ -255,7 +256,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 	 inf_dataSpike->GetName() << endl;
 
 
-  std::string SBFile       = "TightEESBData_template.root";
+  std::string SBFile       = "SBDataTemplate_HLT_Photon10_CombineMC_noErr.root";
   TFile* inf_dataSB = new TFile(SBFile.data());
   TH1F* hdata_SB[nEtaBin];
   for(int ieta=0; ieta < 2; ieta++)
@@ -274,7 +275,6 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   for(int ieta = 0; ieta < nEtaBin; ieta++){
     for(int ipt=0; ipt < nPtBin; ipt++){
       
-
       double scaleEff = doEffCorr? eff[ieta][ipt]: 1.0;
 
       // 1st, get MC truth
@@ -357,48 +357,47 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       if(fitData && !dataDriven)
  	FuncFitResult = Ifit(hdata_data[ieta][ipt],
  			     hTemplate_S[ieta][ipt],
- 			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+ 			     hTemplate_B[ieta][ipt],1,"EGdata_100628.dat",
  			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
  			     fBinsPt[ipt],fBinsPt[ipt+1],
-			     NULL,
-			     scaleNumber);	
+			     NULL
+			     );	
       else if(fitData && dataDriven && ieta==0)
   	FuncFitResult = Ifit(hdata_data[ieta][ipt], 
      			     hdata_Spike,
-//    			     hdata_SB[ieta],1,"RS_100604_fix.dat",
-			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+ 			     hTemplate_B[ieta][ipt],1,"EGdata_100628.dat",
+// 			     hdata_SB[ieta],1,"EGdata_100628.dat",
   			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
   			     fBinsPt[ipt],fBinsPt[ipt+1],
-//    			     hTemplate_B[ieta][ipt],
-   			     NULL,
-			     scaleNumber
+   			     NULL
 			     );	
 
       else if(fitData && dataDriven && ieta==1)
    	FuncFitResult = Ifit(hdata_data[ieta][ipt],
    			     hTemplate_S[ieta][ipt],
-      			     hTemplate_B[ieta][ipt],1,"RS_100604_fix.dat",
+       			     hTemplate_B[ieta][ipt],1,"EGdata_100628.dat",
+//       			     hdata_SB[ieta],1,"EGdata_100628.dat",
    			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
    			     fBinsPt[ipt],fBinsPt[ipt+1],
-  			     NULL,
-			     scaleNumber);	
+  			     NULL
+			     );	
 
       else if(!fitData && dataDriven)
    	FuncFitResult = Ifit(hdata_data[ieta][ipt],
    			     hTemplate_S[ieta][ipt],
-    			     hdata_SB[ieta],0,"RS_100604_fix.dat",
+    			     hTemplate_B[ieta][ipt],0,"EGdata_100628.dat",
    			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
    			     fBinsPt[ipt],fBinsPt[ipt+1],
-  			     hTemplate_B[ieta][ipt],
-			     scaleNumber
+  			     hTemplate_B[ieta][ipt]
 			     );	
       else
 	FuncFitResult = Ifit(hdata_data[ieta][ipt],
 			     hTemplate_S[ieta][ipt],
-			     hTemplate_B[ieta][ipt],0,"RS_100604_fix.dat",
+			     hTemplate_B[ieta][ipt],0,"EGdata_100628.dat",
 			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
 			     fBinsPt[ipt],fBinsPt[ipt+1],
-			     NULL, scaleNumber);	
+			     NULL
+			     );	
 
 
  
@@ -430,6 +429,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
       // modified the data-driven template first
       TH1F* hModifiedSB = (TH1F*)hTemplate_B[ieta][ipt]->Clone();
+//       TH1F* hModifiedSB = (TH1F*)hdata_SB[ieta]->Clone();
 
       for(int ibin=1; ibin <=20; ibin++)
 	{
