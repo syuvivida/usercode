@@ -186,7 +186,6 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   
   std::string dataFile     = fitData? "SBDataTemplate_HLT_Photon10_CombineMC_noErr.root":"fakedata_template.root";
   std::string templateFile = fitData? "SBDataTemplate_HLT_Photon10_CombineMC_noErr.root":"template_template.root";
-//   std::string templateFile = fitData? "YJSBMCTemplate_HLT_Photon10_separateBin.root":"template_template.root";
 
 
   TFile* inf_data = new TFile(dataFile.data());

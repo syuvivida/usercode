@@ -30,67 +30,37 @@ vector<Double_t> Para;
 Double_t SigPDFnorm = 0.;
 Double_t BkgPDFnorm = 0.;
 
-Double_t SBDataPar[12]=
-  {
-    6.00430e-01,
-    1.58383e+00,
-    4.11561e-01,
-    3.08534e-01,
-    6.06736e-02,
-    -1.43427e+00,
-    4.07869e-01,
-    2.54334e-09,
-    5.00000e-01,
-    1.00000e-02,
-    1.00000e+00,
-    1.00000e+00
-  };
-
-
 
 Double_t SBMCPar[2][12]=
   {
     {
-    6.00430e-01,
-    1.58383e+00,
-    4.11561e-01,
-    3.08534e-01,
-    9.73145e-02,
-    -3.61109e-01,
-    -3.27514e-01,
-    7.03607e-02,
-    5.00000e-01,
-    1.00000e-02,
-    1.00000e+00,
-    1.00000e+00},
+      5.34455e+04,
+      1.39715e+00,
+      4.51458e-01,
+      3.24753e-01,
+      2.00750e+03,
+      -2.08708e-01,
+      -4.09513e-01,
+      7.06976e-02,
+      5.00000e-01,
+      1.00000e-02,
+      1.00000e+00,
+      1.00000e+00
+    },
     {
-      5.98523e-01,
-      9.87927e-01,
-      -7.52450e-02,
-      2.82392e-01,
-      7.60784e-02,
-      -7.59068e-01,
-      -9.74272e-02,
-      5.49309e-02,
+      8.97970e+02,
+      9.49639e-01,
+      -6.79620e-02,
+      1.95311e-01,
+      1.61816e+02,
+      -5.91130e-01,
+      -2.50029e-01,
+      2.45641e-13,
       5.00000e-01,
       1.00000e-02,
       1.00000e+00,
       1.00000e+00
     }
-   
-   // pt20
-//     6.00430e-01,
-//     1.58383e+00,
-//     4.11561e-01,
-//     3.08534e-01,
-//     9.10649e-02,
-//     -3.90619e-01,
-//     -3.18373e-01,
-//     6.42629e-02,
-//     5.00000e-01,
-//     1.00000e-02,
-//     1.00000e+00,
-//     1.00000e+00,
   };
 
 
@@ -185,7 +155,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 	       int fit_data=1, std::string dataText="EGdata_comb3Iso_et_0531.dat",
 	       double etamin=-1., double etamax=-1.,
 	       double ptmin=-1., double ptmax=-1.,
-	       TH1F* bkgMCTemplate=NULL)
+	       TH1F* bkgMCTemplate=NULL,
+	       double* scaleNumber=NULL
+	       )
 {
 
   cout << "Input files are " << dataInput->GetName() << "\t" << sigTemplate->GetName() << "\t" << bkgTemplate->GetName() << endl;
@@ -347,7 +319,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
     TH1F* hbkg_MC = (TH1F*)bkgMCTemplate->Clone();
     hbkg_MC->SetName("hbkg_MC");
-    hbkg_MC->Scale(1./hbkg_MC->Integral());
+//     hbkg_MC->Scale(1./hbkg_MC->Integral());
     hbkg_MC->SetMaximum(hbkg_MC->GetMaximum()*3.);
     fit_status = hbkg_MC->Fit(fMC,"b");
     hbkg_MC->Draw();
@@ -361,9 +333,12 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
     for(int i=1;i<=hbkg->GetNbinsX(); i++)
       {
         float binCenter = hbkg->GetBinCenter(i);
-        float scale = fSBMC->Eval(binCenter)<1e-6? 1.0:
+        float scale = fSBMC->Eval(binCenter)<1e-2? 1.0:
 	  fMC->Eval(binCenter)/fSBMC->Eval(binCenter);
+	cout << "scale fMC = " << fMC->Eval(binCenter) << endl;
+	cout << "scale fSBMC = " << fSBMC->Eval(binCenter) << endl;
         cout << "scale = " << scale << endl;
+	scaleNumber[i-1]=scale;
         float value = hbkg->GetBinContent(i);
         float err = hbkg->GetBinError(i);     
         hbkg->SetBinContent(i,value*scale);
@@ -404,7 +379,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
 //   hbkg->SetMaximum(hbkg->GetMaximum()*3.);
   fit_status = hbkg->Fit(f3,"b");
-  hbkg->SetMaximum(5000);
+  hbkg->SetMaximum(hbkg->GetMaximum()*3.);
   hbkg->Draw("e");
   printf("status %d, bkg area %3.3f \n", fit_status,f3->Integral(-1.,11.)/hdata->GetBinWidth(2));
 //   if ( fit_status > 0 ) {
