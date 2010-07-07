@@ -70,9 +70,11 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   TH1F *hdata;
   TH1F *hsig  = (TH1F*)sigTemplate->Clone();
   hsig->SetName("hsig");
+  hsig->Rebin(6);
 
   TH1F *hbkg  = (TH1F*)bkgTemplate->Clone();
   hbkg->SetName("hbkg");
+  hbkg->Rebin(6);
 
   float ndata=0;
   if ( fit_data>0 ) {
@@ -106,6 +108,7 @@ Double_t* IfitBin(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 //   printf("Purity %2.3f, init size %4.3f,  test sample size %4d\n", hsig->Integral()/hsum->Integral(), hsum->Integral(), ndata);
   printf(" -------------------------------------- \n");
 
+  hdata->Rebin(6);
   int nbins = hdata->GetNbinsX();
 
   hsig->Scale(1./hsig->Integral());

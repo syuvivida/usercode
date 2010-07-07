@@ -185,8 +185,13 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 
   if(etamax < 1.55)
     {
-      hsig->Rebin(2);
-      hbkg->Rebin(2);
+      hsig->Rebin(4);
+      hbkg->Rebin(4);
+    }
+  else
+    {
+      hsig->Rebin(3);
+      hbkg->Rebin(3);
     }
 
   hsig->SetLineColor(1);
@@ -266,10 +271,15 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 //   }
 
 
-//   f1->SetParameter(2,f1->GetParameter(2)+0.477-0.3927);
-//   f1->SetParameter(2,0.474);                         
-// //   f1->SetParameter(3,f1->GetParameter(3)*0.2561/0.226);
-//   f1->SetParameter(3,f1->GetParameter(3)*2.69/2.62);
+  if ( etamax < 1.55 ) {
+    f1->SetParameter(1,f1->GetParameter(1)*8.74633e-01/6.68888e-01);//correction from RC
+    f1->SetParameter(2,0.445162);
+    f1->SetParameter(3,f1->GetParameter(3)*2.196/2.236);
+  }else {
+    f1->SetParameter(2,0.15);
+    f1->SetParameter(3,f1->GetParameter(3)*0.47/0.42);
+  }
+
 
   Para.push_back(f1->GetParameter(0)); 
   Para.push_back(f1->GetParameter(1));
@@ -524,7 +534,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   hdata->SetTitle("");
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
-  hdata->Rebin(2);
+  hdata->Rebin(6);
 
   hdata->SetMaximum(hdata->GetMaximum()*1.5);
 
