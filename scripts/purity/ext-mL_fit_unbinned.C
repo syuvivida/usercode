@@ -271,16 +271,34 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 //   }
 
 
+//   if ( etamax < 1.55 ) {
+//     f1->SetParameter(1,f1->GetParameter(1)*8.74633e-01/6.68888e-01);//correction from RC
+//     f1->SetParameter(2,0.445162);
+//     f1->SetParameter(3,f1->GetParameter(3)*2.196/2.236);
+//    }else {
+//      f1->SetParameter(2,0.15);
+//      f1->SetParameter(3,f1->GetParameter(3)*0.47/0.42);
+//    }
+
   if ( etamax < 1.55 ) {
-    f1->SetParameter(1,f1->GetParameter(1)*8.74633e-01/6.68888e-01);//correction from RC
-    f1->SetParameter(2,0.445162);
-    f1->SetParameter(3,f1->GetParameter(3)*2.196/2.236);
-  }else {
-    f1->SetParameter(2,0.15);
-    f1->SetParameter(3,f1->GetParameter(3)*0.47/0.42);
-  }
+     f1->SetParameter(1,f1->GetParameter(1)*8.39614e-01/6.83080e-01);//correction from RC
+     f1->SetParameter(2,4.83182e-01);
+     f1->SetParameter(3,f1->GetParameter(3)*2.33769e-01/2.26323e-01);
 
+//     f1->SetParameter(1,f1->GetParameter(1)*8.73824e-01/7.01961e-01);//correction from RC
+//     f1->SetParameter(2,4.67926e-01);
+//     f1->SetParameter(3,f1->GetParameter(3)*2.39748e-01/2.38900e-01);
 
+//      f1->SetParameter(1,f1->GetParameter(1)*8.18112e-01/6.57107e-01);//correction from RC
+//      f1->SetParameter(2,4.79794e-01);
+//      f1->SetParameter(3,f1->GetParameter(3)*3.01756e-01/3.05279e-01);
+   }else {
+     f1->SetParameter(1,f1->GetParameter(1)*6.99164e-01/5.70974e-01);
+     f1->SetParameter(2,1.48586e-02);
+     f1->SetParameter(3,f1->GetParameter(3)*6.31015e-02/7.01869e-02);
+   }
+
+   
   Para.push_back(f1->GetParameter(0)); 
   Para.push_back(f1->GetParameter(1));
   Para.push_back(f1->GetParameter(2)); // 0.452 - x 
