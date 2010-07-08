@@ -42,14 +42,10 @@ enum{
 _PhoJet15,	// 00
 _PhoJet30,	// 01
 _PhoJet80,	// 02
-// _PhoJet170,	// 03
 _QCD15,         // 04
 _QCD30,         // 05
 _QCD80,         // 06
 _QCD170,         // 07
-// _QCD300,         // 08
-// _QCD470,         // 09
-// _EGdata05,         // 09
 _EGdata,           // 09
 _sig_sum,		// 10
 _bkg_sum,	        // 11
@@ -74,19 +70,14 @@ char type_category[SB_TYPE][32] = {
 };
 
 struct sample_t sample[N_SAMPLES] = {
-{"PhotonJet_Pt15.root",      "PhoJet15",        192200.  , 1143.390  },
-{"PhotonJet_Pt30.root",      "PhoJet30",        20070.   ,  786.794  },
-{"PhotonJet_Pt80.root",      "PhoJet80",        556.5    , 1207.711  },
-// {"PhotonJet_Pt170.root",     "PhoJet170",       2.437    , 1139.400  },
-// {"PhotonJet_Pt300.root",     "PhoJet300",       1.636    , 954.266  },
-{"QCD_Pt15.root",               "QCD15",      876200000. , 6190.500  },
-{"QCD_Pt30.root",               "QCD30",       60410000. , 5269.664  },
-{"QCD_Pt80.root",               "QCD80",         923800. , 3221.800  },
-{"QCD_Pt170.root",              "QCD170",         25470. , 3171.950  },
-// {"QCD_Pt300.root",              "QCD300",          1256. , 3282.660  },
-// {"QCD_Pt470.root",              "QCD470",         87.98  , 2000.  },
-// {"EG_data_May05_2010.root",     "EGdata05",             1. , 0.0001  },
-{"EGdata_132440-135735.root",     "EGdata",             1. , 0.0001  },
+{"PhotonJet_Pt15.root",      "PhoJet15",        192200.  , 614.520  },
+{"PhotonJet_Pt30.root",      "PhoJet30",        20070.   , 1.0253e+03  },
+{"PhotonJet_Pt80.root",      "PhoJet80",        556.5    , 1.28771e+03  },
+{"QCD_Pt15.root",               "QCD15",      876200000. , 6.1768e+03  },
+{"QCD_Pt30.root",               "QCD30",       60410000. , 5.05229e+03  },
+{"QCD_Pt80.root",               "QCD80",         923800. , 2.909e+03  },
+{"QCD_Pt170.root",             "QCD170",         25470.  , 3.1625e+03  },
+{"EGData_131511_139239.root",      "EGdata",             1.  , 0.0001  },
 {"signal sum",			     "sig_sum", 	     -1.     ,-1    },
 {"background sum",		     "bkg_sum", 	     -1.     ,-1    },
 };
@@ -125,6 +116,8 @@ void proj_comb(bool sumw2=true)
     TH2F *h_SIEIE_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH2F *h_HoverE_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH2F *h_ESRatio_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
+
+    TH2F *h_comb3Iso_SIEIE[N_CATEGORIES][N_SAMPLES][SB_TYPE];
 
     TH2F *h_metget_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
     TH2F *h_metdphi_et[N_CATEGORIES][N_SAMPLES][SB_TYPE];
@@ -168,6 +161,11 @@ void proj_comb(bool sumw2=true)
 						     60, 0.0, 300.);
 	      if(sumw2)h_metdphi_et[cate][file][type]->Sumw2();
 	
+
+	      sprintf(buffer,"h_%s_comb3Iso_SIEIE_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
+	      h_comb3Iso_SIEIE[cate][file][type] = new TH2F(buffer,buffer,  120, -1., 11., 100,0,0.05);		    
+	      if(sumw2)h_comb3Iso_SIEIE[cate][file][type]->Sumw2();
+
 
 	      sprintf(buffer,"h_%s_et_%s_%s",tag_category[cate],sample[file].tag, type_category[type]);
 	      h_et[cate][file][type] = new TH1F(buffer,buffer,  60, 0., 300.);
@@ -345,7 +343,7 @@ void proj_comb(bool sumw2=true)
 	  root = (TTree*)f1->FindObjectAny("Analysis");
 	}
 
-      if ( strcmp(sample[file].filename,"EGdata_132440-135735.root")==0)
+      if ( strcmp(sample[file].filename,"EGData_131511_139239.root")==0)
 	{ _isData=1; 
 	  scaling_factor=1.;
 	  root = (TTree*)f1->FindObjectAny("Analysis");
@@ -402,7 +400,7 @@ void proj_comb(bool sumw2=true)
 	FACTORS [ 1] =  0.0 ;
 	FACTORS [ 2] =  0.0 ;
 	FACTORS [ 3] =  0.0500 ;
-	FACTORS [ 4] =  0.0100 ;
+ 	FACTORS [ 4] =  0.0100 ;
 
 	FACTORS [ 5] =  11.;//5.;//1.45;
 	FACTORS [ 6] =  0.00 ;
@@ -432,11 +430,11 @@ void proj_comb(bool sumw2=true)
 	  _ESRATIO
 	};
 		
- 	if ( EvtInfo.HLT_Photon10_L1R != true ) continue;
+ 	if ( _isData==1 && EvtInfo.HLT_Photon15_L1R != true ) continue;
 
 	if ( _isData==1 && !(!EvtInfo.TTBit[36] && !EvtInfo.TTBit[37] && !EvtInfo.TTBit[38] && !EvtInfo.TTBit[39] && !EvtInfo.vtxIsFake && EvtInfo.vtxNdof > 4 && TMath::Abs(EvtInfo.vtxZ) <= 15) ) continue;
 
-// 	if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.ptHat < pthat_min || EvtInfo.ptHat > pthat_max) ) continue;
+    	if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.ptHat < pthat_min || EvtInfo.ptHat > pthat_max) ) continue;
 	int type=0; // for signal or background type	
 	
 	bool findLeadingPhoton=false;
@@ -445,7 +443,7 @@ void proj_comb(bool sumw2=true)
 
 	  int cut_bits = 0;
 		  
- 	  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.et[ipho] < pthat_min || EvtInfo.et[ipho] > pthat_max) ) continue;
+//     	  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.et[ipho] < pthat_min || EvtInfo.et[ipho] > pthat_max) ) continue;
 	  if ( (_isSigMC==1 || _isBkgMC==1) && (EvtInfo.isGenMatched[ipho]==1&& TMath::Abs(EvtInfo.genMomId[ipho])<=22&&EvtInfo.genCalIsoDR04[ipho]<5.0) ) type=0;
 	  else if(_isSigMC==1 || _isBkgMC==1) type=1;
 		  
@@ -476,6 +474,7 @@ void proj_comb(bool sumw2=true)
 	    EvtInfo.hcalTowerSumEtConeDR04[ipho] + EvtInfo.trkSumPtHollowConeDR04[ipho] ;
 
 	  if(comb3Iso > 11.0)continue;
+
 
 	  int cate = -1;
 	  if ( TMath::Abs(EvtInfo.eta[ipho])<1.45 ) {
@@ -581,7 +580,11 @@ void proj_comb(bool sumw2=true)
 
 	  if ( cate == _EB ) {
 	    if (  (cut_bits & (~(1<<_ECALISO | 1<<_SIEIE)))==0 ) {
-	      if ( EvtInfo.sigmaIetaIeta[ipho] > 0.011 && EvtInfo.sigmaIetaIeta[ipho] < 0.012 ) {
+	      
+	      if(EvtInfo.et[ipho]>20.0)h_comb3Iso_SIEIE[cate][file][type]->Fill(comb3Iso, EvtInfo.sigmaIetaIeta[ipho], scaling_factor); 
+
+// 	      if ( EvtInfo.sigmaIetaIeta[ipho] > 0.011 && EvtInfo.sigmaIetaIeta[ipho] < 0.012 ) {
+	      if ( EvtInfo.sigmaIetaIeta[ipho] > 0.011 && EvtInfo.sigmaIetaIeta[ipho] < 0.020 ) {
 		h_comb3IsoSB[cate][file][type]->Fill(comb3Iso, scaling_factor); 
 		h_comb3IsoSB_et[cate][file][type]->Fill(comb3Iso, EvtInfo.et[ipho], scaling_factor); 
 	      }		 
@@ -682,6 +685,7 @@ void proj_comb(bool sumw2=true)
 	  h_npho         [cate][_sig_sum][type]->Add(h_npho[cate][file][type]);
 	  h_metget_et       [cate][_sig_sum][type]->Add(h_metget_et[cate][file][type]);
 	  h_metdphi_et      [cate][_sig_sum][type]->Add(h_metdphi_et[cate][file][type]);
+	  h_comb3Iso_SIEIE  [cate][_sig_sum][type]->Add(h_comb3Iso_SIEIE[cate][file][type]);
 	  h_et           [cate][_sig_sum][type]->Add(h_et[cate][file][type]);
 	  h_et_noIso     [cate][_sig_sum][type]->Add(h_et_noIso[cate][file][type]);
 	  h_eta          [cate][_sig_sum][type]->Add(h_eta[cate][file][type]);
@@ -733,6 +737,7 @@ void proj_comb(bool sumw2=true)
 	  h_npho         [cate][_bkg_sum][type]->Add(h_npho[cate][file][type]);
 	  h_metget_et       [cate][_bkg_sum][type]->Add(h_metget_et[cate][file][type]);
 	  h_metdphi_et      [cate][_bkg_sum][type]->Add(h_metdphi_et[cate][file][type]);
+	  h_comb3Iso_SIEIE  [cate][_bkg_sum][type]->Add(h_comb3Iso_SIEIE[cate][file][type]);
 
 	  h_et     [cate][_bkg_sum][type]->Add(h_et     [cate][file][type]);
 	  h_et_noIso     [cate][_bkg_sum][type]->Add(h_et_noIso     [cate][file][type]);
