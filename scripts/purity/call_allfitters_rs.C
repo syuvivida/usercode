@@ -41,38 +41,12 @@ using namespace std;
 
 // the pt and eta binning
 const double fBinsEta[]={0,1.45,1.7,2.5};
-const double fBinsPt[]={15,20,30,50,80,120};
+const double fBinsPt[]={20,30,50,80,120};
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
 const int REBINNINGS=1;
 
-double tempNumbers[10][2]={
-  {7158.5 , 147.3},
-  {4788.7 , 109.5} ,
-  {896.7 , 40.8},
-  {222.8 , 17.0},
-  {27.1 , 6.1},
-  {6712.3 , 127.6},
-  {3619.0 , 92.8},
-  {559.7 , 33.9},
-  {161.9 , 15.5},
-  {17.1 , 4.8}
-};
-
-double tempPurityNumbers[10][2]={
-  {0.296 +- 0.004},
-  {0.344 +- 0.006},
-  {0.445 +- 0.012},
-  {0.684 +- 0.021},
-  {0.732 +- 0.061},
-  {0.188 +- 0.003},
-  {0.226 +- 0.005},
-  {0.227 +- 0.011},
-  {0.510 +- 0.027},
-  {0.548 +- 0.081}
-
-};
 
 void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 	      Double_t& ratio, Double_t& err)
@@ -134,12 +108,12 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
     {
       sprintf(tmp,"phoEff_Pt%d",i);
       phoEff[i] = (TH1F*)inf_eff->FindObjectAny(tmp);
-      for(int ipt=0; ipt<nPtBin;ipt++)
+      for(int ipt=1; ipt<nPtBin+1;ipt++)
 	{
-	  eff[i][ipt]    =phoEff[i]->GetBinContent(ipt+1);
-	  efferr[i][ipt] =phoEff[i]->GetBinError(ipt+1); 
-	  cout << "Efficiency in ieta=" << i << ", ipt = " << ipt << " bin = " << eff[i][ipt] << 
-	    " +- " << efferr[i][ipt] << endl;
+	  eff[i][ipt-1]    =phoEff[i]->GetBinContent(ipt+1);
+	  efferr[i][ipt-1] =phoEff[i]->GetBinError(ipt+1); 
+	  cout << "Efficiency in ieta=" << i << ", ipt = " << ipt-1 << " bin = " << eff[i][ipt-1] << 
+	    " +- " << efferr[i][ipt-1] << endl;
 	}
    
     }
@@ -795,7 +769,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tgrs_sig_template_EB->SetMarkerStyle(26);
   tgrs_sig_template_EB->SetLineColor(6);
   tgrs_sig_template_EB->SetLineWidth(2);
-  tgrs_sig_template_EB->Draw("p e same");
+//   tgrs_sig_template_EB->Draw("p e same");
 
   TGraphAsymmErrors *tgrs_sig_twobin_EB = new TGraphAsymmErrors(nPtBin, fBinsPtMidPoint, nsig_2bin[0], 
 								fBinsPtError, fBinsPtError, 
@@ -815,7 +789,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   tleg3->SetBorderSize(0);
   if(!fitData)tleg3->AddEntry(tg_mc_sig_EB,"MC Prediction","pl");
   tleg3->AddEntry(tgrs_sig_EB,"Function Fit","pl");
-  tleg3->AddEntry(tgrs_sig_template_EB,"Template Fit","pl");
+//   tleg3->AddEntry(tgrs_sig_template_EB,"Template Fit","pl");
 //   tleg3->AddEntry(tgrs_sig_template_EB,"Function Fit with #sigma_{i#etai#eta} SB","pl");
 //   tleg3->AddEntry(tgrs_sig_twobin_EB,"two bin","pl");
   tleg3->Draw();
