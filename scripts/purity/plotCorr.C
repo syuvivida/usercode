@@ -18,7 +18,7 @@ void plotCorr(char* infname)
    pf_data->SetTitle("");
    pf_data->SetMinimum(ymin);
    pf_data->SetMaximum(ymax);
-   pf_data->GetXaxis()->SetRangeUser(0.01,0.025);
+   pf_data->GetXaxis()->SetRangeUser(0.01,0.02);
    pf_data->SetLineColor(1);
    pf_data->SetMarkerColor(1);
    pf_data->SetMarkerSize(1);
@@ -33,7 +33,7 @@ void plotCorr(char* infname)
    pf_mc->SetTitle("");
    pf_mc->SetMinimum(ymin);
    pf_mc->SetMaximum(ymax);
-   pf_mc->GetXaxis()->SetRangeUser(0.01,0.025);
+   pf_mc->GetXaxis()->SetRangeUser(0.01,0.02);
    pf_mc->SetLineColor(2);
    pf_mc->SetMarkerColor(2);
    pf_mc->SetMarkerSize(1);
