@@ -12,7 +12,6 @@
 #include "TFile.h"
 #include "chi2Nbins.h"
 
-
 using namespace std;
 
 #define NPAR 2
@@ -271,32 +270,23 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 //   }
 
 
-//   if ( etamax < 1.55 ) {
-//     f1->SetParameter(1,f1->GetParameter(1)*8.74633e-01/6.68888e-01);//correction from RC
-//     f1->SetParameter(2,0.445162);
-//     f1->SetParameter(3,f1->GetParameter(3)*2.196/2.236);
-//    }else {
-//      f1->SetParameter(2,0.15);
-//      f1->SetParameter(3,f1->GetParameter(3)*0.47/0.42);
-//    }
-
   if ( etamax < 1.55 ) {
-     f1->SetParameter(1,f1->GetParameter(1)*8.39614e-01/6.83080e-01);//correction from RC
-     f1->SetParameter(2,4.83182e-01);
-     f1->SetParameter(3,f1->GetParameter(3)*2.33769e-01/2.26323e-01);
+    f1->SetParameter(1,f1->GetParameter(1)*8.39614e-01/6.83080e-01);//correction from RC
+    f1->SetParameter(2,4.83182e-01);
+    f1->SetParameter(3,f1->GetParameter(3)*2.33769e-01/2.26323e-01);
 
-//     f1->SetParameter(1,f1->GetParameter(1)*8.73824e-01/7.01961e-01);//correction from RC
-//     f1->SetParameter(2,4.67926e-01);
-//     f1->SetParameter(3,f1->GetParameter(3)*2.39748e-01/2.38900e-01);
+    //     f1->SetParameter(1,f1->GetParameter(1)*8.73824e-01/7.01961e-01);//correction from RC
+    //     f1->SetParameter(2,4.67926e-01);
+    //     f1->SetParameter(3,f1->GetParameter(3)*2.39748e-01/2.38900e-01);
 
-//      f1->SetParameter(1,f1->GetParameter(1)*8.18112e-01/6.57107e-01);//correction from RC
-//      f1->SetParameter(2,4.79794e-01);
-//      f1->SetParameter(3,f1->GetParameter(3)*3.01756e-01/3.05279e-01);
-   }else {
-     f1->SetParameter(1,f1->GetParameter(1)*6.99164e-01/5.70974e-01);
-     f1->SetParameter(2,1.48586e-02);
-     f1->SetParameter(3,f1->GetParameter(3)*6.31015e-02/7.01869e-02);
-   }
+    //      f1->SetParameter(1,f1->GetParameter(1)*8.18112e-01/6.57107e-01);//correction from RC
+    //      f1->SetParameter(2,4.79794e-01);
+    //      f1->SetParameter(3,f1->GetParameter(3)*3.01756e-01/3.05279e-01);
+  }else {
+    f1->SetParameter(1,f1->GetParameter(1)*6.99164e-01/5.70974e-01);
+    f1->SetParameter(2,1.48586e-02);
+    f1->SetParameter(3,f1->GetParameter(3)*6.31015e-02/7.01869e-02);
+  }
 
    
   Para.push_back(f1->GetParameter(0)); 
@@ -325,6 +315,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
       cout << "find EB in pt bin 80--120" << endl;
       fMC->FixParameter(5,-0.1);
     }
+
 
   fMC->FixParameter(8,0.5);
   fMC->FixParameter(0,fMC->GetParameter(0));
@@ -399,6 +390,13 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
       f3->FixParameter(5,-0.1);
     }
 
+//   if(etamax < 1.55 && fabs(ptmin-50.)<1e-6 && 
+//      fabs(ptmax-80.)<1e-6)
+//     {
+//       cout << "find EB in pt bin 50--80" << endl;
+//       f3->FixParameter(5,-0.1);
+//     }
+
   f3->FixParameter(8,0.5);
   f3->FixParameter(0,f3->GetParameter(0)); 
   f3->FixParameter(1,f3->GetParameter(1));
@@ -415,11 +413,23 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
 //     return fitted;
 //   }
 
+  if(etamax < 1.55 && fabs(ptmin-50.)<1e-6 && 
+     fabs(ptmax-80.)<1e-6)
+    {
+      cout << "find EB in pt bin 50--80" << endl;
+      f3->SetParameter(4,0.1066);
+      f3->SetParameter(5,-0.1807);
+      f3->SetParameter(6,-0.4107);
+      f3->SetParameter(7,0.03753);
+    }
+
   Para.push_back(f3->GetParameter(4));
   Para.push_back(f3->GetParameter(5));
   Para.push_back(f3->GetParameter(6));
   Para.push_back(f3->GetParameter(7)); 
   Para.push_back(f3->GetParameter(8)); 
+
+
   BkgPDFnorm = f3->Integral(-1.,11);
   c10->SaveAs(Form("plots/PDFFit_%s.gif",dataInput->GetName()));
   
@@ -547,8 +557,9 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   c1->Draw();  
   //gPad->SetLogy();
   hdata->SetNdivisions(505,"XY");
-  hdata->SetXTitle("Iso_{ECAL}+Iso_{HCAL}+Iso_{TRK} (GeV)");
-  hdata->SetYTitle("Entries");
+//   hdata->SetXTitle("Iso_{ECAL}+Iso_{HCAL}+Iso_{TRK} (GeV)");
+  hdata->SetXTitle("Iso (GeV)");
+  hdata->SetYTitle("Events");
   hdata->SetTitle("");
   hdata->SetMarkerStyle(8);
   hdata->SetMinimum(0.);
@@ -564,7 +575,7 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   //f11->SetFillColor(603);
   f11->SetLineWidth(1);
   f11->SetFillStyle(3001);
-  f11->Draw("same");
+//   f11->Draw("same");
 
   f12->SetParameter(4, para[1]*f12->GetParameter(4)/f12->Integral(-1,11)*hdata->GetBinWidth(2));
   f12->SetFillColor(8);
@@ -595,31 +606,36 @@ Double_t* Ifit(TH1F* dataInput, TH1F* sigTemplate, TH1F* bkgTemplate,
   int nbinForThisBin=0;
   chi2Nbins(f13, hdata, chi2ForThisBin, nbinForThisBin);
 
-  TPaveText *pavetex = new TPaveText(0.43, 0.87, 0.90, 0.92,"NDCBR");
+//   TPaveText *pavetex = new TPaveText(0.43, 0.87, 0.90, 0.92,"NDCBR");
+  TPaveText *pavetex = new TPaveText(0.43, 0.70, 0.90, 0.77,"NDCBR");
   pavetex->SetBorderSize(0);
   pavetex->SetFillColor(0);
   pavetex->SetFillStyle(0);
   pavetex->SetLineWidth(3);
   pavetex->SetTextAlign(12);
-  pavetex->SetTextSize(0.03);
-  pavetex->AddText(Form("#chi^{2}/NDF=%.1f/%d",chi2ForThisBin, nbinForThisBin));
+//   pavetex->SetTextSize(0.03);
+//   pavetex->AddText(Form("#chi^{2}/NDF=%.1f/%d",chi2ForThisBin, nbinForThisBin));
+  pavetex->SetTextSize(0.04);
+  sprintf(text,"SIG %5.1f #pm %5.1f events",para[0], errpara[0]);
+  pavetex->AddText(text);
   pavetex->Draw();
 
-  TLegend *tleg = new TLegend(0.43, 0.60, 0.90, 0.87);
+//   TLegend *tleg = new TLegend(0.43, 0.60, 0.90, 0.87);
+  TLegend *tleg = new TLegend(0.23, 0.80, 0.90, 0.87);
   tleg->SetHeader(dataInput->GetTitle());
 
-  tleg->SetTextSize(0.03);
+  tleg->SetTextSize(0.04);
   tleg->SetFillColor(0);
   tleg->SetShadowColor(0);
   tleg->SetBorderSize(0);
-  sprintf(text,"Data %5.1f events",hdata->Integral());
-  tleg->AddEntry(hdata,text,"pl");
-  sprintf(text,"Fitted %5.1f events",f13->Integral(-1,11)/hdata->GetBinWidth(2));
-  tleg->AddEntry(f13,text,"l");
-  sprintf(text,"SIG %5.1f #pm %5.1f events",para[0], errpara[0]);
-  tleg->AddEntry(f11,text,"f");
-  sprintf(text,"BKG %5.1f #pm %5.1f events",para[1], errpara[1]);
-  tleg->AddEntry(f12,text,"f");
+//   sprintf(text,"Data %5.1f events",hdata->Integral());
+//   tleg->AddEntry(hdata,text,"pl");
+//   sprintf(text,"Fitted %5.1f events",f13->Integral(-1,11)/hdata->GetBinWidth(2));
+//   tleg->AddEntry(f13,text,"l");
+//   sprintf(text,"SIG %5.1f #pm %5.1f events",para[0], errpara[0]);
+//   tleg->AddEntry(f11,text,"f");
+//   sprintf(text,"BKG %5.1f #pm %5.1f events",para[1], errpara[1]);
+//   tleg->AddEntry(f12,text,"f");
   tleg->Draw();
 
 
