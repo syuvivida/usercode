@@ -83,7 +83,7 @@ void histoErrorEiko(TH1F* h, int maxbin, double& total_value, double& total_err)
 
 }
 
-void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr=false, double lumi=8.02){
+void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr=false, double lumi=36.2){
 	
   cout << "do efficiency correction = " << doEffCorr << endl;
   cout << "fit data = " << fitData << endl;
