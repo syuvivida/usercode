@@ -47,6 +47,11 @@ const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
 const int REBINNINGS=1;
 
+const double sysErr[nEtaBin][nPtBin]={ 
+  {15.1,14.3,15.3,14.2},
+  {0,0,0,0}
+};
+
 
 void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
 	      Double_t& ratio, Double_t& err)
@@ -508,9 +513,11 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
   ofstream texout2;
   texout2.open(Form("purity%s.tex",corr.data()));
 
-
   ofstream yieldOut;
   yieldOut.open(Form("yield%s.dat",corr.data()));
+
+  ofstream pasout;
+  pasout.open(Form("PAS%s.tex",corr.data()));
 
   // printing out the results
   for(int ieta=0; ieta < nEtaBin; ieta++){
@@ -535,6 +542,8 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       texout2 << Form("%d-%d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]) << " ";
       texout2 << Form("& %.3f $\\pm$ %.3f", mcpurity[ieta][ipt],mcpurity_err[ieta][ipt]) << " ";
 
+      pasout << Form("%d-%d",(int)fBinsPt[ipt], (int)fBinsPt[ipt+1]) << " ";
+
       cout << " Unbinned fit result : " << endl;
       cout << " purity = " << purity_func[ieta][ipt] << " +- " << purity_err_func[ieta][ipt] << endl;
       cout << " nsig = " <<   nsig_func[ieta][ipt] << " +- " << nsig_err_func[ieta][ipt] << endl;
@@ -543,10 +552,14 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
       fout  << Form("& %.1f +- %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
       fout2 << Form("& %.3f +- %.3f", purity_func[ieta][ipt], purity_err_func[ieta][ipt]) << " ";
-      yieldOut << Form("%.1f %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << endl;
+      yieldOut << Form("%.1f %.1f %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt],
+		       nsig_func[ieta][ipt]*sysErr[ieta][ipt]/100.0) << endl;
 
-      texout << Form("& %.1f $\\pm$ %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt]) << " ";
+      texout << Form("& %.1f $\\pm$ %.1f $\\pm$ %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt],
+		     nsig_func[ieta][ipt]*sysErr[ieta][ipt]/100.0) << " ";
       texout2 << Form("& %.3f $\\pm$ %.3f", purity_func[ieta][ipt], purity_err_func[ieta][ipt]) << " ";
+      pasout << Form("& %.1f $\\pm$ %.1f $\\pm$ %.1f", nsig_func[ieta][ipt], nsig_err_func[ieta][ipt],
+		     nsig_func[ieta][ipt]*sysErr[ieta][ipt]/100.0) << "\\\\" << endl;
 
       cout << " Template Fit result : " << endl;
       cout << " purity = " << purity_template[ieta][ipt] << " +- " << purity_err_template[ieta][ipt] << endl;
@@ -557,7 +570,8 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
       fout << Form("& %.1f +- %.1f", nsig_template[ieta][ipt], nsig_err_template[ieta][ipt]) << " ";
       fout2 << Form("& %.3f +- %.3f", purity_template[ieta][ipt], purity_err_template[ieta][ipt]) << " ";
 
-      texout << Form("& %.1f $\\pm$ %.1f", nsig_template[ieta][ipt], nsig_err_template[ieta][ipt]) << " ";
+      texout << Form("& %.1f $\\pm$ %.1f $\\pm$ %.1f", nsig_template[ieta][ipt], nsig_err_template[ieta][ipt],
+		     nsig_template[ieta][ipt]*sysErr[ieta][ipt]/100.0) << " ";
       texout2 << Form("& %.3f $\\pm$ %.3f", purity_template[ieta][ipt], purity_err_template[ieta][ipt]) << " ";
 
       cout << " Two-bin result : " << endl;
@@ -581,6 +595,7 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 
   texout2.close();
   fout2.close();
+  pasout.close();
 
   yieldOut.close();
   
