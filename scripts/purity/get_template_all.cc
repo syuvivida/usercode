@@ -41,9 +41,6 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   TH1F *h_EB_comb3Iso_EGdata_pt15 = (TH1F*)h_EB_comb3Iso_EGdata_pt15->Clone();
   TH1F *h_EB_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt15->Clone();
 
-  //   h_EB_sig->RebinY(2);
-  //   h_EB_bkg->RebinY(2);
-  //   h_EB_EGdata->RebinY(2);
 
   //pt20-30 bin5-6
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt20", 5,6);
@@ -126,7 +123,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt15", 4,4);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt15", 4,4);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt15", 4,4);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt15", 4,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt15", 4, 4);  
   TH1F *h_EE_comb3Iso_sig_pt15 = (TH1F*)h_EE_comb3Iso_sig_pt15->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt15 = (TH1F*)h_EE_comb3Iso_bkg_pt15->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt15 = (TH1F*)h_EE_comb3Iso_EGdata_pt15->Clone();
@@ -140,7 +137,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt20", 5,6);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt20", 5,6);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt20", 5,6);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt20", 5,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt20", 5,6 );  
   TH1F *h_EE_comb3Iso_sig_pt20 = (TH1F*)h_EE_comb3Iso_sig_pt20->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt20 = (TH1F*)h_EE_comb3Iso_bkg_pt20->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt20 = (TH1F*)h_EE_comb3Iso_EGdata_pt20->Clone();
@@ -150,7 +147,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt30", 7,10);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt30", 7,10);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt30", 7,10);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt30", 7,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt30", 7,10);  
   TH1F *h_EE_comb3Iso_sig_pt30 = (TH1F*)h_EE_comb3Iso_sig_pt30->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt30 = (TH1F*)h_EE_comb3Iso_bkg_pt30->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt30 = (TH1F*)h_EE_comb3Iso_EGdata_pt30->Clone();
@@ -160,7 +157,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt50", 11,16);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt50", 11,16);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt50", 11,16);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt50", 11,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt50", 11,16);  
   TH1F *h_EE_comb3Iso_sig_pt50 = (TH1F*)h_EE_comb3Iso_sig_pt50->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt50 = (TH1F*)h_EE_comb3Iso_bkg_pt50->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt50 = (TH1F*)h_EE_comb3Iso_EGdata_pt50->Clone();
@@ -171,7 +168,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt80", 17,24);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt80", 17,24);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt80", 17,24);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt80", 17,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt80", 17,24);  
   TH1F *h_EE_comb3Iso_sig_pt80 = (TH1F*)h_EE_comb3Iso_sig_pt80->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt80 = (TH1F*)h_EE_comb3Iso_bkg_pt80->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt80 = (TH1F*)h_EE_comb3Iso_EGdata_pt80->Clone();
@@ -181,7 +178,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt120", 25,34);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt120", 25,34);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt120", 25,34);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt120", 25,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt120", 25,34);  
   TH1F *h_EE_comb3Iso_sig_pt120 = (TH1F*)h_EE_comb3Iso_sig_pt120->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt120 = (TH1F*)h_EE_comb3Iso_bkg_pt120->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt120 = (TH1F*)h_EE_comb3Iso_EGdata_pt120->Clone();
@@ -192,7 +189,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt170", 35,46);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt170", 35,46);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt170", 35,46);  
-  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt170", 35,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt170", 35,46);  
   TH1F *h_EE_comb3Iso_sig_pt170 = (TH1F*)h_EE_comb3Iso_sig_pt170->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt170 = (TH1F*)h_EE_comb3Iso_bkg_pt170->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt170 = (TH1F*)h_EE_comb3Iso_EGdata_pt170->Clone();
@@ -364,7 +361,7 @@ void get_template_all(int mctest=0,const char* filename="proj_comb.root"){
   h_EE_comb3Iso_sig_pt120->SetLineColor(4);
   h_EE_comb3Iso_sig_pt120->Draw("hist e same");
 
-  std::string dataMC = mctest==0? "SBData" : "SBMC";
+  std::string dataMC = mctest==0? "Integral_SBData" : "Integral_SBMC";
   TFile *fout = new TFile(Form("%sTemplate_%s",dataMC.data(),filename),"recreate");
   cout << "producing " << fout->GetName() << endl;
 

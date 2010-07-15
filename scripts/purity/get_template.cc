@@ -1,11 +1,19 @@
-void get_template(int mctest=0){
+#include <TH2.h>
+#include <TH1.h>
+#include <TFile.h>
+#include <iostream>
+#include <string>
+#include <TCanvas.h>
+
+using namespace std;
+
+void get_template(int mctest=0,const char* filename="proj_comb.root"){
 
 
-    TFile *f = new TFile("WithSumW2_oneMC_proj_comb.root");   
-    TFile *f1 = new TFile("WithSumW2_oneMC_proj_comb.root");
-    
-    cout << "opening " << f->GetName() << endl;
-    cout << "opening " << f1->GetName() << endl;
+  TFile *f = new TFile(filename);   
+  TFile *f1 = new TFile(filename);
+  cout << "projecting " << f->GetName() << endl;
+  cout << "projecting " << f1->GetName() << endl;
 
   TH2F *h_EB_sig = (TH2F*)f->Get("h_EB_comb3Iso_et_sig_sum_SIG");
   TH2F *h_EB_bkg = (TH2F*)f->Get("h_EB_comb3Iso_et_bkg_sum_BKG");
@@ -14,8 +22,8 @@ void get_template(int mctest=0){
   //for data
   TH2F *h_EB_EGdata = (TH2F*)f1->Get("h_EB_comb3Iso_et_EGdata_SIG");
   TH2F *h_EE_EGdata = (TH2F*)f1->Get("h_EE_comb3Iso_et_EGdata_SIG");
-//   TH2F *h_EB_EGdataSB = (TH2F*)f1->Get("h_EB_comb3IsoSB_et_EGdata_SIG");
-//   TH2F *h_EE_EGdataSB = (TH2F*)f1->Get("h_EE_comb3IsoSB_et_EGdata_SIG");
+  TH2F *h_EB_EGdataSB = (TH2F*)f1->Get("h_EB_comb3IsoSB_et_EGdata_SIG");
+  TH2F *h_EE_EGdataSB = (TH2F*)f1->Get("h_EE_comb3IsoSB_et_EGdata_SIG");
   if ( mctest==1 ) {
     TH2F *h_EB_EGdata = (TH2F*)f1->Get("h_EB_comb3Iso_et_sig_sum_SIG");
     TH2F *h_EE_EGdata = (TH2F*)f1->Get("h_EE_comb3Iso_et_sig_sum_SIG");
@@ -27,88 +35,85 @@ void get_template(int mctest=0){
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt15", 4,4);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt15", 4,4);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt15", 4,4);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt15", 4,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt15", 4,4);  
   TH1F *h_EB_comb3Iso_sig_pt15 = (TH1F*)h_EB_comb3Iso_sig_pt15->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt15 = (TH1F*)h_EB_comb3Iso_bkg_pt15->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt15 = (TH1F*)h_EB_comb3Iso_EGdata_pt15->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt15->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt15->Clone();
 
-//   h_EB_sig->RebinY(2);
-//   h_EB_bkg->RebinY(2);
-//   h_EB_EGdata->RebinY(2);
 
   //pt20-30 bin5-6
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt20", 5,6);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt20", 5,6);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt20", 5,6);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt20", 5,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt20", 5,6);  
   TH1F *h_EB_comb3Iso_sig_pt20 = (TH1F*)h_EB_comb3Iso_sig_pt20->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt20 = (TH1F*)h_EB_comb3Iso_bkg_pt20->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt20 = (TH1F*)h_EB_comb3Iso_EGdata_pt20->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt20 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt20->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt20 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt20->Clone();
 
   //pt30-50 bin7-10
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt30", 7,10);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt30", 7,10);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt30", 7,10);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt30", 7,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt30", 7,10);  
   TH1F *h_EB_comb3Iso_sig_pt30 = (TH1F*)h_EB_comb3Iso_sig_pt30->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt30 = (TH1F*)h_EB_comb3Iso_bkg_pt30->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt30 = (TH1F*)h_EB_comb3Iso_EGdata_pt30->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt30 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt30->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt30 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt30->Clone();
 
   //pt50-80 bin11-16
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt50", 11,16);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt50", 11,16);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt50", 11,16);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt50", 11,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt50", 11,16);  
   TH1F *h_EB_comb3Iso_sig_pt50 = (TH1F*)h_EB_comb3Iso_sig_pt50->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt50 = (TH1F*)h_EB_comb3Iso_bkg_pt50->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt50 = (TH1F*)h_EB_comb3Iso_EGdata_pt50->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt50 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt50->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt50 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt50->Clone();
 
 
   //pt80-120 bin17-24
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt80", 17,24);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt80", 17,24);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt80", 17,24);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt80", 17,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt80", 17,24);  
   TH1F *h_EB_comb3Iso_sig_pt80 = (TH1F*)h_EB_comb3Iso_sig_pt80->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt80 = (TH1F*)h_EB_comb3Iso_bkg_pt80->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt80 = (TH1F*)h_EB_comb3Iso_EGdata_pt80->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt80 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt80->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt80 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt80->Clone();
 
   //pt120-170 bin25-34
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt120", 25,34);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt120", 25,34);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt120", 25,34);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt120", 25,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt120", 25,34);  
   TH1F *h_EB_comb3Iso_sig_pt120 = (TH1F*)h_EB_comb3Iso_sig_pt120->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt120 = (TH1F*)h_EB_comb3Iso_bkg_pt120->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt120 = (TH1F*)h_EB_comb3Iso_EGdata_pt120->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt120 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt120->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt120 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt120->Clone();
 
 
   //pt170-230 bin35-46
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt170", 35,46);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt170", 35,46);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt170", 35,46);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt170", 35,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt170", 35,46);  
   TH1F *h_EB_comb3Iso_sig_pt170 = (TH1F*)h_EB_comb3Iso_sig_pt170->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt170 = (TH1F*)h_EB_comb3Iso_bkg_pt170->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt170 = (TH1F*)h_EB_comb3Iso_EGdata_pt170->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt170 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt170->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt170 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt170->Clone();
 
 
   //pt170-300 bin47-60
   h_EB_sig->ProjectionX("h_EB_comb3Iso_sig_pt230", 47,60);
   h_EB_bkg->ProjectionX("h_EB_comb3Iso_bkg_pt230", 47,60);
   h_EB_EGdata->ProjectionX("h_EB_comb3Iso_EGdata_pt230", 47,60);  
-//   h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt230", 47,60);  
+  h_EB_EGdataSB->ProjectionX("h_EB_comb3IsoSB_EGdata_pt230", 47,60);  
   TH1F *h_EB_comb3Iso_sig_pt230 = (TH1F*)h_EB_comb3Iso_sig_pt230->Clone();
   TH1F *h_EB_comb3Iso_bkg_pt230 = (TH1F*)h_EB_comb3Iso_bkg_pt230->Clone();
   TH1F *h_EB_comb3Iso_EGdata_pt230 = (TH1F*)h_EB_comb3Iso_EGdata_pt230->Clone();
-//   TH1F *h_EB_comb3IsoSB_EGdata_pt230 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt230->Clone();
+  TH1F *h_EB_comb3IsoSB_EGdata_pt230 = (TH1F*)h_EB_comb3IsoSB_EGdata_pt230->Clone();
 
   //-------------------------------------------------------------------------------------
 
@@ -118,88 +123,88 @@ void get_template(int mctest=0){
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt15", 4,4);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt15", 4,4);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt15", 4,4);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt15", 4,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt15", 4, 4);  
   TH1F *h_EE_comb3Iso_sig_pt15 = (TH1F*)h_EE_comb3Iso_sig_pt15->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt15 = (TH1F*)h_EE_comb3Iso_bkg_pt15->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt15 = (TH1F*)h_EE_comb3Iso_EGdata_pt15->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt15->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt15 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt15->Clone();
 
-//   h_EE_sig->RebinY(2);
-//   h_EE_bkg->RebinY(2);
-//   h_EE_EGdata->RebinY(2);
+  //   h_EE_sig->RebinY(2);
+  //   h_EE_bkg->RebinY(2);
+  //   h_EE_EGdata->RebinY(2);
 
   //pt20-30 bin5-6
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt20", 5,6);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt20", 5,6);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt20", 5,6);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt20", 5,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt20", 5,6 );  
   TH1F *h_EE_comb3Iso_sig_pt20 = (TH1F*)h_EE_comb3Iso_sig_pt20->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt20 = (TH1F*)h_EE_comb3Iso_bkg_pt20->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt20 = (TH1F*)h_EE_comb3Iso_EGdata_pt20->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt20 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt20->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt20 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt20->Clone();
 
   //pt30-50 bin7-10
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt30", 7,10);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt30", 7,10);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt30", 7,10);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt30", 7,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt30", 7,10);  
   TH1F *h_EE_comb3Iso_sig_pt30 = (TH1F*)h_EE_comb3Iso_sig_pt30->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt30 = (TH1F*)h_EE_comb3Iso_bkg_pt30->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt30 = (TH1F*)h_EE_comb3Iso_EGdata_pt30->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt30 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt30->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt30 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt30->Clone();
 
   //pt50-80 bin11-16
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt50", 11,16);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt50", 11,16);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt50", 11,16);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt50", 11,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt50", 11,16);  
   TH1F *h_EE_comb3Iso_sig_pt50 = (TH1F*)h_EE_comb3Iso_sig_pt50->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt50 = (TH1F*)h_EE_comb3Iso_bkg_pt50->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt50 = (TH1F*)h_EE_comb3Iso_EGdata_pt50->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt50 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt50->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt50 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt50->Clone();
 
 
   //pt80-120 bin17-24
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt80", 17,24);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt80", 17,24);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt80", 17,24);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt80", 17,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt80", 17,24);  
   TH1F *h_EE_comb3Iso_sig_pt80 = (TH1F*)h_EE_comb3Iso_sig_pt80->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt80 = (TH1F*)h_EE_comb3Iso_bkg_pt80->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt80 = (TH1F*)h_EE_comb3Iso_EGdata_pt80->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt80 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt80->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt80 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt80->Clone();
 
   //pt120-170 bin25-34
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt120", 25,34);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt120", 25,34);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt120", 25,34);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt120", 25,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt120", 25,34);  
   TH1F *h_EE_comb3Iso_sig_pt120 = (TH1F*)h_EE_comb3Iso_sig_pt120->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt120 = (TH1F*)h_EE_comb3Iso_bkg_pt120->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt120 = (TH1F*)h_EE_comb3Iso_EGdata_pt120->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt120 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt120->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt120 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt120->Clone();
 
 
   //pt170-230 bin35-46
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt170", 35,46);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt170", 35,46);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt170", 35,46);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt170", 35,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt170", 35,46);  
   TH1F *h_EE_comb3Iso_sig_pt170 = (TH1F*)h_EE_comb3Iso_sig_pt170->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt170 = (TH1F*)h_EE_comb3Iso_bkg_pt170->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt170 = (TH1F*)h_EE_comb3Iso_EGdata_pt170->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt170 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt170->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt170 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt170->Clone();
 
 
   //pt170-300 bin47-60
   h_EE_sig->ProjectionX("h_EE_comb3Iso_sig_pt230", 47,60);
   h_EE_bkg->ProjectionX("h_EE_comb3Iso_bkg_pt230", 47,60);
   h_EE_EGdata->ProjectionX("h_EE_comb3Iso_EGdata_pt230", 47,60);  
-//   h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt230", 47,60);  
+  h_EE_EGdataSB->ProjectionX("h_EE_comb3IsoSB_EGdata_pt230", 47,60);  
   TH1F *h_EE_comb3Iso_sig_pt230 = (TH1F*)h_EE_comb3Iso_sig_pt230->Clone();
   TH1F *h_EE_comb3Iso_bkg_pt230 = (TH1F*)h_EE_comb3Iso_bkg_pt230->Clone();
   TH1F *h_EE_comb3Iso_EGdata_pt230 = (TH1F*)h_EE_comb3Iso_EGdata_pt230->Clone();
-//   TH1F *h_EE_comb3IsoSB_EGdata_pt230 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt230->Clone();
+  TH1F *h_EE_comb3IsoSB_EGdata_pt230 = (TH1F*)h_EE_comb3IsoSB_EGdata_pt230->Clone();
 
 
   if(mctest==1) {
@@ -356,91 +361,92 @@ void get_template(int mctest=0){
   h_EE_comb3Iso_sig_pt120->SetLineColor(4);
   h_EE_comb3Iso_sig_pt120->Draw("hist e same");
 
-
-  TFile *fout = new TFile("template.root","recreate");
+  std::string dataMC = mctest==0? "SBData" : "SBMC";
+  TFile *fout = new TFile(Form("%sTemplate_%s",dataMC.data(),filename),"recreate");
+  cout << "producing " << fout->GetName() << endl;
 
   h_EB_comb3Iso_sig_pt15->Write();
   h_EB_comb3Iso_bkg_pt15->Write();
   h_EB_comb3Iso_EGdata_pt15 ->Write();
-//   h_EB_comb3IsoSB_EGdata_pt15 ->Write();
+  h_EB_comb3IsoSB_EGdata_pt15 ->Write();
                           
 
   h_EB_comb3Iso_sig_pt20->Write();
   h_EB_comb3Iso_bkg_pt20->Write();
   h_EB_comb3Iso_EGdata_pt20 ->Write();
-//   h_EB_comb3IsoSB_EGdata_pt20 ->Write();
+  h_EB_comb3IsoSB_EGdata_pt20 ->Write();
                           
 
   h_EB_comb3Iso_sig_pt30->Write();
   h_EB_comb3Iso_bkg_pt30->Write();
   h_EB_comb3Iso_EGdata_pt30 ->Write();
-//   h_EB_comb3IsoSB_EGdata_pt30 ->Write();
+  h_EB_comb3IsoSB_EGdata_pt30 ->Write();
                           
   h_EB_comb3Iso_sig_pt50->Write();
   h_EB_comb3Iso_bkg_pt50->Write();
   h_EB_comb3Iso_EGdata_pt50->Write();
-//   h_EB_comb3IsoSB_EGdata_pt50->Write();
+  h_EB_comb3IsoSB_EGdata_pt50->Write();
                           
   h_EB_comb3Iso_sig_pt80->Write();
   h_EB_comb3Iso_bkg_pt80->Write();
   h_EB_comb3Iso_EGdata_pt80->Write();
-//   h_EB_comb3IsoSB_EGdata_pt80->Write();
+  h_EB_comb3IsoSB_EGdata_pt80->Write();
                          
   h_EB_comb3Iso_sig_pt120->Write();
   h_EB_comb3Iso_bkg_pt120->Write();
   h_EB_comb3Iso_EGdata_pt120->Write();
-//   h_EB_comb3IsoSB_EGdata_pt120->Write();
+  h_EB_comb3IsoSB_EGdata_pt120->Write();
 
   h_EB_comb3Iso_sig_pt170->Write();
   h_EB_comb3Iso_bkg_pt170->Write();
   h_EB_comb3Iso_EGdata_pt170->Write();
-//   h_EB_comb3IsoSB_EGdata_pt170->Write();
+  h_EB_comb3IsoSB_EGdata_pt170->Write();
 
   h_EB_comb3Iso_sig_pt230->Write();
   h_EB_comb3Iso_bkg_pt230->Write();
   h_EB_comb3Iso_EGdata_pt230->Write();
-//   h_EB_comb3IsoSB_EGdata_pt230->Write();
+  h_EB_comb3IsoSB_EGdata_pt230->Write();
 
 
   h_EE_comb3Iso_sig_pt15->Write();
   h_EE_comb3Iso_bkg_pt15->Write();
   h_EE_comb3Iso_EGdata_pt15->Write();
-//   h_EE_comb3IsoSB_EGdata_pt15->Write();
+  h_EE_comb3IsoSB_EGdata_pt15->Write();
 
   h_EE_comb3Iso_sig_pt20->Write();
   h_EE_comb3Iso_bkg_pt20->Write();
   h_EE_comb3Iso_EGdata_pt20->Write();
-//   h_EE_comb3IsoSB_EGdata_pt20->Write();
+  h_EE_comb3IsoSB_EGdata_pt20->Write();
 
   h_EE_comb3Iso_sig_pt30->Write();
   h_EE_comb3Iso_bkg_pt30->Write();
   h_EE_comb3Iso_EGdata_pt30->Write();
-//   h_EE_comb3IsoSB_EGdata_pt30->Write();
+  h_EE_comb3IsoSB_EGdata_pt30->Write();
                           
   h_EE_comb3Iso_sig_pt50->Write();
   h_EE_comb3Iso_bkg_pt50->Write();
   h_EE_comb3Iso_EGdata_pt50->Write();
-//   h_EE_comb3IsoSB_EGdata_pt50->Write();
+  h_EE_comb3IsoSB_EGdata_pt50->Write();
                           
   h_EE_comb3Iso_sig_pt80->Write();
   h_EE_comb3Iso_bkg_pt80->Write();
   h_EE_comb3Iso_EGdata_pt80->Write();
-//   h_EE_comb3IsoSB_EGdata_pt80->Write();
+  h_EE_comb3IsoSB_EGdata_pt80->Write();
                           
   h_EE_comb3Iso_sig_pt120->Write();
   h_EE_comb3Iso_bkg_pt120->Write();
   h_EE_comb3Iso_EGdata_pt120->Write();
-//   h_EE_comb3IsoSB_EGdata_pt120->Write();
+  h_EE_comb3IsoSB_EGdata_pt120->Write();
 
   h_EE_comb3Iso_sig_pt170->Write();
   h_EE_comb3Iso_bkg_pt170->Write();
   h_EE_comb3Iso_EGdata_pt170->Write();
-//   h_EE_comb3IsoSB_EGdata_pt170->Write();
+  h_EE_comb3IsoSB_EGdata_pt170->Write();
 
   h_EE_comb3Iso_sig_pt230->Write();
   h_EE_comb3Iso_bkg_pt230->Write();
   h_EE_comb3Iso_EGdata_pt230->Write();
-//   h_EE_comb3IsoSB_EGdata_pt230->Write();
+  h_EE_comb3IsoSB_EGdata_pt230->Write();
 
   fout->Close();
 

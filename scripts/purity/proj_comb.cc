@@ -77,7 +77,7 @@ struct sample_t sample[N_SAMPLES] = {
 {"QCD_Pt30.root",               "QCD30",       60410000. , 5.05229e+03  },
 {"QCD_Pt80.root",               "QCD80",         923800. , 2.909e+03  },
 {"QCD_Pt170.root",             "QCD170",         25470.  , 3.1625e+03  },
-{"EGData_131511_139239.root",      "EGdata",             1.  , 0.0001  },
+{"EGData_131511_139790.root",      "EGdata",             1.  , 0.0001  },
 {"signal sum",			     "sig_sum", 	     -1.     ,-1    },
 {"background sum",		     "bkg_sum", 	     -1.     ,-1    },
 };
@@ -343,7 +343,7 @@ void proj_comb(bool sumw2=true)
 	  root = (TTree*)f1->FindObjectAny("Analysis");
 	}
 
-      if ( strcmp(sample[file].filename,"EGData_131511_139239.root")==0)
+      if ( strcmp(sample[file].filename,"EGData_131511_139790.root")==0)
 	{ _isData=1; 
 	  scaling_factor=1.;
 	  root = (TTree*)f1->FindObjectAny("Analysis");
@@ -448,11 +448,6 @@ void proj_comb(bool sumw2=true)
 	  else if(_isSigMC==1 || _isBkgMC==1) type=1;
 		  
 	  int good_LS=0;
-	  //		  if (
-	  //		      ){
-	  //		    good_LS = 1;
-	  //		  }
-	  // 		  if ( _isData==1 && good_LS!=1 ) continue;
 		  
 	  if ( EvtInfo.et[ipho]<15. ) continue;
 		  
@@ -473,8 +468,15 @@ void proj_comb(bool sumw2=true)
 	  double comb3Iso = EvtInfo.ecalRecHitSumEtConeDR04[ipho] + 
 	    EvtInfo.hcalTowerSumEtConeDR04[ipho] + EvtInfo.trkSumPtHollowConeDR04[ipho] ;
 
-	  if(comb3Iso > 11.0)continue;
+ 	  if(comb3Iso > 11.0)continue;
 
+	  //Pasquale's cuts
+// 	  if(EvtInfo.ecalRecHitSumEtConeDR04[ipho] > 4.2+0.003*EvtInfo.et[ipho])
+// 	    continue;
+// 	  if(EvtInfo.hcalTowerSumEtConeDR04[ipho] > 2.2 + 0.001*EvtInfo.et[ipho])
+// 	    continue;
+// 	  if(EvtInfo.trkSumPtHollowConeDR04[ipho] > 2.0 + 0.001*EvtInfo.et[ipho])
+// 	    continue;
 
 	  int cate = -1;
 	  if ( TMath::Abs(EvtInfo.eta[ipho])<1.45 ) {
@@ -490,9 +492,6 @@ void proj_comb(bool sumw2=true)
 // 	    if ( EvtInfo.sigmaIetaIeta[ipho]>0.002 ) continue;
 
 		    
-	    //  		    if ( EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EB_ECALISO_MAX) cut_bits |= (1<<_ECALISO);
-	    //  		    if ( EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EB_HCALISO_MAX) cut_bits |= (1<<_HCALISO);
-	    //    		    if ( EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] > EB_TRKISO_MAX) cut_bits |= (1<<_TRKISO);
  
 	    if ( comb3Iso > EB_ECALISO_MAX ) cut_bits |= (1<<_ECALISO);
 	    if ( EvtInfo.hadronicOverEm[ipho] > EB_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
@@ -504,9 +503,6 @@ void proj_comb(bool sumw2=true)
 
 	  if ( TMath::Abs(EvtInfo.eta[ipho])>1.7 && TMath::Abs(EvtInfo.eta[ipho])<2.5) {
 	    cate = _EE;
-	    //   		    if ( EvtInfo.ecalRecHitSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EE_ECALISO_MAX) cut_bits |= (1<<_ECALISO);
-	    //   		    if ( EvtInfo.hcalTowerSumEtConeDR04[ipho]/EvtInfo.et[ipho] > EE_HCALISO_MAX) cut_bits |= (1<<_HCALISO);
-	    //    		    if ( EvtInfo.trkSumPtHollowConeDR04[ipho]/EvtInfo.et[ipho] > EE_TRKISO_MAX) cut_bits |= (1<<_TRKISO);
 	    if ( comb3Iso > EE_ECALISO_MAX ) cut_bits |= (1<<_ECALISO);
 	    if ( EvtInfo.hadronicOverEm[ipho] > EE_HOVERE_MAX) cut_bits |= (1<<_HOVERE);
 	    if ( TMath::Abs(EvtInfo.ESRatio[ipho]) < EE_ESRATIO_MIN ) cut_bits |= (1<<_ESRATIO);
