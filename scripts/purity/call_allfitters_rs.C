@@ -797,13 +797,14 @@ void call_allfitters_rs(bool fitData=false, bool dataDriven=false,bool doEffCorr
 //   tgrs_sig_twobin_EB->Draw("p e same");
 
   TLegend *tleg3 = new TLegend(0.193, 0.168, 0.642, 0.437);
-  tleg3->SetHeader("EB Photons");
+  //  tleg3->SetHeader("EB Photons");
   tleg3->SetFillColor(0);
   tleg3->SetFillStyle(0);
   tleg3->SetShadowColor(0);
   tleg3->SetBorderSize(0);
   if(!fitData)tleg3->AddEntry(tg_mc_sig_EB,"MC Prediction","pl");
-  tleg3->AddEntry(tgrs_sig_EB,"Function Fit","pl");
+  //  tleg3->AddEntry(tgrs_sig_EB,"Function Fit","pl");
+  tleg3->AddEntry(tgrs_sig_EB,"Isolated #gamma","pl");
 //   tleg3->AddEntry(tgrs_sig_template_EB,"Template Fit","pl");
 //   tleg3->AddEntry(tgrs_sig_template_EB,"Function Fit with #sigma_{i#etai#eta} SB","pl");
 //   tleg3->AddEntry(tgrs_sig_twobin_EB,"two bin","pl");
