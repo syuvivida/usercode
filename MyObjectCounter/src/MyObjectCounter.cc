@@ -5,8 +5,6 @@
 // Shin-Shan Yu
 
 
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
 #include "syu/MyObjectCounter/header/MyObjectCounter.hh"
 
 
@@ -54,25 +52,6 @@ void MyObjectCounter::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
   _nIn++;
   _alg.init(iEvent, false, false, true, true); 
-
-  // filter trigger path
-  edm::Handle<TriggerResults> TrgResultsHandle = _alg.getTrgResultsHandle();
-  if (TrgResultsHandle.isValid()) {
-  
-    TriggerNames TrgNames( *TrgResultsHandle );   
-    unsigned int TrgIdx1 = TrgNames.triggerIndex( "HLT_Photon10_L1R" );
-    unsigned int TrgIdx2 = TrgNames.triggerIndex( "HLT_Photon15_L1R" );
-
-    vector<string> hlNames_ = TrgNames.triggerNames();
-    if(_nIn < 3){
-      for (size_t i=0; i<TrgNames.size(); ++i) {
-	cout<<"HLT bit = "<<i<<"   "<<hlNames_[i]<<endl;
-      }
-    }
-	
-    if (!TrgResultsHandle->accept(TrgIdx1) &&
-	!TrgResultsHandle->accept(TrgIdx2)) return; 	
-  }
 
    
   // Start to fill the main root branches

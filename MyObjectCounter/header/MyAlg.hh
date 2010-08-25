@@ -30,7 +30,7 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -243,6 +243,7 @@ private:
   edm::Handle<trigger::TriggerEvent>           _trgEventHandle;
   edm::Handle<edm::TriggerResults>             _trgResultsHandle;
   edm::Handle<reco::VertexCollection>          _vertexHandle;
+  edm::TriggerNames                            _trgName;
 
 
   std::vector<reco::GenParticleCollection::const_iterator> _hardGenParticle;

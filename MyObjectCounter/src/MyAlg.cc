@@ -39,6 +39,8 @@ MyAlg& MyAlg::operator=( const MyAlg& original)
     _myConvPhotons    = original._myConvPhotons;
     _myPhotonMCTruth  = original._myPhotonMCTruth;
 
+    _trgName          = original._trgName;
+
     _phoEtMap         = original._phoEtMap;
     _eleEtMap         = original._eleEtMap;
     _genEtMap         = original._genEtMap;
@@ -166,6 +168,11 @@ void MyAlg::getHandles(const edm::Event  & event,
   if(doHLT){
     edm::InputTag HLTName          = _parameters.getParameter<edm::InputTag>("HLTLabel");
     event.getByLabel(HLTName, _trgResultsHandle);
+    if(_trgResultsHandle.isValid())
+      {
+	_trgName = event.triggerNames(*_trgResultsHandle);
+      }
+    
   }
 
   const edm::InputTag l1EmNonIsoTag = edm::InputTag("hltL1extraParticles","NonIsolated");
@@ -321,9 +328,8 @@ void MyAlg::dumpGenInfo(const edm::Event& iEvent)
 void MyAlg::turnOnHLTBit(std::string trgPath, int trgCode)
 {
   if(!_trgResultsHandle.isValid())return;
-  edm::TriggerNames trgName( *_trgResultsHandle);   
-  int NTrigger = trgName.size();
-  int tempIndex = (unsigned int)trgName.triggerIndex( trgPath); 
+  int NTrigger = _trgName.size();
+  int tempIndex = (unsigned int)_trgName.triggerIndex( trgPath); 
   if(tempIndex < NTrigger && _trgResultsHandle->accept(tempIndex))
     _event_trigger |= trgCode;
   return;

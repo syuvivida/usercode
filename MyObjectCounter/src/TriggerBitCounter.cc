@@ -5,7 +5,6 @@
 // Shin-Shan Yu
 
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
 #include "syu/MyObjectCounter/header/TriggerBitCounter.hh"
 
 TriggerBitCounter::TriggerBitCounter(const edm::ParameterSet& iConfig):
