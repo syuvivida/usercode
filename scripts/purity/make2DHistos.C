@@ -15,7 +15,7 @@
   std::string xvar="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
   int xnbin=120, double xmin=-1.0, double xmax=11.0, 
   std::string yvar="pt",
-  int ynbin=1000, double ymin=0.0, double ymax=500.0,
+  int ynbin=500, double ymin=0.0, double ymax=500.0,
   double split = 1.0,bool normalize=false)
 
   ==============================================================================================*/
@@ -40,8 +40,6 @@ const int MAXBIN_ALLOWED=1000;
 const double lumi = 0.1; // 100/nb
 // the pt and eta binning
 const double fBinsEta[]={0,1.45,1.7,2.5};
-const double fBinsPt[]={20,30,50,80,120,180,240,500};
-const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
 
@@ -84,7 +82,7 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
        TH2F *htmp = (TH2F*)h->Clone();
        htmp->SetName("htmp");
        htmp->Reset();
-       sigTree[i]->Draw(Form("(%s):%s>>htmp",xvar.data(),yvar.data()),allCut);
+       sigTree[i]->Draw(Form("%s:(%s)>>htmp",yvar.data(),xvar.data()),allCut);
        htmp->Sumw2();
        htmp->Scale(sigWeight[i]);
        cout << "scale = " << sigWeight[i] << endl;
@@ -112,7 +110,7 @@ void make2DHistos(std::string outputName="",
 		  std::string xvar="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
 		  int xnbin=120, double xmin=-1.0, double xmax=11.0, 
 		  std::string yvar="pt",
-		  int ynbin=1000, double ymin=0.0, double ymax=500.0,
+		  int ynbin=500, double ymin=0.0, double ymax=500.0,
 		  double split = 1.0,
 		  bool normalize=false)
 {
