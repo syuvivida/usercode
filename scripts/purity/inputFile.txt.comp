@@ -1,0 +1,13 @@
+/mc/QCD_mess/comp/MPA_EGData.root 1 1 -1 -1
+/mc/QCD_mess/comp/MPA_PhotonJetPt15.root 1.922e+05 1.22177e+06 15 30
+/mc/QCD_mess/comp/MPA_PhotonJetPt30.root 2.007e+04 973806 30 80
+/mc/QCD_mess/comp/MPA_PhotonJetPt80.root 5.565e+02 1.28771e+06 80 170
+/mc/QCD_mess/comp/MPA_PhotonJetPt170.root 2.437e+01 1.1596e+06 170 300
+/mc/QCD_mess/comp/MPA_PhotonJetPt300.root 1.636e+00 1.03324e+06 300 1000000
+/mc/QCD_mess/comp/MPA_QCDPt15.root 8.762e+08 4.6968e+06 15 20
+/mc/QCD_mess/comp/MPA_QCDPt20.root 2.988e+08 6.51873e+07 20 30 
+/mc/QCD_mess/comp/MPA_QCDPt30.root 6.041e+07 5.09384e+06 30 80
+/mc/QCD_mess/comp/MPA_QCDPt80.root 9.238e+05 2.09496e+06 80 170
+/mc/QCD_mess/comp/MPA_QCDPt170.root 2.547e+04 2.06312e+06 170 300
+/mc/QCD_mess/comp/MPA_QCDPt300.root 1.256e+03 1.3847e+06 300 470
+/mc/QCD_mess/comp/MPA_QCDPt470.root 8.798e+01 1.09365e+06 470 1000000
