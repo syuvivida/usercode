@@ -1,3 +1,12 @@
+#include <TMath.h>
+#include <TF1.h>
+#include <TH1.h>
+#include <iostream>
+#include <fstream>
+#include <TMinuit.h>
+
+using namespace std;
+
 Double_t exp_conv (Double_t *v, Double_t *par)
 {
   Double_t ctau = par[1];
@@ -13,26 +22,53 @@ Double_t exp_conv (Double_t *v, Double_t *par)
 }
 
 
-void fitLifeTime(const char* histoName)
+void fitLifeTime(TH1D* hfit)
 {
-  const float fit_lo_edge =  0.1;
-  const float fit_hi_edge =  3.0;
+  const float fit_lo_edge =  -1.0;
+  const float fit_hi_edge =   5.0;
+  const int BINNINGS = 3;
 
-  TH1F* hfit = (TH1F*)gROOT->FindObject(histoName);
-  TF1* f1 = new TF1("f1",exp_conv, fit_lo_edge, fit_hi_edge,4);
+//   TH1D* hfit = (TH1D*)gROOT->FindObject(histoName);
+//   hfit->Rebin(BINNINGS);
+
+  TF1* f1 = new TF1("f1",exp_conv, -1., 20.,11);
+  f1->SetParName(0, "normalization");
+  f1->SetParName(1, "exp ctau");
+  f1->SetParName(2, "offset");
+  f1->SetParName(3, "exp sigma");
   
-  f1->SetParameters(hfit->Integral(), 1., 0.5, 0.3);
+  f1->SetParameters(hfit->Integral(), 1., 0.6, 0.3);
   f1->SetNpx(2500);
   f1->SetLineColor(2);
 
   hfit->Fit("f1","","",fit_lo_edge,fit_hi_edge);
+  gMinuit->mnmatu(1);
+
   hfit->Fit("f1","","",fit_lo_edge,fit_hi_edge);
 
+  hfit->Fit("f1","","",fit_lo_edge,fit_hi_edge);
+  int fit_status=hfit->Fit("f1","","",fit_lo_edge,fit_hi_edge);
+  if(fit_status!=0)
+  {	
+     f1->SetParameters(1000., 1., 0.6, 0.3);
+     hfit->Fit("f1","","",fit_lo_edge,fit_hi_edge);
+   }
+
+
+  ofstream fout;
+  fout.open("sigGausMean.dat",ios::app | ios::out);
+  fout << hfit->GetName() << "\t" << f1->GetParameter(2) << " " << 
+    f1->GetParError(2) << endl;
+  fout.close();
+  
   cout << " ==================== Fit result ==================" << endl;
   for(int i=0; i< f1-> GetNpar(); i++)
     cout << " Parameter " << i << " = " << f1->GetParameter(i) << endl;
   
   cout << " ==================================================" << endl;
+
+
+
 
 }
 
