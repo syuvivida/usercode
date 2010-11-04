@@ -10,316 +10,337 @@
 #include <TMath.h> 
 #include <TCanvas.h>
 #include <TLegend.h>
-#include "purity_twobin.C"
-#include "ext-mL_fit.C"
-#include "ext-mL_fit_unbinned.C"
-#include "setTDRStyle.C"
+#include "Nov03_ext-mL_fit_ISO.C"
 
 using namespace std;
 
 // the pt and eta binning
-const Double_t fBinsEta[]={0,1.45,1.7,2.5};
-const Double_t fBinsPt[]={15,20,30,50,80,120};
+const double fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300,10000};
+const double fBinsEta[2] = {0.5,2.0};
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
-const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
+const int nEtaBin = 2;
 
-const int REBINNINGS=1;
+const int REBINNINGS_TEMP=3;
+const int REBINNINGS_DATA=5;
+const int NEXP = 200;
 
-const int NEXP = 1000;
+const float fit_lo = -1.;
+const float fit_hi = 20.;
 
-Double_t nsig_data[nEtaBin][nPtBin]=
-  {
-     {
-       983.3,
-       278.2,
-       93.7,
-       21.5,
-       3.0
-     },
-     {
-       702.7,
-       208.0,
-       58.1,
-       15.7,
-       0.8
-     }
+Double_t mySigPDFnorm = 1.0;
+Double_t myBkgPDFnorm = 1.0;
 
-  };
-
-
-void ratioErr(Double_t n1, Double_t n1err, Double_t n2, Double_t n2err,
-	      Double_t& ratio, Double_t& err)
+Double_t mysum_norm(Double_t *v, Double_t *par)
 {
-  if(fabs(n1+n2)<1e-6){ratio=0;err=0;return;}
-  ratio = (n1)/(n1+n2);
-  
-  err= pow(1/(n1+n2) - n1/(n1+n2)/(n1+n2),2)*n1err*n1err+
-    pow(n1/(n1+n2)/(n1+n2),2)*n2err*n2err; 
-
-  err = sqrt(err);
-
+  Double_t func1 = exp_conv(v,par)/mySigPDFnorm;
+  Double_t func2 = expinv_power(v,par)/myBkgPDFnorm;
+  Double_t func = func1+func2;
+  if (func<=0) func=1e-10;
+  return func;
 }
-
 
 
 void toyMC_testFitter(){
 	
-
+  gSystem->mkdir("toysPlot");
   char tmp[1000];
-  setTDRStyle();
-  // settings for purity TGraphAsymmetryErrors
-  Double_t fBinsPtMidPoint[nPtBin]={0};
-  Double_t fBinsPtError[nPtBin]={0};
-  
-  for(int ipt=0; ipt < nPtBin; ipt++)
-    {
-      fBinsPtMidPoint[ipt] = 0.5*(fBinsPt[ipt+1]+fBinsPt[ipt]);
-      fBinsPtError[ipt] = 0.5*(fBinsPt[ipt+1]-fBinsPt[ipt]);
-    }
 
 
-  Double_t nsig_func[nEtaBin][nPtBin]={{0}};
-  Double_t nbkg_func[nEtaBin][nPtBin]={{0}};
-  Double_t nsig_err_func[nEtaBin][nPtBin]={{0}};
-  Double_t nbkg_err_func[nEtaBin][nPtBin]={{0}};
+  TH1D* htoyResult_pull[nEtaBin][nPtBin];
+  TH1D* htoyResult_bias[nEtaBin][nPtBin];
 
-
-  TH1F* hTemplate_S[nEtaBin][nPtBin];
-  TH1F* hTemplate_B[nEtaBin][nPtBin];
-  TH1F* hTemplate_data[nEtaBin][nPtBin];
-  TH1F* hdata_S[nEtaBin][nPtBin];
-  TH1F* hdata_B[nEtaBin][nPtBin];
-  TH1F* hdata_data[nEtaBin][nPtBin];
-
-
-  
-  std::string dataFile     = "rawYield.root";
-  std::string templateFile = "rawYield.root";
-
-  TFile* inf_data = new TFile(dataFile.data());
-  TFile* inf_template = new TFile(templateFile.data());
-
-  TH1F* htoyResult_pull[nEtaBin][nPtBin];
+  TFile* finFile = new TFile("template_comb3Iso_template.root");  
+  TH1D* hTemplate = (TH1D*)finFile->FindObjectAny("h_EB_comb3Iso_EGdata_pt21");
+  hTemplate->Reset();
 
   
   char* dec[2] = {"EB","EE"};
   for(int ieta=0; ieta<nEtaBin; ieta++){
     for(int ipt=0; ipt < nPtBin; ipt++){
 
-      htoyResult_pull[ieta][ipt] = new TH1F(Form("hpull_Eta_%.2f_%.2f_Et_%d_%d",		
-						 fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-						 (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]),
+      htoyResult_pull[ieta][ipt] = new TH1D(Form("hpull_%s_pt_%d",		
+						 dec[ieta],
+						 (int)fBinsPt[ipt]),
  					    "",50,-5.0,5.0);
 
 
-      // getting histograms from data root file
-      sprintf(tmp,"hOutputData_%s_pt%d",dec[ieta],(int)fBinsPt[ipt]);
-      cout << "looking for histogram " << tmp << " in file " << 
-	inf_data->GetName() << endl;
-      hdata_data[ieta][ipt] = (TH1F*)inf_data->FindObjectAny(tmp);
-      hdata_data[ieta][ipt]->Rebin(REBINNINGS);
-      // setting titles
-      sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
-	      fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-	      (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
-      hdata_data[ieta][ipt]->SetTitle(tmp);
+      htoyResult_bias[ieta][ipt] = new TH1D(Form("hbias_%s_pt_%d",		
+						 dec[ieta],
+						 (int)fBinsPt[ipt]),
+ 					    "",100,-0.5,0.5);
 
-
-      sprintf(tmp,"hOutputSig_%s_pt%d",dec[ieta],(int)fBinsPt[ipt]);
-      cout << "looking for histogram " << tmp << " in file " << 
-	inf_data->GetName() << endl;
-      hdata_S[ieta][ipt] = (TH1F*)inf_data->FindObjectAny(tmp);
-      hdata_S[ieta][ipt]->Rebin(REBINNINGS);
-
-      sprintf(tmp,"hOutputBkg_%s_pt%d",dec[ieta],(int)fBinsPt[ipt]);
-      cout << "looking for histogram " << tmp << " in file " << 
-	inf_data->GetName() << endl;
-      hdata_B[ieta][ipt] = (TH1F*)inf_data->FindObjectAny(tmp);
-      hdata_B[ieta][ipt]->Rebin(REBINNINGS);
-
-
-      // getting histogram for template root file
-      sprintf(tmp,"hOutputData_%s_pt%d",dec[ieta],(int)fBinsPt[ipt]);
-      cout << "looking for histogram " << tmp << " in file " << 
-	inf_template->GetName() << endl;
-      hTemplate_data[ieta][ipt] = (TH1F*)inf_template->FindObjectAny(tmp);
-      hTemplate_data[ieta][ipt]->Rebin(REBINNINGS);
-      sprintf(tmp,"%.2f < |#eta(#gamma)| < %.2f, %d < p_{T}(#gamma) < %d GeV",
-	      fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-	      (int)fBinsPt[ipt], (int)fBinsPt[ipt+1]);
-      hTemplate_data[ieta][ipt]->SetTitle(tmp);
-
-      sprintf(tmp,"hOutputSig_%s_pt%d",dec[ieta],(int)fBinsPt[ipt]);
-      cout << "looking for histogram " << tmp << " in file " << 
-	inf_template->GetName() << endl;
-      hTemplate_S[ieta][ipt] = (TH1F*)inf_template->FindObjectAny(tmp);
-      hTemplate_S[ieta][ipt]->Rebin(REBINNINGS);
-
-      sprintf(tmp,"hOutputBkg_%s_pt%d",dec[ieta],(int)fBinsPt[ipt]);
-      cout << "looking for histogram " << tmp << " in file " << 
-	inf_template->GetName() << endl;
-      hTemplate_B[ieta][ipt] = (TH1F*)inf_template->FindObjectAny(tmp);
-      hTemplate_B[ieta][ipt]->Rebin(REBINNINGS);
 
     }
   }
 
 
-  TH1F* htoyMC_data = (TH1F*)hdata_data[0][0]->Clone();
-//   htoyMC_data->SetName("htoyMC_data");
-  htoyMC_data->Reset();
-  
-  TH1F* htoyMC_sig  = (TH1F*)hTemplate_S[0][0]->Clone();
-//   htoyMC_sig->SetName("htoyMC_sig");
-  htoyMC_sig->Reset();
 
-  TH1F* htoyMC_bkg  = (TH1F*)hTemplate_B[0][0]->Clone();
-//   htoyMC_bkg->SetName("htoyMC_bkg");
-  htoyMC_bkg->Reset();
+  TH1D* hfit_sig;
+  TH1D* hfit_bkg;
 
-  TH1F* hfit_sig;
-  TH1F* hfit_bkg;
+  TH1D* hTemplate_S[nEtaBin][nPtBin];
+  TH1D* hTemplate_B[nEtaBin][nPtBin];
+  TH1D* hdata_data[nEtaBin][nPtBin];
+  TH1D* htemp;
 
 
   for(int ieta=0; ieta< nEtaBin; ieta++){
     for(int ipt=0; ipt < nPtBin; ipt++){
 
-      // first obtain fit for the template
-      hfit_sig  = (TH1F*)hTemplate_S[ieta][ipt]->Clone();
-      hfit_sig  -> SetName("hfit_sig");
-      if(ieta==0)
-	hfit_sig  -> Rebin(2);      
-//       hfit_sig->Scale(1.0/(float)hfit_sig->Integral());
-
-      hfit_bkg  = (TH1F*)hTemplate_B[ieta][ipt]->Clone();
-      hfit_bkg  -> SetName("hfit_bkg");
-      if(ieta==0)
-	hfit_bkg  -> Rebin(2);
-//       hfit_bkg->Scale(1.0/(float)hfit_bkg->Integral());
-
-      double sigPar[20] = {hfit_sig->GetMaximum(), 1., 0.5, 0.3,
-			hfit_bkg->GetMaximum(),-.3,-1., 0.01, 0.5, 0.01, 1., 1.};
-
-      TF1 *fsig = new TF1("fsig", exp_conv, -1., 11., 12);
-      fsig->SetParameters(sigPar);
+      if(ieta!=0 || (ipt!=7 && ipt!=4))continue;
+//       if(ieta!=0 || (ipt!=4))continue;
       
-      hfit_sig->Fit(fsig,"","",-1,5.0);
+       // getting histograms from data root file
+       sprintf(tmp,"h_%s_comb3Iso_EGdata_pt%d",dec[ieta],(int)fBinsPt[ipt]);
+       cout << "looking for histogram " << tmp << " in file " << 
+	 finFile->GetName() << endl;
+       hdata_data[ieta][ipt] = (TH1D*)finFile->FindObjectAny(tmp);
+       hdata_data[ieta][ipt]->Rebin(REBINNINGS_DATA);
+
+       // filling unbinned data
+       htemp = (TH1D*)hdata_data[ieta][ipt]->Clone("htemp");
+       htemp->Reset();
+
+
+       sprintf(tmp,"h_%s_comb3Iso_sig_pt%d",dec[ieta],(int)fBinsPt[ipt]);
+       cout << "looking for histogram " << tmp << " in file " << 
+	 finFile->GetName() << endl;
+       hTemplate_S[ieta][ipt] = (TH1D*)finFile->FindObjectAny(tmp);
+       hTemplate_S[ieta][ipt]->Rebin(REBINNINGS_TEMP);
+
+       if(ieta==0)
+       sprintf(tmp,"h_%s_comb3Iso_bkg_pt%d",dec[ieta],(int)fBinsPt[ipt]);
+       else if(ieta==1)
+	 sprintf(tmp,"h_%s_comb3IsoSB_EGdata_pt%d",dec[ieta],(int)fBinsPt[ipt]);
+       cout << "looking for histogram " << tmp << " in file " << 
+	 finFile->GetName() << endl;
+       hTemplate_B[ieta][ipt] = (TH1D*)finFile->FindObjectAny(tmp);
+       hTemplate_B[ieta][ipt]->Rebin(REBINNINGS_TEMP);
+
+
+
+
+       const int NRETURN = 3*NPAR;
+       Double_t myFitPar[NRETURN]={0};
+       Double_t* FuncFitResult;
+       FuncFitResult = Ifit("EGdata_comb3Iso_et.dat",
+			    hTemplate_S[ieta][ipt],hTemplate_B[ieta][ipt],
+			    hdata_data[ieta][ipt], myFitPar,
+			    (int)fBinsPt[ipt], dec[ieta],2);
+
+       Double_t nsig_input    = FuncFitResult[0];
+       Double_t nsigerr_input = FuncFitResult[1];
+       Double_t nbkg_input    = FuncFitResult[2];
+       Double_t nbkgerr_input = FuncFitResult[3];
+
+	    
+       Double_t sigFitPar[NPAR]={0};
+       for(int ipar=0; ipar<NPAR; ipar++)
+	 sigFitPar[ipar] = myFitPar[ipar];
+
+       Double_t bkgFitPar[NPAR]={0};
+       for(int ipar=0; ipar<NPAR; ipar++)
+	 bkgFitPar[ipar] = myFitPar[ipar+NPAR];
+
+
+       Double_t sumFitPar[NPAR]={0};
+       for(int ipar=0; ipar<NPAR; ipar++)
+	 sumFitPar[ipar] = myFitPar[ipar+NPAR*2];
+
+
+       TF1* fsig = new TF1("fsig", exp_conv, fit_lo, fit_hi, 11);
+       fsig->SetParameters(sigFitPar);       
+       fsig->SetParameter(0,1.0);
+
+       mySigPDFnorm = fsig->Integral(fit_lo,fit_hi);
+       cout << "mySigPDFnorm = " << mySigPDFnorm << endl;
       
-      TF1 *fbkg = new TF1("fbkg", expinv_power, -1., 11., 12);
+       TF1* fbkg = new TF1("fbkg", expinv_power, fit_lo, fit_hi, 11);
+       fbkg->SetParameters(bkgFitPar);
+       fbkg->SetParameter(4,1.0);
 
-      fbkg->SetParameters(fsig->GetParameters());
-      fbkg->SetParLimits(5,-10.,1.);
-      fbkg->SetParLimits(6,-1.,2.);
-      fbkg->SetParLimits(7,0.,0.09);
-
-      if(ieta==1 && ipt==3)
-	{
-// 	  cout << "find EE in pt bin 50--80" << endl;
-	  fbkg->FixParameter(5,-0.1);
-	}
-      if(ieta==0 && ipt==4)
-	{
-// 	  cout << "find EB in pt bin 80--120" << endl;
-	  fbkg->FixParameter(5,-0.1);
-	}
-
-      fbkg->FixParameter(8,0.5);
-      fbkg->FixParameter(0,fbkg->GetParameter(0)); 
-      fbkg->FixParameter(1,fbkg->GetParameter(1));
-      fbkg->FixParameter(2,fbkg->GetParameter(2));
-      fbkg->FixParameter(3,fbkg->GetParameter(3));
-
-      hfit_bkg->Fit(fbkg,"b");
-
-//       for(int i=0;i<12;i++)cout << "parameter " << i << " = " << 
-// 	fbkg->GetParameter(i) << endl;
+       myBkgPDFnorm = fbkg->Integral(fit_lo, fit_hi);
+       cout << "myBkgPDFnorm = " << myBkgPDFnorm << endl;
  
-       htoyMC_sig  = (TH1F*)hTemplate_S[ieta][ipt]->Clone();
-       htoyMC_bkg  = (TH1F*)hTemplate_B[ieta][ipt]->Clone();
+       TF1* fsum = new TF1("fsum",mysum_norm, fit_lo, fit_hi,11);
+       fsum->SetParameters(sumFitPar);
+
+       cout << "Using nsig_input = " << nsig_input << endl;
+       cout << "Using nbkg_input = " << nbkg_input << endl;
+
+       fsum->SetParameter(0, nsig_input*hdata_data[ieta][ipt]->GetBinWidth(2));
+       fsum->SetParameter(4, nbkg_input*hdata_data[ieta][ipt]->GetBinWidth(2));
+       fsum->SetLineColor(2);
+       fsum->SetNpx(2500);
+
+       cout << "fsum integral = " << fsum->Integral(fit_lo,fit_hi) << endl;
+       for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
 
 
-       // loops over toys
+//        FILE *infile =  fopen("EGdata_comb3Iso_et.dat","r");  
+//        float xdata, xdata1, xdata2;
+//        for (int i=0;i<datapoint;i++){
+// 	 fscanf(infile,"%f %f %f",&xdata, &xdata1, &xdata2);
+// 	 if( xdata1 >= fBinsPt[ipt] && xdata1 < fBinsPt[ipt+1] && xdata<20.) {
+// 	   if(TMath::Abs(xdata2)<1.45) {
+// 	     htemp->Fill(xdata);
+// 	   }
+// 	 }
+//        }
+
+
+       
+//        TCanvas* myCanvas = new TCanvas("myCanvas","myCanvas");
+//        htemp->Draw();
+//        fsum->Draw("same");
+
+       
+//        // loops over toys
        for(int iexp=0; iexp<NEXP; iexp++){
- 	htoyMC_data->Reset();
 
- 	UInt_t nowSeed = (unsigned long)gSystem->Now();
- 	gRandom->SetSeed(nowSeed);
-  	int ndata = hdata_data[ieta][ipt]->Integral();
- 	int nsig  = gRandom->Poisson(nsig_data[ieta][ipt]);
- 	int nbkg  = gRandom->Poisson(ndata - nsig_data[ieta][ipt]);
-
- // 	htoyMC_data->FillRandom(hTemplate_S[ieta][ipt],nsig);
- // 	htoyMC_data->FillRandom(hTemplate_B[ieta][ipt],nbkg);
- 	htoyMC_data->FillRandom("fsig",nsig);
- 	htoyMC_data->FillRandom("fbkg",nbkg);
-
-
-	htoyMC_data->Draw();
-
- 	cout << "ndata = " << ndata << "\t nsig = " << nsig << " \t nbkg = " << 
- 	  nbkg << endl;
-
- 	Double_t scaleNumber[20];
- 	for(int i=0;i<20;i++)scaleNumber[i]=1.;
-
-
-  	// 2nd, get unbinned fit
-  	Double_t* FuncFitResult;
-
-  	FuncFitResult = Ifit(htoyMC_data,
-  			     htoyMC_sig,
-  			     htoyMC_bkg,0,"EGdata_100628.dat",
-  			     fBinsEta[ieta*2],fBinsEta[ieta*2+1],
-  			     fBinsPt[ipt],fBinsPt[ipt+1],
-  			     NULL
-  			     );	
+	 TH1D* htoyMC_data = (TH1D*)hdata_data[ieta][ipt]->Clone("htoyMC_data");
+	 htoyMC_data->Reset();
+	 
+	 TH1D* htoyMC_sig  = (TH1D*)hTemplate_S[ieta][ipt]->Clone("htoyMC_sig");
+// 	 htoyMC_sig->Reset();
+	 
+	 TH1D* htoyMC_bkg  = (TH1D*)hTemplate_B[ieta][ipt]->Clone("htoyMC_bkg");
+// 	 htoyMC_bkg->Reset();
 
 
 
-  	Double_t nsigfunc    = FuncFitResult[0];
-  	Double_t errnsigfunc = FuncFitResult[1];
-  	Double_t nbkgfunc    = FuncFitResult[2];
-  	Double_t errnbkgfunc = FuncFitResult[3];
+
+	 UInt_t nowSeed = (unsigned long)gSystem->Now();
+	 gRandom->SetSeed(nowSeed);
+	 int nsiggen  = gRandom->Poisson(nsig_input);
+	 int nbkggen  = gRandom->Poisson(nbkg_input);
+	 int ndata = nsiggen + nbkggen;
+
+	 // reset toy MC data
+	 htoyMC_data->Reset();
+	 ofstream fout;
+	 std::string toyData = "toy.dat";
+	 fout.open(toyData.data());
+	 for(int ieve=0; ieve < nsiggen; ieve++)
+	   {
+	     Double_t xvalue = fsig->GetRandom(fit_lo,fit_hi);
+	     fout << xvalue << " " << 
+	       0.5*(fBinsPt[ipt]+fBinsPt[ipt+1]) << " " << fBinsEta[ieta] << endl;
+	     htoyMC_data->Fill(xvalue);
+	   }
+	     
+	 for(int ieve=0; ieve < nbkggen; ieve++)
+	   {
+	     Double_t xvalue = fbkg->GetRandom(fit_lo,fit_hi);
+	     fout << xvalue << " " << 
+	       0.5*(fBinsPt[ipt]+fBinsPt[ipt+1]) << " " << fBinsEta[ieta] << endl;
+	     htoyMC_data->Fill(xvalue);
+	   }
+	     
+	 fout.close();
+
+// 	 htoyMC_data->FillRandom("fsig",nsiggen);
+// 	 htoyMC_data->FillRandom("fbkg",nbkggen);
 
 
-   	Double_t pull = (nsigfunc - nsig_data[ieta][ipt])/errnsigfunc;
+// 	 htoyMC_data->Draw();
+	 
+	 cout << "Generated ndata = " << ndata << "\t nsiggen = " << nsiggen << " \t nbkggen = " << 
+	   nbkggen << endl;
+
+
+	 Double_t* toyFitResult;
+	 Double_t toyMyFitPar[NRETURN]={0};
+
+	 toyFitResult =  Ifit(toyData.data(), 
+			      htoyMC_sig, htoyMC_bkg,
+			      htoyMC_data, toyMyFitPar,
+			      (int)fBinsPt[ipt], dec[ieta],2);
+
+  	Double_t nsigtoyfit    = toyFitResult[0];
+  	Double_t errnsigtoyfit = toyFitResult[1];
+  	Double_t nbkgtoyfit    = toyFitResult[2];
+  	Double_t errnbkgtoyfit = toyFitResult[3];
+
+	 Double_t toySumFitPar[NPAR]={0};
+	 for(int ipar=0; ipar<NPAR; ipar++)
+	 toySumFitPar[ipar] = toyMyFitPar[ipar+NPAR*2];
+
+
+ 	 fsum->SetParameters(toySumFitPar);
+   	 fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+  	 fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+//    	 fsum->SetParameter(0, (float)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+//   	 fsum->SetParameter(4, (float)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+
+	 if(iexp%4==0){
+ 	 TCanvas* myCanvas = new TCanvas("myCanvas","SHIT");
+	 htoyMC_data->SetMaximum(htoyMC_data->GetMaximum()*1.5);
+ 	 htoyMC_data->Draw();
+ 	 fsum->Draw("same");
+	 myCanvas->Print(Form("toysPlot/fit_%03i.gif",iexp));
+	 delete myCanvas;
+	 }
+
+	 cout << "fsum integral = " << fsum->Integral(-1,20) << endl;
+	 for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
+
+
+	
+	cout << "Total data = " << nsiggen + nbkggen << endl;
+	cout << "toyMC_data->Integral() = " << htoyMC_data->Integral() << endl;
+	cout << "Expected nsig = " << nsiggen << " and Fitted nsig = " << nsigtoyfit << endl;
+	cout << "Expected nbkg = " << nbkggen << " and Fitted nbkg = " << nbkgtoyfit << endl;
+	cout << "Input nsig = " << nsig_input << endl;
+
+    	Double_t pull = (nsigtoyfit - nsig_input)/errnsigtoyfit;
     
-//  //  	Double_t* TemplateFitResult;
-//  //  	TemplateFitResult = IfitBin(htoyMC_data,
-//  //  				    htoyMC_sig,
-//  //  				    htoyMC_bkg);
+   	htoyResult_pull[ieta][ipt]->Fill(pull);
 
+	Double_t bias = (nsigtoyfit - nsig_input)/nsig_input;
+	htoyResult_bias[ieta][ipt]->Fill(bias);
 
-//  //  	Double_t nsigtemplate    = TemplateFitResult[0];
-//  //  	Double_t errnsigtemplate = TemplateFitResult[1];
-//  //  	Double_t nbkgtemplate    = TemplateFitResult[2];
-//  //  	Double_t errnbkgtemplate = TemplateFitResult[3];
-
-//  //   	Double_t pull = (nsigtemplate - nsig_data[ieta][ipt])/errnsigtemplate;
-    
-    
-  	htoyResult_pull[ieta][ipt]->Fill(pull);
 
        } // end loops of toys
+
+       TCanvas* myToyCanvas = new TCanvas("myToyCanvas","",1000,500);
+       myToyCanvas->Divide(2,1);
+       myToyCanvas->cd(1);
+
+       htoyResult_pull[ieta][ipt]->SetFillColor(kAzure-4);
+       htoyResult_pull[ieta][ipt]->SetFillStyle(1001);
+       htoyResult_pull[ieta][ipt]->Draw();
+
+       myToyCanvas->cd(2);
+
+       htoyResult_bias[ieta][ipt]->SetFillColor(kViolet-9);
+       htoyResult_bias[ieta][ipt]->SetFillStyle(1001);
+       htoyResult_bias[ieta][ipt]->Draw();
     
-      delete fsig;
-      delete fbkg;
+       delete fsig;
+       delete fbkg;
+
 
     } // end of loop over pt bins
 
+
   } 
 
+
+  TFile* outFile = new TFile("fittertest.root",
+			     "recreate");
+
   for(int ieta=0; ieta < nEtaBin; ieta++){
-    TFile* outFile = new TFile(Form("fitterTest_%s.root",dec[ieta]),
-			       "recreate");
-   
-    for(int ipt=0; ipt < nPtBin; ipt++){
-     
-      htoyResult_pull[ieta][ipt]->Write();
+    for(int ipt=0; ipt < nPtBin; ipt++){      
+ 
+      if(htoyResult_pull[ieta][ipt]->GetEntries()>0)
+       htoyResult_pull[ieta][ipt]->Write();
+
+      if(htoyResult_bias[ieta][ipt]->GetEntries()>0)
+	htoyResult_bias[ieta][ipt]->Write();      
     }
-    outFile->Close();
   }
-    
    
+  outFile->Close();
 
 }
