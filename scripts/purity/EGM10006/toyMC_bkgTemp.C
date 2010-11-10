@@ -16,17 +16,49 @@
 using namespace std;
 
 // the pt and eta binning
-const double fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
-const double fBinsEta[2] = {0.5,2.0};
+const Double_t fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
+const Double_t fBinsEta[2] = {0.5,2.0};
+
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = 2;
+
+const Double_t fNsigPt[2][nPtBin]=
+  {
+    {
+      26304.067089,
+      22608.144062,
+      21972.048313,
+      14271.476950,
+      7053.907180,
+      4792.810030,
+      2845.355508,
+      2906.144032,
+      2391.605544,
+      661.728019,
+      229.530958
+    },
+    {
+      18264.588466,
+      16262.348287,
+      16284.902091,
+      10317.982854,
+      5798.697786,
+      3171.995241,
+      1718.942019,
+      1840.277296,
+      1366.803312,
+      333.989036,
+      106.529129
+    }
+  };
+
 
 const int REBINNINGS_TEMP=3;
 const int REBINNINGS_DATA=5;
 const int NEXP = 200;
 
-const float fit_lo = -1.;
-const float fit_hi = 20.;
+const Double_t fit_lo = -1.;
+const Double_t fit_hi = 20.;
 
 Double_t mySigPDFnorm = 1.0;
 Double_t myBkgPDFnorm = 1.0;
@@ -41,10 +73,10 @@ Double_t mysum_norm(Double_t *v, Double_t *par)
 }
 
 
-void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
+void toyMC_bkgTemp(int runIeta=-1, int runIpt=-1){
 	
   cout << "ROOT version = " << gROOT->GetVersion() << endl;
-//   gSystem->mkdir("toysPlot");
+  //   gSystem->mkdir("toysPlot");
   char tmp[1000];
 
 
@@ -87,7 +119,7 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
   TH1D* hZeeTemplate_S[nEtaBin];
   TH1D* hdata_data[nEtaBin][nPtBin];
   TH1D* htemp;
-
+  TH1D* hTemplate_ShiftB[nEtaBin][nPtBin];
 
   for(int ieta=0; ieta< nEtaBin; ieta++){
 
@@ -143,13 +175,28 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       hTemplate_B[ieta][ipt] = (TH1D*)finFile->FindObjectAny(tmp);
       hTemplate_B[ieta][ipt]->Rebin(REBINNINGS_TEMP);
 
+      // getting a different background template
+      if(ieta==0 && fBinsPt[ipt]>=50)
+	sprintf(tmp,"h_%s_comb3IsoSB_EGdata_pt%d",dec[ieta],50);
+      else if(ieta==0 )
+	sprintf(tmp,"h_%s_comb3IsoSB_EGdata_pt%d",dec[ieta],(int)fBinsPt[ipt]);  
+      else if(ieta==1 && fBinsPt[ipt]>=60)
+	sprintf(tmp,"h_%s_comb3Iso_bkg_pt%d",dec[ieta],60);       
+      else if(ieta==1)
+	sprintf(tmp,"h_%s_comb3Iso_bkg_pt%d",dec[ieta],(int)fBinsPt[ipt]);
+      cout << "looking for histogram " << tmp << " in file " << 
+	finFile->GetName() << endl;
+      hTemplate_ShiftB[ieta][ipt] = (TH1D*)finFile->FindObjectAny(tmp);
+
+      hTemplate_ShiftB[ieta][ipt]->Rebin(REBINNINGS_TEMP);
+
 
 
       const int NRETURN = 3*NPAR;
       Double_t myFitPar[NRETURN]={0};
       Double_t* FuncFitResult;
       FuncFitResult = Ifit("/afs/cern.ch/user/s/syu/scratch0/LxplusArea/EGdata_comb3Iso_et.dat",
-			   hZeeTemplate_S[ieta],hTemplate_B[ieta][ipt],
+			   hZeeTemplate_S[ieta],hTemplate_ShiftB[ieta][ipt],
 			   hdata_data[ieta][ipt], myFitPar,
 			   (int)fBinsPt[ipt], dec[ieta],2);
 
@@ -226,18 +273,23 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       fsig->SetParameters(sigFitPar);       
       fsig->SetParameter(0,1.0);
 
+
       mySigPDFnorm = fsig->Integral(fit_lo,fit_hi);
       cout << "mySigPDFnorm = " << mySigPDFnorm << endl;
       
       TF1* fbkg = new TF1("fbkg", expinv_power, fit_lo, fit_hi, 11);
       fbkg->SetParameters(bkgFitPar);
       fbkg->SetParameter(4,1.0);
+      cout << "Current parameter = " << fbkg->GetParameter(5) << endl;
 
       myBkgPDFnorm = fbkg->Integral(fit_lo, fit_hi);
       cout << "myBkgPDFnorm = " << myBkgPDFnorm << endl;
  
       TF1* fsum = new TF1("fsum",mysum_norm, fit_lo, fit_hi,11);
       fsum->SetParameters(sumFitPar);
+
+
+      nsig_input = fNsigPt[ieta][ipt];
 
       cout << "Using nsig_input = " << nsig_input << endl;
       cout << "Using nbkg_input = " << nbkg_input << endl;
@@ -252,7 +304,7 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       //        for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
 
 //       FILE *infile =  fopen("/afs/cern.ch/user/s/syu/scratch0/LxplusArea/EGdata_comb3Iso_et.dat","r");  
-//       float xdata, xdata1, xdata2; // combined isolation, pt, eta
+//       Double_t xdata, xdata1, xdata2; // combined isolation, pt, eta
 //       int flag = 1;
 //       while (flag!=-1){
 // 	flag =fscanf(infile,"%f %f %f",&xdata, &xdata1, &xdata2);
@@ -292,7 +344,8 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	// reset toy MC data
 	htoyMC_data->Reset();
 	ofstream fout;
-	std::string toyData = Form("/tmp/syu/testtoy_%d_%d.dat",ieta,ipt);
+	std::string toyData = Form("/tmp/syu/changeBkgTemptoy_%d_%d.dat",ieta,ipt);
+
 	fout.open(toyData.data());
 	for(int ieve=0; ieve < nsiggen; ieve++)
 	  {
@@ -339,20 +392,20 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	  toySumFitPar[ipar] = toyMyFitPar[ipar+NPAR*2];
 
 
- 	fsum->SetParameters(toySumFitPar);
- 	fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
- 	fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
-	// 	fsum->SetParameter(0, (float)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
-	// 	fsum->SetParameter(4, (float)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+//  	fsum->SetParameters(toySumFitPar);
+//  	fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+//  	fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+	fsum->SetParameter(0, (Double_t)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+	fsum->SetParameter(4, (Double_t)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
 
-// 	 	if(iexp%20==0){
-// 	 	  TCanvas* myCanvas = new TCanvas("myCanvas","SHIT");
-// 	 	  htoyMC_data->SetMaximum(htoyMC_data->GetMaximum()*1.5);
-// 	 	  htoyMC_data->Draw();
-// 	 	  fsum->Draw("same");
+	// 	if(iexp%20==0){
+ 	 	  TCanvas* myCanvas = new TCanvas("myCanvas","SHIT");
+ 	 	  htoyMC_data->SetMaximum(htoyMC_data->GetMaximum()*1.5);
+ 	 	  htoyMC_data->Draw();
+ 	 	  fsum->Draw("same");
 // 	 	  myCanvas->Print(Form("toysPlot/fit_%03i.gif",iexp));
 // 	 	  delete myCanvas;
-// 	 	}
+	// 	}
 
 	// 	 cout << "fsum integral = " << fsum->Integral(-1,20) << endl;
 	// 	 for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
@@ -378,7 +431,7 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
   }
 
 
-  TFile* outFile = new TFile(Form("fittertest_%s_pt%d.root",
+  TFile* outFile = new TFile(Form("changBkgTemp_%s_pt%d.root",
 				  dec[runIeta], (int)fBinsPt[runIpt]),
 			     "recreate");
 

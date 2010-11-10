@@ -16,17 +16,80 @@
 using namespace std;
 
 // the pt and eta binning
-const double fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
-const double fBinsEta[2] = {0.5,2.0};
+const Double_t fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
+const Double_t fBinsEta[2] = {0.5,2.0};
+
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = 2;
 
+const Double_t fCentralTurnOn[2][nPtBin] = 
+  {
+    {
+      -5.18082e-01,
+      -5.74491e-01,
+      -5.96003e-01,
+      -5.80792e-01,
+      -6.90499e-01,
+      -3.41757e-01,
+      -3.62748e-01,
+      -4.42700e-01,
+      -4.42700e-01,
+      -4.42700e-01,
+      -4.42700e-01
+    },
+    {
+      -9.79516e-01,
+      -9.16850e-01,
+      -8.03688e-01,
+      -7.13450e-01,
+      -6.32900e-01,
+      -5.05971e-01,
+      -5.97417e-01,
+      -3.90069e-01,
+      -6.69578e-01,
+      -6.69579e-01,
+      -6.69579e-01,
+    }
+  };
+
+const Double_t fShiftTurnOn[2][nPtBin] = 
+  {
+    {
+      2.59444e-02,
+      1.92683e-02,
+      2.59041e-02,
+      5.49341e-02,
+      9.24204e-02,
+      3.07716e-02,
+      3.65900e-02,
+      8.90905e-02,
+      8.90905e-02,
+      8.90905e-02,
+      8.90905e-02
+    },
+    {
+      2.58683e-02,
+      2.46157e-02,
+      1.15488e-02,
+      3.37031e-02,
+      2.96529e-02,
+      1.95490e-02,
+      9.81725e-02,
+      1.00803e-01,
+      1.72354e-01,
+      1.72141e-01,
+      1.72141e-01
+    }
+
+  };
+  
+
 const int REBINNINGS_TEMP=3;
 const int REBINNINGS_DATA=5;
-const int NEXP = 200;
+const int NEXP = 300;
 
-const float fit_lo = -1.;
-const float fit_hi = 20.;
+const Double_t fit_lo = -1.;
+const Double_t fit_hi = 20.;
 
 Double_t mySigPDFnorm = 1.0;
 Double_t myBkgPDFnorm = 1.0;
@@ -41,10 +104,10 @@ Double_t mysum_norm(Double_t *v, Double_t *par)
 }
 
 
-void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
+void toyMC_varyMoreTurnOn(int runIeta=-1, int runIpt=-1){
 	
   cout << "ROOT version = " << gROOT->GetVersion() << endl;
-//   gSystem->mkdir("toysPlot");
+  //   gSystem->mkdir("toysPlot");
   char tmp[1000];
 
 
@@ -233,6 +296,11 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       fbkg->SetParameters(bkgFitPar);
       fbkg->SetParameter(4,1.0);
 
+      
+
+      // changing the signal tail
+      Double_t current = fbkg->GetParameter(5);
+      cout << "Current parameter = " << current  << endl;
       myBkgPDFnorm = fbkg->Integral(fit_lo, fit_hi);
       cout << "myBkgPDFnorm = " << myBkgPDFnorm << endl;
  
@@ -252,7 +320,7 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       //        for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
 
 //       FILE *infile =  fopen("/afs/cern.ch/user/s/syu/scratch0/LxplusArea/EGdata_comb3Iso_et.dat","r");  
-//       float xdata, xdata1, xdata2; // combined isolation, pt, eta
+//       Double_t xdata, xdata1, xdata2; // combined isolation, pt, eta
 //       int flag = 1;
 //       while (flag!=-1){
 // 	flag =fscanf(infile,"%f %f %f",&xdata, &xdata1, &xdata2);
@@ -292,7 +360,8 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	// reset toy MC data
 	htoyMC_data->Reset();
 	ofstream fout;
-	std::string toyData = Form("/tmp/syu/testtoy_%d_%d.dat",ieta,ipt);
+	std::string toyData = Form("/tmp/syu/varymoreTurnOntoy_%d_%d.dat",ieta,ipt);
+
 	fout.open(toyData.data());
 	for(int ieve=0; ieve < nsiggen; ieve++)
 	  {
@@ -302,6 +371,17 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	    htoyMC_data->Fill(xvalue);
 	  }
 	     
+	
+	// changing background turn-on power
+ 	Double_t setvalue =gRandom->Gaus(fCentralTurnOn[ieta][ipt],
+ 					 fShiftTurnOn[ieta][ipt]);
+// 	Double_t setvalue =gRandom->Gaus(fCentralTurnOn[ieta][ipt],
+// 					 0.);
+
+	fbkg->SetParameter(5, setvalue);
+	cout << "Now Current parameter = " << fbkg->GetParameter(5)  << endl;
+
+
 	for(int ieve=0; ieve < nbkggen; ieve++)
 	  {
 	    Double_t xvalue = fbkg->GetRandom(fit_lo,fit_hi);
@@ -339,20 +419,20 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	  toySumFitPar[ipar] = toyMyFitPar[ipar+NPAR*2];
 
 
- 	fsum->SetParameters(toySumFitPar);
- 	fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
- 	fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
-	// 	fsum->SetParameter(0, (float)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
-	// 	fsum->SetParameter(4, (float)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+  	fsum->SetParameters(toySumFitPar);
+  	fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+  	fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+// 	fsum->SetParameter(0, (Double_t)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+// 	fsum->SetParameter(4, (Double_t)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
 
-// 	 	if(iexp%20==0){
-// 	 	  TCanvas* myCanvas = new TCanvas("myCanvas","SHIT");
-// 	 	  htoyMC_data->SetMaximum(htoyMC_data->GetMaximum()*1.5);
-// 	 	  htoyMC_data->Draw();
-// 	 	  fsum->Draw("same");
+	// 	if(iexp%20==0){
+//  	 	  TCanvas* myCanvas = new TCanvas("myCanvas","SHIT");
+//  	 	  htoyMC_data->SetMaximum(htoyMC_data->GetMaximum()*1.5);
+//  	 	  htoyMC_data->Draw();
+//  	 	  fsum->Draw("same");
 // 	 	  myCanvas->Print(Form("toysPlot/fit_%03i.gif",iexp));
 // 	 	  delete myCanvas;
-// 	 	}
+	// 	}
 
 	// 	 cout << "fsum integral = " << fsum->Integral(-1,20) << endl;
 	// 	 for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
@@ -378,7 +458,7 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
   }
 
 
-  TFile* outFile = new TFile(Form("fittertest_%s_pt%d.root",
+  TFile* outFile = new TFile(Form("varyMoreTurnOn_%s_pt%d.root",
 				  dec[runIeta], (int)fBinsPt[runIpt]),
 			     "recreate");
 

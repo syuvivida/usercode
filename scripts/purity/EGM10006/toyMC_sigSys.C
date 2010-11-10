@@ -16,8 +16,10 @@
 using namespace std;
 
 // the pt and eta binning
-const double fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
-const double fBinsEta[2] = {0.5,2.0};
+const Double_t fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
+const Double_t fBinsEta[2] = {0.5,2.0};
+const Double_t fShiftTail[2] = {1.42394e-01,1.32054e-02};
+
 const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 const int nEtaBin = 2;
 
@@ -25,8 +27,8 @@ const int REBINNINGS_TEMP=3;
 const int REBINNINGS_DATA=5;
 const int NEXP = 200;
 
-const float fit_lo = -1.;
-const float fit_hi = 20.;
+const Double_t fit_lo = -1.;
+const Double_t fit_hi = 20.;
 
 Double_t mySigPDFnorm = 1.0;
 Double_t myBkgPDFnorm = 1.0;
@@ -41,10 +43,10 @@ Double_t mysum_norm(Double_t *v, Double_t *par)
 }
 
 
-void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
+void toyMC_sigSys(int shift, int runIeta=-1, int runIpt=-1){
 	
   cout << "ROOT version = " << gROOT->GetVersion() << endl;
-//   gSystem->mkdir("toysPlot");
+  //   gSystem->mkdir("toysPlot");
   char tmp[1000];
 
 
@@ -226,6 +228,14 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       fsig->SetParameters(sigFitPar);       
       fsig->SetParameter(0,1.0);
 
+
+      // changing the signal tail
+      Double_t current = fsig->GetParameter(1);
+      cout << "Current parameter = " << current  << endl;
+      current = fsig->GetParameter(1) + (Double_t)shift*fShiftTail[ieta];
+      fsig->SetParameter(1, current);
+      cout << "Now Current parameter = " << fsig->GetParameter(1)  << endl;
+
       mySigPDFnorm = fsig->Integral(fit_lo,fit_hi);
       cout << "mySigPDFnorm = " << mySigPDFnorm << endl;
       
@@ -252,7 +262,7 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
       //        for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
 
 //       FILE *infile =  fopen("/afs/cern.ch/user/s/syu/scratch0/LxplusArea/EGdata_comb3Iso_et.dat","r");  
-//       float xdata, xdata1, xdata2; // combined isolation, pt, eta
+//       Double_t xdata, xdata1, xdata2; // combined isolation, pt, eta
 //       int flag = 1;
 //       while (flag!=-1){
 // 	flag =fscanf(infile,"%f %f %f",&xdata, &xdata1, &xdata2);
@@ -292,7 +302,8 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	// reset toy MC data
 	htoyMC_data->Reset();
 	ofstream fout;
-	std::string toyData = Form("/tmp/syu/testtoy_%d_%d.dat",ieta,ipt);
+	std::string toyData = Form("/tmp/syu/varysigtailtoy%d_%d_%d.dat",shift,ieta,ipt);
+
 	fout.open(toyData.data());
 	for(int ieve=0; ieve < nsiggen; ieve++)
 	  {
@@ -339,20 +350,20 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	  toySumFitPar[ipar] = toyMyFitPar[ipar+NPAR*2];
 
 
- 	fsum->SetParameters(toySumFitPar);
- 	fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
- 	fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
-	// 	fsum->SetParameter(0, (float)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
-	// 	fsum->SetParameter(4, (float)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+//  	fsum->SetParameters(toySumFitPar);
+//  	fsum->SetParameter(0, nsigtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+//  	fsum->SetParameter(4, nbkgtoyfit*hdata_data[ieta][ipt]->GetBinWidth(2));
+	fsum->SetParameter(0, (Double_t)nsiggen*hdata_data[ieta][ipt]->GetBinWidth(2));
+	fsum->SetParameter(4, (Double_t)nbkggen*hdata_data[ieta][ipt]->GetBinWidth(2));
 
-// 	 	if(iexp%20==0){
+	// 	if(iexp%20==0){
 // 	 	  TCanvas* myCanvas = new TCanvas("myCanvas","SHIT");
 // 	 	  htoyMC_data->SetMaximum(htoyMC_data->GetMaximum()*1.5);
 // 	 	  htoyMC_data->Draw();
 // 	 	  fsum->Draw("same");
 // 	 	  myCanvas->Print(Form("toysPlot/fit_%03i.gif",iexp));
 // 	 	  delete myCanvas;
-// 	 	}
+	// 	}
 
 	// 	 cout << "fsum integral = " << fsum->Integral(-1,20) << endl;
 	// 	 for(int ipar=0; ipar<NPAR; ipar++)cout << "fsum par " << ipar << " = " << fsum->GetParameter(ipar) << endl;
@@ -378,7 +389,8 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
   }
 
 
-  TFile* outFile = new TFile(Form("fittertest_%s_pt%d.root",
+  TFile* outFile = new TFile(Form("varySigTail%d_%s_pt%d.root",
+				  shift,
 				  dec[runIeta], (int)fBinsPt[runIpt]),
 			     "recreate");
 
