@@ -3,15 +3,17 @@
 #include <TCanvas.h>
 #include <TH1.h>
 #include <TF1.h>
+#include <TSystem.h>
 
 using namespace std;
 
 void readPullBias(char*prefix="pull_bias"){
 
+  gSystem->mkdir(Form("figures_%s",prefix));
   char* dec[2] = {"EB","EE"};
   const int fBinsPt[]={21,23,26,30,35,40,45,50,60,85,120,300};
   const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
-  const int NRUNS=4;
+  const int NRUNS=8;
 
   ofstream foutm;
   foutm.open("mean.dat");
@@ -67,14 +69,17 @@ void readPullBias(char*prefix="pull_bias"){
       TF1* f1 = hpull->GetFunction("gaus");
       foutm << dec[ieta] << " pt" << fBinsPt[ipt] << " pull: " << f1->GetParameter(1) << " +- " << f1->GetParError(1) << endl;
       fouts << dec[ieta] << " pt" << fBinsPt[ipt] << " pull: " << f1->GetParameter(2) << " +- " << f1->GetParError(2) << endl;
-      c1->Print(Form("pull_%s_%s_pt%d.png",prefix,dec[ieta],fBinsPt[ipt]));
+
+      c1->Print(Form("figures_%s/pull_%s_%s_pt%d.png",
+		     prefix,prefix,dec[ieta],fBinsPt[ipt]));
 
       if(hbias->GetEntries()<1)continue;
       hbias->Fit("gaus");
       TF1* f2 = hbias->GetFunction("gaus");
       foutm << dec[ieta] << " pt" << fBinsPt[ipt] << " bias: " << f2->GetParameter(1) << " +- " << f2->GetParError(1) << endl;
       fouts << dec[ieta] << " pt" << fBinsPt[ipt] << " bias: " << f2->GetParameter(2) << " +- " << f2->GetParError(2) << endl;
-      c1->Print(Form("bias_%s_%s_pt%d.png",prefix,dec[ieta],fBinsPt[ipt]));
+      c1->Print(Form("figures_%s/bias_%s_%s_pt%d.png",
+		     prefix,prefix,dec[ieta],fBinsPt[ipt]));
 
     } // end of loop over pt bins
   } // end of loop over eta bins
