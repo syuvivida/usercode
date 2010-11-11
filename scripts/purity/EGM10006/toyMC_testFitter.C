@@ -23,7 +23,7 @@ const int nEtaBin = 2;
 
 const int REBINNINGS_TEMP=3;
 const int REBINNINGS_DATA=5;
-const int NEXP = 200;
+const int NEXP = 100;
 
 const float fit_lo = -1.;
 const float fit_hi = 20.;
@@ -41,12 +41,12 @@ Double_t mysum_norm(Double_t *v, Double_t *par)
 }
 
 
-void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
+void toyMC_testFitter(int runIeta=-1, int runIpt=-1, int startExp=0){
 	
   cout << "ROOT version = " << gROOT->GetVersion() << endl;
 //   gSystem->mkdir("toysPlot");
   char tmp[1000];
-
+  TRandom2* r2 = new TRandom2();
 
   TH1D* htoyResult_pull[nEtaBin][nPtBin];
   TH1D* htoyResult_bias[nEtaBin][nPtBin];
@@ -269,9 +269,11 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 //       htemp->Draw();
 //       fsum->Draw("same");
 
-       
+      ofstream dumpout;
+      dumpout.open(Form("pull_bias%d_%s_pt%d.dat",startExp, dec[ieta],(int)fBinsPt[ipt]));
+ 
       //        // loops over toys
-      for(int iexp=0; iexp<NEXP; iexp++){
+      for(int iexp=NEXP*startExp; iexp<NEXP*(startExp+1); iexp++){
 
 	TH1D* htoyMC_data = (TH1D*)hdata_data[ieta][ipt]->Clone("htoyMC_data");
 	htoyMC_data->Reset();
@@ -284,15 +286,15 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 
 
 	UInt_t nowSeed = (unsigned long)gSystem->Now();
-	gRandom->SetSeed(nowSeed);
-	int nsiggen  = gRandom->Poisson(nsig_input);
-	int nbkggen  = gRandom->Poisson(nbkg_input);
+	r2->SetSeed(nowSeed);
+	int nsiggen  = r2->Poisson(nsig_input);
+	int nbkggen  = r2->Poisson(nbkg_input);
 	int ndata = nsiggen + nbkggen;
 
 	// reset toy MC data
 	htoyMC_data->Reset();
 	ofstream fout;
-	std::string toyData = Form("/tmp/syu/testtoy_%d_%d.dat",ieta,ipt);
+	std::string toyData = Form("/tmp/syu/testtoy%d_%d_%d.dat",startExp,ieta,ipt);
 	fout.open(toyData.data());
 	for(int ieve=0; ieve < nsiggen; ieve++)
 	  {
@@ -360,13 +362,14 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
 	
 	Double_t pull = (nsigtoyfit - nsig_input)/errnsigtoyfit;
 	Double_t bias = (nsigtoyfit - nsig_input)/nsig_input;
-
+	dumpout << pull << " " << bias << endl; 
     
    	htoyResult_pull[ieta][ipt]->Fill(pull);
 	htoyResult_bias[ieta][ipt]->Fill(bias);
 
 
       } // end loops of toys
+      dumpout.close();
 
       delete fsig;
       delete fbkg;
@@ -378,21 +381,22 @@ void toyMC_testFitter(int runIeta=-1, int runIpt=-1){
   }
 
 
-  TFile* outFile = new TFile(Form("fittertest_%s_pt%d.root",
-				  dec[runIeta], (int)fBinsPt[runIpt]),
-			     "recreate");
+//   TFile* outFile = new TFile(Form("fittertest%d_%s_pt%d.root",
+// 				  startExp,
+// 				  dec[runIeta], (int)fBinsPt[runIpt]),
+// 			     "recreate");
 
-  for(int ieta=0; ieta < nEtaBin; ieta++){
-    for(int ipt=0; ipt < nPtBin; ipt++){      
+//   for(int ieta=0; ieta < nEtaBin; ieta++){
+//     for(int ipt=0; ipt < nPtBin; ipt++){      
  
-      if(htoyResult_pull[ieta][ipt]->GetEntries()>0)
-	htoyResult_pull[ieta][ipt]->Write();
+//       if(htoyResult_pull[ieta][ipt]->GetEntries()>0)
+// 	htoyResult_pull[ieta][ipt]->Write();
 
-      if(htoyResult_bias[ieta][ipt]->GetEntries()>0)
-	htoyResult_bias[ieta][ipt]->Write();      
-    }
-  }
+//       if(htoyResult_bias[ieta][ipt]->GetEntries()>0)
+// 	htoyResult_bias[ieta][ipt]->Write();      
+//     }
+//   }
    
-  outFile->Close();
+//   outFile->Close();
 
 }

@@ -27,7 +27,7 @@ const Double_t fShiftOffset[2] = {1.18859e-02, 4.47113e-03};
 
 const int REBINNINGS_TEMP=3;
 const int REBINNINGS_DATA=5;
-const int NEXP = 200;
+const int NEXP = 100;
 
 const Double_t fit_lo = -1.;
 const Double_t fit_hi = 20.;
@@ -45,12 +45,12 @@ Double_t mysum_norm(Double_t *v, Double_t *par)
 }
 
 
-void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1){
+void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1,int startExp=0){
 	
   cout << "ROOT version = " << gROOT->GetVersion() << endl;
   //   gSystem->mkdir("toysPlot");
   char tmp[1000];
-
+  TRandom2* r2 = new TRandom2();  
 
   TH1D* htoyResult_pull[nEtaBin][nPtBin];
   TH1D* htoyResult_bias[nEtaBin][nPtBin];
@@ -282,7 +282,15 @@ void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1){
 
        
       //        // loops over toys
-      for(int iexp=0; iexp<NEXP; iexp++){
+
+      ofstream dumpout;
+      dumpout.open(Form("varyoffset_pull_bias%d_%d_%s_pt%d.dat",startExp, 
+			shift,
+			dec[ieta],(int)fBinsPt[ipt]));
+
+      //        // loops over toys
+      for(int iexp=NEXP*startExp; iexp<NEXP*(startExp+1); iexp++){
+
 
 	TH1D* htoyMC_data = (TH1D*)hdata_data[ieta][ipt]->Clone("htoyMC_data");
 	htoyMC_data->Reset();
@@ -295,15 +303,16 @@ void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1){
 
 
 	UInt_t nowSeed = (unsigned long)gSystem->Now();
-	gRandom->SetSeed(nowSeed);
-	int nsiggen  = gRandom->Poisson(nsig_input);
-	int nbkggen  = gRandom->Poisson(nbkg_input);
+	r2->SetSeed(nowSeed);
+	int nsiggen  = r2->Poisson(nsig_input);
+	int nbkggen  = r2->Poisson(nbkg_input);
 	int ndata = nsiggen + nbkggen;
 
 	// reset toy MC data
 	htoyMC_data->Reset();
 	ofstream fout;
-	std::string toyData = Form("/tmp/syu/varyoffsettoy%d_%d_%d.dat",shift,ieta,ipt);
+	std::string toyData = Form("/tmp/syu/varyoffsettoy%d_%d_%d_%d.dat",
+				   startExp,shift,ieta,ipt);
 
 	fout.open(toyData.data());
 	for(int ieve=0; ieve < nsiggen; ieve++)
@@ -373,6 +382,7 @@ void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1){
 	Double_t pull = (nsigtoyfit - nsig_input)/errnsigtoyfit;
 	Double_t bias = (nsigtoyfit - nsig_input)/nsig_input;
 
+	dumpout << pull << " " << bias << endl; 
     
    	htoyResult_pull[ieta][ipt]->Fill(pull);
 	htoyResult_bias[ieta][ipt]->Fill(bias);
@@ -380,6 +390,7 @@ void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1){
 
       } // end loops of toys
 
+      dumpout.close();
       delete fsig;
       delete fbkg;
 
@@ -390,22 +401,23 @@ void toyMC_varyOffset(int shift, int runIeta=-1, int runIpt=-1){
   }
 
 
-  TFile* outFile = new TFile(Form("varyOffset%d_%s_pt%d.root",
-				  shift,
-				  dec[runIeta], (int)fBinsPt[runIpt]),
-			     "recreate");
+//   TFile* outFile = new TFile(Form("varyOffset%d_%d_%s_pt%d.root",
+// 				  startExp,
+// 				  shift,
+// 				  dec[runIeta], (int)fBinsPt[runIpt]),
+// 			     "recreate");
 
-  for(int ieta=0; ieta < nEtaBin; ieta++){
-    for(int ipt=0; ipt < nPtBin; ipt++){      
+//   for(int ieta=0; ieta < nEtaBin; ieta++){
+//     for(int ipt=0; ipt < nPtBin; ipt++){      
  
-      if(htoyResult_pull[ieta][ipt]->GetEntries()>0)
-	htoyResult_pull[ieta][ipt]->Write();
+//       if(htoyResult_pull[ieta][ipt]->GetEntries()>0)
+// 	htoyResult_pull[ieta][ipt]->Write();
 
-      if(htoyResult_bias[ieta][ipt]->GetEntries()>0)
-	htoyResult_bias[ieta][ipt]->Write();      
-    }
-  }
+//       if(htoyResult_bias[ieta][ipt]->GetEntries()>0)
+// 	htoyResult_bias[ieta][ipt]->Write();      
+//     }
+//   }
    
-  outFile->Close();
+//   outFile->Close();
 
 }
