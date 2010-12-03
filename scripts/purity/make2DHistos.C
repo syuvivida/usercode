@@ -1,25 +1,24 @@
 /*==============================================================================================     
                   
-  Produce 2-D histograms for combined isolation
-  std::string outputName = "FileName";// prefix for output file name
-  std::string xvar;                   // variables for making histograms in xaxis   
-  int xnbin;                         // total number of bins in x axis
-  double xmin, double xmax;          // minimum and maximum of histograms in xaxis
-  std::string yvar;                  // variables for making histograms in yaxis
-  int ynbin;                         // total number of bins in y axis
-  double ymin, double ymax;          // minimum and maximum of histograms in yaxis
-  double split;                     // if 1.0 for unsplit and original MC samples, 2.0 for split MC samples
-  bool normalize;                   // store the histogram by normalizing the integrated area to 1.0 
+Produce 2-D histograms for combined isolation
+std::string outputName = "FileName";// prefix for output file name
+std::string xvar;                   // variables for making histograms in xaxis   
+int xnbin;                         // total number of bins in x axis
+double xmin, double xmax;          // minimum and maximum of histograms in xaxis
+std::string yvar;                  // variables for making histograms in yaxis
+int ynbin;                         // total number of bins in y axis
+double ymin, double ymax;          // minimum and maximum of histograms in yaxis
+double split;                     // if 1.0 for unsplit and original MC samples, 2.0 for split MC samples
+bool normalize;                   // store the histogram by normalizing the integrated area to 1.0 
       
-  make2DHistos(std::string outputName="";
-  std::string xvar="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
-  int xnbin=120, double xmin=-1.0, double xmax=11.0, 
-  std::string yvar="pt",
-  int ynbin=500, double ymin=0.0, double ymax=500.0,
-  double split = 1.0,bool normalize=false)
+make2DHistos(std::string outputName="";
+std::string xvar="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
+int xnbin=120, double xmin=-1.0, double xmax=11.0, 
+std::string yvar="pt",
+int ynbin=500, double ymin=0.0, double ymax=500.0,
+double split = 1.0,bool normalize=false)
 
-  ==============================================================================================*/
-
+==============================================================================================*/
 
 #include <iostream>
 #include <fstream>
@@ -27,31 +26,34 @@
 #include <TTree.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <vector>
 #include <string>
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TGraphAsymmErrors.h>
+#include <TEntryList.h>
 #include <string>
 #include "tightSelection.h"
 
 using namespace std;
 const int MAXBIN_ALLOWED=1000;
-const double lumi = 0.1; // 100/nb
+const double lumi = 2.90; // 1.2/pb
 // the pt and eta binning
-const double fBinsEta[]={0,1.45,1.7,2.5};
+// const float fBinsEta[]={0,1.45,1.7,2.5};
+const float fBinsEta[]={0,1.4442,1.566,2.5};
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
 
 // fill trees
 void fillTrees(vector<string> &fileName,vector<TTree*> &trees,string treeName)
 {
-   for (unsigned int i=0; i<fileName.size(); i++){
-      TFile *f = new TFile(fileName[i].data());
-      TTree *t = (TTree*)f->FindObjectAny(treeName.data());
-      if (t==0) cout <<"Error!"<<endl;
-      trees.push_back(t);
-   }
+  for (unsigned int i=0; i<fileName.size(); i++){
+    TFile *f = new TFile(fileName[i].data());
+    TTree *t = (TTree*)f->FindObjectAny(treeName.data());
+    if (t==0) cout <<"Error!"<<endl;
+    trees.push_back(t);
+  }
 
 }
 
@@ -59,62 +61,141 @@ void fillTrees(vector<string> &fileName,vector<TTree*> &trees,string treeName)
 void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
 	      vector<int> ptHatLo, vector<int> ptHatHi,
 	      std::string xvar, std::string yvar, 
-	      TCut cut,TH2F* h,bool norm)
+	      TCut cut,TH2F* h,bool norm, vector<TH3F*> mcHistoVect,
+	      bool dumpData=false)
 {
-   TH2F *hRes = (TH2F*)h->Clone();
-   hRes->SetName("hRes");
-   hRes->Reset();
-   hRes->Sumw2();
+  TH2F *hRes = (TH2F*)h->Clone("hRes");
+  hRes->Reset();
+  hRes->Sumw2();
 
-   char tmp[300];
-  
-   for (unsigned int i=0; i<sigTree.size(); i++)
-     {
-       // first determine the pthat cut
-       
-       if(ptHatLo[i]>0 && ptHatHi[i]>0)
-	 sprintf(tmp, "ptHat >= %d && ptHat <= %d",ptHatLo[i], ptHatHi[i]);
-       else
-	 sprintf(tmp, "pt>0");	 
-       TCut ptHatCut = tmp;
-       TCut allCut = cut + ptHatCut;
-       cout << "Current cut = " << allCut.GetTitle() << endl;
-       TH2F *htmp = (TH2F*)h->Clone();
-       htmp->SetName("htmp");
-       htmp->Reset();
-       sigTree[i]->Draw(Form("%s:(%s)>>htmp",yvar.data(),xvar.data()),allCut);
-       htmp->Sumw2();
-       htmp->Scale(sigWeight[i]);
-       cout << "scale = " << sigWeight[i] << endl;
-       cout << "After scaling htmp -> entries() " << htmp->GetEntries() << endl;
-       cout << "After scaling htmp -> Integral() " << htmp->Integral(0,MAXBIN_ALLOWED) << endl;
-       cout << "After scaling htmp -> GetMean()  " << htmp->GetMean() << endl;
-       cout << "After scaling htmp -> GetRMS()  " << htmp->GetRMS() << endl;
-       hRes->Add(htmp);
-       delete htmp;
-   }
-   h->Sumw2();
-   h->Add(hRes);
-   if(norm)h->Scale(1.0/(double)h->Integral(0,MAXBIN_ALLOWED,0,MAXBIN_ALLOWED));
-   cout << "After scaling h-> entries() " << h->GetEntries() << endl;
-   cout << "After scaling h-> Integral() " << h->Integral(0,MAXBIN_ALLOWED) << endl;
-   cout << "After scaling h -> GetMean()  " << h->GetMean() << endl;
-   cout << "After scaling h -> GetRMS()  " << h->GetRMS() << endl;
+  char tmp[300];
    
-   delete hRes;
+  bool addMoreInformation=false;
+
+  ofstream fout;
+  if(dumpData)fout.open("output.dat");
+
+
+  for(unsigned int i=0; i<mcHistoVect.size(); i++)
+    cout << mcHistoVect[i]->GetName() << endl;
+
+  for (unsigned int i=0; i<sigTree.size(); i++)
+    {
+      // first determine the pthat cut
+       
+      if(ptHatLo[i]>0 && ptHatHi[i]>0)
+	sprintf(tmp, "ptHat >= %d && ptHat <= %d",ptHatLo[i], ptHatHi[i]);
+      else
+	sprintf(tmp, "pt>0");	 
+      TCut ptHatCut = tmp;
+      TCut allCut = cut + ptHatCut;
+      cout << "Current cut = " << allCut.GetTitle() << endl;
+      TH2F *htmp = (TH2F*)h->Clone("htmp");
+      htmp->Reset();
+      sigTree[i]->Draw(Form("%s:(%s)>>htmp",yvar.data(),xvar.data()),allCut);
+      htmp->Sumw2();
+      htmp->Scale(sigWeight[i]);
+
+      // printing out information
+      cout << "scale = " << sigWeight[i] << endl;
+      cout << "After scaling htmp -> entries() " << htmp->GetEntries() << endl;
+      cout << "After scaling htmp -> Integral() " << htmp->Integral(0,MAXBIN_ALLOWED) << endl;
+      cout << "After scaling htmp -> GetMean()  " << htmp->GetMean() << endl;
+      cout << "After scaling htmp -> GetRMS()  " << htmp->GetRMS() << endl;
+      hRes->Add(htmp);
+      delete htmp;
+
+
+      //now dumping data into a text file
+      if(!dumpData)continue;
+      const int nMaxPho = 30;
+      Float_t phoEt[nMaxPho];
+      Float_t phoEta[nMaxPho];
+      Float_t ecalIso[nMaxPho];
+      Float_t hcalIso[nMaxPho];
+      Float_t trackIso[nMaxPho];
+      Int_t nphotonscounter;
+      sigTree[i]->SetBranchAddress("pt",&phoEt);
+      sigTree[i]->SetBranchAddress("scEta",&phoEta);
+      sigTree[i]->SetBranchAddress("nPhotons",&nphotonscounter);
+      sigTree[i]->SetBranchAddress("ecalRecHitSumEtConeDR04",&ecalIso);
+      sigTree[i]->SetBranchAddress("hcalTowerSumEtConeDR04",&hcalIso);
+      sigTree[i]->SetBranchAddress("trkSumPtSolidConeDR04",&trackIso);
+
+      TEntryList *selectedList = new TEntryList("selectedList","");
+      sigTree[i]->Draw(">>selectedList",allCut,"entrylist");
+      cout << "sigTree entries = " << sigTree[i]->GetEntries() << endl;
+      long int ndataCount = 0;
+      for (Int_t ieve= 0; ieve<sigTree[i]->GetEntries(); ieve++) {
+	// check if it's in the selected list.
+	if (!selectedList->Contains(ieve)) continue;
+	
+	for(int ipho=0; ipho < nphotonscounter; ipho++){
+
+	  Float_t totalIso = ecalIso[ipho]+hcalIso[ipho]+trackIso[ipho];
+	  if(phoEt[ipho]< 20.0 || fabs(phoEta[ipho])>2.5 || totalIso > 25.0)
+	    continue;
+	  
+	  ndataCount++;
+	  fout  << totalIso << " " << phoEt[ipho] << " " << phoEta[ipho] << endl;
+	
+	} // end of loop over photons
+      } // end of loop over events
+
+      cout << "ndataCount = " << ndataCount << endl;
+      fout.close();
+
+      // now adding more information in histograms if we need to 
+      if(!addMoreInformation)continue;
+      std::string name = mcHistoVect[i]->GetName();
+      cout << "name = " << name << endl;
+      TH3F* h3tmp;
+      h3tmp = (TH3F*)mcHistoVect[i]->Clone("h3tmp");
+      h3tmp->Reset();
+      h3tmp->Sumw2();
+      cout << "after resetting the figures" << endl;
+      sigTree[i]->Draw(Form("ptHat:%s:(%s)>>h3tmp",
+			    yvar.data(),xvar.data()),cut);
+      cout << "after drawing histograms" << endl;
+      h3tmp->Sumw2();
+      cout << "after calling Sumw2" << endl;
+      h3tmp->Scale(sigWeight[i]);
+      cout << "after scaling histograms" << endl;
+      cout << "h3tmp entries = " << h3tmp->GetEntries() << endl;
+      mcHistoVect[i]->Add(h3tmp);
+      mcHistoVect[i]->SetName(name.data());
+      cout << "Now making additional 3D-histogram " 
+	   << mcHistoVect[i]->GetName() << 
+	" with entries = " << mcHistoVect[i]->GetEntries() << endl;
+      delete h3tmp;
+    }
+
+  h->Sumw2();
+  h->Add(hRes);
+  if(norm)h->Scale(1.0/(double)h->Integral(0,MAXBIN_ALLOWED,0,MAXBIN_ALLOWED));
+  cout << "After scaling h-> entries() " << h->GetEntries() << endl;
+  cout << "After scaling h-> Integral() " << h->Integral(0,MAXBIN_ALLOWED) << endl;
+  cout << "After scaling h -> GetMean()  " << h->GetMean() << endl;
+  cout << "After scaling h -> GetRMS()  " << h->GetRMS() << endl;
+   
+  delete hRes;
 }
 
 
 // calling functions
 void make2DHistos(std::string outputName="", 
 		  std::string xvar="(ecalRecHitSumEtConeDR04+hcalTowerSumEtConeDR04+trkSumPtHollowConeDR04)",
-		  int xnbin=120, double xmin=-1.0, double xmax=11.0, 
+		  int xnbin=300, double xmin=-1.0, double xmax=29.0, 
 		  std::string yvar="pt",
 		  int ynbin=500, double ymin=0.0, double ymax=500.0,
 		  double split = 1.0,
 		  bool normalize=false)
 {
   TH2F *hTemplate = new TH2F("hTemplate","",xnbin,xmin,xmax,ynbin,ymin,ymax);
+
+  // z axis is for ptHat distributions
+  TH3F *h3Template = new TH3F("h3Template","",
+			      xnbin,xmin,xmax,ynbin,ymin,ymax,50,0.,1000.);
 
   std::string xTitle = "ISO (GeV)";
   std::string yTitle = "p_{T}(#gamma) (GeV/c)";
@@ -128,6 +209,8 @@ void make2DHistos(std::string outputName="",
   vector<TTree*> mixTree;
   vector<int> mixPtHatLo;
   vector<int> mixPtHatHi;
+  vector<TH3F*> sigThreeDHistos[nEtaBin];
+  vector<TH3F*> bkgThreeDHistos[nEtaBin];
 
   vector<string> phoFile;
   vector<double> phoWeight;
@@ -147,10 +230,14 @@ void make2DHistos(std::string outputName="",
   vector<int> dataPtHatLo;
   vector<int> dataPtHatHi;
 
+  vector<TH3F*> dummyThreeDHistos;
+  dummyThreeDHistos.clear();
+
   FILE *fTable = fopen("inputFile.txt","r");
    
   int flag=1;   
   int nfile=0;
+  int countHistos=0;
   char filename[100];
   while (flag!=-1){
     // first reading input file
@@ -209,13 +296,32 @@ void make2DHistos(std::string outputName="",
 	mixWeight.push_back(scale);
 	mixPtHatLo.push_back(ptHatLo);
 	mixPtHatHi.push_back(ptHatHi);      
+	for(int ieta=0;ieta<nEtaBin;ieta++)
+	  {	
+	    int etaBinStart = fBinsEta[ieta*2]*10000;
+	    int etaBinEnd   = fBinsEta[ieta*2+1]*10000;
+	    TH3F* h3DHistoS = (TH3F*)h3Template->Clone();
+	    h3DHistoS->SetName(Form("3DTemplateS_Eta_%d_%d_%d",
+				    etaBinStart,etaBinEnd,countHistos));
+	    h3DHistoS->Reset();	
+	    cout << "h3DHistoS name = " << h3DHistoS->GetName() << endl;
+	    sigThreeDHistos[ieta].push_back(h3DHistoS);
+
+	    TH3F* h3DHistoB = (TH3F*)h3Template->Clone();
+	    h3DHistoB->SetName(Form("3DTemplateB_Eta_%d_%d_%d",
+				    etaBinStart,etaBinEnd,countHistos));
+	    h3DHistoB->Reset();
+	    cout << "h3DHistoB name = " << h3DHistoB->GetName() << endl;
+	    bkgThreeDHistos[ieta].push_back(h3DHistoB);
+	  }
+	countHistos++;
       }
       cout <<filename<<" "<<cross<<" "<<nevt<< " " << ptHatLo << " " << ptHatHi << endl;
 
       nfile++; 
     }	 
 	
-  } 
+  }
 
   std::string treeName = "Analysis";
 
@@ -262,21 +368,21 @@ void make2DHistos(std::string outputName="",
 
   // making templates for spikes
   TH2F *hIsoSpikeData;
-  hIsoSpikeData = (TH2F*)hTemplate->Clone();
-  hIsoSpikeData->SetName("hIsoSpikeData");
+  hIsoSpikeData = (TH2F*)hTemplate->Clone("hIsoSpikeData");
   hIsoSpikeData->Reset();
   hIsoSpikeData->SetXTitle(xTitle.data());
   hIsoSpikeData->SetYTitle(yTitle.data());
   cout << "making histograms for spikes " << endl;
-  TCut basicSpikeCut = eventCut  + trigCut + rsCutEB + spikeCut;
+  //  TCut basicSpikeCut = eventCut  + trigCut + rsCutEB + spikeCut;
+  TCut basicSpikeCut = trigCut + rsCutEB + spikeCut;
   makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,xvar,yvar,
-	   basicSpikeCut,hIsoSpikeData,normalize);
+	   basicSpikeCut,hIsoSpikeData,normalize,dummyThreeDHistos);
 
   
   // first looping over eta bins
   for(int ieta = 0; ieta < nEtaBin; ieta++){
 
-    sprintf(tmp,"abs(eta)>%.2lf && abs(eta)<%.2lf",
+    sprintf(tmp,"abs(scEta)>%.5lf && abs(scEta)<%.5lf",
 	    fBinsEta[ieta*2],fBinsEta[ieta*2+1]);
     TCut etaCut = tmp;
      
@@ -294,8 +400,11 @@ void make2DHistos(std::string outputName="",
 
     TCut IDCut    = ieta==0? rsCutEB: rsCutEE;
     TCut IDSidebandCut = ieta==0? rsCutSidebandEB : rsCutSidebandEE;
-    TCut basicCut   = eventCut+ etaCut + IDCut + removeSpikeCut;
-    TCut basicSBCut = eventCut+ etaCut + IDSidebandCut + removeSpikeCut;
+    //    TCut basicCut   = eventCut+ etaCut + IDCut + removeSpikeCut;
+    //    TCut basicSBCut = eventCut+ etaCut + IDSidebandCut + removeSpikeCut;
+
+    TCut basicCut   = etaCut + IDCut + removeSpikeCut;
+    TCut basicSBCut = etaCut + IDSidebandCut + removeSpikeCut;
 
     //====================== booking histograms ====================== //
 
@@ -366,15 +475,15 @@ void make2DHistos(std::string outputName="",
        
     cout << "making histograms from mixed MC signal samples" << endl;     
     TCut allCut = basicCut + sigCut;
-    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,xvar,yvar,allCut,hIsoMixSig[ieta],normalize);
+    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,xvar,yvar,allCut,hIsoMixSig[ieta],normalize,sigThreeDHistos[ieta]);
 
     cout << "making histograms from mixed MC background samples" << endl;     
     allCut = basicCut + bkgCut;
-    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,xvar,yvar,allCut,hIsoMixBkg[ieta],normalize);
+    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,xvar,yvar,allCut,hIsoMixBkg[ieta],normalize,bkgThreeDHistos[ieta]);
 
     cout << "making histogram for mixed sideband MC background samples" << endl;
     allCut = basicSBCut;
-    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,xvar,yvar,allCut,hIsoMixSBMC[ieta],normalize);
+    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,xvar,yvar,allCut,hIsoMixSBMC[ieta],normalize,dummyThreeDHistos);
      
     cout << "hIsoMixSig[" << ieta << "]->Integral()  = " << hIsoMixSig[ieta]->Integral(0,MAXBIN_ALLOWED,0,MAXBIN_ALLOWED) << endl;
     cout << "hIsoMixBkg[" << ieta << "]->Integral()  = " << hIsoMixBkg[ieta]->Integral(0,MAXBIN_ALLOWED,0,MAXBIN_ALLOWED) << endl;
@@ -383,10 +492,10 @@ void make2DHistos(std::string outputName="",
       {
 	cout << "making histograms for data samples" << endl;
 	allCut = basicCut + trigCut;
-	makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,xvar,yvar,allCut,hIsoMixData[ieta],normalize);
+	makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,xvar,yvar,allCut,hIsoMixData[ieta],normalize,dummyThreeDHistos);
 	cout << "making histogram for sideband background data" << endl;
 	allCut = basicSBCut + trigCut;
-	makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,xvar,yvar,allCut,hIsoMixSBData[ieta],normalize);
+	makePlot(dataTree,dataWeight,dataPtHatLo,dataPtHatHi,xvar,yvar,allCut,hIsoMixSBData[ieta],normalize,dummyThreeDHistos);
 	cout << "making histogram for all sideband background data" << endl;
 	hIsoAllSBData[ieta]->Add(hIsoMixSBData[ieta],1.0);	   
       }
@@ -400,25 +509,45 @@ void make2DHistos(std::string outputName="",
   } // end of looping over eta bins
 
 
-// dump histogram to a root file
-std::string histoFile = outputName + "_histo.root";
 
-TFile* outFile = new TFile(histoFile.data(),"recreate");
+  // dump histogram to a root file
+  std::string histoFile = outputName + "_histo.root";
+  TH3F* gHate = (TH3F*)h3Template->Clone();
 
-hIsoSpikeData->Write();
+  TFile* outFile = new TFile(histoFile.data(),"recreate");
+  hIsoSpikeData->Write();
+  cout << "hey" << endl;
 
-for(int ieta = 0; ieta < nEtaBin; ieta++){
+  for(int ieta = 0; ieta < nEtaBin; ieta++){
      
-  hIsoAllSBData[ieta]->Write();
+    hIsoAllSBData[ieta]->Write();
 
-  hIsoMixSig[ieta]->Write();
-  hIsoMixBkg[ieta]->Write();
-  hIsoMixData[ieta]->Write();
-  hIsoMixSBData[ieta]->Write();
-  hIsoMixSBMC[ieta]->Write();
-  
- } // end of looping over eta bins
+    hIsoMixSig[ieta]->Write();
+    hIsoMixBkg[ieta]->Write();
+    hIsoMixData[ieta]->Write();
+    hIsoMixSBData[ieta]->Write();
+    hIsoMixSBMC[ieta]->Write();
+
+//     cout << "hey" << endl;
+//     for(unsigned int imc=0; imc < sigThreeDHistos[ieta].size(); imc++){
+//       cout << "imc = " << imc << endl;
+//       gHate = (TH3F*)(sigThreeDHistos[ieta][imc])->Clone();
+//       gHate->SetName(sigThreeDHistos[ieta][imc]->GetName());
+//       cout << sigThreeDHistos[ieta][imc]->GetName() << endl;
+//       gHate->Write();
+//       cout << "oh" << endl;
+//     }
+
+//     for(unsigned int imc=0; imc < bkgThreeDHistos[ieta].size(); imc++){
+//       gHate = (TH3F*)(bkgThreeDHistos[ieta][imc])->Clone();
+//       gHate->SetName(bkgThreeDHistos[ieta][imc]->GetName());
+//       cout << bkgThreeDHistos[ieta][imc]->GetName() << endl;
+//       gHate->Write();
+//       cout << "oh" << endl;
+//     }
+  } // end of looping over eta bins
+
    
-outFile->Close();
+  outFile->Close();
    
 }
