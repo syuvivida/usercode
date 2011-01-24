@@ -41,6 +41,7 @@ const double lumi = 36.0; // 1.2/pb
 // the pt and eta binning
 //const float fBinsEta[]={0,1.4442,1.566,2.5};
 const float fBinsEta[]={0,0.9,0.9,1.4442,1.566,2.1,2.1,2.5};
+
 const int nEtaBin = (sizeof(fBinsEta)/sizeof(fBinsEta[0]))/2;
 
 
@@ -134,6 +135,7 @@ void make2DHistos(std::string outputName="",
 
   vector<TH2F*> dummyHisto; dummyHisto.clear();
   vector<TH2F*> sigHisto; sigHisto.clear();
+  vector<TH2F*> bkgHisto; bkgHisto.clear();
  
   vector<string> mixFile;
   vector<double> mixWeight;
@@ -383,22 +385,33 @@ void make2DHistos(std::string outputName="",
        
     cout << "making histograms from mixed MC signal samples" << endl;     
     TCut allCut = basicCut + sigCut;
+    // adding distributions of variable from each signal MC file
     sigHisto.clear();
     const int totalSize = mixTree.size();
-    TH2F* hIsoMCFile[totalSize];
+    TH2F* hIsoSigMCFile[totalSize];
     for(int iv=0; iv < totalSize; iv++){
-      hIsoMCFile[iv] = (TH2F*)hTemplate->Clone();
-      hIsoMCFile[iv]->SetName(Form("%s_%02i",hIsoMixSig[ieta]->GetName(),iv));
-      hIsoMCFile[iv]->SetTitle(mixFile[iv].data());
-      hIsoMCFile[iv]->Reset();
-      sigHisto.push_back(hIsoMCFile[iv]);
+      hIsoSigMCFile[iv] = (TH2F*)hTemplate->Clone();
+      hIsoSigMCFile[iv]->SetName(Form("%s_%02i",hIsoMixSig[ieta]->GetName(),iv));
+      hIsoSigMCFile[iv]->SetTitle(mixFile[iv].data());
+      hIsoSigMCFile[iv]->Reset();
+      sigHisto.push_back(hIsoSigMCFile[iv]);
     }
     makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,sigHisto,
 	     xvar,yvar,allCut,hIsoMixSig[ieta],normalize);
 
     cout << "making histograms from mixed MC background samples" << endl;     
     allCut = basicCut + bkgCut;
-    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,dummyHisto,
+    // adding distributions of variable from each background MC file
+    bkgHisto.clear();
+    TH2F* hIsoBkgMCFile[totalSize];
+    for(int iv=0; iv < totalSize; iv++){
+      hIsoBkgMCFile[iv] = (TH2F*)hTemplate->Clone();
+      hIsoBkgMCFile[iv]->SetName(Form("%s_%02i",hIsoMixBkg[ieta]->GetName(),iv));
+      hIsoBkgMCFile[iv]->SetTitle(mixFile[iv].data());
+      hIsoBkgMCFile[iv]->Reset();
+      bkgHisto.push_back(hIsoBkgMCFile[iv]);
+    }
+    makePlot(mixTree,mixWeight,mixPtHatLo,mixPtHatHi,bkgHisto,
 	     xvar,yvar,allCut,hIsoMixBkg[ieta],normalize);
 
     cout << "making histogram for mixed sideband MC background samples" << endl;
@@ -440,6 +453,10 @@ void make2DHistos(std::string outputName="",
   cout << "sigHisto.size() = " << sigHisto.size() << endl;
   for(int iv=0; iv < sigHisto.size(); iv++)
     sigHisto[iv]->Write();
+
+  cout << "bkgHisto.size() = " << bkgHisto.size() << endl;
+  for(int iv=0; iv < bkgHisto.size(); iv++)
+    bkgHisto[iv]->Write();
 
 
   for(int ieta = 0; ieta < nEtaBin; ieta++){
