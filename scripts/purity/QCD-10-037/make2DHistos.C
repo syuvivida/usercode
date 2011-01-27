@@ -95,7 +95,13 @@ void makePlot(vector<TTree*> sigTree,vector<double> sigWeight,
       cout << "After scaling htmp -> Integral() " << htmp->Integral(0,MAXBIN_ALLOWED) << endl;
       cout << "After scaling htmp -> GetMean()  " << htmp->GetMean() << endl;
       cout << "After scaling htmp -> GetRMS()  " << htmp->GetRMS() << endl;
-      hRes->Add(htmp);
+
+      // only add the histograms if it's more than 100 entries or if it's data
+      const int minNEntries = 100;
+      if(htmp->GetEntries() > minNEntries || fabs(sigWeight[i]-1.0)<1e-6)
+	hRes->Add(htmp);
+      else 
+	cout << "This sample has too few entries and are not added" << endl;
       
       if(DHisto.size()>0)DHisto[i]->Add(htmp);
       delete htmp;
@@ -177,7 +183,7 @@ void make2DHistos(std::string outputName="",
     bool isPhotonJet = false;
 
     if(tempFile.find("EGData")    != std::string::npos)isData     =true;
-    else if(tempFile.find("PhotonJet") != std::string::npos)isPhotonJet=true;
+    else if(tempFile.find("G_") != std::string::npos)isPhotonJet=true;
 
     // read in x-section
     flag=fscanf(fTable,"%s",tmp);
