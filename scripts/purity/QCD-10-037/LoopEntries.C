@@ -11,7 +11,7 @@ void LoopEntries::Loop(std::string outputFile)
 
    Long64_t nentries = fChain->GetEntriesFast();
 //    const double fBinsPt[]={25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 100, 120, 200,300};
-   const double fBinsPt[]={25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 100, 120, 200,250,300,350,400,450,500};
+ const double fBinsPt[]={25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 100, 120, 200,300,400,500,600,700,800,900,1000};
    const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 
    const double fBinsEta[]={0.0,0.9,1.5,2.1,2.5};
@@ -31,15 +31,15 @@ void LoopEntries::Loop(std::string outputFile)
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       if (Cut(ientry) < 0) continue;
-      if (jentry%1000==0)
-	printf("%4.1f%% started.\r",(float)jentry/(float)nentries*100.);		
+      //     if (jentry%1000==0)
+      //	printf("%4.1f%% started.\r",(float)jentry/(float)nentries*100.);		
 
       // good vertex selections
-
+      
       if(nVtxNotFake<1)continue;
 
       bool hasGoodVtx = false;
-      
+ 
       for(int ivtx=0; ivtx<1; ivtx++)
 	{
 	  if(vtxNdof[ivtx] > 4 && 
@@ -53,6 +53,9 @@ void LoopEntries::Loop(std::string outputFile)
 
 
       if(!hasGoodVtx)continue;
+
+//      if(nVtxGood <1)continue;
+//      if(!notScraping)continue;
       
 //       if (jentry%100==0)
 // 	printf("GoodVtx %4.1f%% done.\r",(float)jentry/(float)nentries*100.);		
@@ -65,6 +68,7 @@ void LoopEntries::Loop(std::string outputFile)
 
 	if(!isBarrel && !isEndcap)continue;
 
+
 // 	if (jentry%100==0)
 // 	  printf("EBEE %4.1f%% done.\r",(float)jentry/(float)nentries*100.);		
 
@@ -76,10 +80,6 @@ void LoopEntries::Loop(std::string outputFile)
 // 	if (jentry%100==0)
 // 	  printf("IDCut1 %4.1f%% done.\r",(float)jentry/(float)nentries*100.);		
 
-	// pt requirements
-	//	if(pt[ipho] < 25.0 || pt[ipho] > 300.0)continue;
-
-	
 	// trigger requirements
 	//	if(pt[ipho] >= 25 && pt[ipho] < 35 
 	//	   && !HLT_Photon20_Cleaned_L1R)continue;
@@ -90,19 +90,23 @@ void LoopEntries::Loop(std::string outputFile)
 	//	if(pt[ipho] >=80 
 	//	   && !(HLT_Photon20_Cleaned_L1R || HLT_Photon30_Cleaned_L1R || HLT_Photon50_Cleaned_L1R_v1 || HLT_Photon70_Cleaned_L1R_v1))continue;
 
+	float ptScaled = pt[ipho];
+	if(isBarrel)ptScaled *= 1.005*0.9957;
+	else ptScaled *= 1.014*0.996;
+
 
  	bool trig20 = HLT_Photon20_Cleaned_L1R  && run>=138564 && run<=143962;
  	bool trig30 = HLT_Photon30_Cleaned_L1R  && run>=144010 && run<=147116;
  	bool trig50 = HLT_Photon50_Cleaned_L1R_v1 && run>=147196 && run<=148058;
  	bool trig70 = HLT_Photon70_Cleaned_L1R_v1 && run>=148822 && run<=149294;
 
- 	if(pt[ipho] >= 25 && pt[ipho] < 35 
+ 	if(ptScaled >= 25 && ptScaled < 35 
  	   && !trig20)continue;
- 	if(pt[ipho] >= 35 && pt[ipho] < 55
+ 	if(ptScaled >= 35 && ptScaled < 55
  	   && !(trig20 || trig30))continue;
- 	if(pt[ipho] >=55 && pt[ipho] < 80 
+ 	if(ptScaled >=55 && ptScaled < 80 
  	   && !(trig20 || trig30 || trig50))continue;
- 	if(pt[ipho] >=80 
+ 	if(ptScaled >=80 
  	   && !(trig20 || trig30 || trig50 || trig70))continue;
 	
 	// basic ID cuts
@@ -132,15 +136,15 @@ void LoopEntries::Loop(std::string outputFile)
 
 	if(totalIso >= 20.0)continue;
 
-	hetapt->Fill(fabs(scEta[ipho]),pt[ipho]);
+	hetapt->Fill(fabs(scEta[ipho]),ptScaled);
 
-	if(pt[ipho] < 25.0 || pt[ipho] > 300.0)continue;
-  	fout << totalIso << " " << pt[ipho] << " " << scEta[ipho] << endl;
+	if(ptScaled < 25.0 || ptScaled > 1000.0)continue;
+  	fout << totalIso << " " << ptScaled << " " << scEta[ipho] << endl;
 
       } // end of looping over photons
 
-      if (jentry%100==0)
-	printf("Final %4.1f%% done.\r",(float)jentry/(float)nentries*100.);		
+      //      if (jentry%100==0)
+      //	printf("Final %4.1f%% done.\r",(float)jentry/(float)nentries*100.);		
    } // end of loop over entries
 
    fout.close();

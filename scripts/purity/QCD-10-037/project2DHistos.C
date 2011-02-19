@@ -16,9 +16,9 @@ using namespace std;
 
 // const double fBinsPt[]={20,30,50,80,120,180,240,500};
 // const double fBinsPt[]={21.,23.,26.,30.,35.,40.,45.,50.,60.,85.,120.,300};
-const double fBinsPt[]={25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 100, 120, 200,300};
-const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 
+const double fBinsPt[]={25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 100, 120, 200,300,400,500,600,700,800,900,1000};
+const int nPtBin = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 
 void project2DHistos(std::string inputFile_)
 {
