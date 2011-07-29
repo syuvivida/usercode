@@ -18,6 +18,7 @@ void phoEff::Loop()
    Long64_t nentries = fChain->GetEntriesFast();
 
    TH1F* h_dec = new TH1F("h_dec","",2,fEtaBin);
+   TH1F* h_ngood = new TH1F("h_ngood","",25,-0.5,24.5);
 
    TH1F* h_eta_template = new TH1F("h_eta_template","",60,-3.0,3.0);
    h_eta_template->SetXTitle("#eta(#gamma)");
@@ -75,7 +76,10 @@ void phoEff::Loop()
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
-//       if(nGoodVtx(ientry)!=1)continue;
+      int ngood_vtx=nGoodVtx(ientry);
+      h_ngood->Fill(ngood_vtx);
+//       if(ngood_vtx<=2)continue;
+
       
       // calculate reconstruction efficiency first
       for(int imc=0; imc < nMC; imc++){
@@ -136,6 +140,7 @@ void phoEff::Loop()
      h_ideff_et[ieta]->BayesDivide(h_recetpass[ieta],h_recetall[ieta],"v");
   
    TFile* outFile = new TFile("output_eff.root","recreate");               
+   h_ngood->Write();
    h_genetaall ->Write();
    h_genetapass ->Write();
    h_recoeff_eta->Write();
@@ -172,8 +177,8 @@ Bool_t phoEff::isGoodPho(Long64_t entry, Int_t ipho)
   if(phoEcalIsoDR04[ipho] > 4.2 +0.006 * phoEt[ipho])return false;
   if(phoHcalIsoDR04[ipho] > 2.2 +0.0025* phoEt[ipho])return false;
   if(phoTrkIsoHollowDR04[ipho] > 2.0 +0.001* phoEt[ipho])return false;
-  if(isEB && phoSigmaIEtaIEta[ipho] > 0.01)return false;
-  if(isEE && phoSigmaIEtaIEta[ipho] > 0.028)return false;
+  if(isEB && phoSigmaIEtaIEta[ipho] > 0.013)return false;
+  if(isEE && phoSigmaIEtaIEta[ipho] > 0.030)return false;
 
   return true;
 
