@@ -90,6 +90,8 @@ void mass_phodijet::Loop()
 
 	if(jetPt[ijet] > maxJetPt)
 	  {
+	    secondmaxJetIndex = maxJetIndex;
+	    secondmaxJetPt    = maxJetPt;
 	    maxJetIndex = ijet;
 	    maxJetPt    = jetPt[ijet];
 	  }
