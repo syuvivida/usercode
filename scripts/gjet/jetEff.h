@@ -5,8 +5,8 @@
 // found on file: job_summer11_ggH_115/ggtree_mc_1.root
 //////////////////////////////////////////////////////////
 
-#ifndef phoEff_h
-#define phoEff_h
+#ifndef jetEff_h
+#define jetEff_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -64,7 +64,7 @@ const Int_t maxP = 500;
 const Int_t maxNVtx=50;
 const Int_t maxNTrk=2000;
 
-class phoEff {
+class jetEff {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -839,8 +839,8 @@ public :
    TBranch        *b_convTk2Pout;   //!
    TBranch        *b_convTk2Pin;   //!
 
-   phoEff(std::string inputFile);
-   virtual ~phoEff();
+   jetEff(std::string inputFile);
+   virtual ~jetEff();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -848,18 +848,20 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   virtual Bool_t   isGoodPho(Long64_t entry, Int_t ipho);
-   virtual Bool_t   isFidPho (Long64_t entry, Int_t ipho);
+   virtual Bool_t   isGoodLooseJet(Long64_t entry, Int_t ijet);
+   virtual Bool_t   isGoodMediumJet(Long64_t entry, Int_t ijet);
+   virtual Bool_t   isGoodTightJet(Long64_t entry, Int_t ijet);
+   virtual Bool_t   isFidJet (Long64_t entry, Int_t ijet);
    virtual Int_t    nGoodVtx (Long64_t entry);
-   std::string      inputFile_;
+   std::string  inputFile_;
 
 };
 
 #endif
 
-#ifdef phoEff_cxx
-//phoEff::phoEff(TTree *tree)
-phoEff::phoEff(std::string inputFile)
+#ifdef jetEff_cxx
+//jetEff::jetEff(TTree *tree)
+jetEff::jetEff(std::string inputFile)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -878,19 +880,19 @@ phoEff::phoEff(std::string inputFile)
    inputFile_ = inputFile;
 }
 
-phoEff::~phoEff()
+jetEff::~jetEff()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t phoEff::GetEntry(Long64_t entry)
+Int_t jetEff::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t phoEff::LoadTree(Long64_t entry)
+Long64_t jetEff::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -903,7 +905,7 @@ Long64_t phoEff::LoadTree(Long64_t entry)
    return centry;
 }
 
-void phoEff::Init(TTree *tree)
+void jetEff::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -1324,7 +1326,7 @@ void phoEff::Init(TTree *tree)
    Notify();
 }
 
-Bool_t phoEff::Notify()
+Bool_t jetEff::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -1335,18 +1337,18 @@ Bool_t phoEff::Notify()
    return kTRUE;
 }
 
-void phoEff::Show(Long64_t entry)
+void jetEff::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t phoEff::Cut(Long64_t entry)
+Int_t jetEff::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef phoEff_cxx
+#endif // #ifdef jetEff_cxx

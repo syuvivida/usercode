@@ -23,6 +23,8 @@ void mass_phodijet::Loop()
    TH1F* h_njet = new TH1F("h_njet","Number of good jets",50,-0.5,49.5);
 
    TH1F* h_dR   = new TH1F("h_dR","#Delta R between leading photon and any jet", 50,0,1);
+   TH1F* h_dR1   = new TH1F("h_dR1","#Delta R between leading photon and 1st jet", 50,0,1);
+   TH1F* h_dR2   = new TH1F("h_dR2","#Delta R between leading photon and 2nd jet", 50,0,1);
    TH1F* h_mjj  = new TH1F("h_mjj","Dijet mass", 500,0,1000);
    TH1F* h_mgjj  = new TH1F("h_mgjj","photon+Dijet mass", 500,0,1000);
    TH2F* h_mjj_mgjj  = new TH2F("h_mjj_mgjj","Dijet mass vs 3-body mass", 500,0,1000,500,0,1000);
@@ -83,7 +85,7 @@ void mass_phodijet::Loop()
 	Float_t dR = maxPhoIndex>=0? pho_p4.DeltaR(tempjet_p4): 999.0;
 	h_dR->Fill(dR);
 	// remove overlap between leading photon and jets
-	if(dR < 0.5)continue;
+// 	if(dR < 0.5)continue;
 
 	nTotalGoodJet++;
 	nGoodJet++;
@@ -125,7 +127,11 @@ void mass_phodijet::Loop()
 			   jetPhi[secondmaxJetIndex],
 			   jetEn[secondmaxJetIndex]);
 
-     
+    
+      h_dR1->Fill(pho_p4.DeltaR(jet1_p4));
+      h_dR2->Fill(pho_p4.DeltaR(jet2_p4));
+
+ 
       Float_t mjj  = (jet1_p4+jet2_p4).M();
       Float_t mgjj = (pho_p4+jet1_p4+jet2_p4).M();
 
@@ -146,6 +152,8 @@ void mass_phodijet::Loop()
   h_npho->Write();
   h_njet->Write();
   h_dR->Write();
+  h_dR1->Write();
+  h_dR2->Write();
   h_mjj->Write();
   h_mgjj->Write();
   h_mjj_mgjj->Write();
