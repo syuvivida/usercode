@@ -25,7 +25,7 @@ void jetEff::Loop()
    TH1F* h_ngood  = (TH1F*)h_nvtx_template->Clone("h_ngood");
 
 
-   TH1F* h_eta_template = new TH1F("h_eta_template","",60,-3.0,3.0);
+   TH1F* h_eta_template = new TH1F("h_eta_template","",100,-5.0,5.0);
    h_eta_template->SetXTitle("#eta(jet)");
    TH1F* h_recetaall = (TH1F*)h_eta_template->Clone("h_recetaall");
    TH1F* h_recetapass = (TH1F*)h_eta_template->Clone("h_recetapass");
@@ -71,7 +71,7 @@ void jetEff::Loop()
 
 
    // profile template
-   TProfile* pf_pt_template = new TProfile("pf_pt_template","",50,0,200,-10.0,10.0);
+   TProfile* pf_pt_template = new TProfile("pf_pt_template","",400,0,200,-10.0,10.0);
    pf_pt_template->SetXTitle("p_{T}(jet) [GeV]");
    pf_pt_template->SetYTitle("p_{T}^{RECO}(jet)/p_{T}^{GEN}(jet)"); 
 
@@ -79,14 +79,20 @@ void jetEff::Loop()
    TProfile* pf_1stjet_ratio = (TProfile*)pf_pt_template->Clone("pf_1stjet_ratio");
    TProfile* pf_2ndjet_ratio = (TProfile*)pf_pt_template->Clone("pf_2ndjet_ratio");
 
-   TProfile* pf_eta_template = new TProfile("pf_eta_template","",60,-3.0,3.0,-10.0,10.0);
+   TProfile* pf_eta_template = new TProfile("pf_eta_template","",100,-5.0,5.0,-10.0,10.0);
    pf_eta_template->SetXTitle("#eta(jet)");
    pf_eta_template->SetYTitle("p_{T}^{GEN}(jet)/p_{T}^{RAW}(jet)"); 
 
    TProfile* pf_alljet_corr_eta = (TProfile*)pf_eta_template->Clone("pf_alljet_corr_eta");
    TProfile* pf_1stjet_corr_eta = (TProfile*)pf_eta_template->Clone("pf_1stjet_corr_eta");
    TProfile* pf_2ndjet_corr_eta = (TProfile*)pf_eta_template->Clone("pf_2ndjet_corr_eta");
-					   
+
+   TProfile* pf_alljet_ratio_eta = (TProfile*)pf_eta_template->Clone("pf_alljet_ratio_eta");
+   pf_alljet_ratio_eta->SetYTitle("p_{T}^{RECO}(jet)/p_{T}^{GEN}(jet)"); 
+   TProfile* pf_1stjet_ratio_eta = (TProfile*)pf_eta_template->Clone("pf_1stjet_ratio_eta");
+   pf_1stjet_ratio_eta->SetYTitle("p_{T}^{RECO}(jet)/p_{T}^{GEN}(jet)"); 
+   TProfile* pf_2ndjet_ratio_eta = (TProfile*)pf_eta_template->Clone("pf_2ndjet_ratio_eta");
+   pf_2ndjet_ratio_eta->SetYTitle("p_{T}^{RECO}(jet)/p_{T}^{GEN}(jet)"); 					   
 
    for(int ieta=0; ieta< NETA; ieta++){
    
@@ -138,6 +144,19 @@ void jetEff::Loop()
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
+      
+      // first check the photons are OK
+      bool findAPhoton=false;
+      for(int ipho=0; ipho< nPho; ipho++){
+	
+	if(phoEt[ipho] < 15.0)continue;
+	if(phoHoverE[ipho] > 0.05)continue;
+	if(fabs(phoEta[ipho]) > 3.0)continue;
+	findAPhoton=true;
+	break;
+      }
+
+      //      if(!findAPhoton)continue;
       // check the number of good vertices per event
       Int_t ngood_vtx=nGoodVtx(ientry);
       h_ngood->Fill(ngood_vtx);
@@ -175,7 +194,7 @@ void jetEff::Loop()
 
 	  // matched or not to generator-level jets
  	  if(jetGenJetIndex[ijet]<1)continue;
-  	  if(!isFidJet(ientry, ijet))continue;
+	  if(!isFidJet(ientry, ijet))continue;
 
 	  h_genpt->Fill(jetGenJetPt[ijet]);
 
@@ -184,16 +203,19 @@ void jetEff::Loop()
 	  Float_t jetRawPtCorr = jetGenJetPt[ijet]/jetRawPt[ijet];
 
 	  pf_alljet_ratio->Fill(jetGenJetPt[ijet],jetPtRatio);
+	  pf_alljet_ratio_eta->Fill(jetGenJetEta[ijet],jetPtRatio);
 	  pf_alljet_corr_eta->Fill(jetEta[ijet],jetRawPtCorr);
 
 	  if(ijet==leadingJetIndex)
 	    {
 	      pf_1stjet_ratio->Fill(jetGenJetPt[ijet],jetPtRatio);
+	      pf_1stjet_ratio_eta->Fill(jetGenJetEta[ijet],jetPtRatio);
 	      pf_1stjet_corr_eta->Fill(jetEta[ijet],jetRawPtCorr);
 	    }
 	  else if(ijet==secondLeadingJetIndex)
 	    {
 	      pf_2ndjet_ratio->Fill(jetGenJetPt[ijet],jetPtRatio);
+	      pf_2ndjet_ratio_eta->Fill(jetGenJetEta[ijet],jetPtRatio);
 	      pf_2ndjet_corr_eta->Fill(jetEta[ijet],jetRawPtCorr);
 	    }
 
@@ -241,7 +263,8 @@ void jetEff::Loop()
 					h_ngood_all[ieta], "v");
      }
   
-   TFile* outFile = new TFile(Form("jeteff_%s",inputFile_.data()),"recreate");               
+   //   TFile* outFile = new TFile(Form("jeteff_%s",inputFile_.data()),"recreate");               
+   TFile* outFile = new TFile("jeteff.root","recreate");               
    h_ngood->Write();
    h_recetaall ->Write();
    h_recetapass ->Write();
@@ -253,6 +276,9 @@ void jetEff::Loop()
    pf_alljet_ratio->Write();
    pf_1stjet_ratio->Write();
    pf_2ndjet_ratio->Write();
+   pf_alljet_ratio_eta->Write();
+   pf_1stjet_ratio_eta->Write();
+   pf_2ndjet_ratio_eta->Write();
    pf_alljet_corr_eta->Write();
    pf_1stjet_corr_eta->Write();
    pf_2ndjet_corr_eta->Write();
@@ -277,8 +303,8 @@ void jetEff::Loop()
 
 Bool_t jetEff::isFidJet (Long64_t entry, Int_t ijet)
 {
-//   if(jetPt[ijet] < 10.0)return false;
-  if(jetRawPt[ijet] < 30.0)return false;
+  if(jetPt[ijet] < 10.0)return false;
+  //  if(jetRawPt[ijet] < 30.0)return false;
   if(fabs(jetEta[ijet]) > 3.0)return false;
   return true;
 
