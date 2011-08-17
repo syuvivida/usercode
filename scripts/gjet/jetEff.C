@@ -25,6 +25,7 @@ void jetEff::Loop()
    TH1F* h_ngood  = (TH1F*)h_nvtx_template->Clone("h_ngood");
 
 
+   // adding efficiency 
    TH1F* h_eta_template = new TH1F("h_eta_template","",100,-5.0,5.0);
    h_eta_template->SetXTitle("#eta(jet)");
    TH1F* h_recetaall = (TH1F*)h_eta_template->Clone("h_recetaall");
@@ -142,7 +143,6 @@ void jetEff::Loop()
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
 
       
       // first check the photons are OK
@@ -196,6 +196,11 @@ void jetEff::Loop()
  	  if(jetGenJetIndex[ijet]<1)continue;
 	  if(!isFidJet(ientry, ijet))continue;
 
+
+	  if(jetGenJetPt[ijet]<20.0)continue;
+	  if(fabs(jetGenJetEta[ijet])>3.0)continue;
+	  
+
 	  h_genpt->Fill(jetGenJetPt[ijet]);
 
  	  Float_t jetPtRatio = jetPt[ijet]/jetGenJetPt[ijet];
@@ -244,6 +249,8 @@ void jetEff::Loop()
 	  h_ngood_pass[etaIndex]->Fill(ngood_vtx);	
       }      
       
+
+      
    } // end of loop over entries
 
    // now save the histogram in a root file
@@ -265,6 +272,8 @@ void jetEff::Loop()
   
    //   TFile* outFile = new TFile(Form("jeteff_%s",inputFile_.data()),"recreate");               
    TFile* outFile = new TFile("jeteff.root","recreate");               
+
+
    h_ngood->Write();
    h_recetaall ->Write();
    h_recetapass ->Write();
@@ -304,7 +313,6 @@ void jetEff::Loop()
 Bool_t jetEff::isFidJet (Long64_t entry, Int_t ijet)
 {
   if(jetPt[ijet] < 10.0)return false;
-  //  if(jetRawPt[ijet] < 30.0)return false;
   if(fabs(jetEta[ijet]) > 3.0)return false;
   return true;
 
