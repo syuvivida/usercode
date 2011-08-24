@@ -15,8 +15,9 @@ const Float_t ENDCAP_MAXETA=2.5;
 const Int_t   NETA=2;
 const Float_t fEtaBin[]={0,ENDCAP_MINETA,ENDCAP_MAXETA};
 
-
-void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon, 3: gluon-gluon
+// 0: no filter, 1: quark-quark, 2: quark-gluon, 3: gluon-gluon
+void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
+		    Float_t ybmin, Float_t ybmax) 
 {
    if (fChain == 0) return;
 
@@ -36,12 +37,102 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
    TH1F* h_dec = new TH1F("h_dec","",2,fEtaBin);
 
 
+   // pt distribution
+   TH1F* h_pt_template = new TH1F("h_pt_template","",500,0,500);
+   TH1F* h_pt_dirgamma = (TH1F*) h_pt_template->Clone("h_pt_dirgamma");
+   TH1F* h_pt_fraggamma = (TH1F*) h_pt_template->Clone("h_pt_fraggamma");
+   TH1F* h_pt_1stjet = (TH1F*) h_pt_template->Clone("h_pt_1stjet");
+   TH1F* h_pt_2ndjet = (TH1F*) h_pt_template->Clone("h_pt_2ndjet");
+   
    // rapidity distribution
    TH1F* h_y_template = new TH1F("h_y_template","",100,-5,5);
    TH1F* h_y_dirgamma = (TH1F*) h_y_template->Clone("h_y_dirgamma");
    TH1F* h_y_fraggamma = (TH1F*) h_y_template->Clone("h_y_fraggamma");
    TH1F* h_y_1stjet = (TH1F*) h_y_template->Clone("h_y_1stjet");
    TH1F* h_y_2ndjet = (TH1F*) h_y_template->Clone("h_y_2ndjet");
+
+   // some CM variables 
+   TH1F* h_pstar_template = new TH1F("h_pstar_template","",500,0,500);
+
+   TH1F* h_pstar_dirgamma1stjet = (TH1F*)h_pstar_template->Clone("h_pstar_dirgamma1stjet");
+   h_pstar_dirgamma1stjet->SetXTitle("p^{*}(#gamma^{direct},"
+				      "jet^{1st})");
+   
+   TH1F* h_pstar_dirgamma2ndjet = (TH1F*)h_pstar_template->Clone("h_pstar_dirgamma2ndjet");
+   h_pstar_dirgamma2ndjet->SetXTitle("p^{*}(#gamma^{direct},"
+				      "jet^{2nd})");
+   
+   TH1F* h_pstar_dijet = (TH1F*)h_pstar_template->Clone("h_pstar_dijet");
+   h_pstar_dijet->SetXTitle("p^{*}(jet^{1st},"
+					"jet^{2nd})");
+
+   TH1F* h_pstar_fraggamma1stjet = (TH1F*)h_pstar_template->Clone("h_pstar_fraggamma1stjet");
+   h_pstar_fraggamma1stjet->SetXTitle("p^{*}(#gamma^{frag},"
+					"jet^{1st})");
+
+   TH1F* h_pstar_fraggamma2ndjet = (TH1F*)h_pstar_template->Clone("h_pstar_fraggamma2ndjet");
+   h_pstar_fraggamma2ndjet->SetXTitle("p^{*}(#gamma^{frag},"
+				       "jet^{2nd})");
+
+   TH1F* h_pstar_debug = (TH1F*)h_pstar_template->Clone("h_pstar_debug");
+   h_pstar_debug->SetXTitle("p^{*}(#gamma^{direct},"
+				      "jet^{1st})");
+
+   ////////////////////////////////////////////////////////////////////////
+
+
+   TH1F* h_yB_template = new TH1F("h_yB_template","",100,-5.0,5.0);
+
+   TH1F* h_yB_dirgamma1stjet = (TH1F*)h_yB_template->Clone("h_yB_dirgamma1stjet");
+   h_yB_dirgamma1stjet->SetXTitle("y_{B}(#gamma^{direct},"
+				      "jet^{1st})");
+   
+   TH1F* h_yB_dirgamma2ndjet = (TH1F*)h_yB_template->Clone("h_yB_dirgamma2ndjet");
+   h_yB_dirgamma2ndjet->SetXTitle("y_{B}(#gamma^{direct},"
+				      "jet^{2nd})");
+   
+   TH1F* h_yB_dijet = (TH1F*)h_yB_template->Clone("h_yB_dijet");
+   h_yB_dijet->SetXTitle("y_{B}(jet^{1st},"
+					"jet^{2nd})");
+
+   TH1F* h_yB_fraggamma1stjet = (TH1F*)h_yB_template->Clone("h_yB_fraggamma1stjet");
+   h_yB_fraggamma1stjet->SetXTitle("y_{B}(#gamma^{frag},"
+					"jet^{1st})");
+
+   TH1F* h_yB_fraggamma2ndjet = (TH1F*)h_yB_template->Clone("h_yB_fraggamma2ndjet");
+   h_yB_fraggamma2ndjet->SetXTitle("y_{B}(#gamma^{frag},"
+				       "jet^{2nd})");
+
+   TH1F* h_yB_debug = (TH1F*)h_yB_template->Clone("h_yB_debug");
+   h_yB_debug->SetXTitle("y_{B}(#gamma^{direct},"
+				      "jet^{1st})");
+
+
+   // z_gammma proposed by JETPHOX
+   TH1F* h_zgamma_template = new TH1F("h_zgamma_template","",
+				    200,-4.0,4.0);
+
+   TH1F* h_zgamma_dirgamma1stjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_dirgamma1stjet");
+   h_zgamma_dirgamma1stjet->SetXTitle("z_{#gamma}(#gamma^{direct},"
+				      "jet^{1st})");
+   
+   TH1F* h_zgamma_dirgamma2ndjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_dirgamma2ndjet");
+   h_zgamma_dirgamma2ndjet->SetXTitle("z_{#gamma}(#gamma^{direct},"
+				      "jet^{2nd})");
+   
+   TH1F* h_zgamma_dijet = (TH1F*)h_zgamma_template->Clone("h_zgamma_dijet");
+   h_zgamma_dijet->SetXTitle("z_{#gamma}(jet^{1st},"
+					"jet^{2nd})");
+
+   TH1F* h_zgamma_fraggamma1stjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_fraggamma1stjet");
+   h_zgamma_fraggamma1stjet->SetXTitle("z_{#gamma}(#gamma^{frag},"
+					"jet^{1st})");
+
+   TH1F* h_zgamma_fraggamma2ndjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_fraggamma2ndjet");
+   h_zgamma_fraggamma2ndjet->SetXTitle("z_{#gamma}(#gamma^{frag},"
+				       "jet^{2nd})");
+
+
 
    // delta phi
    TH1F* h_dPhi_template = new TH1F("h_dPhi_template","",
@@ -157,8 +248,9 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
 	// check if this is a real photon
 
 	if(mcPID[imc]!=22)continue;
-	if(mcPt[imc]< 20.0)continue;
- 	if(fabs(mcEta[imc]) > 2.5)continue;
+  	if(mcPt[imc]< 20.0)continue;
+   	if(fabs(mcEta[imc]) > 2.5)continue;
+
 
 	if(mcMomPID[imc]==22 && imc > 7 && !findADirPhoton)
 	  {
@@ -188,10 +280,16 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
 
 
       if(findADirPhoton)
-	h_y_dirgamma->Fill(gen_direct_photon.Rapidity());
+	{
+	  h_y_dirgamma->Fill(gen_direct_photon.Rapidity());
+	  h_pt_dirgamma->Fill(gen_direct_photon.Pt());
+	}
 
       if(findAFraPhoton)
-	h_y_fraggamma->Fill(gen_fragmentation_photon.Rapidity());
+	{
+	  h_y_fraggamma->Fill(gen_fragmentation_photon.Rapidity());
+	  h_pt_fraggamma->Fill(gen_fragmentation_photon.Pt());
+	}
 
       // first check which reco jet is the one from the highest and 
       // second et gen jet
@@ -226,7 +324,7 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
       // only study
       if(leadingJetIndex >=0 &&
 	 (
-	  jetGenJetPt[leadingJetIndex] > 20.0 &&
+ 	  jetGenJetPt[leadingJetIndex] > 20.0 &&
 	  fabs(jetGenJetEta[leadingJetIndex]) < 3.0
 	  )
 	 )
@@ -240,14 +338,6 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
 	 )
 	findSecondLeadingJet = true;
 
-//       for(int ijet=0; ijet<nJet; ijet++)
-// 	{
-// 	  cout << "jet " << ijet << ": " << 
-// 	    jetPt[ijet] << "\t" << jetEta[ijet] << endl;
-// 	  cout << "\t" << 
-// 	    jetGenJetPt[ijet] << "\t" << jetGenJetEta[ijet] << endl;
-// 	}
-
 
       TLorentzVector gen_1stjet(0,0,0,0);
       if(findLeadingJet)
@@ -259,6 +349,7 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
 				  jetGenJetEn[leadingJetIndex]
 				  );
 	  h_y_1stjet->Fill(gen_1stjet.Rapidity());
+ 	  h_pt_1stjet->Fill(gen_1stjet.Pt());
 	  
 	}
       
@@ -276,47 +367,84 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
 				  );
 
 	   h_y_2ndjet->Fill(gen_2ndjet.Rapidity());
+	   h_pt_2ndjet->Fill(gen_2ndjet.Pt());
 	}
 
       
       // now calculating cosTheta and chi
-      if(findADirPhoton && findLeadingJet)
+      if(findADirPhoton && findLeadingJet 
+	 && separated(gen_direct_photon, gen_1stjet)
+	 )
 	{
 
-	  h_cosTheta_dirgamma1stjet->Fill(cosThetaStar(gen_direct_photon, gen_1stjet));
-	  h_chi_dirgamma1stjet->Fill(chiPair(gen_direct_photon, gen_1stjet));
+	  Double_t pstar_temp  = pstar(gen_direct_photon,gen_1stjet);
+	  Double_t yB_temp     = yB(gen_direct_photon,gen_1stjet);
+	  h_pstar_dirgamma1stjet->Fill(pstar_temp);
+	  h_yB_dirgamma1stjet->Fill(yB_temp);
+	  h_zgamma_dirgamma1stjet->Fill(zgamma(gen_direct_photon,gen_1stjet));
 	  h_dPhi_dirgamma1stjet->Fill(deltaPhi(gen_direct_photon,gen_1stjet));
+
+ 	  if(pstar_temp > pstarmin && pstar_temp < pstarmax 
+	     && fabs(yB_temp) > ybmin && fabs(yB_temp) < ybmax)
+	    {
+	      h_cosTheta_dirgamma1stjet->Fill(cosThetaStar(gen_direct_photon, gen_1stjet));
+	      h_pstar_debug->Fill(pstar_temp);
+	      h_yB_debug   ->Fill(yB_temp);
+	    }
+
+	    h_chi_dirgamma1stjet->Fill(chiPair(gen_direct_photon, gen_1stjet));
 	}
       
-      if(findADirPhoton && findSecondLeadingJet)
+      if(findADirPhoton && findSecondLeadingJet
+	 && separated(gen_direct_photon, gen_2ndjet)
+	 )
 	{
+	  h_pstar_dirgamma2ndjet->Fill(pstar(gen_direct_photon,gen_2ndjet));
+	  h_yB_dirgamma2ndjet->Fill(yB(gen_direct_photon,gen_2ndjet));
+	  h_zgamma_dirgamma2ndjet->Fill(zgamma(gen_direct_photon,gen_2ndjet));
+	  h_dPhi_dirgamma2ndjet->Fill(deltaPhi(gen_direct_photon,gen_2ndjet));
 	  h_cosTheta_dirgamma2ndjet->Fill(cosThetaStar(gen_direct_photon, gen_2ndjet));	  
 	  h_chi_dirgamma2ndjet->Fill(chiPair(gen_direct_photon,gen_2ndjet));
-	  h_dPhi_dirgamma2ndjet->Fill(deltaPhi(gen_direct_photon,gen_2ndjet));
 
 	}
 
-      if(findLeadingJet && findSecondLeadingJet)
+      if(findLeadingJet && findSecondLeadingJet 
+	 && separated(gen_1stjet, gen_2ndjet)
+	 )
 	{
+	  h_pstar_dijet->Fill(pstar(gen_1stjet, gen_2ndjet));
+	  h_yB_dijet->Fill(yB(gen_1stjet, gen_2ndjet));
+	  h_zgamma_dijet->Fill(zgamma(gen_1stjet, gen_2ndjet));
+	  h_dPhi_dijet->Fill(deltaPhi(gen_1stjet, gen_2ndjet));
 	  h_cosTheta_dijet->Fill(cosThetaStar(gen_1stjet, gen_2ndjet));
 	  h_chi_dijet->Fill(chiPair(gen_1stjet, gen_2ndjet));
-	  h_dPhi_dijet->Fill(deltaPhi(gen_1stjet, gen_2ndjet));
 	}
 
 
-      if(findAFraPhoton && findLeadingJet)
+      if(findAFraPhoton && findLeadingJet 
+	 && separated(gen_fragmentation_photon,gen_1stjet)
+	 )
 	{
+	  h_pstar_fraggamma1stjet->Fill(pstar(gen_fragmentation_photon,gen_1stjet));
+	  h_yB_fraggamma1stjet->Fill(yB(gen_fragmentation_photon,gen_1stjet));
+	  h_zgamma_fraggamma1stjet->Fill(zgamma(gen_fragmentation_photon,gen_1stjet));
+	  h_dPhi_fraggamma1stjet->Fill(deltaPhi(gen_fragmentation_photon,gen_1stjet));
 	  h_cosTheta_fraggamma1stjet->Fill(cosThetaStar(gen_fragmentation_photon,gen_1stjet));
 	  h_chi_fraggamma1stjet->Fill(chiPair(gen_fragmentation_photon,gen_1stjet));
-	  h_dPhi_fraggamma1stjet->Fill(deltaPhi(gen_fragmentation_photon,gen_1stjet));
 	}
 
 
-      if(findAFraPhoton && findSecondLeadingJet)
+      if(findAFraPhoton && findSecondLeadingJet
+	 && separated(gen_fragmentation_photon,gen_2ndjet)
+	 )
 	{
+
+	  h_pstar_fraggamma2ndjet->Fill(pstar(gen_fragmentation_photon,gen_2ndjet));
+	  h_yB_fraggamma2ndjet->Fill(yB(gen_fragmentation_photon,gen_2ndjet));
+	  h_zgamma_fraggamma2ndjet->Fill(zgamma(gen_fragmentation_photon,gen_2ndjet));
+	  h_dPhi_fraggamma2ndjet->Fill(deltaPhi(gen_fragmentation_photon,gen_2ndjet));
 	  h_cosTheta_fraggamma2ndjet->Fill(cosThetaStar(gen_fragmentation_photon,gen_2ndjet));
 	  h_chi_fraggamma2ndjet->Fill(chiPair(gen_fragmentation_photon,gen_2ndjet));
-	  h_dPhi_fraggamma2ndjet->Fill(deltaPhi(gen_fragmentation_photon,gen_2ndjet));
 	}
 
   
@@ -335,12 +463,46 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
    if(pos!= std::string::npos)
      inputFile_.swap(inputFile_.erase(pos,remword.length()));
    
-   TFile* outFile = new TFile(Form("cosTheta_%s_%s",MODE[mode],inputFile_.data()),"recreate");               
-
+   TFile* outFile = new TFile(Form("jetphoxPaper_cosTheta_pstar%dto%d_"
+				   "yb%.1lf""to""%.1lf_%s_%s",
+				   (Int_t)pstarmin, (Int_t)pstarmax,
+				   ybmin, ybmax,
+				   MODE[mode],inputFile_.data()),"recreate");               
    h_y_dirgamma -> Write();
    h_y_fraggamma -> Write();
    h_y_1stjet -> Write();
    h_y_2ndjet -> Write();
+
+   h_pt_dirgamma -> Write();
+   h_pt_fraggamma -> Write();
+   h_pt_1stjet -> Write();
+   h_pt_2ndjet -> Write();
+
+   h_pstar_dirgamma1stjet -> Write();
+   h_pstar_dirgamma2ndjet -> Write();
+   h_pstar_dijet-> Write();
+   h_pstar_fraggamma1stjet-> Write();
+   h_pstar_fraggamma2ndjet-> Write();
+   h_pstar_debug->Write();
+
+   h_yB_dirgamma1stjet -> Write();
+   h_yB_dirgamma2ndjet -> Write();
+   h_yB_dijet-> Write();
+   h_yB_fraggamma1stjet-> Write();
+   h_yB_fraggamma2ndjet-> Write();
+   h_yB_debug->Write();
+
+   h_zgamma_dirgamma1stjet -> Write();
+   h_zgamma_dirgamma2ndjet -> Write();
+   h_zgamma_dijet-> Write();
+   h_zgamma_fraggamma1stjet-> Write();
+   h_zgamma_fraggamma2ndjet-> Write();
+
+   h_dPhi_dirgamma1stjet -> Write();
+   h_dPhi_dirgamma2ndjet -> Write();
+   h_dPhi_dijet-> Write();
+   h_dPhi_fraggamma1stjet-> Write();
+   h_dPhi_fraggamma2ndjet-> Write();
 
    h_cosTheta_dirgamma1stjet -> Write();
    h_cosTheta_dirgamma2ndjet -> Write();
@@ -354,11 +516,6 @@ void cosTheta::Loop(Int_t mode) // 0: no filter, 1: quark-quark, 2: quark-gluon,
    h_chi_fraggamma1stjet-> Write();
    h_chi_fraggamma2ndjet-> Write();
 
-   h_dPhi_dirgamma1stjet -> Write();
-   h_dPhi_dirgamma2ndjet -> Write();
-   h_dPhi_dijet-> Write();
-   h_dPhi_fraggamma1stjet-> Write();
-   h_dPhi_fraggamma2ndjet-> Write();
 
    outFile->Close();      
 }

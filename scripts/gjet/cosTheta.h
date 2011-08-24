@@ -845,7 +845,9 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(Int_t mode=0);
+   virtual void     Loop(Int_t mode=0,
+			 Float_t pstarmin=-9999.0, Float_t pstarmax=9999.0,
+			 Float_t ybmin = 0.0, Float_t ybmax=9999.0);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual Bool_t   isGoodPho(Long64_t entry, Int_t ipho);
