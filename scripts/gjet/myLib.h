@@ -50,7 +50,9 @@ Double_t chiPair(TLorentzVector l1, TLorentzVector l2) {
 }
 
 
-// some CM frame variables
+// some CM frame variables, pstar is momentum magnitude of photon in the 
+// center of mass frame pt/sinTheta*
+
 Double_t pstar(TLorentzVector l1, TLorentzVector l2) { 
 
   Double_t ystar = 0.5*fabs(l1.Rapidity()-l2.Rapidity());  

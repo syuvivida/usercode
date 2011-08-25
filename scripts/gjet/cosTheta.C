@@ -78,6 +78,9 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
    h_pstar_debug->SetXTitle("p^{*}(#gamma^{direct},"
 				      "jet^{1st})");
 
+   TH1F* h_pthat = (TH1F*)h_pstar_template->Clone("h_pthat");
+   h_pthat->SetTitle("#hat{p_{T}}");
+
    ////////////////////////////////////////////////////////////////////////
 
 
@@ -221,6 +224,7 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
 
       Int_t eventMode = 0;
 
+
       if(mcPID[4]==21 && mcPID[5]==21){ n_gg +=1; eventMode=3;}
 
       else if(abs(mcPID[4])<=6 && abs(mcPID[5])<=6){ n_qq +=1; eventMode=1;}
@@ -249,7 +253,7 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
 
 	if(mcPID[imc]!=22)continue;
   	if(mcPt[imc]< 20.0)continue;
-   	if(fabs(mcEta[imc]) > 2.5)continue;
+    	if(fabs(mcEta[imc]) > 2.5)continue;
 
 
 	if(mcMomPID[imc]==22 && imc > 7 && !findADirPhoton)
@@ -322,19 +326,21 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
 
 
       // only study
-      if(leadingJetIndex >=0 &&
-	 (
- 	  jetGenJetPt[leadingJetIndex] > 20.0 &&
-	  fabs(jetGenJetEta[leadingJetIndex]) < 3.0
-	  )
+      if(leadingJetIndex >=0 
+ 	 &&
+ 	 (
+  	  jetGenJetPt[leadingJetIndex] > 20.0 &&
+ 	  fabs(jetGenJetEta[leadingJetIndex]) < 3.0
+ 	  )
 	 )
 	findLeadingJet = true;
 	 
-      if(secondLeadingJetIndex >=0 &&
-	 (
-	  jetGenJetPt[secondLeadingJetIndex] > 20.0 &&
-	  fabs(jetGenJetEta[secondLeadingJetIndex]) < 3.0
-	  )
+      if(secondLeadingJetIndex >=0 
+ &&
+ 	 (
+  	  jetGenJetPt[secondLeadingJetIndex] > 20.0 &&
+ 	  fabs(jetGenJetEta[secondLeadingJetIndex]) < 3.0
+ 	  )
 	 )
 	findSecondLeadingJet = true;
 
@@ -384,6 +390,7 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
 	  h_zgamma_dirgamma1stjet->Fill(zgamma(gen_direct_photon,gen_1stjet));
 	  h_dPhi_dirgamma1stjet->Fill(deltaPhi(gen_direct_photon,gen_1stjet));
 
+	  h_pthat->Fill(pthat);
  	  if(pstar_temp > pstarmin && pstar_temp < pstarmax 
 	     && fabs(yB_temp) > ybmin && fabs(yB_temp) < ybmax)
 	    {
@@ -463,7 +470,7 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
    if(pos!= std::string::npos)
      inputFile_.swap(inputFile_.erase(pos,remword.length()));
    
-   TFile* outFile = new TFile(Form("jetphoxPaper_cosTheta_pstar%dto%d_"
+   TFile* outFile = new TFile(Form("cosTheta_pstar%dto%d_"
 				   "yb%.1lf""to""%.1lf_%s_%s",
 				   (Int_t)pstarmin, (Int_t)pstarmax,
 				   ybmin, ybmax,
@@ -484,6 +491,7 @@ void cosTheta::Loop(Int_t mode, Float_t pstarmin, Float_t pstarmax,
    h_pstar_fraggamma1stjet-> Write();
    h_pstar_fraggamma2ndjet-> Write();
    h_pstar_debug->Write();
+   h_pthat->Write();
 
    h_yB_dirgamma1stjet -> Write();
    h_yB_dirgamma2ndjet -> Write();
