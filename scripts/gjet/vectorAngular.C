@@ -6,8 +6,8 @@
 #include <TLorentzVector.h>
 #include "myLib.h"
 
-void vectorAngular::Loop(Float_t pstarmin, Float_t pstarmax,
-			 Float_t ybmin, Float_t ybmax)
+void vectorAngular::Loop(double pstarmin, double pstarmax,
+			 double ybmin, double ybmax)
 {
 
    if (fChain == 0) return;
@@ -15,176 +15,176 @@ void vectorAngular::Loop(Float_t pstarmin, Float_t pstarmax,
    Long64_t nentries = fChain->GetEntriesFast();
 
    // pt distribution
-   TH1F* h_pt_template = new TH1F("h_pt_template","",500,0,500);
-   TH1F* h_pt_dirgamma = (TH1F*) h_pt_template->Clone("h_pt_dirgamma");
-   TH1F* h_pt_fraggamma = (TH1F*) h_pt_template->Clone("h_pt_fraggamma");
-   TH1F* h_pt_1stjet = (TH1F*) h_pt_template->Clone("h_pt_1stjet");
-   TH1F* h_pt_2ndjet = (TH1F*) h_pt_template->Clone("h_pt_2ndjet");
+   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500);
+   TH1D* h_pt_dirgamma = (TH1D*) h_pt_template->Clone("h_pt_dirgamma");
+   TH1D* h_pt_fraggamma = (TH1D*) h_pt_template->Clone("h_pt_fraggamma");
+   TH1D* h_pt_1stjet = (TH1D*) h_pt_template->Clone("h_pt_1stjet");
+   TH1D* h_pt_2ndjet = (TH1D*) h_pt_template->Clone("h_pt_2ndjet");
    
    // rapidity distribution
-   TH1F* h_y_template = new TH1F("h_y_template","",100,-5,5);
-   TH1F* h_y_dirgamma = (TH1F*) h_y_template->Clone("h_y_dirgamma");
-   TH1F* h_y_fraggamma = (TH1F*) h_y_template->Clone("h_y_fraggamma");
-   TH1F* h_y_1stjet = (TH1F*) h_y_template->Clone("h_y_1stjet");
-   TH1F* h_y_2ndjet = (TH1F*) h_y_template->Clone("h_y_2ndjet");
+   TH1D* h_y_template = new TH1D("h_y_template","",100,-5,5);
+   TH1D* h_y_dirgamma = (TH1D*) h_y_template->Clone("h_y_dirgamma");
+   TH1D* h_y_fraggamma = (TH1D*) h_y_template->Clone("h_y_fraggamma");
+   TH1D* h_y_1stjet = (TH1D*) h_y_template->Clone("h_y_1stjet");
+   TH1D* h_y_2ndjet = (TH1D*) h_y_template->Clone("h_y_2ndjet");
 
    // some CM variables 
-   TH1F* h_pstar_template = new TH1F("h_pstar_template","",500,0,500);
+   TH1D* h_pstar_template = new TH1D("h_pstar_template","",500,0,500);
 
-   TH1F* h_pstar_dirgamma1stjet = (TH1F*)h_pstar_template->Clone("h_pstar_dirgamma1stjet");
+   TH1D* h_pstar_dirgamma1stjet = (TH1D*)h_pstar_template->Clone("h_pstar_dirgamma1stjet");
    h_pstar_dirgamma1stjet->SetXTitle("p^{*}(#gamma^{direct},"
 				      "jet^{1st})");
    
-   TH1F* h_pstar_dirgamma2ndjet = (TH1F*)h_pstar_template->Clone("h_pstar_dirgamma2ndjet");
+   TH1D* h_pstar_dirgamma2ndjet = (TH1D*)h_pstar_template->Clone("h_pstar_dirgamma2ndjet");
    h_pstar_dirgamma2ndjet->SetXTitle("p^{*}(#gamma^{direct},"
 				      "jet^{2nd})");
    
-   TH1F* h_pstar_dijet = (TH1F*)h_pstar_template->Clone("h_pstar_dijet");
+   TH1D* h_pstar_dijet = (TH1D*)h_pstar_template->Clone("h_pstar_dijet");
    h_pstar_dijet->SetXTitle("p^{*}(jet^{1st},"
 					"jet^{2nd})");
 
-   TH1F* h_pstar_fraggamma1stjet = (TH1F*)h_pstar_template->Clone("h_pstar_fraggamma1stjet");
+   TH1D* h_pstar_fraggamma1stjet = (TH1D*)h_pstar_template->Clone("h_pstar_fraggamma1stjet");
    h_pstar_fraggamma1stjet->SetXTitle("p^{*}(#gamma^{frag},"
 					"jet^{1st})");
 
-   TH1F* h_pstar_fraggamma2ndjet = (TH1F*)h_pstar_template->Clone("h_pstar_fraggamma2ndjet");
+   TH1D* h_pstar_fraggamma2ndjet = (TH1D*)h_pstar_template->Clone("h_pstar_fraggamma2ndjet");
    h_pstar_fraggamma2ndjet->SetXTitle("p^{*}(#gamma^{frag},"
 				       "jet^{2nd})");
 
-   TH1F* h_pstar_debug = (TH1F*)h_pstar_template->Clone("h_pstar_debug");
+   TH1D* h_pstar_debug = (TH1D*)h_pstar_template->Clone("h_pstar_debug");
    h_pstar_debug->SetXTitle("p^{*}(#gamma^{direct},"
 				      "jet^{1st})");
 
-   TH1F* h_pthat = (TH1F*)h_pstar_template->Clone("h_pthat");
+   TH1D* h_pthat = (TH1D*)h_pstar_template->Clone("h_pthat");
    h_pthat->SetTitle("#hat{p_{T}}");
 
    ////////////////////////////////////////////////////////////////////////
 
 
-   TH1F* h_yB_template = new TH1F("h_yB_template","",100,-5.0,5.0);
+   TH1D* h_yB_template = new TH1D("h_yB_template","",100,-5.0,5.0);
 
-   TH1F* h_yB_dirgamma1stjet = (TH1F*)h_yB_template->Clone("h_yB_dirgamma1stjet");
+   TH1D* h_yB_dirgamma1stjet = (TH1D*)h_yB_template->Clone("h_yB_dirgamma1stjet");
    h_yB_dirgamma1stjet->SetXTitle("y_{B}(#gamma^{direct},"
 				      "jet^{1st})");
    
-   TH1F* h_yB_dirgamma2ndjet = (TH1F*)h_yB_template->Clone("h_yB_dirgamma2ndjet");
+   TH1D* h_yB_dirgamma2ndjet = (TH1D*)h_yB_template->Clone("h_yB_dirgamma2ndjet");
    h_yB_dirgamma2ndjet->SetXTitle("y_{B}(#gamma^{direct},"
 				      "jet^{2nd})");
    
-   TH1F* h_yB_dijet = (TH1F*)h_yB_template->Clone("h_yB_dijet");
+   TH1D* h_yB_dijet = (TH1D*)h_yB_template->Clone("h_yB_dijet");
    h_yB_dijet->SetXTitle("y_{B}(jet^{1st},"
 					"jet^{2nd})");
 
-   TH1F* h_yB_fraggamma1stjet = (TH1F*)h_yB_template->Clone("h_yB_fraggamma1stjet");
+   TH1D* h_yB_fraggamma1stjet = (TH1D*)h_yB_template->Clone("h_yB_fraggamma1stjet");
    h_yB_fraggamma1stjet->SetXTitle("y_{B}(#gamma^{frag},"
 					"jet^{1st})");
 
-   TH1F* h_yB_fraggamma2ndjet = (TH1F*)h_yB_template->Clone("h_yB_fraggamma2ndjet");
+   TH1D* h_yB_fraggamma2ndjet = (TH1D*)h_yB_template->Clone("h_yB_fraggamma2ndjet");
    h_yB_fraggamma2ndjet->SetXTitle("y_{B}(#gamma^{frag},"
 				       "jet^{2nd})");
 
-   TH1F* h_yB_debug = (TH1F*)h_yB_template->Clone("h_yB_debug");
+   TH1D* h_yB_debug = (TH1D*)h_yB_template->Clone("h_yB_debug");
    h_yB_debug->SetXTitle("y_{B}(#gamma^{direct},"
 				      "jet^{1st})");
 
 
    // z_gammma proposed by JETPHOX
-   TH1F* h_zgamma_template = new TH1F("h_zgamma_template","",
+   TH1D* h_zgamma_template = new TH1D("h_zgamma_template","",
 				    200,-4.0,4.0);
 
-   TH1F* h_zgamma_dirgamma1stjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_dirgamma1stjet");
+   TH1D* h_zgamma_dirgamma1stjet = (TH1D*)h_zgamma_template->Clone("h_zgamma_dirgamma1stjet");
    h_zgamma_dirgamma1stjet->SetXTitle("z_{#gamma}(#gamma^{direct},"
 				      "jet^{1st})");
    
-   TH1F* h_zgamma_dirgamma2ndjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_dirgamma2ndjet");
+   TH1D* h_zgamma_dirgamma2ndjet = (TH1D*)h_zgamma_template->Clone("h_zgamma_dirgamma2ndjet");
    h_zgamma_dirgamma2ndjet->SetXTitle("z_{#gamma}(#gamma^{direct},"
 				      "jet^{2nd})");
    
-   TH1F* h_zgamma_dijet = (TH1F*)h_zgamma_template->Clone("h_zgamma_dijet");
+   TH1D* h_zgamma_dijet = (TH1D*)h_zgamma_template->Clone("h_zgamma_dijet");
    h_zgamma_dijet->SetXTitle("z_{#gamma}(jet^{1st},"
 					"jet^{2nd})");
 
-   TH1F* h_zgamma_fraggamma1stjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_fraggamma1stjet");
+   TH1D* h_zgamma_fraggamma1stjet = (TH1D*)h_zgamma_template->Clone("h_zgamma_fraggamma1stjet");
    h_zgamma_fraggamma1stjet->SetXTitle("z_{#gamma}(#gamma^{frag},"
 					"jet^{1st})");
 
-   TH1F* h_zgamma_fraggamma2ndjet = (TH1F*)h_zgamma_template->Clone("h_zgamma_fraggamma2ndjet");
+   TH1D* h_zgamma_fraggamma2ndjet = (TH1D*)h_zgamma_template->Clone("h_zgamma_fraggamma2ndjet");
    h_zgamma_fraggamma2ndjet->SetXTitle("z_{#gamma}(#gamma^{frag},"
 				       "jet^{2nd})");
 
 
 
    // delta phi
-   TH1F* h_dPhi_template = new TH1F("h_dPhi_template","",
+   TH1D* h_dPhi_template = new TH1D("h_dPhi_template","",
 				    100,0.0,TMath::Pi());
-   TH1F* h_dPhi_dirgamma1stjet = (TH1F*)h_dPhi_template->Clone("h_dPhi_dirgamma1stjet");
+   TH1D* h_dPhi_dirgamma1stjet = (TH1D*)h_dPhi_template->Clone("h_dPhi_dirgamma1stjet");
    h_dPhi_dirgamma1stjet->SetXTitle("#Delta#phi(#gamma^{direct},"
 					"jet^{1st})");
    
-   TH1F* h_dPhi_dirgamma2ndjet = (TH1F*)h_dPhi_template->Clone("h_dPhi_dirgamma2ndjet");
+   TH1D* h_dPhi_dirgamma2ndjet = (TH1D*)h_dPhi_template->Clone("h_dPhi_dirgamma2ndjet");
    h_dPhi_dirgamma2ndjet->SetXTitle("#Delta#phi(#gamma^{direct},"
 					"jet^{2nd})");
 
-   TH1F* h_dPhi_dijet = (TH1F*)h_dPhi_template->Clone("h_dPhi_dijet");
+   TH1D* h_dPhi_dijet = (TH1D*)h_dPhi_template->Clone("h_dPhi_dijet");
    h_dPhi_dijet->SetXTitle("#Delta#phi(jet^{1st},"
 					"jet^{2nd})");
 
-   TH1F* h_dPhi_fraggamma1stjet = (TH1F*)h_dPhi_template->Clone("h_dPhi_fraggamma1stjet");
+   TH1D* h_dPhi_fraggamma1stjet = (TH1D*)h_dPhi_template->Clone("h_dPhi_fraggamma1stjet");
    h_dPhi_fraggamma1stjet->SetXTitle("#Delta#phi(#gamma^{frag},"
 					"jet^{1st})");
 
-   TH1F* h_dPhi_fraggamma2ndjet = (TH1F*)h_dPhi_template->Clone("h_dPhi_fraggamma2ndjet");
+   TH1D* h_dPhi_fraggamma2ndjet = (TH1D*)h_dPhi_template->Clone("h_dPhi_fraggamma2ndjet");
    h_dPhi_fraggamma2ndjet->SetXTitle("#Delta#phi(#gamma^{frag},"
 					"jet^{2nd})");
 
    
    // costheta
-   TH1F* h_cosTheta_template = new TH1F("h_cosTheta_template","",
+   TH1D* h_cosTheta_template = new TH1D("h_cosTheta_template","",
 					100,0.0,1.0);
       
-   TH1F* h_cosTheta_dirgamma1stjet = (TH1F*)h_cosTheta_template->Clone("h_cosTheta_dirgamma1stjet");
+   TH1D* h_cosTheta_dirgamma1stjet = (TH1D*)h_cosTheta_template->Clone("h_cosTheta_dirgamma1stjet");
    h_cosTheta_dirgamma1stjet->SetXTitle("cos#theta^{*}(#gamma^{direct},"
 					"jet^{1st})");
    
-   TH1F* h_cosTheta_dirgamma2ndjet = (TH1F*)h_cosTheta_template->Clone("h_cosTheta_dirgamma2ndjet");
+   TH1D* h_cosTheta_dirgamma2ndjet = (TH1D*)h_cosTheta_template->Clone("h_cosTheta_dirgamma2ndjet");
    h_cosTheta_dirgamma2ndjet->SetXTitle("cos#theta^{*}(#gamma^{direct},"
 					"jet^{2nd})");
 
-   TH1F* h_cosTheta_dijet = (TH1F*)h_cosTheta_template->Clone("h_cosTheta_dijet");
+   TH1D* h_cosTheta_dijet = (TH1D*)h_cosTheta_template->Clone("h_cosTheta_dijet");
    h_cosTheta_dijet->SetXTitle("cos#theta^{*}(jet^{1st},"
 					"jet^{2nd})");
 
-   TH1F* h_cosTheta_fraggamma1stjet = (TH1F*)h_cosTheta_template->Clone("h_cosTheta_fraggamma1stjet");
+   TH1D* h_cosTheta_fraggamma1stjet = (TH1D*)h_cosTheta_template->Clone("h_cosTheta_fraggamma1stjet");
    h_cosTheta_fraggamma1stjet->SetXTitle("cos#theta^{*}(#gamma^{frag},"
 					"jet^{1st})");
 
-   TH1F* h_cosTheta_fraggamma2ndjet = (TH1F*)h_cosTheta_template->Clone("h_cosTheta_fraggamma2ndjet");
+   TH1D* h_cosTheta_fraggamma2ndjet = (TH1D*)h_cosTheta_template->Clone("h_cosTheta_fraggamma2ndjet");
    h_cosTheta_fraggamma2ndjet->SetXTitle("cos#theta^{*}(#gamma^{frag},"
 					"jet^{2nd})");
 
 
    // chi
-   TH1F* h_chi_template = new TH1F("h_chi_template","",
+   TH1D* h_chi_template = new TH1D("h_chi_template","",
 					100,0.0,20.0);      
       
-   TH1F* h_chi_dirgamma1stjet = (TH1F*)h_chi_template->Clone("h_chi_dirgamma1stjet");
+   TH1D* h_chi_dirgamma1stjet = (TH1D*)h_chi_template->Clone("h_chi_dirgamma1stjet");
    h_chi_dirgamma1stjet->SetXTitle("#chi(#gamma^{direct},"
 					"jet^{1st})");
    
 
-   TH1F* h_chi_dirgamma2ndjet = (TH1F*)h_chi_template->Clone("h_chi_dirgamma2ndjet");
+   TH1D* h_chi_dirgamma2ndjet = (TH1D*)h_chi_template->Clone("h_chi_dirgamma2ndjet");
    h_chi_dirgamma2ndjet->SetXTitle("#chi(#gamma^{direct},"
 					"jet^{2nd})");
    
-   TH1F* h_chi_dijet = (TH1F*)h_chi_template->Clone("h_chi_dijet");
+   TH1D* h_chi_dijet = (TH1D*)h_chi_template->Clone("h_chi_dijet");
    h_chi_dijet->SetXTitle("#chi(jet^{1st},"
 			  "jet^{2nd})");
 
-   TH1F* h_chi_fraggamma1stjet = (TH1F*)h_chi_template->Clone("h_chi_fraggamma1stjet");
+   TH1D* h_chi_fraggamma1stjet = (TH1D*)h_chi_template->Clone("h_chi_fraggamma1stjet");
    h_chi_fraggamma1stjet->SetXTitle("#chi(#gamma^{frag},"
 				    "jet^{1st})");
 
-   TH1F* h_chi_fraggamma2ndjet = (TH1F*)h_chi_template->Clone("h_chi_fraggamma2ndjet");
+   TH1D* h_chi_fraggamma2ndjet = (TH1D*)h_chi_template->Clone("h_chi_fraggamma2ndjet");
    h_chi_fraggamma2ndjet->SetXTitle("#chi(#gamma^{frag},"
 				    "jet^{2nd})");
 
@@ -205,7 +205,7 @@ void vectorAngular::Loop(Float_t pstarmin, Float_t pstarmax,
       TLorentzVector gen_fragmentation_photon(0,0,0,0);
 
 
-      for(int imc=0; imc < genPhoPt->size(); imc++){
+      for(unsigned int imc=0; imc < genPhoPt->size(); imc++){
 	
 	// check if this is a real photon
   	if(genPhoPt->at(imc)< 20.0)continue;
@@ -256,13 +256,13 @@ void vectorAngular::Loop(Float_t pstarmin, Float_t pstarmax,
       // second et gen jet
       bool findLeadingJet = false;
       Int_t leadingJetIndex=-1;
-      Float_t genJetMaxPt=-9999.;
+      double genJetMaxPt=-9999.;
 
       bool findSecondLeadingJet = false;
       Int_t secondLeadingJetIndex=-1;
-      Float_t secondJetMaxPt=-9999.;
+      double secondJetMaxPt=-9999.;
 
-      for(int ijet=0; ijet < genJetPt->size(); ijet++){
+      for(unsigned int ijet=0; ijet < genJetPt->size(); ijet++){
 
 	if(genJetPt->at(ijet) > genJetMaxPt)
 	  {
@@ -415,13 +415,13 @@ void vectorAngular::Loop(Float_t pstarmin, Float_t pstarmax,
 
 
    
-   std::string remword="/data2/syu/ggNTuple/";
+   std::string remword="/data2/syu/anilNtuple/";
    size_t pos = inputFile_.find(remword);
   
    if(pos!= std::string::npos)
      inputFile_.swap(inputFile_.erase(pos,remword.length()));
    
-   TFile* outFile = new TFile(Form("cosTheta_pstar%dto%d_"
+   TFile* outFile = new TFile(Form("vectorAngular_pstar%dto%d_"
 				   "yb%.1lf""to""%.1lf_%s",
 				   (Int_t)pstarmin, (Int_t)pstarmax,
 				   ybmin, ybmax,

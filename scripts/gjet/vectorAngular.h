@@ -257,8 +257,8 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(Float_t pstarmin=-9999.0, Float_t pstarmax=9999.0,
-			 Float_t ybmin = 0.0, Float_t ybmax=9999.0);
+   virtual void     Loop(double pstarmin=-9999.0, double pstarmax=9999.0,
+			 double ybmin = 0.0, double ybmax=9999.0);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    std::string  inputFile_;
