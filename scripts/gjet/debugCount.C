@@ -18,7 +18,7 @@ const Float_t fEtaBin[]={0,ENDCAP_MINETA,ENDCAP_MAXETA};
 void debugCount::Loop() 
 {
 
-  cout << "here" << endl;
+  cout << "here version 2" << endl;
    if (fChain == 0) return;
 
    cout << "there" << endl;
@@ -50,21 +50,35 @@ void debugCount::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
-      //      if(jentry>10000)break;
+      //      if(jentry>50000)break;
       nPass[0] ++;
+
+      Int_t TriggerHLT75 = HLTIndex[30];
+
+      Int_t TriggerHLT75Iso = HLTIndex[29];
+
+      Int_t TriggerHLT90Iso = HLTIndex[15];
+
+      if(TriggerHLT75Iso > 0 && HLT[TriggerHLT75Iso]>0)
+        nPass[1]++;
+
+      if(TriggerHLT90Iso > 0 && HLT[TriggerHLT90Iso]>0)
+        nPass[2]++;
+
+      if(TriggerHLT75 > 0 && HLT[TriggerHLT75]>1)nPass[4]++;
+
+      if(TriggerHLT75 > 0 && HLT[TriggerHLT75]!=1)continue;
+
+      nPass[3]++;
+
+
+
 
       Int_t ngood_vtx=IsVtxGood;
       if(ngood_vtx==0)continue;
 
-      nPass[1] ++;
+      nPass[5] ++;
 
-
-      Int_t TriggerHLT75 = HLTIndex[30];
-
-
-      if(HLT[TriggerHLT75]==0)continue;
-
-      nPass[2]++;
 
 
       bool findLeadingPhoton = false;
@@ -75,6 +89,35 @@ void debugCount::Loop()
       for(int ipho=0; ipho < nPho; ipho++){
 	
 	if(!isGoodPho(ientry,ipho))continue;
+
+	nPass[6]++;
+
+	h_pt_dirgamma->Fill(phoEt[ipho]);
+	h_y_dirgamma ->Fill(phoSCEta[ipho]);
+
+	if( fabs(phoSCEta[ipho])<0.9 )nPass[7]++;
+	else if( fabs(phoSCEta[ipho])>0.9 && 
+		 fabs(phoSCEta[ipho])<BARREL_MAXETA )
+	  nPass[8]++;
+	else if( fabs(phoSCEta[ipho])>ENDCAP_MINETA &&
+		 fabs(phoSCEta[ipho])< 2.1)
+	  nPass[9]++;
+
+	else if( fabs(phoSCEta[ipho])> 2.1 && 
+		 fabs(phoSCEta[ipho])< ENDCAP_MAXETA)
+	  nPass[10]++;
+	
+	if(fabs(phoSCEta[ipho]) < BARREL_MAXETA && phoSigmaIEtaIEta[ipho] < 0.010)
+	  nPass[13]++;
+
+	if(fabs(phoSCEta[ipho]) < ENDCAP_MAXETA && 
+	   fabs(phoSCEta[ipho]) > ENDCAP_MINETA 
+	   && phoSigmaIEtaIEta[ipho] < 0.030)
+	  nPass[14]++;
+
+	
+
+
 	if(phoEt[ipho] > phoMaxPt)
 	  {
 	    phoMaxPt = phoEt[ipho];
@@ -82,13 +125,11 @@ void debugCount::Loop()
 	    findLeadingPhoton = true;
 	  }
 	
-	nPass[4]++;
-
       } // end of leading photon search
 
       if(!findLeadingPhoton)continue;
 	
-      nPass[3]++;
+      nPass[11]++;
 
       // first check which reco jet is the one from the highest and 
       // second et gen jet
@@ -134,6 +175,7 @@ void debugCount::Loop()
       TLorentzVector gen_1stjet(0,0,0,0);
       if(findLeadingJet)
 	{
+	  nPass[12]++;
 	  gen_1stjet.SetPtEtaPhiE(
 				  jetPt[leadingJetIndex],
 				  jetEta[leadingJetIndex],
@@ -168,7 +210,7 @@ void debugCount::Loop()
 
 
    for(int i=0; i<20; i++)
-     // if(nPass[i]>0)
+     if(nPass[i]>0)
        cout << "nPass["<< i << "]=" << nPass[i] << endl;
    
    /*
@@ -177,7 +219,7 @@ void debugCount::Loop()
   
    if(pos!= std::string::npos)
      inputFile_.swap(inputFile_.erase(pos,remword.length()));
-   
+     
 
 
    TFile* outFile = new TFile(Form("debugCount_pstar%dto%d_"
@@ -185,8 +227,11 @@ void debugCount::Loop()
 				   (Int_t)pstarmin, (Int_t)pstarmax,
 				   ybmin, ybmax,
 				   MODE[mode],inputFile_.data()),"recreate");               
+				   
+   */
 
-
+   TFile* outFile = new TFile("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/debug.root",
+			      "recreate");
    h_y_dirgamma -> Write();
    h_y_1stjet -> Write();
    h_y_2ndjet -> Write();
@@ -198,7 +243,7 @@ void debugCount::Loop()
 
    outFile->Close();     
 
-   */
+   
 }
 
 
@@ -284,12 +329,17 @@ Bool_t debugCount::isGoodPho(Long64_t entry, Int_t ipho)
 //   if(phoEcalIsoDR04[ipho] > 4.2 +0.006 * phoEt[ipho])return false;
 //   if(phoHcalIsoDR04[ipho] > 2.2 +0.0025* phoEt[ipho])return false;
 //   if(phoTrkIsoHollowDR04[ipho] > 2.0 +0.001* phoEt[ipho])return false;
+
   if(phoEcalIsoDR04[ipho] > 4.2 +0.003 * phoEt[ipho])return false;
   if(phoHcalIsoDR04[ipho] > 2.2 +0.001* phoEt[ipho])return false;
   if(phoTrkIsoHollowDR04[ipho] > 2.0 +0.001* phoEt[ipho])return false;
+ 
+  //  Float_t sumIso = phoEcalIsoDR04[ipho] + phoHcalIsoDR04[ipho] + phoTrkIsoHollowDR04[ipho];
   
-//   if(isEB && phoSigmaIEtaIEta[ipho] > 0.011)return false;
-//   if(isEE && phoSigmaIEtaIEta[ipho] > 0.030)return false;
+  //  if(sumIso < 5.0)return false;
+ 
+  //  if(isEB && phoSigmaIEtaIEta[ipho] > 0.010)return false;
+  //  if(isEE && phoSigmaIEtaIEta[ipho] > 0.030)return false;
 
   return true;
 
