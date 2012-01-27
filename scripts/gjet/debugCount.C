@@ -42,7 +42,7 @@ void debugCount::Loop()
    TH1F* h_y_2ndjet = (TH1F*) h_y_template->Clone("h_y_2ndjet");
 
 
-   Long64_t nPass[20]={0};
+   Long64_t nPass[30]={0};
 
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -53,24 +53,54 @@ void debugCount::Loop()
       //      if(jentry>50000)break;
       nPass[0] ++;
 
-      Int_t TriggerHLT75 = HLTIndex[30];
+      Int_t HLT_Photon30_CaloIdVL = HLTIndex[63];
+      
+      Int_t HLT_Photon30_CaloIdVL_IsoL = HLTIndex[64];
 
-      Int_t TriggerHLT75Iso = HLTIndex[29];
+      Int_t HLT_Photon50_CaloIdVL = HLTIndex[65];
 
-      Int_t TriggerHLT90Iso = HLTIndex[15];
+      Int_t HLT_Photon50_CaloIdVL_IsoL = HLTIndex[66];
 
-      if(TriggerHLT75Iso > 0 && HLT[TriggerHLT75Iso]>0)
-        nPass[1]++;
+      Int_t HLT_Photon75_CaloIdVL = HLTIndex[30];
 
-      if(TriggerHLT90Iso > 0 && HLT[TriggerHLT90Iso]>0)
-        nPass[2]++;
+      Int_t HLT_Photon75_CaloIdVL_IsoL = HLTIndex[29];
 
-      if(TriggerHLT75 > 0 && HLT[TriggerHLT75]>1)nPass[4]++;
+      Int_t HLT_Photon90_CaloIdVL = HLTIndex[67];
 
-      if(TriggerHLT75 > 0 && HLT[TriggerHLT75]!=1)continue;
+      Int_t HLT_Photon90_CaloIdVL_IsoL = HLTIndex[15];
 
+      Int_t HLT_Photon135 = HLTIndex[31];
+      
+      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
+	nPass[1]++;
+      if(HLT_Photon75_CaloIdVL_IsoL > 0 && HLT[HLT_Photon75_CaloIdVL_IsoL]>0)
+        nPass[15]++;
+
+      if(HLT_Photon30_CaloIdVL      > 0 && HLT[HLT_Photon30_CaloIdVL]>0)
+	nPass[16]++;
+      if(HLT_Photon30_CaloIdVL_IsoL > 0 && HLT[HLT_Photon30_CaloIdVL_IsoL]>0)
+	nPass[17]++;
+
+      if(HLT_Photon50_CaloIdVL      > 0 && HLT[HLT_Photon50_CaloIdVL]>0)
+        nPass[18]++;
+      if(HLT_Photon50_CaloIdVL_IsoL > 0 && HLT[HLT_Photon50_CaloIdVL_IsoL]>0)
+	nPass[19]++;
+
+      if(HLT_Photon90_CaloIdVL      > 0 && HLT[HLT_Photon90_CaloIdVL]>0)
+        nPass[20]++;
+      if(HLT_Photon90_CaloIdVL_IsoL > 0 && HLT[HLT_Photon90_CaloIdVL_IsoL]>0)
+	nPass[21]++;
+
+      if(HLT_Photon135              > 0 && HLT[HLT_Photon135]>0)
+        nPass[22]++;
+
+
+      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>1)
+	nPass[4]++; // prescaled
+
+      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]!=1)continue;
       nPass[3]++;
-
+      
 
 
 
@@ -209,7 +239,7 @@ void debugCount::Loop()
    } // end of loop over entries
 
 
-   for(int i=0; i<20; i++)
+   for(int i=0; i<30; i++)
      if(nPass[i]>0)
        cout << "nPass["<< i << "]=" << nPass[i] << endl;
    
