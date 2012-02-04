@@ -42,6 +42,9 @@ void debugCount::Loop()
    TH1F* h_y_2ndjet = (TH1F*) h_y_template->Clone("h_y_2ndjet");
 
 
+   TH1F* h_npass = new TH1F("h_npass","",30,-0.5,29.5);
+   h_npass->SetXTitle("nPass");
+
    Long64_t nPass[30]={0};
 
    Long64_t nbytes = 0, nb = 0;
@@ -52,6 +55,7 @@ void debugCount::Loop()
       // if (Cut(ientry) < 0) continue;
       //      if(jentry>50000)break;
       nPass[0] ++;
+      h_npass->Fill(0.0);
 
       Int_t HLT_Photon30_CaloIdVL = HLTIndex[63];
       
@@ -72,35 +76,64 @@ void debugCount::Loop()
       Int_t HLT_Photon135 = HLTIndex[31];
       
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
-	nPass[1]++;
+	{ 
+	  nPass[1]++;
+	  h_npass->Fill(1.0);
+	}
+
       if(HLT_Photon75_CaloIdVL_IsoL > 0 && HLT[HLT_Photon75_CaloIdVL_IsoL]>0)
-        nPass[15]++;
+	{
+	  nPass[15]++;
+	  h_npass->Fill(15.0);
+	}
 
       if(HLT_Photon30_CaloIdVL      > 0 && HLT[HLT_Photon30_CaloIdVL]>0)
-	nPass[16]++;
+	{
+	  nPass[16]++;
+	  h_npass->Fill(16.0);
+	}
       if(HLT_Photon30_CaloIdVL_IsoL > 0 && HLT[HLT_Photon30_CaloIdVL_IsoL]>0)
-	nPass[17]++;
+	{
+	  nPass[17]++;
+	  h_npass->Fill(17.0);
+	}
 
       if(HLT_Photon50_CaloIdVL      > 0 && HLT[HLT_Photon50_CaloIdVL]>0)
-        nPass[18]++;
+	{
+	  nPass[18]++;
+	  h_npass->Fill(18.0);
+	}
       if(HLT_Photon50_CaloIdVL_IsoL > 0 && HLT[HLT_Photon50_CaloIdVL_IsoL]>0)
-	nPass[19]++;
-
+	{
+	  nPass[19]++;
+	  h_npass->Fill(19.0);
+	}
       if(HLT_Photon90_CaloIdVL      > 0 && HLT[HLT_Photon90_CaloIdVL]>0)
-        nPass[20]++;
+	{
+	  nPass[20]++;
+	  h_npass->Fill(20.0);
+	}
       if(HLT_Photon90_CaloIdVL_IsoL > 0 && HLT[HLT_Photon90_CaloIdVL_IsoL]>0)
-	nPass[21]++;
-
+	{
+	  nPass[21]++;
+	  h_npass->Fill(21.0);
+	}
       if(HLT_Photon135              > 0 && HLT[HLT_Photon135]>0)
-        nPass[22]++;
-
-
+	{
+	  nPass[22]++;
+	  h_npass->Fill(22.0);
+	}
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>1)
-	nPass[4]++; // prescaled
+	{
+	  nPass[4]++; // prescaled
+	  h_npass->Fill(4.0);
+	}
 
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]!=1)continue;
-      nPass[3]++;
-      
+      {
+	nPass[3]++;
+	h_npass->Fill(3.0);
+      }
 
 
 
@@ -108,7 +141,7 @@ void debugCount::Loop()
       if(ngood_vtx==0)continue;
 
       nPass[5] ++;
-
+      h_npass->Fill(5.0);
 
 
       bool findLeadingPhoton = false;
@@ -121,33 +154,49 @@ void debugCount::Loop()
 	if(!isGoodPho(ientry,ipho))continue;
 
 	nPass[6]++;
+	h_npass->Fill(6.0);
 
 	h_pt_dirgamma->Fill(phoEt[ipho]);
 	h_y_dirgamma ->Fill(phoSCEta[ipho]);
 
-	if( fabs(phoSCEta[ipho])<0.9 )nPass[7]++;
+	if( fabs(phoSCEta[ipho])<0.9 )
+	  {
+	    nPass[7]++;
+	    h_npass->Fill(7.0);
+	  }
 	else if( fabs(phoSCEta[ipho])>0.9 && 
 		 fabs(phoSCEta[ipho])<BARREL_MAXETA )
-	  nPass[8]++;
+	  {
+	    nPass[8]++;
+	    h_npass->Fill(8.0);
+	  }
+
 	else if( fabs(phoSCEta[ipho])>ENDCAP_MINETA &&
 		 fabs(phoSCEta[ipho])< 2.1)
-	  nPass[9]++;
-
+	  {
+	    nPass[9]++;
+	    h_npass->Fill(9.0);	    
+	  }
 	else if( fabs(phoSCEta[ipho])> 2.1 && 
 		 fabs(phoSCEta[ipho])< ENDCAP_MAXETA)
-	  nPass[10]++;
+	  {
+	    nPass[10]++;
+	    h_npass->Fill(10.0);
+	  }
 	
 	if(fabs(phoSCEta[ipho]) < BARREL_MAXETA && phoSigmaIEtaIEta[ipho] < 0.010)
-	  nPass[13]++;
-
+	  {
+	    nPass[13]++;
+	    h_npass->Fill(13.0);
+	  }
 	if(fabs(phoSCEta[ipho]) < ENDCAP_MAXETA && 
 	   fabs(phoSCEta[ipho]) > ENDCAP_MINETA 
 	   && phoSigmaIEtaIEta[ipho] < 0.030)
-	  nPass[14]++;
-
-	
-
-
+	  {
+	    nPass[14]++;
+	    h_npass->Fill(14.0);
+	  }
+	    
 	if(phoEt[ipho] > phoMaxPt)
 	  {
 	    phoMaxPt = phoEt[ipho];
@@ -160,6 +209,7 @@ void debugCount::Loop()
       if(!findLeadingPhoton)continue;
 	
       nPass[11]++;
+      h_npass->Fill(11.0);
 
       // first check which reco jet is the one from the highest and 
       // second et gen jet
@@ -206,6 +256,7 @@ void debugCount::Loop()
       if(findLeadingJet)
 	{
 	  nPass[12]++;
+	  h_npass->Fill(12.0);
 	  gen_1stjet.SetPtEtaPhiE(
 				  jetPt[leadingJetIndex],
 				  jetEta[leadingJetIndex],
@@ -240,28 +291,19 @@ void debugCount::Loop()
 
 
    for(int i=0; i<30; i++)
-     if(nPass[i]>0)
-       cout << "nPass["<< i << "]=" << nPass[i] << endl;
-   
-   /*
-   std::string remword="/data2/syu/ggNTuple/";
-   size_t pos = inputFile_.find(remword);
+       if(nPass[i]>0)
+	 cout << "nPass["<< i << "]=" << nPass[i] << endl;
+
+   std::string remword="/data4/syu/";
+   size_t pos = _inputDirName.find(remword);
   
    if(pos!= std::string::npos)
-     inputFile_.swap(inputFile_.erase(pos,remword.length()));
+     _inputDirName.swap(_inputDirName.erase(pos,remword.length()));
      
 
 
-   TFile* outFile = new TFile(Form("debugCount_pstar%dto%d_"
-				   "yb%.1lf""to""%.1lf_%s_%s",
-				   (Int_t)pstarmin, (Int_t)pstarmax,
-				   ybmin, ybmax,
-				   MODE[mode],inputFile_.data()),"recreate");               
+   TFile* outFile = new TFile(Form("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/%s.root",_inputDirName.data()),"recreate");               
 				   
-   */
-
-   TFile* outFile = new TFile("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/debug.root",
-			      "recreate");
    h_y_dirgamma -> Write();
    h_y_1stjet -> Write();
    h_y_2ndjet -> Write();
@@ -269,7 +311,8 @@ void debugCount::Loop()
    h_pt_dirgamma -> Write();
    h_pt_1stjet -> Write();
    h_pt_2ndjet -> Write();
-
+   
+   h_npass->Write();
 
    outFile->Close();     
 
