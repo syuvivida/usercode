@@ -129,11 +129,12 @@ void debugCount::Loop()
 	  h_npass->Fill(4.0);
 	}
 
-      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]!=1)continue;
-      {
-	nPass[3]++;
-	h_npass->Fill(3.0);
-      }
+      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]!=1)
+	{
+	  continue;
+	  nPass[3]++;
+	  h_npass->Fill(3.0);
+	}
 
 
 
