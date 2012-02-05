@@ -34,6 +34,12 @@ void debugCount::Loop()
    TH1F* h_pt_dirgamma = (TH1F*) h_pt_template->Clone("h_pt_dirgamma");
    TH1F* h_pt_1stjet = (TH1F*) h_pt_template->Clone("h_pt_1stjet");
    TH1F* h_pt_2ndjet = (TH1F*) h_pt_template->Clone("h_pt_2ndjet");
+
+   TH1F* h_pt_trig30 = (TH1F*) h_pt_template->Clone("h_pt_trig30");
+   TH1F* h_pt_trig50 = (TH1F*) h_pt_template->Clone("h_pt_trig50");
+   TH1F* h_pt_trig75 = (TH1F*) h_pt_template->Clone("h_pt_trig75");
+   TH1F* h_pt_trig90 = (TH1F*) h_pt_template->Clone("h_pt_trig90");
+   TH1F* h_pt_trig135 = (TH1F*) h_pt_template->Clone("h_pt_trig135");
    
    // rapidity distribution
    TH1F* h_y_template = new TH1F("h_y_template","",100,-5,5);
@@ -42,7 +48,7 @@ void debugCount::Loop()
    TH1F* h_y_2ndjet = (TH1F*) h_y_template->Clone("h_y_2ndjet");
 
 
-   TH1F* h_npass = new TH1F("h_npass","",30,-0.5,29.5);
+   TH1I* h_npass = new TH1I("h_npass","",30,-0.5,29.5);
    h_npass->SetXTitle("nPass");
 
    Long64_t nPass[30]={0};
@@ -54,8 +60,9 @@ void debugCount::Loop()
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
       //      if(jentry>50000)break;
+
       nPass[0] ++;
-      h_npass->Fill(0.0);
+      h_npass->Fill(0);
 
       Int_t HLT_Photon30_CaloIdVL = HLTIndex[63];
       
@@ -75,74 +82,77 @@ void debugCount::Loop()
 
       Int_t HLT_Photon135 = HLTIndex[31];
       
-      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
-	{ 
-	  nPass[1]++;
-	  h_npass->Fill(1.0);
-	}
-
-      if(HLT_Photon75_CaloIdVL_IsoL > 0 && HLT[HLT_Photon75_CaloIdVL_IsoL]>0)
-	{
-	  nPass[15]++;
-	  h_npass->Fill(15.0);
-	}
 
       if(HLT_Photon30_CaloIdVL      > 0 && HLT[HLT_Photon30_CaloIdVL]>0)
 	{
-	  nPass[16]++;
-	  h_npass->Fill(16.0);
+	  nPass[1]++;
+	  h_npass->Fill(1);
 	}
       if(HLT_Photon30_CaloIdVL_IsoL > 0 && HLT[HLT_Photon30_CaloIdVL_IsoL]>0)
 	{
-	  nPass[17]++;
-	  h_npass->Fill(17.0);
+	  nPass[2]++;
+	  h_npass->Fill(2);
 	}
 
       if(HLT_Photon50_CaloIdVL      > 0 && HLT[HLT_Photon50_CaloIdVL]>0)
 	{
-	  nPass[18]++;
-	  h_npass->Fill(18.0);
+	  nPass[3]++;
+	  h_npass->Fill(3);
 	}
       if(HLT_Photon50_CaloIdVL_IsoL > 0 && HLT[HLT_Photon50_CaloIdVL_IsoL]>0)
 	{
-	  nPass[19]++;
-	  h_npass->Fill(19.0);
+	  nPass[4]++;
+	  h_npass->Fill(4);
 	}
+
+      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
+	{ 
+	  nPass[5]++;
+	  h_npass->Fill(5);
+	}
+
+      if(HLT_Photon75_CaloIdVL_IsoL > 0 && HLT[HLT_Photon75_CaloIdVL_IsoL]>0)
+	{
+	  nPass[6]++;
+	  h_npass->Fill(6);
+	}
+
       if(HLT_Photon90_CaloIdVL      > 0 && HLT[HLT_Photon90_CaloIdVL]>0)
 	{
-	  nPass[20]++;
-	  h_npass->Fill(20.0);
+	  nPass[7]++;
+	  h_npass->Fill(7);
 	}
       if(HLT_Photon90_CaloIdVL_IsoL > 0 && HLT[HLT_Photon90_CaloIdVL_IsoL]>0)
 	{
-	  nPass[21]++;
-	  h_npass->Fill(21.0);
+	  nPass[8]++;
+	  h_npass->Fill(8);
 	}
       if(HLT_Photon135              > 0 && HLT[HLT_Photon135]>0)
 	{
-	  nPass[22]++;
-	  h_npass->Fill(22.0);
+	  nPass[9]++;
+	  h_npass->Fill(9);
 	}
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>1)
 	{
-	  nPass[4]++; // prescaled
-	  h_npass->Fill(4.0);
+	  nPass[10]++; // prescaled
+	  h_npass->Fill(10);
 	}
 
+      /*
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]!=1)
 	{
 	  continue;
-	  nPass[3]++;
-	  h_npass->Fill(3.0);
+	  nPass[11]++;
+	  h_npass->Fill(11);
 	}
-
+      */
 
 
       Int_t ngood_vtx=IsVtxGood;
       if(ngood_vtx==0)continue;
 
-      nPass[5] ++;
-      h_npass->Fill(5.0);
+      nPass[12] ++;
+      h_npass->Fill(12);
 
 
       bool findLeadingPhoton = false;
@@ -154,48 +164,48 @@ void debugCount::Loop()
 	
 	if(!isGoodPho(ientry,ipho))continue;
 
-	nPass[6]++;
-	h_npass->Fill(6.0);
+	nPass[13]++;
+	h_npass->Fill(13);
 
 	h_pt_dirgamma->Fill(phoEt[ipho]);
 	h_y_dirgamma ->Fill(phoSCEta[ipho]);
 
 	if( fabs(phoSCEta[ipho])<0.9 )
 	  {
-	    nPass[7]++;
-	    h_npass->Fill(7.0);
+	    nPass[14]++;
+	    h_npass->Fill(14);
 	  }
 	else if( fabs(phoSCEta[ipho])>0.9 && 
 		 fabs(phoSCEta[ipho])<BARREL_MAXETA )
 	  {
-	    nPass[8]++;
-	    h_npass->Fill(8.0);
+	    nPass[15]++;
+	    h_npass->Fill(15);
 	  }
 
 	else if( fabs(phoSCEta[ipho])>ENDCAP_MINETA &&
 		 fabs(phoSCEta[ipho])< 2.1)
 	  {
-	    nPass[9]++;
-	    h_npass->Fill(9.0);	    
+	    nPass[16]++;
+	    h_npass->Fill(16);	    
 	  }
 	else if( fabs(phoSCEta[ipho])> 2.1 && 
 		 fabs(phoSCEta[ipho])< ENDCAP_MAXETA)
 	  {
-	    nPass[10]++;
-	    h_npass->Fill(10.0);
+	    nPass[17]++;
+	    h_npass->Fill(17);
 	  }
 	
 	if(fabs(phoSCEta[ipho]) < BARREL_MAXETA && phoSigmaIEtaIEta[ipho] < 0.010)
 	  {
-	    nPass[13]++;
-	    h_npass->Fill(13.0);
+	    nPass[18]++;
+	    h_npass->Fill(18);
 	  }
 	if(fabs(phoSCEta[ipho]) < ENDCAP_MAXETA && 
 	   fabs(phoSCEta[ipho]) > ENDCAP_MINETA 
-	   && phoSigmaIEtaIEta[ipho] < 0.030)
+	   && phoSigmaIEtaIEta[ipho] < 0.028)
 	  {
-	    nPass[14]++;
-	    h_npass->Fill(14.0);
+	    nPass[19]++;
+	    h_npass->Fill(19);
 	  }
 	    
 	if(phoEt[ipho] > phoMaxPt)
@@ -205,12 +215,71 @@ void debugCount::Loop()
 	    findLeadingPhoton = true;
 	  }
 	
+
+	// now use only one trigger path for each pt bin
+	if(HLT_Photon30_CaloIdVL      > 0 && HLT[HLT_Photon30_CaloIdVL]>0)
+	  {
+	    h_pt_trig30->Fill(phoEt[ipho]);
+	    if(phoEt[ipho]>=40 && phoEt[ipho] < 60)
+	      {
+		nPass[20]++;
+		h_npass->Fill(20);
+	      }
+	  }
+   
+
+	if(HLT_Photon50_CaloIdVL      > 0 && HLT[HLT_Photon50_CaloIdVL]>0)
+	  {
+	    h_pt_trig50->Fill(phoEt[ipho]);
+	    if(phoEt[ipho]>=60 && phoEt[ipho] < 85)
+	      {
+		nPass[21]++;
+		h_npass->Fill(21);
+	      }
+	  }
+	
+
+	if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
+	  {
+	    h_pt_trig75->Fill(phoEt[ipho]);
+	    if(phoEt[ipho]>=85 && phoEt[ipho] < 100)
+	      {
+		nPass[22]++;
+		h_npass->Fill(22);
+	      }
+	  }
+
+
+	if(HLT_Photon90_CaloIdVL      > 0 && HLT[HLT_Photon90_CaloIdVL]>0)
+	  {
+	    h_pt_trig90->Fill(phoEt[ipho]);
+	    if(phoEt[ipho]>=100 && phoEt[ipho] < 145)
+	      {
+		nPass[23]++;
+		h_npass->Fill(23);
+	      }
+	  }
+
+	if(HLT_Photon135              > 0 && HLT[HLT_Photon135]>0)
+	{
+	  h_pt_trig135->Fill(phoEt[ipho]);
+	  if(phoEt[ipho]>=145 && phoEt[ipho] < 300)
+	    {
+	      nPass[24]++;
+	      h_npass->Fill(24);
+	    }
+	}
+ 
+
+
       } // end of leading photon search
 
       if(!findLeadingPhoton)continue;
+
+
 	
-      nPass[11]++;
-      h_npass->Fill(11.0);
+      nPass[25]++;
+      h_npass->Fill(25);
 
       // first check which reco jet is the one from the highest and 
       // second et gen jet
@@ -256,8 +325,8 @@ void debugCount::Loop()
       TLorentzVector gen_1stjet(0,0,0,0);
       if(findLeadingJet)
 	{
-	  nPass[12]++;
-	  h_npass->Fill(12.0);
+	  nPass[26]++;
+	  h_npass->Fill(26);
 	  gen_1stjet.SetPtEtaPhiE(
 				  jetPt[leadingJetIndex],
 				  jetEta[leadingJetIndex],
@@ -296,6 +365,10 @@ void debugCount::Loop()
 	 cout << "nPass["<< i << "]=" << nPass[i] << endl;
 
    std::string remword="/data4/syu/";
+
+   if(_inputDirName.find("v4") != std::string::npos)
+     remword="/data2/syu/";
+
    size_t pos = _inputDirName.find(remword);
   
    if(pos!= std::string::npos)
@@ -303,7 +376,7 @@ void debugCount::Loop()
      
 
 
-   TFile* outFile = new TFile(Form("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/%s.root",_inputDirName.data()),"recreate");               
+   TFile* outFile = new TFile(Form("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/QCD11005_%s.root",_inputDirName.data()),"recreate");               
 				   
    h_y_dirgamma -> Write();
    h_y_1stjet -> Write();
@@ -315,6 +388,12 @@ void debugCount::Loop()
    
    h_npass->Write();
 
+   h_pt_trig30->Write();
+   h_pt_trig50->Write();
+   h_pt_trig75->Write();
+   h_pt_trig90->Write();
+   h_pt_trig135->Write();
+ 
    outFile->Close();     
 
    
@@ -396,24 +475,24 @@ Bool_t debugCount::isGoodPho(Long64_t entry, Int_t ipho)
      fabs(phoSCEta[ipho]) < ENDCAP_MAXETA) isEE=true;
 
   if(!isEB && !isEE)return false;
-  if(phoEt[ipho] < 85.0)return false;
-  if(phoEt[ipho] > 95.0)return false;
+  //  if(phoEt[ipho] < 85.0)return false;
+  //  if(phoEt[ipho] > 95.0)return false;
   if(phoHoverE[ipho] > 0.05)return false;
   if(phohasPixelSeed[ipho]==1)return false;
 //   if(phoEcalIsoDR04[ipho] > 4.2 +0.006 * phoEt[ipho])return false;
 //   if(phoHcalIsoDR04[ipho] > 2.2 +0.0025* phoEt[ipho])return false;
 //   if(phoTrkIsoHollowDR04[ipho] > 2.0 +0.001* phoEt[ipho])return false;
 
-  if(phoEcalIsoDR04[ipho] > 4.2 +0.003 * phoEt[ipho])return false;
-  if(phoHcalIsoDR04[ipho] > 2.2 +0.001* phoEt[ipho])return false;
-  if(phoTrkIsoHollowDR04[ipho] > 2.0 +0.001* phoEt[ipho])return false;
+//  if(phoEcalIsoDR04[ipho] > 4.2 +0.003 * phoEt[ipho])return false;
+//  if(phoHcalIsoDR04[ipho] > 2.2 +0.001* phoEt[ipho])return false;
+//  if(phoTrkIsoHollowDR04[ipho] > 2.0 +0.001* phoEt[ipho])return false;
  
-  //  Float_t sumIso = phoEcalIsoDR04[ipho] + phoHcalIsoDR04[ipho] + phoTrkIsoHollowDR04[ipho];
+  Float_t sumIso = phoEcalIsoDR04[ipho] + phoHcalIsoDR04[ipho] + phoTrkIsoHollowDR04[ipho];
   
   //  if(sumIso < 5.0)return false;
  
-  //  if(isEB && phoSigmaIEtaIEta[ipho] > 0.010)return false;
-  //  if(isEE && phoSigmaIEtaIEta[ipho] > 0.030)return false;
+  if(isEB && phoSigmaIEtaIEta[ipho] > 0.010)return false;
+  if(isEE && phoSigmaIEtaIEta[ipho] > 0.028)return false;
 
   return true;
 
