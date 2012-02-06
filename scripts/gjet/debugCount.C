@@ -48,10 +48,11 @@ void debugCount::Loop()
    TH1F* h_y_2ndjet = (TH1F*) h_y_template->Clone("h_y_2ndjet");
 
 
-   TH1I* h_npass = new TH1I("h_npass","",30,-0.5,29.5);
+   const int NCOUNTS=40;
+   TH1I* h_npass = new TH1I("h_npass","",NCOUNTS,-0.5,NCOUNTS-0.5);
    h_npass->SetXTitle("nPass");
 
-   Long64_t nPass[30]={0};
+   Long64_t nPass[NCOUNTS]={0};
 
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -59,7 +60,7 @@ void debugCount::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
-      //      if(jentry>50000)break;
+      //if(jentry>50000)break;
 
       nPass[0] ++;
       h_npass->Fill(0);
@@ -83,62 +84,74 @@ void debugCount::Loop()
       Int_t HLT_Photon135 = HLTIndex[31];
       
 
-      if(HLT_Photon30_CaloIdVL      > 0 && HLT[HLT_Photon30_CaloIdVL]>0)
+      Bool_t fire_HLT_Photon30_CaloIdVL = HLT_Photon30_CaloIdVL>0 && HLT[HLT_Photon30_CaloIdVL]>0;
+      Bool_t fire_HLT_Photon30_CaloIdVL_IsoL = HLT_Photon30_CaloIdVL_IsoL>0 && HLT[HLT_Photon30_CaloIdVL_IsoL]>0;
+      Bool_t fire_HLT_Photon50_CaloIdVL = HLT_Photon50_CaloIdVL>0 && HLT[HLT_Photon50_CaloIdVL]>0;
+
+      Bool_t fire_HLT_Photon50_CaloIdVL_IsoL = HLT_Photon50_CaloIdVL_IsoL>0 && HLT[HLT_Photon50_CaloIdVL_IsoL]>0;
+      Bool_t fire_HLT_Photon75_CaloIdVL = HLT_Photon75_CaloIdVL>0 && HLT[HLT_Photon75_CaloIdVL]>0;
+      Bool_t fire_HLT_Photon75_CaloIdVL_IsoL = HLT_Photon75_CaloIdVL_IsoL>0 && HLT[HLT_Photon75_CaloIdVL_IsoL]>0;
+      Bool_t fire_HLT_Photon90_CaloIdVL = HLT_Photon90_CaloIdVL>0 && HLT[HLT_Photon90_CaloIdVL]>0;
+      Bool_t fire_HLT_Photon90_CaloIdVL_IsoL = HLT_Photon90_CaloIdVL_IsoL>0 && HLT[HLT_Photon90_CaloIdVL_IsoL]>0;
+      Bool_t fire_HLT_Photon135 = HLT_Photon135>0 && HLT[HLT_Photon135]>0;
+
+      if(fire_HLT_Photon30_CaloIdVL)
 	{
 	  nPass[1]++;
 	  h_npass->Fill(1);
 	}
-      if(HLT_Photon30_CaloIdVL_IsoL > 0 && HLT[HLT_Photon30_CaloIdVL_IsoL]>0)
+      if(fire_HLT_Photon30_CaloIdVL_IsoL)
 	{
 	  nPass[2]++;
 	  h_npass->Fill(2);
 	}
 
-      if(HLT_Photon50_CaloIdVL      > 0 && HLT[HLT_Photon50_CaloIdVL]>0)
+      if(fire_HLT_Photon50_CaloIdVL)
 	{
 	  nPass[3]++;
 	  h_npass->Fill(3);
 	}
-      if(HLT_Photon50_CaloIdVL_IsoL > 0 && HLT[HLT_Photon50_CaloIdVL_IsoL]>0)
+      if(fire_HLT_Photon50_CaloIdVL_IsoL)
 	{
 	  nPass[4]++;
 	  h_npass->Fill(4);
 	}
 
-      if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
+      if(fire_HLT_Photon75_CaloIdVL)
 	{ 
 	  nPass[5]++;
 	  h_npass->Fill(5);
 	}
 
-      if(HLT_Photon75_CaloIdVL_IsoL > 0 && HLT[HLT_Photon75_CaloIdVL_IsoL]>0)
+      if(fire_HLT_Photon75_CaloIdVL_IsoL)
 	{
 	  nPass[6]++;
 	  h_npass->Fill(6);
 	}
 
-      if(HLT_Photon90_CaloIdVL      > 0 && HLT[HLT_Photon90_CaloIdVL]>0)
+      if(fire_HLT_Photon90_CaloIdVL)
 	{
 	  nPass[7]++;
 	  h_npass->Fill(7);
 	}
-      if(HLT_Photon90_CaloIdVL_IsoL > 0 && HLT[HLT_Photon90_CaloIdVL_IsoL]>0)
+      if(fire_HLT_Photon90_CaloIdVL_IsoL)
 	{
 	  nPass[8]++;
 	  h_npass->Fill(8);
 	}
-      if(HLT_Photon135              > 0 && HLT[HLT_Photon135]>0)
+      if(fire_HLT_Photon135)
 	{
 	  nPass[9]++;
 	  h_npass->Fill(9);
 	}
+
+      /*
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>1)
 	{
 	  nPass[10]++; // prescaled
 	  h_npass->Fill(10);
 	}
 
-      /*
       if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]!=1)
 	{
 	  continue;
@@ -162,6 +175,40 @@ void debugCount::Loop()
       // now find a good leading photon
       for(int ipho=0; ipho < nPho; ipho++){
 	
+	
+	// before applying photon cuts
+	if(fire_HLT_Photon30_CaloIdVL && phoEt[ipho]>=40 && phoEt[ipho] < 60 && fabs(phoSCEta[ipho])<2.5)
+	  {
+	    nPass[30]++;
+	    h_npass->Fill(30);
+	  }
+ 	if(fire_HLT_Photon50_CaloIdVL && phoEt[ipho]>=60 && phoEt[ipho] < 85 && fabs(phoSCEta[ipho])<2.5)
+	  {
+	    nPass[31]++;
+	    h_npass->Fill(31);
+	  }
+   
+  	if(fire_HLT_Photon75_CaloIdVL && phoEt[ipho]>=85 && phoEt[ipho] < 100 && fabs(phoSCEta[ipho])<2.5)
+	  {
+	    nPass[32]++;
+	    h_npass->Fill(32);
+	  }
+   
+	if(fire_HLT_Photon90_CaloIdVL && phoEt[ipho]>=100 && phoEt[ipho] < 145 && fabs(phoSCEta[ipho])<2.5)
+	  {
+	    nPass[33]++;
+	    h_npass->Fill(33);
+	  }
+   
+	if(fire_HLT_Photon135 && phoEt[ipho]>=145 && phoEt[ipho] < 300 && fabs(phoSCEta[ipho])<2.5)
+	  {
+	    nPass[34]++;
+	    h_npass->Fill(34);
+	  }
+   
+
+
+	// after applying photon IDs
 	if(!isGoodPho(ientry,ipho))continue;
 
 	nPass[13]++;
@@ -217,7 +264,7 @@ void debugCount::Loop()
 	
 
 	// now use only one trigger path for each pt bin
-	if(HLT_Photon30_CaloIdVL      > 0 && HLT[HLT_Photon30_CaloIdVL]>0)
+	if(fire_HLT_Photon30_CaloIdVL)
 	  {
 	    h_pt_trig30->Fill(phoEt[ipho]);
 	    if(phoEt[ipho]>=40 && phoEt[ipho] < 60)
@@ -228,7 +275,7 @@ void debugCount::Loop()
 	  }
    
 
-	if(HLT_Photon50_CaloIdVL      > 0 && HLT[HLT_Photon50_CaloIdVL]>0)
+	if(fire_HLT_Photon50_CaloIdVL)
 	  {
 	    h_pt_trig50->Fill(phoEt[ipho]);
 	    if(phoEt[ipho]>=60 && phoEt[ipho] < 85)
@@ -239,7 +286,7 @@ void debugCount::Loop()
 	  }
 	
 
-	if(HLT_Photon75_CaloIdVL      > 0 && HLT[HLT_Photon75_CaloIdVL]>0)
+	if(fire_HLT_Photon75_CaloIdVL)
 	  {
 	    h_pt_trig75->Fill(phoEt[ipho]);
 	    if(phoEt[ipho]>=85 && phoEt[ipho] < 100)
@@ -250,7 +297,7 @@ void debugCount::Loop()
 	  }
 
 
-	if(HLT_Photon90_CaloIdVL      > 0 && HLT[HLT_Photon90_CaloIdVL]>0)
+	if(fire_HLT_Photon90_CaloIdVL)
 	  {
 	    h_pt_trig90->Fill(phoEt[ipho]);
 	    if(phoEt[ipho]>=100 && phoEt[ipho] < 145)
@@ -260,17 +307,17 @@ void debugCount::Loop()
 	      }
 	  }
 
-	if(HLT_Photon135              > 0 && HLT[HLT_Photon135]>0)
-	{
-	  h_pt_trig135->Fill(phoEt[ipho]);
-	  if(phoEt[ipho]>=145 && phoEt[ipho] < 300)
-	    {
-	      nPass[24]++;
-	      h_npass->Fill(24);
-	    }
-	}
+	if(fire_HLT_Photon135)
+	  {
+	    h_pt_trig135->Fill(phoEt[ipho]);
+	    if(phoEt[ipho]>=145 && phoEt[ipho] < 300)
+	      {
+		nPass[24]++;
+		h_npass->Fill(24);
+	      }
+	  }
  
-
+	
 
       } // end of leading photon search
 
@@ -360,7 +407,7 @@ void debugCount::Loop()
    } // end of loop over entries
 
 
-   for(int i=0; i<30; i++)
+   for(int i=0; i<NCOUNTS; i++)
        if(nPass[i]>0)
 	 cout << "nPass["<< i << "]=" << nPass[i] << endl;
 
@@ -376,7 +423,7 @@ void debugCount::Loop()
      
 
 
-   TFile* outFile = new TFile(Form("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/QCD11005_%s.root",_inputDirName.data()),"recreate");               
+   TFile* outFile = new TFile(Form("/home/syu/ggNtuple_scripts/CMSSW_4_2_8_patch7/src/runJob/11005_%s.root",_inputDirName.data()),"recreate");               
 				   
    h_y_dirgamma -> Write();
    h_y_1stjet -> Write();
