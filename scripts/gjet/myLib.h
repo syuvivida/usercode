@@ -1,6 +1,8 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 
+namespace eiko {
+
 Bool_t separated(TLorentzVector l1, TLorentzVector l2);
 Double_t zgamma(TLorentzVector l1, TLorentzVector l2);
 Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2);
@@ -31,7 +33,7 @@ Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2) {
   Double_t result = l1.Phi()-l2.Phi();
   while (result > TMath::Pi()) result -= 2*TMath::Pi();
   while (result <= -TMath::Pi()) result += 2*TMath::Pi();
-  return result;
+  return fabs(result);
 }
 
 Double_t cosThetaStar(TLorentzVector l1, TLorentzVector l2) { 
@@ -70,3 +72,4 @@ Double_t yB(TLorentzVector l1, TLorentzVector l2) {
 }
 
 
+}
