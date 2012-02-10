@@ -23,6 +23,7 @@ void yj_angularmc_eff::Loop()
   double ptbound[]={85., 95., 110., 130., 160., 200.};
   const int nPtBins = sizeof(ptbound)/sizeof(ptbound[0])-1;
   cout << "There are " << nPtBins << " pt bins" << endl;
+  const int nDECs = 2;
 
   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500);
   TH1D* h_pthat       = (TH1D*)h_pt_template->Clone("h_pthat");
@@ -35,12 +36,6 @@ void yj_angularmc_eff::Loop()
 
   TH1D* h_ptbin_template= new TH1D("h_ptbin_template","", nPtBins, ptbound);
 
-  TH1D* h_zgamma[2][nPtBins][2];
-  TH1D* h_dphi[2][nPtBins][2];
-  TH1D* h_cost[2][nPtBins][2];
-  TH1D* h_chi[2][nPtBins][2];
-  TH1D* h_pstar[2][nPtBins][2];
-  TH1D* h_yB[2][nPtBins][2];
 
   TH1D* h_zgamma_template = new TH1D("h_zgamma_template","",
 				     200,-4.0,4.0);
@@ -58,7 +53,6 @@ void yj_angularmc_eff::Loop()
 
   TH1D* h_yB_template = new TH1D("h_yB_template","",100,-5.0,5.0);
 
-  // debugging histograms
   TH1D* h_sieie_template = new TH1D("h_sieie_template","", 100, 0,0.1);
   
   TH1D* h_eciso_template = new TH1D("h_eciso_template","", 250, 0,50.0);
@@ -71,10 +65,25 @@ void yj_angularmc_eff::Loop()
 
   TH1D* h_pixel_template = new TH1D("h_pixel_template","", 3, -0.5,2.5);
 
+  
+
+  TH1D* h_jetpt_eff[2];
+  TH1D* h_jeteta_eff[2];
+
+  TH1D* h_pt_eff[nDECs][2];        // in EB and EE
+  TH1D* h_eta_eff[nPtBins][2]; // in various pt bins
+  TH1D* h_zgamma[nDECs][nPtBins][2];
+  TH1D* h_dphi[nDECs][nPtBins][2];
+  TH1D* h_cost[nDECs][nPtBins][2];
+  TH1D* h_chi[nDECs][nPtBins][2];
+  TH1D* h_pstar[nDECs][nPtBins][2];
+  TH1D* h_yB[nDECs][nPtBins][2];
+
 
   // creating histograms
   char* decName[4]={"EB","EE","leadingEB","leadingEE"};
 
+  // debugging histograms
   TH1D* h_sieie[4];
   TH1D* h_eciso[4];
   TH1D* h_hciso[4];
@@ -93,7 +102,25 @@ void yj_angularmc_eff::Loop()
       h_pixel[idec] = (TH1D*)h_pixel_template->Clone(Form("h_pixel_%s", decName[idec]));    
     }
 
-  for(int idec=0; idec < 2; idec ++){
+
+  // histograms for efficiency
+
+  for(int ip=0; ip<2; ip++){
+
+    h_jetpt_eff[ip] = (TH1D*)h_pt_template->Clone(Form("h_jetpt_eff_%d",ip));
+    h_jeteta_eff[ip] = (TH1D*)h_eta_template->Clone(Form("h_jeteta_eff_%d",ip));
+
+
+    for(int idec=0; idec< nDECs; idec++)
+      h_pt_eff[idec][ip] = (TH1D*)h_pt_template->Clone(Form("h_pt_eff_%s_%d",
+							    decName[idec], ip));
+    for(int ipt=0; ipt < nPtBins; ipt++)
+      h_eta_eff[ipt][ip] = (TH1D*)h_eta_template->Clone(Form("h_eta_eff_%d_%d_%d",
+							      (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+  }// end of loop over process, ip=0 before cut, 1 after cut
+  
+  
+  for(int idec=0; idec < nDECs; idec ++){
 
     for(int ipt=0; ipt < nPtBins; ipt++){
      
@@ -123,8 +150,11 @@ void yj_angularmc_eff::Loop()
 
   } // loop over barrel and endcaps
 
-
-  
+  //---------------------------------------------------------------------------------------------------------------------
+  //
+  //   Now we start loop over events
+  // 
+  //---------------------------------------------------------------------------------------------------------------------
 
   Long64_t nPass[30]={0};
 
@@ -146,8 +176,9 @@ void yj_angularmc_eff::Loop()
     int leadingPhotonIndex = -1;
     double phoMaxPt = -9999.;
 
-     
+    //-------------------------------------------------------------------------
     // now find a good leading photon that is matched to hard scattering photon
+    //-------------------------------------------------------------------------
     for(unsigned int ipho=0; ipho < PhotonPt->size(); ipho++)
       {	
 
@@ -182,7 +213,7 @@ void yj_angularmc_eff::Loop()
     double leadingPhotonEt = PhotonEt->at(leadingPhotonIndex);
     int phoPtBinIndex =  h_ptbin_template->GetXaxis()->FindBin(leadingPhotonEt)-1; 
 
-    double leadingPhotonScEta = PhotonScEta->at(leadingPhotonIndex);
+    double leadingPhotonEta = PhotonEta->at(leadingPhotonIndex);
     int phoDecBinIndex = phoDecCode(ientry, leadingPhotonIndex);
 
     h_sieie[phoDecBinIndex+2] -> Fill(PhotonSigmaIetaIeta->at(leadingPhotonIndex));
@@ -193,7 +224,7 @@ void yj_angularmc_eff::Loop()
     h_pixel[phoDecBinIndex+2] -> Fill(PhotonhasPixelSeed->at(leadingPhotonIndex));
 
     h_ptpho->Fill(leadingPhotonEt);
-    h_etapho->Fill(PhotonEta->at(leadingPhotonIndex));
+    h_etapho->Fill(leadingPhotonEta);
 
     if(leadingPhotonIndex>0)nPass[10]++;
 
@@ -206,7 +237,9 @@ void yj_angularmc_eff::Loop()
 			PhotonEnergy->at(leadingPhotonIndex)
 			);
 
+    //-------------------------------------------------------------------------
     // find the reco jet that has the highest matched gen jet pt
+    //-------------------------------------------------------------------------
 
     Int_t leadingJetIndex=-1;
     double genJetMaxPt=-9999.;
@@ -228,19 +261,21 @@ void yj_angularmc_eff::Loop()
 
     } // end of loop over jets
 
-    
+
+    // need to have a leading photon and a leading jet
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
+
+    double leadingJetPt  = patJetPfAk05Pt_->at(leadingJetIndex);
+    double leadingJetEta = patJetPfAk05Eta_->at(leadingJetIndex);
+
+    h_ptjet->Fill(leadingJetPt);
+    h_etajet->Fill(leadingJetEta);
 
     nPass[3]++;
 
-    h_ptjet->Fill(patJetPfAk05Pt_->at(leadingJetIndex));
-    h_etajet->Fill(patJetPfAk05Eta_->at(leadingJetIndex));
 
-
-    // counting entries
     if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))continue;
     if(phoDecBinIndex < 0)continue;
-
     for(int ipt=0; ipt < nPtBins; ipt++)nPass[phoPtBinIndex+4]++;
 
     
@@ -251,7 +286,11 @@ void yj_angularmc_eff::Loop()
 			   patJetPfAk05Phi_->at(leadingJetIndex),
 			   patJetPfAk05En_->at(leadingJetIndex)
 			   );
-    
+
+
+    //-------------------------------------------------------------------------
+    // Now we plot distributions before and after cuts
+    //-------------------------------------------------------------------------
 
     double gj_zgamma = eiko::zgamma(l4_pho, l4_1stjet);
     double gj_dphi   = eiko::deltaPhi(l4_pho, l4_1stjet);
@@ -261,6 +300,13 @@ void yj_angularmc_eff::Loop()
     double gj_yB     = eiko::yB(l4_pho, l4_1stjet);    
 
     // before applying cuts
+
+    h_pt_eff[phoDecBinIndex][0]->Fill(leadingPhotonEt);
+    h_eta_eff[phoPtBinIndex][0]->Fill(leadingPhotonEta);
+
+    h_jetpt_eff[0]->Fill(leadingJetPt);
+    h_jeteta_eff[0]->Fill(leadingJetEta);
+
     h_zgamma[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_dphi);
     h_cost[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_cost);
@@ -269,13 +315,17 @@ void yj_angularmc_eff::Loop()
     h_yB[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_yB);		   
 
     // after applying cuts
+
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
-
     if(!isGoodPho(ientry, leadingPhotonIndex))continue;
-
     if(!isGoodLooseJet(ientry, leadingJetIndex))continue;
 
-    // after applying cuts
+    h_pt_eff[phoDecBinIndex][1]->Fill(leadingPhotonEt);
+    h_eta_eff[phoPtBinIndex][1]->Fill(leadingPhotonEta);
+
+    h_jetpt_eff[1]->Fill(leadingJetPt);
+    h_jeteta_eff[1]->Fill(leadingJetEta);
+
     h_zgamma[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_dphi);
     h_cost[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_cost);
@@ -287,7 +337,11 @@ void yj_angularmc_eff::Loop()
 
   for(int i=0;i<30;i++)if(nPass[i]>0)cout << "nPass[" << i << "] = " << nPass[i] << endl;
 
-  // write out output histogram files to calculate efficiency
+
+  //---------------------------------------------------------------------------------------
+  // Write these histograms to an output root file, the output will be used for efficiency
+  //---------------------------------------------------------------------------------------
+     
   
   std::string remword="/data4/yunju/NewtreeT/MC/";
 
@@ -295,7 +349,7 @@ void yj_angularmc_eff::Loop()
   
   if(pos!= std::string::npos)
     _inputDirName.swap(_inputDirName.erase(pos,remword.length()));
-     
+
 
   TFile* outFile = new TFile(Form("/home/syu/CVSCode/eff_%s.root",_inputDirName.data()),"recreate");               
 
@@ -316,10 +370,20 @@ void yj_angularmc_eff::Loop()
 
   }
 
-  for(int idec=0; idec<2; idec++){
+
+  for(int ip=0; ip<2; ip++){
+
+    h_jetpt_eff[ip]->Write();
+    h_jeteta_eff[ip]->Write();
+
+    for(int idec=0; idec<nDECs; idec++) h_pt_eff[idec][ip]->Write();
+    for(int ipt=0; ipt < nPtBins; ipt++) h_eta_eff[ipt][ip]->Write();
+  }// end of loop over process, ip=0 before cut, 1 after cut
+
+  for(int idec=0; idec< nDECs; idec++){
     for(int ipt=0; ipt< nPtBins; ipt++){
       for(int ip=0; ip<2; ip++){
-
+	
 	h_zgamma[idec][ipt][ip]->Write();
 	h_dphi[idec][ipt][ip]->Write();
 	h_cost[idec][ipt][ip]->Write();
