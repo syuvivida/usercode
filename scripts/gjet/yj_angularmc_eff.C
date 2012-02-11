@@ -12,7 +12,7 @@ const double BARREL_MAXETA=1.44;
 const double ENDCAP_MINETA=1.57;
 const double ENDCAP_MAXETA=2.5;
 
-void yj_angularmc_eff::Loop()
+void yj_angularmc_eff::Loop(bool applyCOMCut)
 {
   cout << "This is version 0" << endl;
   if (fChain == 0) return;
@@ -37,6 +37,8 @@ void yj_angularmc_eff::Loop()
   TH1D* h_ptbin_template= new TH1D("h_ptbin_template","", nPtBins, ptbound);
 
 
+  TH1D* h_ptratio_template = new TH1D("h_ptratio_template","",500,0.0,2.5);
+
   TH1D* h_zgamma_template = new TH1D("h_zgamma_template","",
 				     200,-4.0,4.0);
   
@@ -52,6 +54,8 @@ void yj_angularmc_eff::Loop()
   TH1D* h_pstar_template = new TH1D("h_pstar_template","",500,0,500);
 
   TH1D* h_yB_template = new TH1D("h_yB_template","",100,-5.0,5.0);
+
+  TH1D* h_yCOM_template = new TH1D("h_yCOM_template","",100,-5.0,5.0);
 
   TH1D* h_sieie_template = new TH1D("h_sieie_template","", 100, 0,0.1);
   
@@ -72,12 +76,14 @@ void yj_angularmc_eff::Loop()
 
   TH1D* h_pt_eff[nDECs][2];        // in EB and EE
   TH1D* h_eta_eff[nPtBins][2]; // in various pt bins
+  TH1D* h_ptratio[nDECs][2];
   TH1D* h_zgamma[nDECs][nPtBins][2];
   TH1D* h_dphi[nDECs][nPtBins][2];
   TH1D* h_cost[nDECs][nPtBins][2];
   TH1D* h_chi[nDECs][nPtBins][2];
   TH1D* h_pstar[nDECs][nPtBins][2];
   TH1D* h_yB[nDECs][nPtBins][2];
+  TH1D* h_yCOM[nDECs][nPtBins][2];
 
 
   // creating histograms
@@ -112,8 +118,12 @@ void yj_angularmc_eff::Loop()
 
 
     for(int idec=0; idec< nDECs; idec++)
-      h_pt_eff[idec][ip] = (TH1D*)h_pt_template->Clone(Form("h_pt_eff_%s_%d",
-							    decName[idec], ip));
+      {
+	h_pt_eff[idec][ip] = (TH1D*)h_pt_template->Clone(Form("h_pt_eff_%s_%d",
+							      decName[idec], ip));
+	h_ptratio[idec][ip]= (TH1D*)h_ptratio_template->Clone(Form("h_ptratio_%s_%d",
+								   decName[idec],ip));
+      }
     for(int ipt=0; ipt < nPtBins; ipt++)
       h_eta_eff[ipt][ip] = (TH1D*)h_eta_template->Clone(Form("h_eta_eff_%d_%d_%d",
 							      (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
@@ -141,7 +151,11 @@ void yj_angularmc_eff::Loop()
 	h_pstar[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_%s_%d_%d_%d", decName[idec],
 								     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
+
 	h_yB[idec][ipt][ip] = (TH1D*)h_yB_template->Clone(Form("h_yB_%s_%d_%d_%d", decName[idec],
+							       (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
+	h_yCOM[idec][ipt][ip] = (TH1D*)h_yCOM_template->Clone(Form("h_yCOM_%s_%d_%d_%d", decName[idec],
 							       (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 	
       } // end of loop over processes
@@ -164,7 +178,7 @@ void yj_angularmc_eff::Loop()
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     
-//     if(jentry > 50000) break;
+    //    if(jentry > 50000) break;
     nPass[0]++;
     h_pthat->Fill(PhotonMCpthat); // make sure we are checking the right MC samples
 
@@ -298,7 +312,9 @@ void yj_angularmc_eff::Loop()
     double gj_chi    = eiko::chiPair(l4_pho, l4_1stjet);
     double gj_pstar  = eiko::pstar(l4_pho, l4_1stjet);
     double gj_yB     = eiko::yB(l4_pho, l4_1stjet);    
+    double gj_yCOM   = eiko::yCOM(l4_pho, l4_1stjet);
 
+    double ptRatio   = leadingJetPt/leadingPhotonEt;
     // before applying cuts
 
     h_pt_eff[phoDecBinIndex][0]->Fill(leadingPhotonEt);
@@ -307,12 +323,15 @@ void yj_angularmc_eff::Loop()
     h_jetpt_eff[0]->Fill(leadingJetPt);
     h_jeteta_eff[0]->Fill(leadingJetEta);
 
+    h_ptratio[phoDecBinIndex][0]->Fill(ptRatio);
+
     h_zgamma[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_dphi);
     h_cost[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_cost);
     h_chi[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_chi);
     h_pstar[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_pstar);
     h_yB[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_yB);		   
+    h_yCOM[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_yCOM);		   
 
     // after applying cuts
 
@@ -320,11 +339,17 @@ void yj_angularmc_eff::Loop()
     if(!isGoodPho(ientry, leadingPhotonIndex))continue;
     if(!isGoodLooseJet(ientry, leadingJetIndex))continue;
 
+    bool passCOMCut = gj_pstar > 130.0 && fabs(gj_yCOM) < 1.0;
+    if(applyCOMCut && !passCOMCut)continue;
+
+
     h_pt_eff[phoDecBinIndex][1]->Fill(leadingPhotonEt);
     h_eta_eff[phoPtBinIndex][1]->Fill(leadingPhotonEta);
 
     h_jetpt_eff[1]->Fill(leadingJetPt);
     h_jeteta_eff[1]->Fill(leadingJetEta);
+
+    h_ptratio[phoDecBinIndex][1]->Fill(ptRatio);
 
     h_zgamma[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_dphi);
@@ -332,6 +357,8 @@ void yj_angularmc_eff::Loop()
     h_chi[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_chi);
     h_pstar[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_pstar);
     h_yB[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_yB);		   
+    h_yCOM[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_yCOM);		   
+
    
   } // end of loop over entries
 
@@ -350,7 +377,7 @@ void yj_angularmc_eff::Loop()
   if(pos!= std::string::npos)
     _inputDirName.swap(_inputDirName.erase(pos,remword.length()));
 
-
+  if(applyCOMCut)_inputDirName += "_withCOMCut";
   TFile* outFile = new TFile(Form("/home/syu/CVSCode/eff_%s.root",_inputDirName.data()),"recreate");               
 
   h_pthat->Write();
@@ -377,6 +404,8 @@ void yj_angularmc_eff::Loop()
     h_jeteta_eff[ip]->Write();
 
     for(int idec=0; idec<nDECs; idec++) h_pt_eff[idec][ip]->Write();
+    for(int idec=0; idec<nDECs; idec++) h_ptratio[idec][ip]->Write();
+
     for(int ipt=0; ipt < nPtBins; ipt++) h_eta_eff[ipt][ip]->Write();
   }// end of loop over process, ip=0 before cut, 1 after cut
 
@@ -390,6 +419,7 @@ void yj_angularmc_eff::Loop()
 	h_chi[idec][ipt][ip]->Write();
 	h_pstar[idec][ipt][ip]->Write();
 	h_yB[idec][ipt][ip]->Write();				   
+	h_yCOM[idec][ipt][ip]->Write();
 
       }
     }
