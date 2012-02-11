@@ -314,11 +314,11 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(bool applyCOMCut=false);
+   virtual void     Loop(bool applyCOMCut=false, bool applyPileupCorr=false);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual Int_t    phoDecCode(Long64_t entry, Int_t ipho);
-   virtual Bool_t   isGoodPho(Long64_t entry, Int_t ipho);
+   virtual Bool_t   isGoodPho(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
    virtual Bool_t   isGoodLooseJet(Long64_t entry, Int_t ijet);
    virtual Bool_t   isGoodMediumJet(Long64_t entry, Int_t ijet);
    virtual Bool_t   isGoodTightJet(Long64_t entry, Int_t ijet);

@@ -3,7 +3,28 @@
   myWatch->Start();
   gROOT->ProcessLine(".L combineMC_eff.C++");
 
-  
+  // jetpt/photon pt
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_ptratio_EB\",\"p_{T}(jet)/p_{T}(#gamma) in barrel\",2)"
+);
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_ptratio_EE\",\"p_{T}(jet)/p_{T}(#gamma) in endcap\",2)"
+);
+
+  //nvertex
+
+ 
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_nvtx_eff_EB\",\"number of vertex in barrel\")"
+);
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_nvtx_eff_EE\",\"number of vertex in endcap\")"
+);
+
+ 
+   
   // jet pt and eta
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_jetpt_eff\",\"p_{T}(jet)\",2,30,300)");
@@ -167,6 +188,7 @@
 "combineMC_eff\(\"h_dphi_EE_160_200\",\"#Delta #phi\",2)");
 
 
+ 
   // y at the center of mass frame in barrel
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yCOM_EB_85_95\",\"y^{boost}\",2,-2.4,2.4)");
