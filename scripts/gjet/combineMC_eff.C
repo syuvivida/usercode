@@ -270,7 +270,7 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
    gSystem->mkdir("effHistos");
    c1->Print(Form("effHistos/eff_%s.eps",histoName.data()));
    c1->Print(Form("effHistos/eff_%s.pdf",histoName.data()));
-   c1->Print(Form("effHistos/eff_%s.gif",histoName.data()));
+   //   c1->Print(Form("effHistos/eff_%s.gif",histoName.data()));
 
    if(nfiles>1){
      TCanvas* c2 = new TCanvas("c2","",1000,1000);
@@ -284,7 +284,7 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 
      c2->Print(Form("effHistos/eff2_%s.eps",histoName.data()));
      c2->Print(Form("effHistos/eff2_%s.pdf",histoName.data()));
-     c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
+     //     c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
 
 
    }
