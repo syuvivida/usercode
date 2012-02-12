@@ -58,6 +58,11 @@
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_eta_eff_160_200\",\"#eta(#gamma)\",2,-2.5,2.5)");
 
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_eta_eff_allpt\",\"#eta(#gamma)\",2,-2.5,2.5)");
+
+
   // pstar in barrel
   gROOT->ProcessLine(
  		     "combineMC_eff\(\"h_pstar_EB_85_95\",\"p^{*}\",2,85,300)");
@@ -74,6 +79,9 @@
   gROOT->ProcessLine(
 		     "combineMC_eff\(\"h_pstar_EB_160_200\",\"p^{*}\",2,85,300)");
 
+  gROOT->ProcessLine(
+		     "combineMC_eff\(\"h_pstar_EB_allpt\",\"p^{*}\",2,85,300)");
+
   // pstar in endcap
   gROOT->ProcessLine(
 		     "combineMC_eff\(\"h_pstar_EE_85_95\",\"p^{*}\",2,85,300)");
@@ -89,6 +97,9 @@
 
   gROOT->ProcessLine(
 		     "combineMC_eff\(\"h_pstar_EE_160_200\",\"p^{*}\",2,85,300)");
+
+  gROOT->ProcessLine(
+		     "combineMC_eff\(\"h_pstar_EE_allpt\",\"p^{*}\",2,85,300)");
 
 
   // yBoost in barrel
@@ -107,6 +118,9 @@
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yB_EB_160_200\",\"y^{boost}\",2,-2.4,2.4)");
 
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_yB_EB_allpt\",\"y^{boost}\",2,-2.4,2.4)");
+
   // yboost in endcap
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yB_EE_85_95\",\"y^{boost}\",2,-2.4,2.4)");
@@ -122,6 +136,9 @@
 
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yB_EE_160_200\",\"y^{boost}\",2,-2.4,2.4)");
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_yB_EE_allpt\",\"y^{boost}\",2,-2.4,2.4)");
 
   // costheta in barrel
   gROOT->ProcessLine(
@@ -139,6 +156,9 @@
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_cost_EB_160_200\",\"cos#theta^{*}\",2,0.0,1.0)");
 
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_cost_EB_allpt\",\"cos#theta^{*}\",2,0.0,1.0)");
+
   // costheta in endcap
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_cost_EE_85_95\",\"cos#theta^{*}\",2,0.0,1.0)");
@@ -154,6 +174,9 @@
 
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_cost_EE_160_200\",\"cos#theta^{*}\",2,0.0,1.0)");
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_cost_EE_allpt\",\"cos#theta^{*}\",2,0.0,1.0)");
 
    // deltaphi in barrel
   gROOT->ProcessLine(
@@ -171,6 +194,9 @@
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_dphi_EB_160_200\",\"#Delta #phi\",2)");
 
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_dphi_EB_allpt\",\"#Delta #phi\",2)");
+
   // deltaphi in endcap
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_dphi_EE_85_95\",\"#Delta #phi\",2)");
@@ -186,6 +212,9 @@
 
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_dphi_EE_160_200\",\"#Delta #phi\",2)");
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_dphi_EE_allpt\",\"#Delta #phi\",2)");
 
 
  
@@ -205,6 +234,9 @@
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yCOM_EB_160_200\",\"y^{boost}\",2,-2.4,2.4)");
 
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_yCOM_EB_allpt\",\"y^{boost}\",2,-2.4,2.4)");
+
   // y at the center of mass frame in endcap
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yCOM_EE_85_95\",\"y^{boost}\",2,-2.4,2.4)");
@@ -220,6 +252,9 @@
 
   gROOT->ProcessLine(
 "combineMC_eff\(\"h_yCOM_EE_160_200\",\"y^{boost}\",2,-2.4,2.4)");
+
+  gROOT->ProcessLine(
+"combineMC_eff\(\"h_yCOM_EE_allpt\",\"y^{boost}\",2,-2.4,2.4)");
 
 
   myWatch->Stop();
