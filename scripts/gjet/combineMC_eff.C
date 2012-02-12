@@ -242,16 +242,6 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
  
 //      }
 
-   for(int ibin=1; ibin<= nbins; ibin++)
-     {
-       cout << "Efficiency bin " << ibin << ": " << y_eff[ibin-1]
-	    << " -" << y_eff_l[ibin-1]
-	    << " +" << y_eff_h[ibin-1] << "\t"
-	    << h_eff->GetBinContent(ibin) << " +- " << h_eff->GetBinError(ibin) 
-	    << endl;
- 
-     }
-
    std::string remword="h_";
 
    size_t pos = histoName.find(remword);
@@ -259,6 +249,25 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
    if(pos!= std::string::npos)
      histoName.swap(histoName.erase(pos,remword.length()));
 
+
+   gSystem->mkdir("effDataFiles");
+   ofstream fout;
+   fout.open(Form("effDataFiles/%s.dat",histoName.data()));
+   for(int ibin=1; ibin<= nbins; ibin++)
+     {
+       cout << "Efficiency bin " << ibin << ": " << y_eff[ibin-1]
+	    << " -" << y_eff_l[ibin-1]
+	    << " +" << y_eff_h[ibin-1] << "\t"
+	    << h_eff->GetBinContent(ibin) << " +- " << h_eff->GetBinError(ibin) 
+	    << endl;
+
+       fout << ibin << " " << y_eff[ibin-1]
+	    << " " << y_eff_l[ibin-1]
+	    << " " << y_eff_h[ibin-1] << endl;
+ 
+     }
+
+   fout.close();
 
    TCanvas* c1 = new TCanvas("c1","",1000,500);
    c1->Divide(2,1);
@@ -270,24 +279,24 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
    gSystem->mkdir("effHistos");
    c1->Print(Form("effHistos/eff_%s.eps",histoName.data()));
    c1->Print(Form("effHistos/eff_%s.pdf",histoName.data()));
-   //   c1->Print(Form("effHistos/eff_%s.gif",histoName.data()));
+   c1->Print(Form("effHistos/eff_%s.gif",histoName.data()));
 
-   if(nfiles>1){
-     TCanvas* c2 = new TCanvas("c2","",1000,1000);
-     c2->Divide(2,2);
-     for(int i=0;i<3;i++){
-       c2->cd(i+1);
-       eff[i]->Draw();
-     }
-     c2->cd(4);
-     eff_final->Draw("ap");
+//    if(nfiles>1){
+//      TCanvas* c2 = new TCanvas("c2","",1000,1000);
+//      c2->Divide(2,2);
+//      for(int i=0;i<3;i++){
+//        c2->cd(i+1);
+//        eff[i]->Draw();
+//      }
+//      c2->cd(4);
+//      eff_final->Draw("ap");
 
-     c2->Print(Form("effHistos/eff2_%s.eps",histoName.data()));
-     c2->Print(Form("effHistos/eff2_%s.pdf",histoName.data()));
-     //     c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
+//      c2->Print(Form("effHistos/eff2_%s.eps",histoName.data()));
+//      c2->Print(Form("effHistos/eff2_%s.pdf",histoName.data()));
+//      c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
+     
 
-
-   }
+//    }
 
 
 
