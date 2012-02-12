@@ -220,41 +220,41 @@
  
   // y at the center of mass frame in barrel
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EB_85_95\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EB_85_95\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EB_95_110\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EB_95_110\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EB_110_130\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EB_110_130\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EB_130_160\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EB_130_160\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EB_160_200\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EB_160_200\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EB_allpt\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EB_allpt\",\"y^{COM}\",2,-2.4,2.4)");
 
   // y at the center of mass frame in endcap
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EE_85_95\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EE_85_95\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EE_95_110\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EE_95_110\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EE_110_130\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EE_110_130\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EE_130_160\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EE_130_160\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EE_160_200\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EE_160_200\",\"y^{COM}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_yCOM_EE_allpt\",\"y^{boost}\",2,-2.4,2.4)");
+"combineMC_eff\(\"h_yCOM_EE_allpt\",\"y^{COM}\",2,-2.4,2.4)");
 
 
   myWatch->Stop();
