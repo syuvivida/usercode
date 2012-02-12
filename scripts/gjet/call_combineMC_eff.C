@@ -16,11 +16,11 @@
 
  
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_nvtx_eff_EB\",\"number of vertex in barrel\")"
+"combineMC_eff\(\"h_nvtx_EB\",\"number of vertex in barrel\")"
 );
 
   gROOT->ProcessLine(
-"combineMC_eff\(\"h_nvtx_eff_EE\",\"number of vertex in endcap\")"
+"combineMC_eff\(\"h_nvtx_EE\",\"number of vertex in endcap\")"
 );
 
  
