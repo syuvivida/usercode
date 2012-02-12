@@ -14,7 +14,8 @@ const double ENDCAP_MAXETA=2.5;
 
 void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 {
-  cout << "This is version 0" << endl;
+  cout << "This is version 1" << endl;
+  cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntriesFast();
