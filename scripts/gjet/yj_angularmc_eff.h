@@ -319,6 +319,9 @@ public :
    virtual void     Show(Long64_t entry = -1);
    virtual Int_t    phoDecCode(Long64_t entry, Int_t ipho);
    virtual Bool_t   isGoodPho(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
+   virtual Double_t phoEcalIso(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
+   virtual Double_t phoHcalIso(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
+   virtual Double_t phoTrkIso(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
    virtual Bool_t   isGoodLooseJet(Long64_t entry, Int_t ijet);
    virtual Bool_t   isGoodMediumJet(Long64_t entry, Int_t ijet);
    virtual Bool_t   isGoodTightJet(Long64_t entry, Int_t ijet);

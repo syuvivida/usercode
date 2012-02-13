@@ -281,22 +281,22 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
    c1->Print(Form("effHistos/eff_%s.pdf",histoName.data()));
    c1->Print(Form("effHistos/eff_%s.gif",histoName.data()));
 
-//    if(nfiles>1){
-//      TCanvas* c2 = new TCanvas("c2","",1000,1000);
-//      c2->Divide(2,2);
-//      for(int i=0;i<3;i++){
-//        c2->cd(i+1);
-//        eff[i]->Draw();
-//      }
-//      c2->cd(4);
-//      eff_final->Draw("ap");
+   if(nfiles>1){
+     TCanvas* c2 = new TCanvas("c2","",1000,1000);
+     c2->Divide(2,2);
+     for(int i=0;i<3;i++){
+       c2->cd(i+1);
+       eff[i]->Draw();
+     }
+     c2->cd(4);
+     eff_final->Draw("ap");
 
-//      c2->Print(Form("effHistos/eff2_%s.eps",histoName.data()));
-//      c2->Print(Form("effHistos/eff2_%s.pdf",histoName.data()));
-//      c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
-     
+     c2->Print(Form("effHistos/eff2_%s.eps",histoName.data()));
+     c2->Print(Form("effHistos/eff2_%s.pdf",histoName.data()));
+     c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
+   
 
-//    }
+   }
 
 
 
