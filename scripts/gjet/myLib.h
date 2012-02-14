@@ -7,10 +7,18 @@ namespace eiko {
   Double_t zgamma(TLorentzVector l1, TLorentzVector l2);
   Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2);
   Double_t cosThetaStar(TLorentzVector l1, TLorentzVector l2);
+  Double_t cosThetaStar_BoostToCM(TLorentzVector l1, TLorentzVector l2);
+  Double_t cosThetaStar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2);
   Double_t chiPair(TLorentzVector l1, TLorentzVector l2);
   Double_t pstar(TLorentzVector l1, TLorentzVector l2);
+  Double_t pstar_BoostToCM(TLorentzVector l1, TLorentzVector l2);
+  Double_t pstar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2);
   Double_t yB(TLorentzVector l1, TLorentzVector l2);
-  Double_t yCOM(TLorentzVector l1, TLorentzVector l2);
+  Double_t ystar(TLorentzVector l1, TLorentzVector l2);
+  Double_t ystar_BoostToCM(TLorentzVector l1, TLorentzVector l2);
+
+  void BoostToCM_3D(TLorentzVector& l1, TLorentzVector& l2);
+  void BoostToCM_Z(TLorentzVector& l1, TLorentzVector& l2);
 
   Bool_t separated(TLorentzVector l1, TLorentzVector l2) { 
     Bool_t result = false;
@@ -44,6 +52,36 @@ namespace eiko {
 
   }
 
+  // boost along the sum of two momenta
+  Double_t cosThetaStar_BoostToCM(TLorentzVector l1, TLorentzVector l2) { 
+
+    TLorentzVector l1_copy(l1);
+    TLorentzVector l2_copy(l2);
+
+    BoostToCM_3D(l1_copy, l2_copy);
+
+    Double_t result = fabs(l1_copy.CosTheta());
+
+    return result;
+
+  }
+
+
+  // boost along the z direction of the sum of two momenta
+  Double_t cosThetaStar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2) { 
+
+    TLorentzVector l1_copy(l1);
+    TLorentzVector l2_copy(l2);
+
+    BoostToCM_Z(l1_copy, l2_copy);
+
+    Double_t result = fabs(l1_copy.CosTheta());
+
+    return result;
+
+  }
+
+
   Double_t chiPair(TLorentzVector l1, TLorentzVector l2) { 
 
     Double_t ystar = 0.5*fabs(l1.Rapidity()-l2.Rapidity());
@@ -63,6 +101,34 @@ namespace eiko {
 
   }
 
+  Double_t pstar_BoostToCM(TLorentzVector l1, TLorentzVector l2){
+
+    TLorentzVector l1_copy(l1);
+    TLorentzVector l2_copy(l2);
+
+    BoostToCM_3D(l1_copy, l2_copy);
+
+    Double_t result = l1_copy.Rho();
+
+    return result;
+
+
+  }
+
+  Double_t pstar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2){
+
+    TLorentzVector l1_copy(l1);
+    TLorentzVector l2_copy(l2);
+
+    BoostToCM_Z(l1_copy, l2_copy);
+
+    Double_t result = l1_copy.Rho();
+
+    return result;
+
+
+  }
+
 
   Double_t yB(TLorentzVector l1, TLorentzVector l2) { 
 
@@ -71,11 +137,52 @@ namespace eiko {
 
   }
 
-  Double_t yCOM(TLorentzVector l1, TLorentzVector l2){
+  Double_t ystar(TLorentzVector l1, TLorentzVector l2){
 
     Double_t result =0.5*(l1.Rapidity()-l2.Rapidity());
     return result;
 
   }
 
-}
+  Double_t ystar_BoostToCM(TLorentzVector l1, TLorentzVector l2){
+
+    TLorentzVector l1_copy(l1);
+    TLorentzVector l2_copy(l2);
+
+    BoostToCM_3D(l1_copy, l2_copy);
+
+    Double_t result = l1_copy.Rapidity();
+
+    return result;
+
+  }
+
+
+  void BoostToCM_3D(TLorentzVector& l1, TLorentzVector& l2){
+
+    TLorentzVector sum_p4 = (l1+l2);
+
+    TVector3 boostVector = -sum_p4.BoostVector();
+
+    l1.Boost(boostVector); 
+    l2.Boost(boostVector); 
+
+    return;
+  }
+
+  void BoostToCM_Z(TLorentzVector& l1, TLorentzVector& l2){
+
+    TLorentzVector sum_p4 = (l1+l2);
+    sum_p4.SetPx(0.0);
+    sum_p4.SetPy(0.0);
+
+    TVector3 boostVector = -sum_p4.BoostVector();
+
+    l1.Boost(boostVector); 
+    l2.Boost(boostVector); 
+
+    return;
+  }
+
+
+} // end of namespace eiko
