@@ -32,13 +32,19 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   cout << "There are " << nPtBins << " pt bins" << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
 
+  double ystarMax = 1.4;
+  double ptMin    = ptbound[0];
+  double pstarMin = ptMin*TMath::CosH(ystarMax);
+  
+  cout << "pstarMin = " << pstarMin << endl;
+
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntriesFast();
   cout << "There are " << nentries << " entries" << endl;
 
 
-  TH2D* h2_ycom_pstar_template = new TH2D("h2_ycom_pstar_template","",100.0,-5.0,5.0,500,0,500);
+  TH2D* h2_ystar_pstar_template = new TH2D("h2_ystar_pstar_template","",100.0,-5.0,5.0,500,0,500);
 
 
   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500);
@@ -81,7 +87,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   TH1D* h_yB_template = new TH1D("h_yB_template","",100,-5.0,5.0);
 
-  TH1D* h_yCOM_template = new TH1D("h_yCOM_template","",100,-5.0,5.0);
+  TH1D* h_ystar_template = new TH1D("h_ystar_template","",100,-5.0,5.0);
 
   TH1D* h_sieie_template = new TH1D("h_sieie_template","", 100, 0,0.1);
   
@@ -96,7 +102,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_pixel_template = new TH1D("h_pixel_template","", 3, -0.5,2.5);
 
 
-  TH2D* h2_ycom_pstar[2]; // in EB and EE
+  TH2D* h2_ystar_pstar[2]; // in EB and EE
 
   TH1D* h_jetpt_eff[2];
   TH1D* h_jeteta_eff[2];
@@ -111,11 +117,16 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_ptratio[nDECs][2];
   TH1D* h_zgamma[nDECs][nPtBins+1][2];
   TH1D* h_dphi[nDECs][nPtBins+1][2];
-  TH1D* h_cost[nDECs][nPtBins+1][2];
+  TH1D* h_cost[nDECs][nPtBins+1][2]; // tanH(0.5(y1-y2))
+  TH1D* h_cost_COM3D[nDECs][nPtBins+1][2]; // boost to the COM using total momentum
+  TH1D* h_cost_COMZ[nDECs][nPtBins+1][2]; // boost to the COM using z-momentum
   TH1D* h_chi[nDECs][nPtBins+1][2];
   TH1D* h_pstar[nDECs][nPtBins+1][2];
+  TH1D* h_pstar_COM3D[nDECs][nPtBins+1][2]; // boost to the COM using total momentum
+  TH1D* h_pstar_COMZ[nDECs][nPtBins+1][2]; // boost to the COM using z-momentum
   TH1D* h_yB[nDECs][nPtBins+1][2];
-  TH1D* h_yCOM[nDECs][nPtBins+1][2];
+  TH1D* h_ystar[nDECs][nPtBins+1][2];
+  TH1D* h_ystar_COM3D[nDECs][nPtBins+1][2]; // boost to the COM using total momentum
 
 
   // creating histograms
@@ -173,7 +184,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   for(int idec=0; idec < nDECs; idec ++){
 
 
-    h2_ycom_pstar[idec] = (TH2D*)h2_ycom_pstar_template->Clone(Form("h2_ycom_pstar_%s",decName[idec]));
+    h2_ystar_pstar[idec] = (TH2D*)h2_ystar_pstar_template->Clone(Form("h2_ystar_pstar_%s",decName[idec]));
 
     for(int ip=0; ip<2; ip++){
       pf_nvtx_eciso[idec][ip] = (TProfile*)pf_nvtx_eciso_template->Clone
@@ -199,13 +210,24 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
 	    h_cost[idec][ipt][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_%s_allpt_%d", decName[idec], ip));
 
+	    h_cost_COM3D[idec][ipt][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_COM3D_%s_allpt_%d", decName[idec], ip));
+
+	    h_cost_COMZ[idec][ipt][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_COMZ_%s_allpt_%d", decName[idec], ip));
+
 	    h_chi[idec][ipt][ip] = (TH1D*)h_chi_template->Clone(Form("h_chi_%s_allpt_%d", decName[idec], ip));
 
 	    h_pstar[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_%s_allpt_%d", decName[idec], ip));
 
+	    h_pstar_COM3D[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_COM3D_%s_allpt_%d", decName[idec], ip));
+
+	    h_pstar_COMZ[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_COMZ_%s_allpt_%d", decName[idec], ip));
+
 	    h_yB[idec][ipt][ip] = (TH1D*)h_yB_template->Clone(Form("h_yB_%s_allpt_%d", decName[idec], ip));
 
-	    h_yCOM[idec][ipt][ip] = (TH1D*)h_yCOM_template->Clone(Form("h_yCOM_%s_allpt_%d", decName[idec], ip));
+	    h_ystar[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_%s_allpt_%d", decName[idec], ip));
+
+	    h_ystar_COM3D[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COM3D_%s_allpt_%d", decName[idec], ip));
+
 	  }
 
 	else
@@ -220,18 +242,33 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 	    h_cost[idec][ipt][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_%s_%d_%d_%d", decName[idec],
 								       (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
+	    h_cost_COM3D[idec][ipt][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_COM3D_%s_%d_%d_%d", decName[idec],
+									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
+	    h_cost_COMZ[idec][ipt][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_COMZ_%s_%d_%d_%d", decName[idec],
+									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
 	    h_chi[idec][ipt][ip] = (TH1D*)h_chi_template->Clone(Form("h_chi_%s_%d_%d_%d", decName[idec],
 								     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
 	    h_pstar[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_%s_%d_%d_%d", decName[idec],
 									 (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
+	    h_pstar_COM3D[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_COM3D_%s_%d_%d_%d", decName[idec],
+									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
+	    h_pstar_COMZ[idec][ipt][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_COMZ_%s_%d_%d_%d", decName[idec],
+									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
 	    h_yB[idec][ipt][ip] = (TH1D*)h_yB_template->Clone(Form("h_yB_%s_%d_%d_%d", decName[idec],
 								   (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
-	    h_yCOM[idec][ipt][ip] = (TH1D*)h_yCOM_template->Clone(Form("h_yCOM_%s_%d_%d_%d", decName[idec],
+	    h_ystar[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_%s_%d_%d_%d", decName[idec],
 								       (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
+	    h_ystar_COM3D[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COM3D_%s_%d_%d_%d", decName[idec],
+									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
 	  }
 	
       } // end of loop over processes
@@ -254,7 +291,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     
-    if(jentry > 100000) break;
+    //    if(jentry > 100000) break;
     nPass[0]++;
     h_pthat->Fill(PhotonMCpthat); // make sure we are checking the right MC samples
 
@@ -387,7 +424,22 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 			   patJetPfAk05En_->at(leadingJetIndex)
 			   );
 
+
+
+    //-------------------------------------------------------------------------
+    // Preselections                                    
+    //-------------------------------------------------------------------------
+    
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
+
+    double gj_pstar  = eiko::pstar(l4_pho, l4_1stjet);
+    double gj_ystar   = eiko::ystar(l4_pho, l4_1stjet);
+
+    bool passCOMCut = gj_pstar > pstarMin && fabs(gj_ystar) < ystarMax;
+    if(applyCOMCut && !passCOMCut)continue;
+
+
+    h2_ystar_pstar[phoDecBinIndex]->Fill(gj_ystar, gj_pstar);
 
 
     //-------------------------------------------------------------------------
@@ -396,11 +448,18 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     double gj_zgamma = eiko::zgamma(l4_pho, l4_1stjet);
     double gj_dphi   = eiko::deltaPhi(l4_pho, l4_1stjet);
+
     double gj_cost   = eiko::cosThetaStar(l4_pho, l4_1stjet);
+    double gj_cost_com3D = eiko::cosThetaStar_BoostToCM(l4_pho, l4_1stjet);
+    double gj_cost_comZ = eiko::cosThetaStar_ZBoostToCM(l4_pho, l4_1stjet);
+
     double gj_chi    = eiko::chiPair(l4_pho, l4_1stjet);
-    double gj_pstar  = eiko::pstar(l4_pho, l4_1stjet);
+
+    double gj_pstar_com3D = eiko::pstar_BoostToCM(l4_pho, l4_1stjet);
+    double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
+
     double gj_yB     = eiko::yB(l4_pho, l4_1stjet);    
-    double gj_yCOM   = eiko::yCOM(l4_pho, l4_1stjet);
+    double gj_ystar_com3D = eiko::ystar_BoostToCM(l4_pho, l4_1stjet);
 
     double ptRatio   = leadingJetPt/leadingPhotonEt;
     // before applying cuts
@@ -417,23 +476,43 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     h_zgamma[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_dphi);
+
     h_cost[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_cost);
+    h_cost_COM3D[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_cost_com3D);
+    h_cost_COMZ[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_cost_comZ);
+
     h_chi[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_chi);
+
     h_pstar[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_pstar);
+    h_pstar_COM3D[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_pstar_com3D);
+    h_pstar_COMZ[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_pstar_comZ);
+
     h_yB[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_yB);		   
-    h_yCOM[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_yCOM);		   
+    h_ystar[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_ystar);		   
+    h_ystar_COM3D[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_ystar_com3D);
 
 
     // lump all pt together
     h_eta_eff[nPtBins][0]->Fill(leadingPhotonEta);
     h_zgamma[phoDecBinIndex][nPtBins][0]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][nPtBins][0]->Fill(gj_dphi);
-    h_cost[phoDecBinIndex][nPtBins][0]->Fill(gj_cost);
-    h_chi[phoDecBinIndex][nPtBins][0]->Fill(gj_chi);
-    h_pstar[phoDecBinIndex][nPtBins][0]->Fill(gj_pstar);
-    h_yB[phoDecBinIndex][nPtBins][0]->Fill(gj_yB);		   
-    h_yCOM[phoDecBinIndex][nPtBins][0]->Fill(gj_yCOM);		   
 
+    h_cost[phoDecBinIndex][nPtBins][0]->Fill(gj_cost);
+    h_cost_COM3D[phoDecBinIndex][nPtBins][0]->Fill(gj_cost_com3D);
+    h_cost_COMZ[phoDecBinIndex][nPtBins][0]->Fill(gj_cost_comZ);
+
+    h_chi[phoDecBinIndex][nPtBins][0]->Fill(gj_chi);
+
+    h_pstar[phoDecBinIndex][nPtBins][0]->Fill(gj_pstar);
+    h_pstar_COM3D[phoDecBinIndex][nPtBins][0]->Fill(gj_pstar_com3D);
+    h_pstar_COMZ[phoDecBinIndex][nPtBins][0]->Fill(gj_pstar_comZ);
+
+    h_yB[phoDecBinIndex][nPtBins][0]->Fill(gj_yB);		   
+    h_ystar[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar);		   
+    h_ystar_COM3D[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar_com3D);
+
+
+    // checking the isolation behaviour as a function of nvertex
     pf_nvtx_eciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,
 					   phoEcalIso(ientry,leadingPhotonIndex,false));
     pf_nvtx_hciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,
@@ -454,10 +533,6 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if(!isGoodPho(ientry, leadingPhotonIndex, applyPileUpCorr))continue;
     if(!isGoodLooseJet(ientry, leadingJetIndex))continue;
 
-    h2_ycom_pstar[phoDecBinIndex]->Fill(gj_yCOM, gj_pstar);
-
-    bool passCOMCut = gj_pstar > 130.0 && fabs(gj_yCOM) < 1.0;
-    if(applyCOMCut && !passCOMCut)continue;
 
     h_nvtx_eff[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood);
 
@@ -471,21 +546,42 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     h_zgamma[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_dphi);
-    h_cost[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_cost);
-    h_chi[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_chi);
-    h_pstar[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_pstar);
-    h_yB[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_yB);		   
-    h_yCOM[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_yCOM);		   
 
-       // lump all pt together
+    h_cost[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_cost);
+    h_cost_COM3D[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_cost_com3D);
+    h_cost_COMZ[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_cost_comZ);
+
+    h_chi[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_chi);
+
+    h_pstar[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_pstar);
+    h_pstar_COM3D[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_pstar_com3D);
+    h_pstar_COMZ[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_pstar_comZ);
+
+    h_yB[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_yB);		   
+    h_ystar[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar);		   
+    h_ystar_COM3D[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar_com3D);
+
+
+    // lump all pt together
     h_eta_eff[nPtBins][1]->Fill(leadingPhotonEta);
     h_zgamma[phoDecBinIndex][nPtBins][1]->Fill(gj_zgamma);
     h_dphi[phoDecBinIndex][nPtBins][1]->Fill(gj_dphi);
+
     h_cost[phoDecBinIndex][nPtBins][1]->Fill(gj_cost);
+    h_cost_COM3D[phoDecBinIndex][nPtBins][1]->Fill(gj_cost_com3D);
+    h_cost_COMZ[phoDecBinIndex][nPtBins][1]->Fill(gj_cost_comZ);
+
     h_chi[phoDecBinIndex][nPtBins][1]->Fill(gj_chi);
+
     h_pstar[phoDecBinIndex][nPtBins][1]->Fill(gj_pstar);
+    h_pstar_COM3D[phoDecBinIndex][nPtBins][1]->Fill(gj_pstar_com3D);
+    h_pstar_COMZ[phoDecBinIndex][nPtBins][1]->Fill(gj_pstar_comZ);
+
     h_yB[phoDecBinIndex][nPtBins][1]->Fill(gj_yB);		   
-    h_yCOM[phoDecBinIndex][nPtBins][1]->Fill(gj_yCOM);		   
+    h_ystar[phoDecBinIndex][nPtBins][1]->Fill(gj_ystar);		   
+    h_ystar_COM3D[phoDecBinIndex][nPtBins][1]->Fill(gj_ystar_com3D);
+
+
 
   } // end of loop over entries
 
@@ -500,14 +596,13 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   std::string remword="/data4/yunju/NewtreeT/MC/";
 
   size_t pos = _inputDirName.find(remword);
-  
+
   if(pos!= std::string::npos)
     _inputDirName.swap(_inputDirName.erase(pos,remword.length()));
 
   if(applyCOMCut)_inputDirName += "_withCOMCut";
   if(applyPileUpCorr)_inputDirName += "_pileCorr";
   TFile* outFile = new TFile(Form("/home/syu/CVSCode/eff_%s.root",_inputDirName.data()),"recreate");               
-
   h_pthat->Write();
   h_ptpho->Write();
   h_ptjet->Write();
@@ -539,7 +634,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   for(int idec=0; idec< nDECs; idec++){
 
-    h2_ycom_pstar[idec]->Write();
+    h2_ystar_pstar[idec]->Write();
 
     for(int ip=0; ip<2; ip++){
       pf_nvtx_eciso[idec][ip]->Write();
@@ -554,10 +649,15 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 	h_zgamma[idec][ipt][ip]->Write();
 	h_dphi[idec][ipt][ip]->Write();
 	h_cost[idec][ipt][ip]->Write();
+	h_cost_COM3D[idec][ipt][ip]->Write();
+	h_cost_COMZ[idec][ipt][ip]->Write();
 	h_chi[idec][ipt][ip]->Write();
 	h_pstar[idec][ipt][ip]->Write();
+	h_pstar_COM3D[idec][ipt][ip]->Write();
+	h_pstar_COMZ[idec][ipt][ip]->Write();
 	h_yB[idec][ipt][ip]->Write();				   
-	h_yCOM[idec][ipt][ip]->Write();
+	h_ystar[idec][ipt][ip]->Write();
+	h_ystar_COM3D[idec][ipt][ip]->Write();
 
       }
     }

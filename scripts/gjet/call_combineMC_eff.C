@@ -82,6 +82,12 @@
   gROOT->ProcessLine(
 		     "combineMC_eff(\"h_pstar_EB_allpt\",\"p^{*}\",4,85,300)");
 
+  gROOT->ProcessLine(
+		     "combineMC_eff(\"h_pstar_COM3D_EB_allpt\",\"p^{*}\",4,85,300)");
+
+  gROOT->ProcessLine(
+		     "combineMC_eff(\"h_pstar_COMZ_EB_allpt\",\"p^{*}\",4,85,300)");
+
   // pstar in endcap
   gROOT->ProcessLine(
 		     "combineMC_eff(\"h_pstar_EE_85_95\",\"p^{*}\",2,85,300)");
@@ -101,6 +107,12 @@
   gROOT->ProcessLine(
 		     "combineMC_eff(\"h_pstar_EE_allpt\",\"p^{*}\",4,85,300)");
 
+
+  gROOT->ProcessLine(
+		     "combineMC_eff(\"h_pstar_COM3D_EE_allpt\",\"p^{*}\",4,85,300)");
+
+  gROOT->ProcessLine(
+		     "combineMC_eff(\"h_pstar_COMZ_EE_allpt\",\"p^{*}\",4,85,300)");
 
   // yBoost in barrel
   gROOT->ProcessLine(
@@ -159,6 +171,12 @@
   gROOT->ProcessLine(
 "combineMC_eff(\"h_cost_EB_allpt\",\"cos#theta^{*}\",4,0.0,1.0)");
 
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_cost_COM3D_EB_allpt\",\"cos#theta^{*}\",4,0.0,1.0)");
+
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_cost_COMZ_EB_allpt\",\"cos#theta^{*}\",4,0.0,1.0)");
+
   // costheta in endcap
   gROOT->ProcessLine(
 "combineMC_eff(\"h_cost_EE_85_95\",\"cos#theta^{*}\",2,0.0,1.0)");
@@ -177,6 +195,13 @@
 
   gROOT->ProcessLine(
 "combineMC_eff(\"h_cost_EE_allpt\",\"cos#theta^{*}\",4,0.0,1.0)");
+
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_cost_COM3D_EE_allpt\",\"cos#theta^{*}\",4,0.0,1.0)");
+
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_cost_COMZ_EE_allpt\",\"cos#theta^{*}\",4,0.0,1.0)");
+
 
    // deltaphi in barrel
   gROOT->ProcessLine(
@@ -220,41 +245,47 @@
  
   // y at the center of mass frame in barrel
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EB_85_95\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EB_85_95\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EB_95_110\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EB_95_110\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EB_110_130\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EB_110_130\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EB_130_160\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EB_130_160\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EB_160_200\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EB_160_200\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EB_allpt\",\"y^{COM}\",4,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EB_allpt\",\"y^{*}\",4,-2.4,2.4)");
+
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_ystar_COM3D_EB_allpt\",\"y^{*}\",4,-2.4,2.4)");
 
   // y at the center of mass frame in endcap
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EE_85_95\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EE_85_95\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EE_95_110\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EE_95_110\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EE_110_130\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EE_110_130\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EE_130_160\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EE_130_160\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EE_160_200\",\"y^{COM}\",2,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EE_160_200\",\"y^{*}\",2,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_yCOM_EE_allpt\",\"y^{COM}\",4,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_EE_allpt\",\"y^{*}\",4,-2.4,2.4)");
+
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_ystar_COM3D_EE_allpt\",\"y^{*}\",4,-2.4,2.4)");
 
 
   myWatch->Stop();
