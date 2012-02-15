@@ -101,7 +101,8 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
   h_eff      = (TH1D*)h_template->Clone("h_eff");
   h_eff      -> SetXTitle(xtitle.data());
   h_eff      -> SetYTitle("Efficiency");
-  h_eff      -> SetTitle("Darko method");
+//   h_eff      -> SetTitle("Darko method");
+  h_eff      -> SetTitle("");
   h_eff      -> SetLineWidth(2);
 
   if(h_all_numr->GetEntries()!=0)
@@ -129,26 +130,30 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 
     cout << "File " << ifile << endl;
     TFile *f_temp = TFile::Open(myMCFiles[ifile].filename.data());
+    cout << "opening " << myMCFiles[ifile].filename << endl;
+
     double weight = myMCFiles[ifile].scaleFactor;
     weight_temp[ifile] = weight;
 
     // numerator
     h_numr[ifile] = (TH1D*)(f_temp->Get(Form("%s_1",histoName.data())));
     h_numr[ifile] -> SetName(Form("h_numr_%d",ifile));
-    h_all_numr    -> Add(h_numr[ifile], weight);
-
     h_numr[ifile] -> Rebin(rebin);
     if(ifile==0)
       h_all_numr    -> Rebin(rebin);
+
+    h_all_numr    -> Add(h_numr[ifile], weight);
 
 
     // denominator
     h_deno[ifile] = (TH1D*)(f_temp->Get(Form("%s_0",histoName.data())));
     h_deno[ifile] -> SetName(Form("h_deno_%d",ifile));
-    h_all_deno    -> Add(h_deno[ifile], weight);
     h_deno[ifile] -> Rebin(rebin);
     if(ifile==0)
       h_all_deno    -> Rebin(rebin);
+
+    h_all_deno    -> Add(h_deno[ifile], weight);
+
 
     // to be used with TEfficiency methods
     cout << h_numr[ifile]->GetEntries() << "\t" << h_deno[ifile]->GetEntries() << endl;
@@ -156,16 +161,18 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
     eff[ifile]->SetTitle(xtitle.data());
   } // end of loop over files
 
-
+  cout << h_all_deno->GetBinContent(18) << "\t" << h_all_numr->GetBinContent(18) << endl;
   TEfficiency* eff_combine = new TEfficiency();
 
   TList* effList = new TList();
   for(int i=0; i<nfiles; i++)
     effList->Add(eff[i]);
+
   TGraphAsymmErrors* eff_final = eff_combine->Combine(effList, "v", nfiles, weight_temp);
   eff_final->GetXaxis()->SetTitle(xtitle.data());
   eff_final->GetYaxis()->SetTitle("Efficiency");
-  eff_final->SetTitle("TEfficiency");
+//   eff_final->SetTitle("TEfficiency");
+  eff_final->SetTitle("");
 
   h_eff->Rebin(rebin);
   int nbins = h_eff->GetNbinsX();
@@ -202,7 +209,7 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
       for(int ifile=0; ifile < nfiles; ifile++)
 	{
 	  double ntotal =  h_deno[ifile]->GetBinContent(ibin);
-	  if(ntotal < 10)continue;
+ 	  if(ntotal < 10)continue;
 	  double npass  =  h_numr[ifile]->GetBinContent(ibin);
 	  double nfail  =  ntotal -npass;
 	  double weight = myMCFiles[ifile].scaleFactor;
@@ -243,16 +250,17 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 //      }
 
    std::string remword="h_";
-
-   size_t pos = histoName.find(remword);
+   std::string temp_histoName = histoName;
+   
+   size_t pos = temp_histoName.find(remword);
   
    if(pos!= std::string::npos)
-     histoName.swap(histoName.erase(pos,remword.length()));
+     temp_histoName.swap(temp_histoName.erase(pos,remword.length()));
 
 
    gSystem->mkdir("effDataFiles");
    ofstream fout;
-   fout.open(Form("effDataFiles/%s.dat",histoName.data()));
+   fout.open(Form("effDataFiles/%s.dat",temp_histoName.data()));
    for(int ibin=1; ibin<= nbins; ibin++)
      {
        cout << "Efficiency bin " << ibin << ": " << y_eff[ibin-1]
@@ -269,17 +277,28 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 
    fout.close();
 
-   TCanvas* c1 = new TCanvas("c1","",1000,500);
-   c1->Divide(2,1);
-   c1->cd(1);
+//    TCanvas* c1 = new TCanvas("c1","",1000,500);
+   TCanvas* c1 = new TCanvas("c1","",500,500);
+//    c1->Divide(2,1);
+//    c1->cd(1);
    eff_final->Draw("ap");
-   c1->cd(2);
-   h_eff->Draw("e1");
+   eff_final->Fit("pol1","","",-15,15);
+//    h_eff->Draw("e1");
+//    h_eff->Fit("pol1","","",-15,15);
+
+   if(histoName.find("pstar")!= std::string::npos || 
+      histoName.find("_pt")!= std::string::npos)
+     eff_final->Fit("pol1","","",0,500);
+     //      h_eff->Fit("pol1","","",0,500);
+//    h_eff->Draw("e1");
+
+//    c1->cd(2);
+//    h_eff->Draw("e1");
 
    gSystem->mkdir("effHistos");
-   c1->Print(Form("effHistos/eff_%s.eps",histoName.data()));
-   c1->Print(Form("effHistos/eff_%s.pdf",histoName.data()));
-   c1->Print(Form("effHistos/eff_%s.gif",histoName.data()));
+   c1->Print(Form("effHistos/eff_%s.eps",temp_histoName.data()));
+   c1->Print(Form("effHistos/eff_%s.pdf",temp_histoName.data()));
+   c1->Print(Form("effHistos/eff_%s.gif",temp_histoName.data()));
 
    if(nfiles>1){
      TCanvas* c2 = new TCanvas("c2","",1000,1000);
@@ -291,9 +310,9 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
      c2->cd(4);
      eff_final->Draw("ap");
 
-     c2->Print(Form("effHistos/eff2_%s.eps",histoName.data()));
-     c2->Print(Form("effHistos/eff2_%s.pdf",histoName.data()));
-     c2->Print(Form("effHistos/eff2_%s.gif",histoName.data()));
+     c2->Print(Form("effHistos/eff2_%s.eps",temp_histoName.data()));
+     c2->Print(Form("effHistos/eff2_%s.pdf",temp_histoName.data()));
+     c2->Print(Form("effHistos/eff2_%s.gif",temp_histoName.data()));
    
 
    }
