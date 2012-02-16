@@ -17,7 +17,7 @@ const int nDECs = 2;
 double ptbound[]={85., 95., 110., 130., 160., 200.};
 const int nPtBins = sizeof(ptbound)/sizeof(ptbound[0])-1;
 
-// effective area for correcting pileup
+// effective area for correcting pileup, ECAL/HCAL/Tracker from EWK-11-251
 const double aeff[2][3]={
   {0.183, 0.062, 0.0167},
   {0.090, 0.180, 0.032}
@@ -28,7 +28,7 @@ const double aeff[2][3]={
 
 void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 {
-  cout << "This is version 2" << endl;
+  cout << "This is version 3" << endl;
   cout << "There are " << nPtBins << " pt bins" << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
 
@@ -127,6 +127,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_yB[nDECs][nPtBins+1][2];
   TH1D* h_ystar[nDECs][nPtBins+1][2];
   TH1D* h_ystar_COM3D[nDECs][nPtBins+1][2]; // boost to the COM using total momentum
+  TH1D* h_ystar_COMZ[nDECs][nPtBins+1][2]; // boost to the COM using the z-momentum
 
 
   // creating histograms
@@ -228,6 +229,8 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
 	    h_ystar_COM3D[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COM3D_%s_allpt_%d", decName[idec], ip));
 
+	    h_ystar_COMZ[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COMZ_%s_allpt_%d", decName[idec], ip));
+
 	  }
 
 	else
@@ -269,6 +272,9 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 	    h_ystar_COM3D[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COM3D_%s_%d_%d_%d", decName[idec],
 									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
 
+	    h_ystar_COMZ[idec][ipt][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COMZ_%s_%d_%d_%d", decName[idec],
+									     (int)ptbound[ipt], (int)ptbound[ipt+1], ip));
+
 	  }
 	
       } // end of loop over processes
@@ -291,7 +297,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     
-    //    if(jentry > 100000) break;
+//     if(jentry > 50000 ) break;
     nPass[0]++;
     h_pthat->Fill(PhotonMCpthat); // make sure we are checking the right MC samples
 
@@ -432,14 +438,14 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
 
-    double gj_pstar  = eiko::pstar(l4_pho, l4_1stjet);
-    double gj_ystar   = eiko::ystar(l4_pho, l4_1stjet);
+    double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
+    double gj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_1stjet);
 
-    bool passCOMCut = gj_pstar > pstarMin && fabs(gj_ystar) < ystarMax;
+    bool passCOMCut = gj_pstar_comZ > pstarMin && fabs(gj_ystar_comZ) < ystarMax;
     if(applyCOMCut && !passCOMCut)continue;
 
 
-    h2_ystar_pstar[phoDecBinIndex]->Fill(gj_ystar, gj_pstar);
+    h2_ystar_pstar[phoDecBinIndex]->Fill(gj_ystar_comZ, gj_pstar_comZ);
 
 
     //-------------------------------------------------------------------------
@@ -455,10 +461,12 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     double gj_chi    = eiko::chiPair(l4_pho, l4_1stjet);
 
+    double gj_pstar  = eiko::pstar(l4_pho, l4_1stjet);
     double gj_pstar_com3D = eiko::pstar_BoostToCM(l4_pho, l4_1stjet);
-    double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
 
     double gj_yB     = eiko::yB(l4_pho, l4_1stjet);    
+
+    double gj_ystar   = eiko::ystar(l4_pho, l4_1stjet);
     double gj_ystar_com3D = eiko::ystar_BoostToCM(l4_pho, l4_1stjet);
 
     double ptRatio   = leadingJetPt/leadingPhotonEt;
@@ -490,6 +498,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_yB[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_yB);		   
     h_ystar[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_ystar);		   
     h_ystar_COM3D[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_ystar_com3D);
+    h_ystar_COMZ[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_ystar_comZ);
 
 
     // lump all pt together
@@ -510,6 +519,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_yB[phoDecBinIndex][nPtBins][0]->Fill(gj_yB);		   
     h_ystar[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar);		   
     h_ystar_COM3D[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar_com3D);
+    h_ystar_COMZ[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar_comZ);
 
 
     // checking the isolation behaviour as a function of nvertex
@@ -529,10 +539,11 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     // after applying cuts
 
+    //=============================================================
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
     if(!isGoodPho(ientry, leadingPhotonIndex, applyPileUpCorr))continue;
     if(!isGoodLooseJet(ientry, leadingJetIndex))continue;
-
+    //=============================================================
 
     h_nvtx_eff[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood);
 
@@ -560,6 +571,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_yB[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_yB);		   
     h_ystar[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar);		   
     h_ystar_COM3D[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar_com3D);
+    h_ystar_COMZ[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar_comZ);
 
 
     // lump all pt together
@@ -580,6 +592,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_yB[phoDecBinIndex][nPtBins][1]->Fill(gj_yB);		   
     h_ystar[phoDecBinIndex][nPtBins][1]->Fill(gj_ystar);		   
     h_ystar_COM3D[phoDecBinIndex][nPtBins][1]->Fill(gj_ystar_com3D);
+    h_ystar_COMZ[phoDecBinIndex][nPtBins][1]->Fill(gj_ystar_comZ);
 
 
 
@@ -658,6 +671,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 	h_yB[idec][ipt][ip]->Write();				   
 	h_ystar[idec][ipt][ip]->Write();
 	h_ystar_COM3D[idec][ipt][ip]->Write();
+	h_ystar_COMZ[idec][ipt][ip]->Write();
 
       }
     }
