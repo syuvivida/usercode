@@ -288,6 +288,9 @@
   gROOT->ProcessLine(
 "combineMC_eff(\"h_ystar_COM3D_EE_allpt\",\"y^{*} in endcap\",4,-2.4,2.4)");
 
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_ystar_COMZ_EE_allpt\",\"y^{*} in endcap\",4,-2.4,2.4)");
+
   myWatch->Stop();
   cout << myWatch->RealTime() << " seconds has passed! " << endl; 
 

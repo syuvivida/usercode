@@ -16,6 +16,7 @@ namespace eiko {
   Double_t yB(TLorentzVector l1, TLorentzVector l2);
   Double_t ystar(TLorentzVector l1, TLorentzVector l2);
   Double_t ystar_BoostToCM(TLorentzVector l1, TLorentzVector l2);
+  Double_t ystar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2);
 
   void BoostToCM_3D(TLorentzVector& l1, TLorentzVector& l2);
   void BoostToCM_Z(TLorentzVector& l1, TLorentzVector& l2);
@@ -150,6 +151,19 @@ namespace eiko {
     TLorentzVector l2_copy(l2);
 
     BoostToCM_3D(l1_copy, l2_copy);
+
+    Double_t result = l1_copy.Rapidity();
+
+    return result;
+
+  }
+
+  Double_t ystar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2){
+
+    TLorentzVector l1_copy(l1);
+    TLorentzVector l2_copy(l2);
+
+    BoostToCM_Z(l1_copy, l2_copy);
 
     Double_t result = l1_copy.Rapidity();
 
