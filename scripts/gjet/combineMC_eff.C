@@ -282,9 +282,9 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 //    c1->Divide(2,1);
 //    c1->cd(1);
    eff_final->Draw("ap");
-   eff_final->Fit("pol1","","",-15,15);
+   eff_final->Fit("pol1","","",-20,20);
 //    h_eff->Draw("e1");
-//    h_eff->Fit("pol1","","",-15,15);
+//    h_eff->Fit("pol1","","",-20,20);
 
    if(histoName.find("pstar")!= std::string::npos || 
       histoName.find("_pt")!= std::string::npos)
