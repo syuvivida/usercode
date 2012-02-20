@@ -32,7 +32,8 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   cout << "There are " << nPtBins << " pt bins" << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
 
-  double ystarMax = 1.4;
+//   double ystarMax = 1.4;  // if photon pt min~25 GeV
+  double ystarMax = 1.0;  // if photon pt min~ 85 GeV
   double ptMin    = ptbound[0];
   double pstarMin = ptMin*TMath::CosH(ystarMax);
   
