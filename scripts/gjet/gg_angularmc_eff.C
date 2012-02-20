@@ -28,12 +28,13 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   cout << "There are " << nPtBins << " pt bins" << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
 
-//   double ystarMax = 1.4;  // if photon pt min~25 GeV
-  double ystarMax = 1.0;  // if photon pt min~ 85 GeV
-  double ptMin    = ptbound[0];
-  double pstarMin = ptMin*TMath::CosH(ystarMax);
+//const double ystarMax = 1.4;  // if photon pt min~25 GeV
+  const double ystarMax = 1.0;  // if photon pt min~ 85 GeV
+  const double pstarMin = ptbound[0]       *TMath::CosH(ystarMax);
+  const double pstarMax = ptbound[nPtBins];
   
-  cout << "pstarMin = " << pstarMin << endl;
+  cout << "ystar range: |y*| < " << ystarMax << endl;
+  cout << "pstar range: " << pstarMin << " < p* < " << pstarMax << " GeV" << endl;
 
   if (fChain == 0) return;
 
@@ -297,7 +298,6 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     
-//     if(jentry > 50000 ) break;
     nPass[0]++;
     h_pthat->Fill(pthat); // make sure we are checking the right MC samples
 
@@ -450,7 +450,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
     double gj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_1stjet);
 
-    bool passCOMCut = gj_pstar_comZ > pstarMin && fabs(gj_ystar_comZ) < ystarMax;
+    bool passCOMCut = gj_pstar_comZ > pstarMin && gj_pstar_comZ < pstarMax
+      && fabs(gj_ystar_comZ) < ystarMax;
     if(applyCOMCut && !passCOMCut)continue;
 
 
