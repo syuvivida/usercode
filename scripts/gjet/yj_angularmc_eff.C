@@ -328,7 +328,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 	h_pixel[decIndex] -> Fill(PhotonhasPixelSeed->at(ipho));
 
 
-	// 	if(!PhotonisGenMatched->at(ipho))continue;
+	if(!PhotonisGenMatched->at(ipho))continue;
 	
 	// 	cout << PhotongenMomId->size() << "\t" << PhotonPt->size() << endl;
 	// 	if(fabs(PhotongenMomId->at(ipho)-22)>1e-6)continue; // not prompt photon
