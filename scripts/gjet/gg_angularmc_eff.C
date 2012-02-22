@@ -12,7 +12,8 @@ const double ENDCAP_MINETA=1.57;
 const double ENDCAP_MAXETA=2.5;
 const int nDECs = 2;
 
-double ptbound[]={85., 95., 110., 130., 160., 200.};
+//double ptbound[]={85., 95., 110., 130., 160., 200.};
+double ptbound[]={40., 45., 50., 55., 60., 65., 70., 75., 85., 95., 110., 130., 160., 200.};
 const int nPtBins = sizeof(ptbound)/sizeof(ptbound[0])-1;
 
 // effective area for correcting pileup, ECAL/HCAL/Tracker from EWK-11-251
