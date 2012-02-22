@@ -421,7 +421,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))continue;
     if(phoDecBinIndex < 0)continue;
-    for(int ipt=0; ipt < nPtBins; ipt++)nPass[phoPtBinIndex+4]++;
+    nPass[phoPtBinIndex+4]++;
 
     
     TLorentzVector l4_1stjet(0,0,0,0);

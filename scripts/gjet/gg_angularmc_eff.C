@@ -24,7 +24,7 @@ const double aeff[2][3]={
 
 void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 {
-  cout << "This is version 3" << endl;
+  cout << "This is version 4" << endl;
   cout << "There are " << nPtBins << " pt bins" << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
 
@@ -59,7 +59,9 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   TH1D* h_ptbin_template= new TH1D("h_ptbin_template","", nPtBins, ptbound);
   
-  TH1D* h_ptratio_template = new TH1D("h_ptratio_template","",500,0.0,2.5);
+  TH1D* h_ptratio_template = new TH1D("h_ptratio_template","",600,0.0,3.0);
+
+  TH1D* h_dR_template = new TH1D("h_dR_template","",200,0.0,2.0);
 
   TH1D* h_nvtx_template = new TH1D("h_nvtx_template","",40,0.5,40.5);
 
@@ -143,6 +145,17 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_tkiso[6];
   TH1D* h_hovere[6];
   TH1D* h_pixel[6];
+
+  TH1D* h_recgenpt_jet;
+  TH1D* h_dR_jet;
+  TH1D* h_recgenpt_pho;
+  TH1D* h_dR_pho;
+
+  h_recgenpt_jet = (TH1D*)h_ptratio_template->Clone("h_recgenpt_jet");
+  h_recgenpt_pho = (TH1D*)h_ptratio_template->Clone("h_recgenpt_pho");
+  h_dR_jet       = (TH1D*)h_dR_template->Clone("h_dR_jet");
+  h_dR_pho       = (TH1D*)h_dR_template->Clone("h_dR_pho");
+  
 
   for(int idec=0; idec<6; idec++)
     {
@@ -297,7 +310,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    
+//     if(jentry > 50000 ) break;
     nPass[0]++;
     h_pthat->Fill(pthat); // make sure we are checking the right MC samples
 
@@ -316,30 +329,32 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     }
 
-    int leadingPhotonIndex = -1;
-    double phoMaxPt = -9999.;
-
     //-------------------------------------------------------------------------
     // now find a good leading photon that is matched to hard scattering photon
     //-------------------------------------------------------------------------
+
+    int leadingPhotonIndex = -1;
+    double phoMaxPt = -9999.;
+
     for(unsigned int ipho=0; ipho < nPho; ipho++)
       {	
 
-	int decIndex = phoDecCode(ientry, ipho);
-	if(!isFidPho(ientry,ipho))continue;
+	int decIndex = phoDecCode(ipho);
+	if(!isFidPho(ipho))continue;
 
 	h_sieie[decIndex] -> Fill(phoSigmaIEtaIEta[ipho]);
-	h_eciso[decIndex] -> Fill(phoEcalIso(ientry,ipho,false));
-	h_hciso[decIndex] -> Fill(phoHcalIso(ientry,ipho,false));
-	h_tkiso[decIndex] -> Fill(phoTrkIso(ientry,ipho,false));
+	h_eciso[decIndex] -> Fill(phoEcalIso(ipho,false));
+	h_hciso[decIndex] -> Fill(phoHcalIso(ipho,false));
+	h_tkiso[decIndex] -> Fill(phoTrkIso(ipho,false));
 	h_hovere[decIndex]-> Fill(phoHoverE[ipho]);
 	h_pixel[decIndex] -> Fill(phohasPixelSeed[ipho]);
 
-	if(phoGenIndex[ipho]<0)continue;
+	// make sure this is the signal photon we care about
+ 	if(phoGenIndex[ipho]<0)continue;
+ 	if(phoGenMomPID[ipho]!=22)continue;
 
-	if(phoGenMomPID[ipho]!=22)continue;
-	
-	double thisPhoPt= phoEt[ipho];      
+	double thisPhoPt= phoEt[ipho]; 
+
 	if(thisPhoPt > phoMaxPt)
 	  {
 	    phoMaxPt = thisPhoPt;
@@ -356,27 +371,26 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     int phoPtBinIndex =  h_ptbin_template->GetXaxis()->FindBin(leadingPhotonEt)-1; 
 
     double leadingPhotonEta = phoEta[leadingPhotonIndex];
-    int phoDecBinIndex = phoDecCode(ientry, leadingPhotonIndex);
+    int phoDecBinIndex = phoDecCode(leadingPhotonIndex);
 
     h_sieie[phoDecBinIndex+2] -> Fill(phoSigmaIEtaIEta[leadingPhotonIndex]);
     h_hovere[phoDecBinIndex+2]-> Fill(phoHoverE[leadingPhotonIndex]);
     h_pixel[phoDecBinIndex+2] -> Fill(phohasPixelSeed[leadingPhotonIndex]);
 
-    h_eciso[phoDecBinIndex+2] -> Fill(phoEcalIso(ientry,leadingPhotonIndex,false));
-    h_hciso[phoDecBinIndex+2] -> Fill(phoHcalIso(ientry,leadingPhotonIndex,false));
-    h_tkiso[phoDecBinIndex+2] -> Fill(phoTrkIso(ientry,leadingPhotonIndex,false));
+    h_eciso[phoDecBinIndex+2] -> Fill(phoEcalIso(leadingPhotonIndex,false));
+    h_hciso[phoDecBinIndex+2] -> Fill(phoHcalIso(leadingPhotonIndex,false));
+    h_tkiso[phoDecBinIndex+2] -> Fill(phoTrkIso(leadingPhotonIndex,false));
 
 
    // after pileup correction
-    h_eciso[phoDecBinIndex+4] -> Fill(phoEcalIso(ientry,leadingPhotonIndex,true));
-    h_hciso[phoDecBinIndex+4] -> Fill(phoHcalIso(ientry,leadingPhotonIndex,true));
-    h_tkiso[phoDecBinIndex+4] -> Fill(phoTrkIso(ientry,leadingPhotonIndex,true));
+    h_eciso[phoDecBinIndex+4] -> Fill(phoEcalIso(leadingPhotonIndex,true));
+    h_hciso[phoDecBinIndex+4] -> Fill(phoHcalIso(leadingPhotonIndex,true));
+    h_tkiso[phoDecBinIndex+4] -> Fill(phoTrkIso(leadingPhotonIndex,true));
 
 
     h_ptpho->Fill(leadingPhotonEt);
     h_etapho->Fill(leadingPhotonEta);
 
-    if(leadingPhotonIndex>0)nPass[10]++;
 
     // assign 4-vector of leading photon
     TLorentzVector l4_pho(0,0,0,0);
@@ -386,7 +400,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 			phoPhi[leadingPhotonIndex],
 		        phoE[leadingPhotonIndex]
 			);
-    
+
+
     //-------------------------------------------------------------------------
     // find the reco jet that has the highest matched gen jet pt
     //-------------------------------------------------------------------------
@@ -396,7 +411,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     
     for(int ijet=0; ijet < nJet; ijet++){
 
-      if(!isFidJet(ientry,ijet))continue;
+      if(!isFidJet(ijet))continue;
       if(jetGenJetIndex[ijet] < 1)continue;
       
       h_jetparton->Fill(jetGenPartonID[ijet]);
@@ -404,10 +419,10 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
       double thisGenJetPt = jetGenJetPt[ijet];
 
       if(thisGenJetPt > genJetMaxPt)
-	{
-	  genJetMaxPt = thisGenJetPt;
-	  leadingJetIndex= ijet;
-	}
+ 	{
+ 	  genJetMaxPt = thisGenJetPt;
+ 	  leadingJetIndex= ijet;
+ 	}
 
 
     } // end of loop over jets
@@ -415,6 +430,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     // need to have a leading photon and a leading jet
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
+    nPass[3]++;
+
 
     double leadingJetPt  = jetPt[leadingJetIndex];
     double leadingJetEta = jetEta[leadingJetIndex];
@@ -422,15 +439,9 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ptjet->Fill(leadingJetPt);
     h_etajet->Fill(leadingJetEta);
     h_leadingjetparton->Fill(jetGenPartonID[leadingJetIndex]);
- 
-    nPass[3]++;
-
-
-    if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))continue;
-    if(phoDecBinIndex < 0)continue;
-    for(int ipt=0; ipt < nPtBins; ipt++)nPass[phoPtBinIndex+4]++;
-
     
+    // assign 4-vector
+
     TLorentzVector l4_1stjet(0,0,0,0);
     l4_1stjet.SetPtEtaPhiE(
 			   jetPt[leadingJetIndex],
@@ -440,7 +451,11 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 			   );
 
 
+    if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))continue;
+    if(phoDecBinIndex < 0)continue;
+    nPass[phoPtBinIndex+4]++;
 
+    
     //-------------------------------------------------------------------------
     // Preselections                                    
     //-------------------------------------------------------------------------
@@ -534,25 +549,25 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     // checking the isolation behaviour as a function of nvertex
     pf_nvtx_eciso[phoDecBinIndex][0]->Fill(nVtxGood,
-					   phoEcalIso(ientry,leadingPhotonIndex,false));
+					   phoEcalIso(leadingPhotonIndex,false));
     pf_nvtx_hciso[phoDecBinIndex][0]->Fill(nVtxGood,
-					   phoHcalIso(ientry,leadingPhotonIndex,false));
+					   phoHcalIso(leadingPhotonIndex,false));
     pf_nvtx_tkiso[phoDecBinIndex][0]->Fill(nVtxGood,
-					   phoTrkIso(ientry,leadingPhotonIndex,false));
+					   phoTrkIso(leadingPhotonIndex,false));
 
     pf_nvtx_eciso[phoDecBinIndex][1]->Fill(nVtxGood,
-					   phoEcalIso(ientry,leadingPhotonIndex,true));
+					   phoEcalIso(leadingPhotonIndex,true));
     pf_nvtx_hciso[phoDecBinIndex][1]->Fill(nVtxGood,
-					   phoHcalIso(ientry,leadingPhotonIndex,true));
+					   phoHcalIso(leadingPhotonIndex,true));
     pf_nvtx_tkiso[phoDecBinIndex][1]->Fill(nVtxGood,
-					   phoTrkIso(ientry,leadingPhotonIndex,true));
+					   phoTrkIso(leadingPhotonIndex,true));
 
     // after applying cuts
 
     //=============================================================
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
-    if(!isGoodPho(ientry, leadingPhotonIndex, applyPileUpCorr))continue;
-    if(!isGoodLooseJet(ientry, leadingJetIndex))continue;
+    if(!isGoodPho(leadingPhotonIndex, applyPileUpCorr))continue;
+    if(!isGoodLooseJet(leadingJetIndex))continue;
     //=============================================================
 
     h_nvtx_eff[phoDecBinIndex][1]->Fill(nVtxGood);
@@ -616,12 +631,22 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   //---------------------------------------------------------------------------------------
      
   
-  std::string remword="/data4/syu/";
+  std::string remword  ="/data4/syu/7TeV_pythiaMC/";
+  std::string remword2 ="/data2/syu/7TeV_madgraphMC/";
 
-  size_t pos = _inputFileName.find(remword);
+  size_t pos  = _inputFileName.find(remword);
+  size_t pos2 = _inputFileName.find(remword2);
 
   if(pos!= std::string::npos)
     _inputFileName.swap(_inputFileName.erase(pos,remword.length()));
+
+  else if(pos2!= std::string::npos)
+    _inputFileName.swap(_inputFileName.erase(pos2,remword2.length()));
+
+  else
+    _inputFileName = "test.root";
+      
+
 
   if(applyPileUpCorr)_inputFileName = "pileCorr_" + _inputFileName;
   if(applyCOMCut)_inputFileName = "withCOMCut_" + _inputFileName ;
@@ -633,6 +658,12 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   h_ptjet->Write();
   h_etapho->Write();
   h_etajet->Write();
+
+//   h_recgenpt_jet -> Write();
+//   h_recgenpt_pho -> Write(); 
+//   h_dR_jet       -> Write(); 
+//   h_dR_pho       -> Write();
+
 
   for(int idec=0; idec<6; idec++){
 
@@ -694,7 +725,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
 }
 
-Int_t  gg_angularmc_eff::phoDecCode(Long64_t entry, Int_t ipho)
+Int_t  gg_angularmc_eff::phoDecCode(Int_t ipho)
 {
   double eta = phoSCEta[ipho];
   if(fabs(eta) < BARREL_MAXETA)return 0;
@@ -704,9 +735,9 @@ Int_t  gg_angularmc_eff::phoDecCode(Long64_t entry, Int_t ipho)
 
 }
 
-Bool_t gg_angularmc_eff::isFidPho (Long64_t entry, Int_t ipho)
+Bool_t gg_angularmc_eff::isFidPho (Int_t ipho)
 {
-  if(phoDecCode(entry,ipho)<0)return false;
+  if(phoDecCode(ipho)<0)return false;
   double et  = phoEt[ipho];  
   if(et < ptbound[0])return false;
   if(et > ptbound[nPtBins])return false;
@@ -715,17 +746,17 @@ Bool_t gg_angularmc_eff::isFidPho (Long64_t entry, Int_t ipho)
 
 
 
-Bool_t gg_angularmc_eff::isGoodPho(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Bool_t gg_angularmc_eff::isGoodPho(Int_t ipho, bool applyPileUpCorr)
 {
   double et  = phoEt[ipho];
 
-  if(!isFidPho(entry,ipho))return false;
+  if(!isFidPho(ipho))return false;
   if(phoHoverE[ipho] > 0.05)return false;
   if(phohasPixelSeed[ipho]==1)return false; // this should be saved as bool
 
-  double eciso = phoEcalIso(entry, ipho, applyPileUpCorr); 
-  double hciso = phoHcalIso(entry, ipho, applyPileUpCorr);
-  double tkiso = phoTrkIso(entry, ipho, applyPileUpCorr);
+  double eciso = phoEcalIso(ipho, applyPileUpCorr); 
+  double hciso = phoHcalIso(ipho, applyPileUpCorr);
+  double tkiso = phoTrkIso(ipho, applyPileUpCorr);
 
   if(eciso > 4.2 +0.006*et)return false;
   if(hciso > 2.2 +0.0025*et)return false;
@@ -734,24 +765,24 @@ Bool_t gg_angularmc_eff::isGoodPho(Long64_t entry, Int_t ipho, bool applyPileUpC
   return true;
 }
 
-Double_t  gg_angularmc_eff::phoEcalIso(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Double_t  gg_angularmc_eff::phoEcalIso(Int_t ipho, bool applyPileUpCorr)
 {
-  if(!isFidPho(entry,ipho))return -9999.0;
+  if(!isFidPho(ipho))return -9999.0;
 
   double eciso = phoEcalIsoDR04[ipho];
-  int decBinIndex = phoDecCode(entry,ipho);
+  int decBinIndex = phoDecCode(ipho);
 
   if(applyPileUpCorr)
     eciso -= aeff[decBinIndex][0]*rho25; 
   return eciso;
 }
  
-Double_t gg_angularmc_eff::phoHcalIso(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Double_t gg_angularmc_eff::phoHcalIso(Int_t ipho, bool applyPileUpCorr)
 {
-  if(!isFidPho(entry,ipho))return -9999.0;
+  if(!isFidPho(ipho))return -9999.0;
 
   double hciso = phoHcalIsoDR04[ipho];
-  int decBinIndex = phoDecCode(entry,ipho);
+  int decBinIndex = phoDecCode(ipho);
 
   if(applyPileUpCorr)
     hciso -= aeff[decBinIndex][1]*rho25; 
@@ -759,12 +790,12 @@ Double_t gg_angularmc_eff::phoHcalIso(Long64_t entry, Int_t ipho, bool applyPile
 
 }
 
-Double_t gg_angularmc_eff::phoTrkIso(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Double_t gg_angularmc_eff::phoTrkIso(Int_t ipho, bool applyPileUpCorr)
 {
-  if(!isFidPho(entry,ipho))return -9999.0;
+  if(!isFidPho(ipho))return -9999.0;
 
   double tkiso = phoTrkIsoHollowDR04[ipho];
-  int decBinIndex = phoDecCode(entry,ipho);
+  int decBinIndex = phoDecCode(ipho);
 
   if(applyPileUpCorr)
     tkiso -= aeff[decBinIndex][2]*rho25; 
@@ -773,7 +804,7 @@ Double_t gg_angularmc_eff::phoTrkIso(Long64_t entry, Int_t ipho, bool applyPileU
 }
 
 
-Bool_t gg_angularmc_eff::isFidJet (Long64_t entry, Int_t ijet)
+Bool_t gg_angularmc_eff::isFidJet (Int_t ijet)
 {
   if(fabs(jetEta[ijet]) > 2.4)return false;
   if(jetPt[ijet] < 30.0)return false;
@@ -781,7 +812,7 @@ Bool_t gg_angularmc_eff::isFidJet (Long64_t entry, Int_t ijet)
 }
 
 // check if this reco-jet is a good loose jet
-Bool_t gg_angularmc_eff::isGoodLooseJet(Long64_t entry, Int_t ijet)
+Bool_t gg_angularmc_eff::isGoodLooseJet(Int_t ijet)
 {
   if(fabs(jetEta[ijet]) > 2.4)return false;
   if(jetPt[ijet] < 30.0)return false;
@@ -800,7 +831,7 @@ Bool_t gg_angularmc_eff::isGoodLooseJet(Long64_t entry, Int_t ijet)
 
 
 // check if this reco-jet is a good medium jet
-Bool_t gg_angularmc_eff::isGoodMediumJet(Long64_t entry, Int_t ijet)
+Bool_t gg_angularmc_eff::isGoodMediumJet(Int_t ijet)
 {
   if(jetPt[ijet] < 10.0)return false;
   if(fabs(jetEta[ijet]) > 3.0)return false;
@@ -818,7 +849,7 @@ Bool_t gg_angularmc_eff::isGoodMediumJet(Long64_t entry, Int_t ijet)
 }
 
 // check if this reco-jet is a good medium jet
-Bool_t gg_angularmc_eff::isGoodTightJet(Long64_t entry, Int_t ijet)
+Bool_t gg_angularmc_eff::isGoodTightJet(Int_t ijet)
 {
   if(jetPt[ijet] < 10.0)return false;
   if(fabs(jetEta[ijet]) > 3.0)return false;
