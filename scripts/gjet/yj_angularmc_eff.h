@@ -317,17 +317,17 @@ public :
    virtual void     Loop(bool applyCOMCut=false, bool applyPileupCorr=true);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   virtual Int_t    phoDecCode(Long64_t entry, Int_t ipho);
-   virtual Bool_t   isGoodPho(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
-   virtual Double_t phoEcalIso(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
-   virtual Double_t phoHcalIso(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
-   virtual Double_t phoTrkIso(Long64_t entry, Int_t ipho, bool applyPileupCorr=false);
-   virtual Bool_t   isGoodLooseJet(Long64_t entry, Int_t ijet);
-   virtual Bool_t   isGoodMediumJet(Long64_t entry, Int_t ijet);
-   virtual Bool_t   isGoodTightJet(Long64_t entry, Int_t ijet);
-   virtual Bool_t   isFidJet (Long64_t entry, Int_t ijet);
-   virtual Bool_t   isFidPho (Long64_t entry, Int_t ipho);
-   virtual Int_t    matchedGenJet(Long64_t entry, Int_t ijet);
+   virtual Int_t    phoDecCode(Int_t ipho);
+   virtual Bool_t   isGoodPho(Int_t ipho, bool applyPileupCorr=false);
+   virtual Double_t phoEcalIso(Int_t ipho, bool applyPileupCorr=false);
+   virtual Double_t phoHcalIso(Int_t ipho, bool applyPileupCorr=false);
+   virtual Double_t phoTrkIso(Int_t ipho, bool applyPileupCorr=false);
+   virtual Bool_t   isGoodLooseJet(Int_t ijet);
+   virtual Bool_t   isGoodMediumJet(Int_t ijet);
+   virtual Bool_t   isGoodTightJet(Int_t ijet);
+   virtual Bool_t   isFidJet (Int_t ijet);
+   virtual Bool_t   isFidPho (Int_t ipho);
+   virtual Int_t    matchedGenJet(Int_t ijet);
    std::string _inputDirName;
 
 };
