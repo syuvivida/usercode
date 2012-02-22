@@ -6,6 +6,7 @@ namespace eiko {
   Bool_t separated(TLorentzVector l1, TLorentzVector l2);
   Double_t zgamma(TLorentzVector l1, TLorentzVector l2);
   Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2);
+  Double_t deltaR(double eta1, double phi1, double eta2, double phi2);
   Double_t cosThetaStar(TLorentzVector l1, TLorentzVector l2);
   Double_t cosThetaStar_BoostToCM(TLorentzVector l1, TLorentzVector l2);
   Double_t cosThetaStar_ZBoostToCM(TLorentzVector l1, TLorentzVector l2);
@@ -36,6 +37,18 @@ namespace eiko {
     Double_t result = fabs(l2.Pt())>1e-6? - (l1.Pt()/l2.Pt())*TMath::Cos(dphi) : -999.0;
 
     return result;
+  }
+
+  Double_t deltaR(double eta1, double phi1, double eta2, double phi2)
+  {
+    
+    Double_t deta = eta1-eta2;
+    double dphi = phi1-phi2;
+    while (dphi > TMath::Pi()) dphi -= 2*TMath::Pi();
+    while (dphi <= -TMath::Pi()) dphi += 2*TMath::Pi();
+    double dR = sqrt(deta*deta+dphi*dphi);
+    return dR;
+
   }
 
   Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2) { 
