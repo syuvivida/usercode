@@ -317,18 +317,18 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     for(unsigned int ipho=0; ipho < PhotonPt->size(); ipho++)
       {	
 
-	int decIndex = phoDecCode(ientry, ipho);
-	if(!isFidPho(ientry,ipho))continue;
+	int decIndex = phoDecCode(ipho);
+	if(!isFidPho(ipho))continue;
 
 	h_sieie[decIndex] -> Fill(PhotonSigmaIetaIeta->at(ipho));
-	h_eciso[decIndex] -> Fill(phoEcalIso(ientry,ipho,false));
-	h_hciso[decIndex] -> Fill(phoHcalIso(ientry,ipho,false));
-	h_tkiso[decIndex] -> Fill(phoTrkIso(ientry,ipho,false));
+	h_eciso[decIndex] -> Fill(phoEcalIso(ipho,false));
+	h_hciso[decIndex] -> Fill(phoHcalIso(ipho,false));
+	h_tkiso[decIndex] -> Fill(phoTrkIso(ipho,false));
 	h_hovere[decIndex]-> Fill(PhotonhadronicOverEm->at(ipho));
 	h_pixel[decIndex] -> Fill(PhotonhasPixelSeed->at(ipho));
 
 
-	if(!PhotonisGenMatched->at(ipho))continue;
+ 	if(!PhotonisGenMatched->at(ipho))continue;
 	
 	// 	cout << PhotongenMomId->size() << "\t" << PhotonPt->size() << endl;
 	// 	if(fabs(PhotongenMomId->at(ipho)-22)>1e-6)continue; // not prompt photon
@@ -350,21 +350,21 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     int phoPtBinIndex =  h_ptbin_template->GetXaxis()->FindBin(leadingPhotonEt)-1; 
 
     double leadingPhotonEta = PhotonEta->at(leadingPhotonIndex);
-    int phoDecBinIndex = phoDecCode(ientry, leadingPhotonIndex);
+    int phoDecBinIndex = phoDecCode(leadingPhotonIndex);
 
     h_sieie[phoDecBinIndex+2] -> Fill(PhotonSigmaIetaIeta->at(leadingPhotonIndex));
     h_hovere[phoDecBinIndex+2]-> Fill(PhotonhadronicOverEm->at(leadingPhotonIndex));
     h_pixel[phoDecBinIndex+2] -> Fill(PhotonhasPixelSeed->at(leadingPhotonIndex));
 
-    h_eciso[phoDecBinIndex+2] -> Fill(phoEcalIso(ientry,leadingPhotonIndex,false));
-    h_hciso[phoDecBinIndex+2] -> Fill(phoHcalIso(ientry,leadingPhotonIndex,false));
-    h_tkiso[phoDecBinIndex+2] -> Fill(phoTrkIso(ientry,leadingPhotonIndex,false));
+    h_eciso[phoDecBinIndex+2] -> Fill(phoEcalIso(leadingPhotonIndex,false));
+    h_hciso[phoDecBinIndex+2] -> Fill(phoHcalIso(leadingPhotonIndex,false));
+    h_tkiso[phoDecBinIndex+2] -> Fill(phoTrkIso(leadingPhotonIndex,false));
 
 
    // after pileup correction
-    h_eciso[phoDecBinIndex+4] -> Fill(phoEcalIso(ientry,leadingPhotonIndex,true));
-    h_hciso[phoDecBinIndex+4] -> Fill(phoHcalIso(ientry,leadingPhotonIndex,true));
-    h_tkiso[phoDecBinIndex+4] -> Fill(phoTrkIso(ientry,leadingPhotonIndex,true));
+    h_eciso[phoDecBinIndex+4] -> Fill(phoEcalIso(leadingPhotonIndex,true));
+    h_hciso[phoDecBinIndex+4] -> Fill(phoHcalIso(leadingPhotonIndex,true));
+    h_tkiso[phoDecBinIndex+4] -> Fill(phoTrkIso(leadingPhotonIndex,true));
 
 
     h_ptpho->Fill(leadingPhotonEt);
@@ -390,8 +390,8 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     
     for(int ijet=0; ijet < patJetPfAk05Pt_->size(); ijet++){
 
-      if(!isFidJet(ientry,ijet))continue;
-      int genJetIndex = matchedGenJet(ientry, ijet);
+      if(!isFidJet(ijet))continue;
+      int genJetIndex = matchedGenJet(ijet);
       if(genJetIndex < 0)continue;
 
 
@@ -528,25 +528,25 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     // checking the isolation behaviour as a function of nvertex
     pf_nvtx_eciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,
-					   phoEcalIso(ientry,leadingPhotonIndex,false));
+					   phoEcalIso(leadingPhotonIndex,false));
     pf_nvtx_hciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,
-					   phoHcalIso(ientry,leadingPhotonIndex,false));
+					   phoHcalIso(leadingPhotonIndex,false));
     pf_nvtx_tkiso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,
-					   phoTrkIso(ientry,leadingPhotonIndex,false));
+					   phoTrkIso(leadingPhotonIndex,false));
 
     pf_nvtx_eciso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,
-					   phoEcalIso(ientry,leadingPhotonIndex,true));
+					   phoEcalIso(leadingPhotonIndex,true));
     pf_nvtx_hciso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,
-					   phoHcalIso(ientry,leadingPhotonIndex,true));
+					   phoHcalIso(leadingPhotonIndex,true));
     pf_nvtx_tkiso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,
-					   phoTrkIso(ientry,leadingPhotonIndex,true));
+					   phoTrkIso(leadingPhotonIndex,true));
 
     // after applying cuts
 
     //=============================================================
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
-    if(!isGoodPho(ientry, leadingPhotonIndex, applyPileUpCorr))continue;
-    if(!isGoodLooseJet(ientry, leadingJetIndex))continue;
+    if(!isGoodPho(leadingPhotonIndex, applyPileUpCorr))continue;
+    if(!isGoodLooseJet(leadingJetIndex))continue;
     //=============================================================
 
     h_nvtx_eff[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood);
@@ -686,7 +686,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
 }
 
-Int_t  yj_angularmc_eff::phoDecCode(Long64_t entry, Int_t ipho)
+Int_t  yj_angularmc_eff::phoDecCode(Int_t ipho)
 {
   double eta = PhotonScEta->at(ipho);
   if(fabs(eta) < BARREL_MAXETA)return 0;
@@ -696,9 +696,9 @@ Int_t  yj_angularmc_eff::phoDecCode(Long64_t entry, Int_t ipho)
 
 }
 
-Bool_t yj_angularmc_eff::isFidPho (Long64_t entry, Int_t ipho)
+Bool_t yj_angularmc_eff::isFidPho (Int_t ipho)
 {
-  if(phoDecCode(entry,ipho)<0)return false;
+  if(phoDecCode(ipho)<0)return false;
   double et  = PhotonEt   ->at(ipho);  
   if(et < ptbound[0])return false;
   if(et > ptbound[nPtBins])return false;
@@ -707,17 +707,17 @@ Bool_t yj_angularmc_eff::isFidPho (Long64_t entry, Int_t ipho)
 
 
 
-Bool_t yj_angularmc_eff::isGoodPho(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Bool_t yj_angularmc_eff::isGoodPho(Int_t ipho, bool applyPileUpCorr)
 {
   double et  = PhotonEt   ->at(ipho);
 
-  if(!isFidPho(entry,ipho))return false;
+  if(!isFidPho(ipho))return false;
   if(PhotonhadronicOverEm->at(ipho) > 0.05)return false;
   if(PhotonhasPixelSeed->at(ipho)   > 1e-6)return false; // this should be saved as bool
 
-  double eciso = phoEcalIso(entry, ipho, applyPileUpCorr); 
-  double hciso = phoHcalIso(entry, ipho, applyPileUpCorr);
-  double tkiso = phoTrkIso(entry, ipho, applyPileUpCorr);
+  double eciso = phoEcalIso(ipho, applyPileUpCorr); 
+  double hciso = phoHcalIso(ipho, applyPileUpCorr);
+  double tkiso = phoTrkIso(ipho, applyPileUpCorr);
 
   if(eciso > 4.2 +0.006*et)return false;
   if(hciso > 2.2 +0.0025*et)return false;
@@ -726,24 +726,24 @@ Bool_t yj_angularmc_eff::isGoodPho(Long64_t entry, Int_t ipho, bool applyPileUpC
   return true;
 }
 
-Double_t  yj_angularmc_eff::phoEcalIso(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Double_t  yj_angularmc_eff::phoEcalIso(Int_t ipho, bool applyPileUpCorr)
 {
-  if(!isFidPho(entry,ipho))return -9999.0;
+  if(!isFidPho(ipho))return -9999.0;
 
   double eciso = PhotonecalRecHitSumEtConeDR04->at(ipho);
-  int decBinIndex = phoDecCode(entry,ipho);
+  int decBinIndex = phoDecCode(ipho);
 
   if(applyPileUpCorr)
     eciso -= aeff[decBinIndex][0]*Photonrho25; 
   return eciso;
 }
  
-Double_t yj_angularmc_eff::phoHcalIso(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Double_t yj_angularmc_eff::phoHcalIso(Int_t ipho, bool applyPileUpCorr)
 {
-  if(!isFidPho(entry,ipho))return -9999.0;
+  if(!isFidPho(ipho))return -9999.0;
 
   double hciso = PhotonhcalTowerSumEtConeDR04->at(ipho);
-  int decBinIndex = phoDecCode(entry,ipho);
+  int decBinIndex = phoDecCode(ipho);
 
   if(applyPileUpCorr)
     hciso -= aeff[decBinIndex][1]*Photonrho25; 
@@ -751,12 +751,12 @@ Double_t yj_angularmc_eff::phoHcalIso(Long64_t entry, Int_t ipho, bool applyPile
 
 }
 
-Double_t yj_angularmc_eff::phoTrkIso(Long64_t entry, Int_t ipho, bool applyPileUpCorr)
+Double_t yj_angularmc_eff::phoTrkIso(Int_t ipho, bool applyPileUpCorr)
 {
-  if(!isFidPho(entry,ipho))return -9999.0;
+  if(!isFidPho(ipho))return -9999.0;
 
   double tkiso = PhotontrkSumPtHollowConeDR04->at(ipho);
-  int decBinIndex = phoDecCode(entry,ipho);
+  int decBinIndex = phoDecCode(ipho);
 
   if(applyPileUpCorr)
     tkiso -= aeff[decBinIndex][2]*Photonrho25; 
@@ -765,7 +765,7 @@ Double_t yj_angularmc_eff::phoTrkIso(Long64_t entry, Int_t ipho, bool applyPileU
 }
 
 
-Bool_t yj_angularmc_eff::isFidJet (Long64_t entry, Int_t ijet)
+Bool_t yj_angularmc_eff::isFidJet (Int_t ijet)
 {
   if(fabs(patJetPfAk05Eta_->at(ijet)) > 2.4)return false;
   if(patJetPfAk05Pt_->at(ijet) < 30.0)return false;
@@ -774,9 +774,9 @@ Bool_t yj_angularmc_eff::isFidJet (Long64_t entry, Int_t ijet)
 
 
 // check if this reco-jet is a good loose jet
-Bool_t yj_angularmc_eff::isGoodLooseJet(Long64_t entry, Int_t ijet)
+Bool_t yj_angularmc_eff::isGoodLooseJet(Int_t ijet)
 {
-  if(!isFidJet(entry,ijet))return false;
+  if(!isFidJet(ijet))return false;
   if(patJetPfAk05JetNConstituents_->at(ijet) <= 1)return false;
   if(patJetPfAk05NeutHadEFr_->at(ijet) >= 0.99)return false;
   if(patJetPfAk05NeutEmEFr_->at(ijet) >= 0.99)return false;
@@ -792,7 +792,7 @@ Bool_t yj_angularmc_eff::isGoodLooseJet(Long64_t entry, Int_t ijet)
 
 
 // check if this reco-jet is a good medium jet
-Bool_t yj_angularmc_eff::isGoodMediumJet(Long64_t entry, Int_t ijet)
+Bool_t yj_angularmc_eff::isGoodMediumJet(Int_t ijet)
 {
   if(patJetPfAk05Pt_->at(ijet) < 10.0)return false;
   if(fabs(patJetPfAk05Eta_->at(ijet)) > 3.0)return false;
@@ -811,7 +811,7 @@ Bool_t yj_angularmc_eff::isGoodMediumJet(Long64_t entry, Int_t ijet)
 }
 
 // check if this reco-jet is a good medium jet
-Bool_t yj_angularmc_eff::isGoodTightJet(Long64_t entry, Int_t ijet)
+Bool_t yj_angularmc_eff::isGoodTightJet(Int_t ijet)
 {
   if(patJetPfAk05Pt_->at(ijet) < 10.0)return false;
   if(fabs(patJetPfAk05Eta_->at(ijet)) > 3.0)return false;
@@ -830,19 +830,15 @@ Bool_t yj_angularmc_eff::isGoodTightJet(Long64_t entry, Int_t ijet)
 }
 
 
-Int_t  yj_angularmc_eff::matchedGenJet(Long64_t entry, Int_t ijet)
+Int_t  yj_angularmc_eff::matchedGenJet(Int_t ijet)
 {
   
   int matchedGenIndex = -1;
   for(int k=0; k< genJetPt_->size(); k++)
     {
 
-      double deta = genJetEta_->at(k)-patJetPfAk05Eta_->at(ijet);
-      double dphi = genJetPhi_->at(k)-patJetPfAk05Phi_->at(ijet);      
-      while (dphi > TMath::Pi()) dphi -= 2*TMath::Pi();
-      while (dphi <= -TMath::Pi()) dphi += 2*TMath::Pi();
-
-      double dR = sqrt(deta*deta+dphi*dphi);
+      double dR = eiko::deltaR(genJetEta_->at(k),genJetPhi_->at(k),
+			       patJetPfAk05Eta_->at(ijet),patJetPfAk05Phi_->at(ijet)); 
 
       double relPt = genJetPt_->at(k)>1e-6? 
 	fabs(genJetPt_->at(k)-patJetPfAk05Pt_->at(ijet))/genJetPt_->at(k): -9999.0;
