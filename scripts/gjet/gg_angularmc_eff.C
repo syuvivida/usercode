@@ -34,9 +34,10 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   const double pstarMin = ptbound[0]       *TMath::CosH(ystarMax);
   const double pstarMax = ptbound[nPtBins];
   
-  cout << "ystar range: |y*| < " << ystarMax << endl;
-  cout << "pstar range: " << pstarMin << " < p* < " << pstarMax << " GeV" << endl;
-
+  if(applyCOMCut){
+    cout << "ystar range: |y*| < " << ystarMax << endl;
+    cout << "pstar range: " << pstarMin << " < p* < " << pstarMax << " GeV" << endl;
+  }
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -53,6 +54,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   TH1I* h_jetparton   = new TH1I("h_jetparton","",150,-99.5,50.5);
   TH1I* h_leadingjetparton   = new TH1I("h_leadingjetparton","",150,-99.5,50.5);
+  TH1I* h_njet_template = new TH1I("h_njet_template","",50,-0.5,49.5);
 
   TH1D* h_eta_template = new TH1D("h_eta_template","",100,-5.0,5.0);
   TH1D* h_etapho      = (TH1D*)h_eta_template->Clone("h_etapho");
@@ -111,6 +113,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_jetpt_eff[2];
   TH1D* h_jeteta_eff[2];
 
+  TH1I* h_njet[2][2];                  // in EB and EE, before and after pileupcorr
   TProfile* pf_nvtx_eciso[2][2];       // in EB and EE, before and after pileupcorr
   TProfile* pf_nvtx_hciso[2][2];       // in EB and EE, before and after pileupcorr
   TProfile* pf_nvtx_tkiso[2][2];       // in EB and EE, before and after pileupcorr
@@ -203,6 +206,9 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h2_ystar_pstar[idec] = (TH2D*)h2_ystar_pstar_template->Clone(Form("h2_ystar_pstar_%s",decName[idec]));
 
     for(int ip=0; ip<2; ip++){
+
+      h_njet[idec][ip] = (TH1I*)h_njet_template->Clone(Form("h_njet_%s_%d",decName[idec],ip));
+
       pf_nvtx_eciso[idec][ip] = (TProfile*)pf_nvtx_eciso_template->Clone
 	(Form("pf_nvtx_eciso_%s_%s",decName[idec],puName[ip]));
       
@@ -409,12 +415,14 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     Int_t leadingJetIndex=-1;
     double genJetMaxPt=-9999.;
-    
+    int nGoodJet=0;
+     
     for(int ijet=0; ijet < nJet; ijet++){
 
       if(!isFidJet(ijet))continue;
       if(jetGenJetIndex[ijet] < 1)continue;
       
+      nGoodJet++;
       h_jetparton->Fill(jetGenPartonID[ijet]);
       
       double thisGenJetPt = jetGenJetPt[ijet];
@@ -506,6 +514,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_jetpt_eff[0]->Fill(leadingJetPt);
     h_jeteta_eff[0]->Fill(leadingJetEta);
 
+    h_njet[phoDecBinIndex][0]->Fill(nGoodJet);
+
     h_ptratio[phoDecBinIndex][0]->Fill(ptRatio);
 
     h_zgamma[phoDecBinIndex][phoPtBinIndex][0]->Fill(gj_zgamma);
@@ -578,6 +588,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     h_jetpt_eff[1]->Fill(leadingJetPt);
     h_jeteta_eff[1]->Fill(leadingJetEta);
+
+    h_njet[phoDecBinIndex][1]->Fill(nGoodJet);
 
     h_ptratio[phoDecBinIndex][1]->Fill(ptRatio);
 
@@ -694,6 +706,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h2_ystar_pstar[idec]->Write();
 
     for(int ip=0; ip<2; ip++){
+      h_njet[idec][ip]->Write();
       pf_nvtx_eciso[idec][ip]->Write();
       pf_nvtx_hciso[idec][ip]->Write();
       pf_nvtx_tkiso[idec][ip]->Write();
