@@ -25,7 +25,7 @@ struct MCFile{
 
 
 void combineMC_spectrum(std::string histoName, std::string xtitle, 
-			std::string inputFile="inputFile.txt",  
+			std::string inputFile="inputFile.txt", bool update=false,
 			int rebin=1, double xmin=-9999.0, double xmax=-9999.0)
 {
   
@@ -69,7 +69,7 @@ void combineMC_spectrum(std::string histoName, std::string xtitle,
       
   }	 
 	
-  const int nfiles = myMCFiles.size();
+  const unsigned int nfiles = myMCFiles.size();
    
   cout << "Reading " << nfiles << " files" << endl;
 
@@ -95,7 +95,7 @@ void combineMC_spectrum(std::string histoName, std::string xtitle,
   TH1D* h_template = (TH1D*)(f1->Get(Form("%s",histoName.data())));
   h_template->Reset();
 
-  h_all = (TH1D*)h_template->Clone("h_all");
+  h_all = (TH1D*)h_template->Clone(Form("%s_all",histoName.data()));
 
   h_all -> Reset();
 
@@ -143,6 +143,20 @@ void combineMC_spectrum(std::string histoName, std::string xtitle,
     h_deno[ifile]->Draw("hist,same");
   }
   
+  std::string remword  =".txt";
+  size_t pos  = inputFile.find(remword);
+
+  if(pos!= std::string::npos)
+    inputFile.swap(inputFile.erase(pos,remword.length()));
+
+  std::string command = "recreate";
+
+  if(update)command ="update";
+
+  TFile* outFile = new TFile(Form("/home/syu/CVSCode/combined_%s.root",inputFile.data()),command.data());               
+  h_all->Write();
+
+  outFile->Close();     
 
 
 }
