@@ -123,7 +123,7 @@ void displayTwofiles(std::string file1, std::string file2,
   float y2NDC = 0.915;
 
   if(var1.find("eta")!= std::string::npos || 
-     var1.find("sieie")!= std::string::npos )
+     var1.find("h_sieie_leadingEB")!= std::string::npos )
      
     {
       x1NDC = 0.333;
