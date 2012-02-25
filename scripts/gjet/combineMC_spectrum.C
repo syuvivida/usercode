@@ -24,7 +24,9 @@ struct MCFile{
 };
 
 
-void combineMC_spectrum(std::string histoName, std::string xtitle, int rebin=1, double xmin=-9999.0, double xmax=-9999.0)
+void combineMC_spectrum(std::string histoName, std::string xtitle, 
+			std::string inputFile="inputFile.txt",  
+			int rebin=1, double xmin=-9999.0, double xmax=-9999.0)
 {
   
   //-------------------------------------------------------------------------------
@@ -35,7 +37,7 @@ void combineMC_spectrum(std::string histoName, std::string xtitle, int rebin=1, 
   std::vector<MCFile> myMCFiles;
 
   double lumi = 1.0;
-  FILE *fTable = fopen("inputFile.txt","r");
+  FILE *fTable = fopen(inputFile.data(),"r");
    
   int flag=1;   
   while (flag!=-1){
@@ -131,7 +133,7 @@ void combineMC_spectrum(std::string histoName, std::string xtitle, int rebin=1, 
   } // end of loop over files
 
   
-  TCanvas* c1 = new TCanvas("c1","After combining all MC samples",500,500);
+  TCanvas* c1 = new TCanvas("c1",inputFile.data(),500,500);
   h_all->SetMarkerSize(1);
   h_all->SetMarkerStyle(24);
   h_all->Draw("e");
