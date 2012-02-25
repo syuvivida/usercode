@@ -117,7 +117,23 @@ void displayTwofiles(std::string file1, std::string file2,
   cout << "KS test prob 1 = " << kstestProb1 << endl;
   cout << "KS test prob 2 = " << kstestProb2 << endl;
 
-  TLegend* leg = new TLegend(0.415,0.701,0.617,0.915);
+  float x1NDC = 0.415;
+  float y1NDC = 0.701;
+  float x2NDC = 0.617;
+  float y2NDC = 0.915;
+
+  if(var1.find("eta")!= std::string::npos || 
+     var1.find("sieie")!= std::string::npos )
+     
+    {
+      x1NDC = 0.333;
+      y1NDC = 0.182;
+      x2NDC = 0.536;
+      y2NDC = 0.396;
+    }
+
+  TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
+  
 //   leg->SetHeader(Form("#chi^{2}/NDF=%.1f/%d"
 // 		      ,chi2,nbins));
   leg->SetHeader(Form("#chi^{2} Prob=%.2f"
@@ -161,6 +177,8 @@ void displayTwofiles(std::string file1, std::string file2,
 
   std::string filename;
   std::string psname = "compareMC/" + var1;
+  if(output.data()!="")
+    psname = "compareMC/"+ output;
   filename = psname + ".eps";
   c1->Print(filename.data());
   filename = psname + ".gif";
