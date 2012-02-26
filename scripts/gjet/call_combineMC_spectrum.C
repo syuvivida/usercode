@@ -100,11 +100,66 @@ void call_combineMC_spectrum(std::string fileName)
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_ystar_COMZ_EE_allpt_0\",\"Endcap y^{*}\",\"%s\",true)", fileName.data()));
 
-//   gROOT->ProcessLine(Form(
-// "combineMC_spectrum(\"h_njet_EB_0\",\"Jet multiplicity with barrel photon\",\"%s\",true)", fileName.data()));
 
-//   gROOT->ProcessLine(Form(
-// "combineMC_spectrum(\"h_njet_EE_0\",\"Jet multiplicity with endcap photon\",\"%s\",true)", fileName.data()));
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_njetraw_EB\",\"Jet multiplicity with barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_njetraw_EE\",\"Jet multiplicity with endcap photon\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_ptclosestjet_EB\",\"p_{T} of the closest jet to barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_ptclosestjet_EE\",\"p_{T} of the closest jet to endcap photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_etaclosestjet_EB\",\"#eta of the closest jet to barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_etaclosestjet_EE\",\"#eta of the closest jet to endcap photon\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_dRclosestjet_EB\",\"#Delta R of the closest jet to barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_dRclosestjet_EE\",\"#Delta R of the closest jet to endcap photon\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_alljetpt_eff_EB_0\",\"p_{T}(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_alljetpt_eff_EE_0\",\"p_{T}(jet^{all}) with endcap photon\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_alljeteta_eff_EB_0\",\"#eta(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_alljeteta_eff_EE_0\",\"#eta(jet^{all}) with endcap photon\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_cost_COMZ_alljet_EB_0\",\"Barrel cos#theta^{*} using all jets\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_pstar_COMZ_alljet_EB_0\",\"Barrel p^{*} using all jets [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_ystar_COMZ_alljet_EB_0\",\"Barrel y^{*} using all jets\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_cost_COMZ_alljet_EE_0\",\"Endcap cos#theta^{*} using all jets\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_pstar_COMZ_alljet_EE_0\",\"Endcap p^{*} using all jets [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_ystar_COMZ_alljet_EE_0\",\"Endcap y^{*} using all jets\",\"%s\",true)", fileName.data()));
 
 
   myWatch->Stop();
