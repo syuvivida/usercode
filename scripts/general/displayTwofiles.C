@@ -4,8 +4,9 @@
 void displayTwofiles(std::string file1, std::string file2, 
  		     std::string var1, std::string var2="",
 		     float xmin=-9999.0, float xmax=-9999.0,
-		     //  		     std::string xtitle="", std::string ytitle="",
-		     std::string output="test", bool logScale=false, bool reBin=false)
+		     //  		     std::string xtitle="", std::string ytitle="",		     
+		     bool logScale=false, bool reBin=false, 
+		     std::string output="test")
 {
   if(var2 ==  "" )var2=var1;
   
@@ -177,7 +178,7 @@ void displayTwofiles(std::string file1, std::string file2,
 
   std::string filename;
   std::string psname = "compareMC/" + var1;
-  if(output.data()!="")
+  if(output !="test")
     psname = "compareMC/"+ output;
   filename = psname + ".eps";
   c1->Print(filename.data());
@@ -185,5 +186,6 @@ void displayTwofiles(std::string file1, std::string file2,
   c1->Print(filename.data());
   filename = psname + ".pdf";
   c1->Print(filename.data());
+//   c1->Close();
 }
 		     
