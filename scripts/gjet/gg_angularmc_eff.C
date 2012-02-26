@@ -9,7 +9,8 @@
 
 const double BARREL_MAXETA=1.44;
 const double ENDCAP_MINETA=1.57;
-const double ENDCAP_MAXETA=2.5;
+//const double ENDCAP_MAXETA=2.5;
+const double ENDCAP_MAXETA=2.3;
 const int nDECs = 2;
 
 double ptbound[]={85., 95., 110., 130., 160., 200.};
