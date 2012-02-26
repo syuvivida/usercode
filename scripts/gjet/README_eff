@@ -1,0 +1,19 @@
+1)
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data4/syu/7TeV_pythiaMC/new_TreeMC_G_Pt-80to120.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data4/syu/7TeV_pythiaMC/new_TreeMC_G_Pt-120to170.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data4/syu/7TeV_pythiaMC/new_TreeMC_G_Pt-170to300.root\"\) >&! Log < /dev/null&
+
+2) 
+edit input.txt
+
+3)
+root -q -b call_combineMC_eff.C
+
+Then, two directories are produced:
+ effDataFiles with numbers and effHistos with figures
+
+
+
+

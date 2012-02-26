@@ -1,0 +1,30 @@
+1)
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data4/syu/7TeV_pythiaMC/new_TreeMC_G_Pt-80to120.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data4/syu/7TeV_pythiaMC/new_TreeMC_G_Pt-120to170.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data4/syu/7TeV_pythiaMC/new_TreeMC_G_Pt-170to300.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data2/syu/7TeV_madgraphMC/gg_GJets_TuneZ2_40_HT_100_7TeV-madgraph.root\"\) >&! Log2 < /dev/null &
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data2/syu/7TeV_madgraphMC/gg_GJets_TuneZ2_100_HT_200_7TeV-madgraph.root\"\) >&! Log2 < /dev/null &
+
+root -q -b runLoop.C\(\"gg_angularmc_eff\",\"/data2/syu/7TeV_madgraphMC/gg_GJets_TuneZ2_200_HT_inf_7TeV-madgraph.root\"\) >&! Log2 < /dev/null &
+
+2) 
+edit madgraph.txt and pythia.txt
+ This tells which MC samples to combine
+
+3) combine MC spectrum
+root -q -b call_combineMC_spectrum.C\(\"madgraph.txt\"\)
+root -q -b call_combineMC_spectrum.C\(\"pythia.txt\"\)
+
+If I am adding histograms, need to update call_combineMC_spectrum.C
+
+3) display two histograms
+
+root -q -b call_displayTwofiles.C
+
+
+
+
