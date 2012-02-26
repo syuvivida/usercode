@@ -12,8 +12,8 @@ const double ENDCAP_MINETA=1.57;
 const double ENDCAP_MAXETA=2.5;
 const int nDECs = 2;
 
-//double ptbound[]={85., 95., 110., 130., 160., 200.};
-double ptbound[]={40., 45., 50., 55., 60., 65., 70., 75., 85., 95., 110., 130., 160., 200.};
+double ptbound[]={85., 95., 110., 130., 160., 200.};
+// double ptbound[]={40., 45., 50., 55., 60., 65., 70., 75., 85., 95., 110., 130., 160., 200.};
 const int nPtBins = sizeof(ptbound)/sizeof(ptbound[0])-1;
 
 // effective area for correcting pileup, ECAL/HCAL/Tracker from EWK-11-251
@@ -43,25 +43,19 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   Long64_t nentries = fChain->GetEntriesFast();
   cout << "There are " << nentries << " entries" << endl;
 
+  // defining templates of various histograms
 
   TH2D* h2_ystar_pstar_template = new TH2D("h2_ystar_pstar_template","",100.0,-5.0,5.0,500,0,500);
 
 
   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500);
-  TH1D* h_pthat       = (TH1D*)h_pt_template->Clone("h_pthat");
-  TH1D* h_ptpho       = (TH1D*)h_pt_template->Clone("h_ptpho");
-  TH1D* h_ptjet       = (TH1D*)h_pt_template->Clone("h_ptjet");
 
-  TH1I* h_jetparton   = new TH1I("h_jetparton","",150,-99.5,50.5);
-  TH1I* h_leadingjetparton   = new TH1I("h_leadingjetparton","",150,-99.5,50.5);
   TH1I* h_njet_template = new TH1I("h_njet_template","",50,-0.5,49.5);
 
   TH1D* h_eta_template = new TH1D("h_eta_template","",100,-5.0,5.0);
-  TH1D* h_etapho      = (TH1D*)h_eta_template->Clone("h_etapho");
-  TH1D* h_etajet      = (TH1D*)h_eta_template->Clone("h_etajet");
 
   TH1D* h_ptbin_template= new TH1D("h_ptbin_template","", nPtBins, ptbound);
-  
+
   TH1D* h_ptratio_template = new TH1D("h_ptratio_template","",600,0.0,3.0);
 
   TH1D* h_dR_template = new TH1D("h_dR_template","",200,0.0,2.0);
@@ -107,21 +101,44 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   TH1D* h_pixel_template = new TH1D("h_pixel_template","", 3, -0.5,2.5);
 
+  // now declare the necessary histograms
+
+  TH1D* h_sieie[6];
+  TH1D* h_eciso[6];
+  TH1D* h_hciso[6];
+  TH1D* h_tkiso[6];
+  TH1D* h_hovere[6];
+  TH1D* h_pixel[6];
+
+  TH1D* h_recgenpt_jet;
+  TH1D* h_dR_jet;
+  TH1D* h_recgenpt_pho;
+  TH1D* h_dR_pho;
+  TH1D* h_dR_gj;
+
 
   TH2D* h2_ystar_pstar[2]; // in EB and EE
 
   TH1D* h_jetpt_eff[2];
   TH1D* h_jeteta_eff[2];
 
-  TH1I* h_njet[2][2];                  // in EB and EE, before and after pileupcorr
+  TH1I* h_njet[2][2];                  // in EB and EE, before and after ID selections
+  TH1I* h_njetraw[2];                  // jet multiplicity before perselections in barrel and endcap
+  TH1D* h_ptclosestjet[2];             // pt of the closest jet in deltaR to the leading photon in barrel and endcap
+  TH1D* h_etaclosestjet[2];            // eta of the closest jet in deltaR to the leading photon in barrel and endcap
+  TH1D* h_dRclosestjet[2];             // deltaR of the closest jet in deltaR to the leading photon in barrel and endcap
+
+
   TProfile* pf_nvtx_eciso[2][2];       // in EB and EE, before and after pileupcorr
   TProfile* pf_nvtx_hciso[2][2];       // in EB and EE, before and after pileupcorr
   TProfile* pf_nvtx_tkiso[2][2];       // in EB and EE, before and after pileupcorr
 
   TH1D* h_pt_eff[nDECs][2];        // in EB and EE
-  TH1D* h_nvtx_eff[nDECs][2];        // in EB and EE
   TH1D* h_eta_eff[nPtBins+1][2]; // in various pt bins
+  TH1D* h_nvtx_eff[nDECs][2];        // in EB and EE
   TH1D* h_ptratio[nDECs][2];
+
+  // angular and COM distributions
   TH1D* h_zgamma[nDECs][nPtBins+1][2];
   TH1D* h_dphi[nDECs][nPtBins+1][2];
   TH1D* h_cost[nDECs][nPtBins+1][2]; // tanH(0.5(y1-y2))
@@ -137,28 +154,35 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_ystar_COMZ[nDECs][nPtBins+1][2]; // boost to the COM using the z-momentum
 
 
+  // histograms for photon and the vector sum of all good jets
+  TH1D* h_alljetpt_eff[nDECs][2];   // in EB and EE before and after the selections
+  TH1D* h_alljeteta_eff[nDECs][2];
+  TH1D* h_cost_COMZ_alljet[nDECs][2]; 
+  TH1D* h_pstar_COMZ_alljet[nDECs][2];
+  TH1D* h_ystar_COMZ_alljet[nDECs][2];
+
+
   // creating histograms
   char* decName[6]={"EB","EE","leadingEB","leadingEE",
 		    "leadingEBPileupCorr","leadingEEPileupCorr"};
   char* puName[2]={"raw","pucorr"};
 
   // debugging histograms
-  TH1D* h_sieie[6];
-  TH1D* h_eciso[6];
-  TH1D* h_hciso[6];
-  TH1D* h_tkiso[6];
-  TH1D* h_hovere[6];
-  TH1D* h_pixel[6];
+  TH1D* h_pthat       = (TH1D*)h_pt_template->Clone("h_pthat");
 
-  TH1D* h_recgenpt_jet;
-  TH1D* h_dR_jet;
-  TH1D* h_recgenpt_pho;
-  TH1D* h_dR_pho;
+  TH1D* h_ptpho       = (TH1D*)h_pt_template->Clone("h_ptpho");
+  TH1D* h_ptjet       = (TH1D*)h_pt_template->Clone("h_ptjet");
+  TH1D* h_etapho      = (TH1D*)h_eta_template->Clone("h_etapho");
+  TH1D* h_etajet      = (TH1D*)h_eta_template->Clone("h_etajet");
+
+  TH1I* h_jetparton   = new TH1I("h_jetparton","",150,-99.5,50.5);
+  TH1I* h_leadingjetparton   = new TH1I("h_leadingjetparton","",150,-99.5,50.5);
 
   h_recgenpt_jet = (TH1D*)h_ptratio_template->Clone("h_recgenpt_jet");
   h_recgenpt_pho = (TH1D*)h_ptratio_template->Clone("h_recgenpt_pho");
   h_dR_jet       = (TH1D*)h_dR_template->Clone("h_dR_jet");
   h_dR_pho       = (TH1D*)h_dR_template->Clone("h_dR_pho");
+  h_dR_gj        = (TH1D*)h_dR_template->Clone("h_dR_gj");
   
 
   for(int idec=0; idec<6; idec++)
@@ -205,7 +229,20 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     h2_ystar_pstar[idec] = (TH2D*)h2_ystar_pstar_template->Clone(Form("h2_ystar_pstar_%s",decName[idec]));
 
+    h_ptclosestjet[idec]  = (TH1D*)h_pt_template->Clone(Form("h_ptclosestjet_%s",decName[idec]));
+    h_etaclosestjet[idec] = (TH1D*)h_eta_template->Clone(Form("h_etaclosestjet_%s",decName[idec])); 
+    h_dRclosestjet[idec]  = (TH1D*)h_dR_template->Clone(Form("h_dRclosestjet_%s",decName[idec])); 
+
+    h_njetraw[idec] = (TH1I*)h_njet_template->Clone(Form("h_njetraw_%s",decName[idec]));
+
     for(int ip=0; ip<2; ip++){
+
+      h_alljetpt_eff[idec][ip] = (TH1D*)h_pt_template->Clone(Form("h_alljetpt_eff_%s_%d",decName[idec],ip));
+      h_alljeteta_eff[idec][ip] = (TH1D*)h_eta_template->Clone(Form("h_alljeteta_eff_%s_%d",decName[idec],ip));
+      h_cost_COMZ_alljet[idec][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_COMZ_alljet_%s_%d",decName[idec],ip));
+      h_pstar_COMZ_alljet[idec][ip] = (TH1D*)h_pstar_template->Clone(Form("h_pstar_COMZ_alljet_%s_%d",decName[idec],ip));
+      h_ystar_COMZ_alljet[idec][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COMZ_alljet_%s_%d",decName[idec],ip));
+
 
       h_njet[idec][ip] = (TH1I*)h_njet_template->Clone(Form("h_njet_%s_%d",decName[idec],ip));
 
@@ -317,7 +354,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-//     if(jentry > 50000 ) break;
+    if(jentry > 50000 ) break;
     nPass[0]++;
     h_pthat->Fill(pthat); // make sure we are checking the right MC samples
 
@@ -416,17 +453,50 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     Int_t leadingJetIndex=-1;
     double genJetMaxPt=-9999.;
     int nGoodJet=0;
+    double closestPt = -9999.;
+    double closestEta = -9999.;
+    double closestdR = 9999.;
      
+    TLorentzVector l4_alljet(0,0,0,0);
+
     for(int ijet=0; ijet < nJet; ijet++){
 
       if(!isFidJet(ijet))continue;
       if(jetGenJetIndex[ijet] < 1)continue;
+
+      TLorentzVector l4_thisjet(0,0,0,0);
+
+      l4_thisjet.SetPtEtaPhiE(
+			      jetPt[ijet],
+			      jetEta[ijet],
+			      jetPhi[ijet],
+			      jetEn[ijet]
+			      );
+
+      double thisdR = l4_thisjet.DeltaR(l4_pho);
+      h_dR_gj->Fill(thisdR);
+      if(thisdR < 0.5)continue; // remove the overlap between photon and jet
+
+
+      l4_alljet += l4_thisjet;
+
       
       nGoodJet++;
       h_jetparton->Fill(jetGenPartonID[ijet]);
       
       double thisGenJetPt = jetGenJetPt[ijet];
+      // study the properties of the closest jet
 
+      if(thisdR < closestdR)
+	{
+	  closestPt  = jetPt[ijet];
+	  closestEta = jetEta[ijet];
+	  closestdR  = thisdR;
+	}
+
+
+
+      // check which matched recojet has the highest genjet pt
       if(thisGenJetPt > genJetMaxPt)
  	{
  	  genJetMaxPt = thisGenJetPt;
@@ -436,6 +506,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     } // end of loop over jets
 
+    h_njetraw[phoDecBinIndex]->Fill(nGoodJet);
 
     // need to have a leading photon and a leading jet
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
@@ -448,6 +519,11 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ptjet->Fill(leadingJetPt);
     h_etajet->Fill(leadingJetEta);
     h_leadingjetparton->Fill(jetGenPartonID[leadingJetIndex]);
+
+    h_ptclosestjet[phoDecBinIndex]->Fill(closestPt);
+    h_etaclosestjet[phoDecBinIndex]->Fill(closestEta);
+    h_dRclosestjet[phoDecBinIndex]->Fill(closestdR);
+
     
     // assign 4-vector
 
@@ -460,17 +536,15 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 			   );
 
 
+    //-------------------------------------------------------------------------
+    // Preselections                                    
+    //-------------------------------------------------------------------------
+
     if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))continue;
     if(phoDecBinIndex < 0)continue;
     nPass[phoPtBinIndex+4]++;
 
     
-    //-------------------------------------------------------------------------
-    // Preselections                                    
-    //-------------------------------------------------------------------------
-    
-    if(!eiko::separated(l4_pho, l4_1stjet))continue;
-
     double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
     double gj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_1stjet);
 
@@ -504,6 +578,11 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     double gj_ystar_com3D = eiko::ystar_BoostToCM(l4_pho, l4_1stjet);
 
     double ptRatio   = leadingJetPt/leadingPhotonEt;
+
+    double allgj_cost_comZ = eiko::cosThetaStar_ZBoostToCM(l4_pho, l4_alljet);
+    double allgj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_alljet);
+    double allgj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_alljet);
+
     // before applying cuts
 
     h_nvtx_eff[phoDecBinIndex][0]->Fill(nVtxGood);
@@ -557,6 +636,13 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ystar_COM3D[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar_com3D);
     h_ystar_COMZ[phoDecBinIndex][nPtBins][0]->Fill(gj_ystar_comZ);
 
+    // lumping all jets together
+    h_alljetpt_eff[phoDecBinIndex][0]->Fill(l4_alljet.Pt());
+    h_alljeteta_eff[phoDecBinIndex][0]->Fill(l4_alljet.Eta());
+    h_cost_COMZ_alljet[phoDecBinIndex][0]->Fill(allgj_cost_comZ);
+    h_pstar_COMZ_alljet[phoDecBinIndex][0]->Fill(allgj_pstar_comZ);
+    h_ystar_COMZ_alljet[phoDecBinIndex][0]->Fill(allgj_ystar_comZ);
+
 
     // checking the isolation behaviour as a function of nvertex
     pf_nvtx_eciso[phoDecBinIndex][0]->Fill(nVtxGood,
@@ -572,6 +658,9 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 					   phoHcalIso(leadingPhotonIndex,true));
     pf_nvtx_tkiso[phoDecBinIndex][1]->Fill(nVtxGood,
 					   phoTrkIso(leadingPhotonIndex,true));
+
+
+
 
     // after applying cuts
 
@@ -633,6 +722,14 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ystar_COMZ[phoDecBinIndex][nPtBins][1]->Fill(gj_ystar_comZ);
 
 
+    // lumping all jets together
+    h_alljetpt_eff[phoDecBinIndex][1]->Fill(l4_alljet.Pt());
+    h_alljeteta_eff[phoDecBinIndex][1]->Fill(l4_alljet.Eta());
+    h_cost_COMZ_alljet[phoDecBinIndex][1]->Fill(allgj_cost_comZ);
+    h_pstar_COMZ_alljet[phoDecBinIndex][1]->Fill(allgj_pstar_comZ);
+    h_ystar_COMZ_alljet[phoDecBinIndex][1]->Fill(allgj_ystar_comZ);
+
+
 
   } // end of loop over entries
 
@@ -672,6 +769,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   h_etapho->Write();
   h_etajet->Write();
 
+  h_dR_gj->Write();
 //   h_recgenpt_jet -> Write();
 //   h_recgenpt_pho -> Write(); 
 //   h_dR_jet       -> Write(); 
@@ -705,11 +803,23 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     h2_ystar_pstar[idec]->Write();
 
+    h_ptclosestjet[idec]->Write();             
+    h_etaclosestjet[idec]->Write();            
+    h_dRclosestjet[idec]->Write();             
+    h_njetraw[idec]->Write();
+
     for(int ip=0; ip<2; ip++){
       h_njet[idec][ip]->Write();
       pf_nvtx_eciso[idec][ip]->Write();
       pf_nvtx_hciso[idec][ip]->Write();
       pf_nvtx_tkiso[idec][ip]->Write();
+
+      h_alljetpt_eff[idec][ip]->Write();   
+      h_alljeteta_eff[idec][ip]->Write();
+      h_cost_COMZ_alljet[idec][ip]->Write();
+      h_pstar_COMZ_alljet[idec][ip]->Write();
+      h_ystar_COMZ_alljet[idec][ip]->Write();
+
     }
 
 
