@@ -354,7 +354,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    if(jentry > 50000 ) break;
+//     if(jentry > 50000 ) break;
     nPass[0]++;
     h_pthat->Fill(pthat); // make sure we are checking the right MC samples
 
