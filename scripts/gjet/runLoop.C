@@ -9,7 +9,7 @@ void runLoop(std::string className, std::string fileName)
   command = className + " a(\"" + fileName + "\");";
   gROOT->ProcessLine(command.data());
 
-  command = "a.Loop(true)";
+  command = "a.Loop()";
   gROOT->ProcessLine(command.data());
   myWatch->Stop();
   cout << myWatch->RealTime() << " seconds has passed! " << endl; 
