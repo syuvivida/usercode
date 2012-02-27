@@ -1,0 +1,3 @@
+/home/syu/CVSCode/gg/noCOMCut/ggeff_pileCorr_new_TreeMC_G_Pt-80to120.root 4.472e+02 2046637
+/home/syu/CVSCode/gg/noCOMCut/ggeff_pileCorr_new_TreeMC_G_Pt-120to170.root 8.417e+01 2088216
+/home/syu/CVSCode/gg/noCOMCut/ggeff_pileCorr_new_TreeMC_G_Pt-170to300.root 2.264e+01 2019161
