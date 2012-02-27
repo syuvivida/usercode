@@ -51,7 +51,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500);
 
-  TH1I* h_njet_template = new TH1I("h_njet_template","",50,-0.5,49.5);
+  TH1D* h_njet_template = new TH1D("h_njet_template","",50,-0.5,49.5);
 
   TH1D* h_eta_template = new TH1D("h_eta_template","",100,-5.0,5.0);
 
@@ -117,17 +117,17 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_dR_pho;
   TH1D* h_dR_gj;
 
-
   TH2D* h2_ystar_pstar[2]; // in EB and EE
 
   TH1D* h_jetpt_eff[2];
   TH1D* h_jeteta_eff[2];
 
-  TH1I* h_njet[2][2];                  // in EB and EE, before and after ID selections
-  TH1I* h_njetraw[2];                  // jet multiplicity before perselections in barrel and endcap
+  TH1D* h_njet[2][2];                  // in EB and EE, before and after ID selections
+  TH1D* h_njetraw[2];                  // jet multiplicity before perselections in barrel and endcap
   TH1D* h_ptclosestjet[2];             // pt of the closest jet in deltaR to the leading photon in barrel and endcap
   TH1D* h_etaclosestjet[2];            // eta of the closest jet in deltaR to the leading photon in barrel and endcap
   TH1D* h_dRclosestjet[2];             // deltaR of the closest jet in deltaR to the leading photon in barrel and endcap
+  TH1D* h_dRLeadingPhoJet[2];          // deltaR of the leading photon and leading jet
 
 
   TProfile* pf_nvtx_eciso[2][2];       // in EB and EE, before and after pileupcorr
@@ -176,8 +176,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   TH1D* h_etapho      = (TH1D*)h_eta_template->Clone("h_etapho");
   TH1D* h_etajet      = (TH1D*)h_eta_template->Clone("h_etajet");
 
-  TH1I* h_jetparton   = new TH1I("h_jetparton","",150,-99.5,50.5);
-  TH1I* h_leadingjetparton   = new TH1I("h_leadingjetparton","",150,-99.5,50.5);
+  TH1D* h_jetparton   = new TH1D("h_jetparton","",150,-99.5,50.5);
+  TH1D* h_leadingjetparton   = new TH1D("h_leadingjetparton","",150,-99.5,50.5);
 
   h_recgenpt_jet = (TH1D*)h_ptratio_template->Clone("h_recgenpt_jet");
   h_recgenpt_pho = (TH1D*)h_ptratio_template->Clone("h_recgenpt_pho");
@@ -233,8 +233,8 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ptclosestjet[idec]  = (TH1D*)h_pt_template->Clone(Form("h_ptclosestjet_%s",decName[idec]));
     h_etaclosestjet[idec] = (TH1D*)h_eta_template->Clone(Form("h_etaclosestjet_%s",decName[idec])); 
     h_dRclosestjet[idec]  = (TH1D*)h_dR_template->Clone(Form("h_dRclosestjet_%s",decName[idec])); 
-
-    h_njetraw[idec] = (TH1I*)h_njet_template->Clone(Form("h_njetraw_%s",decName[idec]));
+    h_dRLeadingPhoJet[idec] = (TH1D*)h_dR_template->Clone(Form("h_dRLeadingPhoJet_%s",decName[idec]));
+    h_njetraw[idec] = (TH1D*)h_njet_template->Clone(Form("h_njetraw_%s",decName[idec]));
 
     for(int ip=0; ip<2; ip++){
 
@@ -245,7 +245,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
       h_ystar_COMZ_alljet[idec][ip] = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COMZ_alljet_%s_%d",decName[idec],ip));
 
 
-      h_njet[idec][ip] = (TH1I*)h_njet_template->Clone(Form("h_njet_%s_%d",decName[idec],ip));
+      h_njet[idec][ip] = (TH1D*)h_njet_template->Clone(Form("h_njet_%s_%d",decName[idec],ip));
 
       pf_nvtx_eciso[idec][ip] = (TProfile*)pf_nvtx_eciso_template->Clone
 	(Form("pf_nvtx_eciso_%s_%s",decName[idec],puName[ip]));
@@ -521,11 +521,6 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_etajet->Fill(leadingJetEta);
     h_leadingjetparton->Fill(jetGenPartonID[leadingJetIndex]);
 
-    h_ptclosestjet[phoDecBinIndex]->Fill(closestPt);
-    h_etaclosestjet[phoDecBinIndex]->Fill(closestEta);
-    h_dRclosestjet[phoDecBinIndex]->Fill(closestdR);
-
-    
     // assign 4-vector
 
     TLorentzVector l4_1stjet(0,0,0,0);
@@ -545,6 +540,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if(phoDecBinIndex < 0)continue;
     nPass[phoPtBinIndex+4]++;
 
+
     
     double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
     double gj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_1stjet);
@@ -554,15 +550,13 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if(applyCOMCut && !passCOMCut)continue;
 
 
-    h2_ystar_pstar[phoDecBinIndex]->Fill(gj_ystar_comZ, gj_pstar_comZ);
-
-
     //-------------------------------------------------------------------------
     // Now we plot distributions before and after cuts
     //-------------------------------------------------------------------------
 
     double gj_zgamma = eiko::zgamma(l4_pho, l4_1stjet);
     double gj_dphi   = eiko::deltaPhi(l4_pho, l4_1stjet);
+    double gj_dR     = l4_pho.DeltaR(l4_1stjet);
 
     double gj_cost   = eiko::cosThetaStar(l4_pho, l4_1stjet);
     double gj_cost_com3D = eiko::cosThetaStar_BoostToCM(l4_pho, l4_1stjet);
@@ -585,6 +579,14 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     double allgj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_alljet);
 
     // before applying cuts
+
+    h2_ystar_pstar[phoDecBinIndex]->Fill(gj_ystar_comZ, gj_pstar_comZ);
+
+    h_ptclosestjet[phoDecBinIndex]->Fill(closestPt);
+    h_etaclosestjet[phoDecBinIndex]->Fill(closestEta);
+    h_dRclosestjet[phoDecBinIndex]->Fill(closestdR);
+    h_dRLeadingPhoJet[phoDecBinIndex]->Fill(gj_dR);
+
 
     h_nvtx_eff[phoDecBinIndex][0]->Fill(nVtxGood);
 
@@ -807,6 +809,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ptclosestjet[idec]->Write();             
     h_etaclosestjet[idec]->Write();            
     h_dRclosestjet[idec]->Write();             
+    h_dRLeadingPhoJet[idec]->Write();
     h_njetraw[idec]->Write();
 
     for(int ip=0; ip<2; ip++){

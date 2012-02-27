@@ -15,10 +15,17 @@ void call_combineMC_spectrum(std::string fileName)
 "combineMC_spectrum(\"h_ptjet\",\"p_{T}(jet) [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_jetpt_eff_0\", \"p_{T}(jet) [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_etapho\",\"#eta(#gamma)\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_etajet\",\"#eta(jet)\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_jeteta_eff_0\",\"#eta(jet)\",\"%s\",true)", fileName.data()));
+
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_sieie_leadingEB\",\"Barrel #sigma_{i#eta i#eta}\",\"%s\",true)", fileName.data()));
@@ -127,6 +134,11 @@ void call_combineMC_spectrum(std::string fileName)
   gROOT->ProcessLine(Form(
 			  "combineMC_spectrum(\"h_dRclosestjet_EE\",\"#Delta R of the closest jet to endcap photon\",\"%s\",true)", fileName.data()));
 
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_dRLeadingPhoJet_EB\",\"#Delta R of the leading photon (barrel) and jet\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_dRLeadingPhoJet_EE\",\"#Delta R of the leading photon (endcap) and jet\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 			  "combineMC_spectrum(\"h_alljetpt_eff_EB_0\",\"p_{T}(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
