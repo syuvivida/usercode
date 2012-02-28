@@ -169,6 +169,10 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   char* puName[2]={"raw","pucorr"};
 
   // debugging histograms
+
+  TH1D* h_genciso     = (TH1D*)h_eciso_template->Clone("h_genciso");
+  TH1D* h_gentiso     = (TH1D*)h_tkiso_template->Clone("h_gentiso");
+
   TH1D* h_pthat       = (TH1D*)h_pt_template->Clone("h_pthat");
 
   TH1D* h_ptpho       = (TH1D*)h_pt_template->Clone("h_ptpho");
@@ -359,6 +363,23 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     nPass[0]++;
     h_pthat->Fill(pthat); // make sure we are checking the right MC samples
 
+
+    //-------------------------------------------------------------------------
+    // Check only MC information                                               
+    //-------------------------------------------------------------------------
+    
+    bool findAGenPho = false;
+    for(int imc=0; imc < 15 ; imc++)
+      {
+	if(mcPID[imc]==22 && mcMomPID[imc]==22)
+	  {
+	    findAGenPho = true;
+	    h_genciso->Fill(mcCalIsoDR04[imc]);
+	    h_gentiso->Fill(mcTrkIsoDR04[imc]);
+	  }
+	if(findAGenPho)break;
+      }
+    
 
     //vertex selection
     if(IsVtxGood==0) continue;
@@ -763,9 +784,15 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
   if(applyPileUpCorr)_inputFileName = "pileCorr_" + _inputFileName;
   if(applyCOMCut)_inputFileName = "withCOMCut_" + _inputFileName ;
+
   TFile* outFile = new TFile(Form("/home/syu/CVSCode/ggeff_%s",_inputFileName.data()),"recreate");               
   h_jetparton->Write();
   h_leadingjetparton->Write();
+
+  h_genciso->Write();
+  h_gentiso->Write();
+
+
   h_pthat->Write();
   h_ptpho->Write();
   h_ptjet->Write();

@@ -1011,11 +1011,11 @@ void gg_angularmc_eff::Init(TTree *tree)
    fChain->SetBranchAddress("nMC", &nMC, &b_nMC);
    fChain->SetBranchAddress("mcPID", mcPID, &b_mcPID);
 //    fChain->SetBranchAddress("mcVtx", mcVtx, &b_mcVtx);
-   fChain->SetBranchAddress("mcPt", mcPt, &b_mcPt);
+//   fChain->SetBranchAddress("mcPt", mcPt, &b_mcPt);
 //    fChain->SetBranchAddress("mcMass", mcMass, &b_mcMass);
-   fChain->SetBranchAddress("mcEta", mcEta, &b_mcEta);
-   fChain->SetBranchAddress("mcPhi", mcPhi, &b_mcPhi);
-   fChain->SetBranchAddress("mcE", mcE, &b_mcE);
+//   fChain->SetBranchAddress("mcEta", mcEta, &b_mcEta);
+//   fChain->SetBranchAddress("mcPhi", mcPhi, &b_mcPhi);
+//   fChain->SetBranchAddress("mcE", mcE, &b_mcE);
 //    fChain->SetBranchAddress("mcEt", mcEt, &b_mcEt);
 //    fChain->SetBranchAddress("mcGMomPID", mcGMomPID, &b_mcGMomPID);
    fChain->SetBranchAddress("mcMomPID", mcMomPID, &b_mcMomPID);
@@ -1023,12 +1023,12 @@ void gg_angularmc_eff::Init(TTree *tree)
 //    fChain->SetBranchAddress("mcMomMass", mcMomMass, &b_mcMomMass);
 //    fChain->SetBranchAddress("mcMomEta", mcMomEta, &b_mcMomEta);
 //    fChain->SetBranchAddress("mcMomPhi", mcMomPhi, &b_mcMomPhi);
-   fChain->SetBranchAddress("mcIndex", mcIndex, &b_mcIndex);
+/*    fChain->SetBranchAddress("mcIndex", mcIndex, &b_mcIndex); */
 //    fChain->SetBranchAddress("mcDecayType", mcDecayType, &b_mcDecayType);
 //    fChain->SetBranchAddress("mcCalIsoDR03", mcCalIsoDR03, &b_mcCalIsoDR03);
 //    fChain->SetBranchAddress("mcTrkIsoDR03", mcTrkIsoDR03, &b_mcTrkIsoDR03);
-//    fChain->SetBranchAddress("mcCalIsoDR04", mcCalIsoDR04, &b_mcCalIsoDR04);
-//    fChain->SetBranchAddress("mcTrkIsoDR04", mcTrkIsoDR04, &b_mcTrkIsoDR04);
+   fChain->SetBranchAddress("mcCalIsoDR04", mcCalIsoDR04, &b_mcCalIsoDR04);
+   fChain->SetBranchAddress("mcTrkIsoDR04", mcTrkIsoDR04, &b_mcTrkIsoDR04);
 //    fChain->SetBranchAddress("genMET", &genMET, &b_genMET);
 //    fChain->SetBranchAddress("genMETPhi", &genMETPhi, &b_genMETPhi);
 //    fChain->SetBranchAddress("nPUInfo", &nPUInfo, &b_nPUInfo);
