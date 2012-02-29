@@ -8,6 +8,12 @@ void call_combineMC_spectrum(std::string fileName)
   // first histogram requires recreating root files
   gROOT->ProcessLine(Form(
 			  "combineMC_spectrum(\"h_pthat\",\"#hat{p_{T}} [GeV]\",\"%s\")", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_genciso\",\"Gen-level calorimeter isolation [GeV]\",\"%s\",true)", fileName.data()));
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_gentiso\",\"Gen-level track isolation [GeV]\",\"%s\",true)", fileName.data()));
+
   gROOT->ProcessLine(Form(
 			  "combineMC_spectrum(\"h_ptpho\",\"p_{T}(#gamma) [GeV]\",\"%s\",true)", fileName.data()));
 
@@ -172,7 +178,6 @@ void call_combineMC_spectrum(std::string fileName)
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_ystar_COMZ_alljet_EE_0\",\"Endcap y^{*} using all jets\",\"%s\",true)", fileName.data()));
-
 
   myWatch->Stop();
   cout << myWatch->RealTime() << " seconds has passed! " << endl; 
