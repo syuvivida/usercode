@@ -60,7 +60,11 @@ void call_displayTwofiles()
 
   gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_dphi_EB_allpt_0_all\",\"\",-9999,-9999,true,true)");
 
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_dphi_EB_85_95_0_all\",\"\",-9999,-9999,true,true)");
+
   gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_dphi_EE_allpt_0_all\",\"\",-9999,-9999,true,true)");
+
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_dphi_EE_85_95_0_all\",\"\",-9999,-9999,true,true)");
 
   gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_cost_COMZ_EB_allpt_0_all\",\"\",-9999,-9999,false,true)");
 

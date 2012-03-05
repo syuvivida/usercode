@@ -86,6 +86,9 @@ void call_combineMC_spectrum(std::string fileName)
 "combineMC_spectrum(\"h_dphi_EB_allpt_0\",\"#Delta #phi(barrel #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_dphi_EB_85_95_0\",\"#Delta #phi(barrel #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_cost_COMZ_EB_allpt_0\",\"Barrel cos#theta^{*}\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
@@ -100,6 +103,9 @@ void call_combineMC_spectrum(std::string fileName)
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_dphi_EE_allpt_0\",\"#Delta #phi(endcap #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_dphi_EE_85_95_0\",\"#Delta #phi(endcap #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_cost_COMZ_EE_allpt_0\",\"Endcap cos#theta^{*}\",\"%s\",true)", fileName.data()));
