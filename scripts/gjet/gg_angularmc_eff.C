@@ -13,8 +13,8 @@ const double ENDCAP_MINETA=1.57;
 const double ENDCAP_MAXETA=2.3;
 const int nDECs = 2;
 
-double ptbound[]={85., 95., 110., 130., 160., 200.};
-// double ptbound[]={40., 45., 50., 55., 60., 65., 70., 75., 85., 95., 110., 130., 160., 200.};
+// double ptbound[]={85., 95., 110., 130., 160., 200.};
+double ptbound[]={40., 45., 50., 55., 60., 65., 70., 75., 85., 95., 110., 130., 160., 200.};
 const int nPtBins = sizeof(ptbound)/sizeof(ptbound[0])-1;
 
 // effective area for correcting pileup, ECAL/HCAL/Tracker from EWK-11-251
@@ -39,6 +39,19 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     cout << "ystar range: |y*| < " << ystarMax << endl;
     cout << "pstar range: " << pstarMin << " < p* < " << pstarMax << " GeV" << endl;
   }
+
+  bool isDirPho = false;
+  bool isFraPho = false;
+  if(_inputFileName.find("G_Pt")!= std::string::npos || _inputFileName.find("GJets")!= std::string::npos)
+    isDirPho = true;
+  else if(_inputFileName.find("QCD")!= std::string::npos)
+    isFraPho = true;
+
+  if(isDirPho)
+    cout << "This is a gamma+jet direct photon MC sample." << endl;
+  if(isFraPho)
+    cout << "This is a dijet fragmentation photon MC sample." << endl;
+
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -371,7 +384,10 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     bool findAGenPho = false;
     for(int imc=0; imc < 15 ; imc++)
       {
-	if(mcPID[imc]==22 && mcMomPID[imc]==22)
+	if( (isDirPho && mcPID[imc]==22 && mcMomPID[imc]==22) ||
+	    (isFraPho && mcPID[imc]==22 && mcMomPID[imc]==21) ||
+	    (isFraPho && mcPID[imc]==22 && abs(mcMomPID[imc])<=6)
+	    )
 	  {
 	    findAGenPho = true;
 	    h_genciso->Fill(mcCalIsoDR04[imc]);
@@ -402,7 +418,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     int leadingPhotonIndex = -1;
     double phoMaxPt = -9999.;
 
-    for(unsigned int ipho=0; ipho < nPho; ipho++)
+    for(int ipho=0; ipho < nPho; ipho++)
       {	
 
 	int decIndex = phoDecCode(ipho);
@@ -417,7 +433,9 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
 	// make sure this is the signal photon we care about
  	if(phoGenIndex[ipho]<0)continue;
- 	if(phoGenMomPID[ipho]!=22)continue;
+ 	if(isDirPho && phoGenMomPID[ipho]!=22)continue;
+	// fragmentation photon from quarks or gluons
+ 	if(isFraPho && phoGenMomPID[ipho]!=21 && abs(phoGenMomPID[ipho])>6)continue; 
 
 	double thisPhoPt= phoEt[ipho]; 
 
