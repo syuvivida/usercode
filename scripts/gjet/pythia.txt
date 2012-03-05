@@ -1,3 +1,9 @@
-/home/syu/CVSCode/gg/noCOMCut/ggeff_pileCorr_new_TreeMC_G_Pt-80to120.root 4.472e+02 2046637
-/home/syu/CVSCode/gg/noCOMCut/ggeff_pileCorr_new_TreeMC_G_Pt-120to170.root 8.417e+01 2088216
-/home/syu/CVSCode/gg/noCOMCut/ggeff_pileCorr_new_TreeMC_G_Pt-170to300.root 2.264e+01 2019161
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_G_Pt-30to50.root 1.669e+04 1487260
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_G_Pt-50to80.root 2.722e+03 1986704
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_G_Pt-80to120.root 4.472e+02 2046637
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_G_Pt-120to170.root 8.417e+01 2088216
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_G_Pt-170to300.root 2.264e+01 2019161
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_QCD_Pt-30to50.root 5.312e+07 6583068
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_QCD_Pt-50to80.root 6.359e+06 5396700
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_QCD_Pt-80to120.root 7.843e+05 2495004
+/home/syu/CVSCode/gg/noCOMCut_eta23_lowpt/ggeff_pileCorr_new_TreeMC_QCD_Pt-120to170.root 1.151e+05 3110236
