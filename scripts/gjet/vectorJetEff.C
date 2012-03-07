@@ -186,12 +186,22 @@ void vectorJetEff::Loop()
 
    
    // write output root file
-   string remword="/data4/syu/7TeV_vectorNtuple/pythia/";
 
-   size_t pos = _inputFileName.find(remword);
+  std::string remword  ="/data4/syu/7TeV_vectorNtuple/pythia/";
+  std::string remword2 ="/data4/syu/7TeV_vectorNtuple/madgraph/";
 
-   if(pos!= string::npos)
-     _inputFileName.swap(_inputFileName.erase(pos,remword.length()));
+  size_t pos  = _inputFileName.find(remword);
+  size_t pos2 = _inputFileName.find(remword2);
+
+  if(pos!= std::string::npos)
+    _inputFileName.swap(_inputFileName.erase(pos,remword.length()));
+
+  else if(pos2!= std::string::npos)
+    _inputFileName.swap(_inputFileName.erase(pos2,remword2.length()));
+
+  else
+    _inputFileName = "test.root";
+
 
    TFile* outFile = new TFile(Form("/home/syu/CVSCode/jeteff_%s",
  				   _inputFileName.data()),"recreate");       
