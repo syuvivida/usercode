@@ -1,0 +1,31 @@
+1)
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/pythia/G_Pt-30to50_TuneZ2_7TeV_pythia6.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/pythia/G_Pt-50to80_TuneZ2_7TeV_pythia6.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/pythia/G_Pt-80to120_TuneZ2_7TeV_pythia6.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/pythia/G_Pt-120to170_TuneZ2_7TeV_pythia6.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/pythia/G_Pt-170to300_TuneZ2_7TeV_pythia6.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/madgraph/GJets_TuneZ2_40_HT_100_7TeV-madgraph.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/madgraph/GJets_TuneZ2_100_HT_200_7TeV-madgraph.root\"\) >&! Log < /dev/null&
+
+root -q -b runLoop.C\(\"vectorJetEff\",\"/data4/syu/7TeV_vectorNtuple/madgraph/GJets_TuneZ2_200_HT_inf_7TeV-madgraph.root\"\) >&! Log < /dev/null&
+
+
+
+2) 
+edit input.txt
+
+3)
+root -q -b call_combineMC_jeteff.C
+
+Then, two directories are produced:
+ effDataFiles with numbers and effHistos with figures
+
+
+
+
