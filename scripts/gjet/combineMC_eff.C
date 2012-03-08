@@ -158,7 +158,7 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
     // to be used with TEfficiency methods
     cout << h_numr[ifile]->GetEntries() << "\t" << h_deno[ifile]->GetEntries() << endl;
     eff[ifile] = new TEfficiency(*(h_numr[ifile]),*(h_deno[ifile]));
-    eff[ifile]->SetTitle(xtitle.data());
+    eff[ifile]->SetTitle(myMCFiles[ifile].filename.data());
   } // end of loop over files
 
   cout << h_all_deno->GetBinContent(18) << "\t" << h_all_numr->GetBinContent(18) << endl;
@@ -301,24 +301,27 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
    c1->Print(Form("effHistos/eff_%s.gif",temp_histoName.data()));
 
    if(nfiles>1){
-     TCanvas* c2 = new TCanvas("c2","",1000,1000);
+     TCanvas* c2 = new TCanvas("c2",xtitle.data(),1000,1000);
      c2->Divide(2,2);
-     for(int i=0;i<3;i++){
-       c2->cd(i+1);
+     int countCanvas = 0;
+     for(int i=0;i<nfiles;i++){
+       int padNumber = (i%4)+1;
+       if(countCanvas>0 && i%4==0)c2->Clear("D");
+       c2->cd(padNumber);
+       cout << "inside pad" << padNumber << endl;
        eff[i]->Draw();
-     }
-     c2->cd(4);
-     eff_final->Draw("ap");
+       if(i%4==3 || i== nfiles-1){
+	 countCanvas++;
+	 c2->Print(Form("effHistos/eff2_%s_%d.eps",temp_histoName.data(),countCanvas));
+	 c2->Print(Form("effHistos/eff2_%s_%d.pdf",temp_histoName.data(),countCanvas));
+	 c2->Print(Form("effHistos/eff2_%s_%d.gif",temp_histoName.data(),countCanvas));
+       }
+     } // end of loop over files 
 
-     c2->Print(Form("effHistos/eff2_%s.eps",temp_histoName.data()));
-     c2->Print(Form("effHistos/eff2_%s.pdf",temp_histoName.data()));
-     c2->Print(Form("effHistos/eff2_%s.gif",temp_histoName.data()));
-   
-
-   }
-
-
-
+   } // if there is more than one file, display each efficiency curve
 
 
 }
+
+
+   
