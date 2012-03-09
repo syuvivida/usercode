@@ -169,6 +169,7 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
     effList->Add(eff[i]);
 
   TGraphAsymmErrors* eff_final = eff_combine->Combine(effList, "v", nfiles, weight_temp);
+  eff_final->SetName("eff_final");
   eff_final->GetXaxis()->SetTitle(xtitle.data());
   eff_final->GetYaxis()->SetTitle("Efficiency");
 //   eff_final->SetTitle("TEfficiency");
@@ -290,7 +291,7 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 //       histoName.find("pt_")!= std::string::npos)
 //      eff_final->Fit("pol1","","",0,500);
      //      h_eff->Fit("pol1","","",0,500);
-//    h_eff->Draw("e1");
+   //    h_eff->Draw("e1");
 
 //    c1->cd(2);
 //    h_eff->Draw("e1");
@@ -320,6 +321,10 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 
    } // if there is more than one file, display each efficiency curve
 
+  TFile* outFile = new TFile(Form("effHistos/eff_%s.root",temp_histoName.data()),"recreate");               
+  eff_final->Write();
+  outFile->Close();
+  
 
 }
 

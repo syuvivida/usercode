@@ -27,40 +27,76 @@
    
   // jet pt and eta
   gROOT->ProcessLine(
-"combineMC_eff(\"h_jetpt_eff\",\"p_{T}(jet)\",4,30,200)");
+"combineMC_eff(\"h_jetpt_eff_EB\",\"p_{T}(jet)\",4,30,200)");
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_jetpt_eff_EE\",\"p_{T}(jet)\",4,30,200)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_jeteta_eff\",\"#eta(jet)\",4,-2.4,2.4)");
+"combineMC_eff(\"h_jeteta_eff_EB\",\"#eta(jet)\",4,-2.2,2.2)");
+  gROOT->ProcessLine(
+"combineMC_eff(\"h_jeteta_eff_EE\",\"#eta(jet)\",4,-2.2,2.2)");
+
 
 
   // photon pt and eta
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_pt_eff_EB\",\"p_{T}(#gamma) in barrel\",4,85,200)"
+// );
+
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_pt_eff_EE\",\"p_{T}(#gamma) in endcap\",4,85,200)"
+// );
+
+ 
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_eta_eff_85_95\",\"#eta(#gamma)\",4,-2.5,2.5)");
+
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_eta_eff_95_110\",\"#eta(#gamma)\",4,-2.5,2.5)");
+
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_eta_eff_110_130\",\"#eta(#gamma)\",4,-2.5,2.5)");
+
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_eta_eff_130_160\",\"#eta(#gamma)\",4,-2.5,2.5)");
+
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_eta_eff_160_200\",\"#eta(#gamma)\",4,-2.5,2.5)");
+
+
+//   gROOT->ProcessLine(
+// "combineMC_eff(\"h_eta_eff_allpt\",\"#eta(#gamma)\",4,-2.2,2.2)");
+
+
+
   gROOT->ProcessLine(
-"combineMC_eff(\"h_pt_eff_EB\",\"p_{T}(#gamma) in barrel\",4,85,200)"
+"combineMC_eff(\"h_phopt_eff_EB\",\"p_{T}(#gamma) in barrel\",4,85,200)"
 );
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_pt_eff_EE\",\"p_{T}(#gamma) in endcap\",4,85,200)"
+"combineMC_eff(\"h_phopt_eff_EE\",\"p_{T}(#gamma) in endcap\",4,85,200)"
 );
 
  
   gROOT->ProcessLine(
-"combineMC_eff(\"h_eta_eff_85_95\",\"#eta(#gamma)\",4,-2.5,2.5)");
+"combineMC_eff(\"h_phoeta_eff_85_95\",\"#eta(#gamma)\",4,-2.5,2.5)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_eta_eff_95_110\",\"#eta(#gamma)\",4,-2.5,2.5)");
+"combineMC_eff(\"h_phoeta_eff_95_110\",\"#eta(#gamma)\",4,-2.5,2.5)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_eta_eff_110_130\",\"#eta(#gamma)\",4,-2.5,2.5)");
+"combineMC_eff(\"h_phoeta_eff_110_130\",\"#eta(#gamma)\",4,-2.5,2.5)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_eta_eff_130_160\",\"#eta(#gamma)\",4,-2.5,2.5)");
+"combineMC_eff(\"h_phoeta_eff_130_160\",\"#eta(#gamma)\",4,-2.5,2.5)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_eta_eff_160_200\",\"#eta(#gamma)\",4,-2.5,2.5)");
+"combineMC_eff(\"h_phoeta_eff_160_200\",\"#eta(#gamma)\",4,-2.5,2.5)");
 
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_eta_eff_allpt\",\"#eta(#gamma)\",4,-2.5,2.5)");
+"combineMC_eff(\"h_phoeta_eff_allpt\",\"#eta(#gamma)\",4,-2.2,2.2)");
+
 
 
   // pstar in barrel
