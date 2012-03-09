@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Feb  8 09:19:58 2012 by ROOT version 5.27/06b
+// Thu Mar  8 12:04:45 2012 by ROOT version 5.27/06b
 // from TTree tree/tree
-// found on file: /data4/yunju/NewtreeT/MC/TreeMCPho80_2_4/Phojtree_1_1_bwi.root
+// found on file: /data4/syu/7TeV_vectorNtuple/pythia/G_Pt-30to50_TuneZ2_7TeV_pythia6.root
 //////////////////////////////////////////////////////////
 
 #ifndef yj_angularmc_eff_h
@@ -11,13 +11,9 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <TBranch.h>
-#include <TLeaf.h>
-#include <TSystemDirectory.h>
-#include <TList.h>
-
 #include <iostream>
 #include <string>
+#include <TH2.h>
 
 using namespace std;
 
@@ -308,7 +304,7 @@ public :
    TBranch        *b_PhotongenTrkIsoDR04;   //!
    TBranch        *b_PhotongenIsoDR04;   //!
 
-   yj_angularmc_eff(std::string dirName, TTree *tree=0);
+   yj_angularmc_eff(std::string filename, TTree *tree=0);
    virtual ~yj_angularmc_eff();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -325,48 +321,33 @@ public :
    virtual Bool_t   isGoodLooseJet(Int_t ijet);
    virtual Bool_t   isGoodMediumJet(Int_t ijet);
    virtual Bool_t   isGoodTightJet(Int_t ijet);
-   virtual Bool_t   isFidJet (Int_t ijet);
    virtual Bool_t   isFidPho (Int_t ipho);
-   virtual Int_t    matchedGenJet(Int_t ijet);
-   std::string _inputDirName;
+   virtual Bool_t   isFidJet (Int_t ijet);
+   virtual Int_t    matchRecoToGenJet(Int_t ijet); // return matched index in genjet
+   virtual Int_t    matchGenToRecoJet(Int_t ijet); // return matched index in recojet
+
+   virtual TH1D*    createHisto(TH1D* htemplate, string histoName, string xtitle, int ip, double ptmin=-1, double ptmax=-1);
+   std::string _inputFileName;
 
 };
 
 #endif
 
 #ifdef yj_angularmc_eff_cxx
-yj_angularmc_eff::yj_angularmc_eff(std::string dirName, TTree *tree)
+yj_angularmc_eff::yj_angularmc_eff(std::string filename, TTree *tree)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-     TChain* pho = new TChain("tree");
-
-     TSystemDirectory *base = new TSystemDirectory("root","root");
-     base->SetDirectory(dirName.data());
-     TList *listOfFiles = base->GetListOfFiles();
-     TIter fileIt(listOfFiles);
-     TFile *fileH = new TFile();
-     int nfile=0;
-     while(fileH = (TFile*)fileIt()) {
-       std::string fileN = fileH->GetName();
-       std::string baseString = "Phojtree";
-       if( fileH->IsFolder())  continue;
-       if(fileN.find(baseString) == std::string::npos)continue;
-       cout << fileN.data() << endl;
-       nfile++;
-       pho->Add(fileN.data());
+     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.data());
+     if (!f) {
+       f = new TFile(filename.data());
      }
-
-     cout << "Opening " << nfile << " files " << endl;
-     tree = pho;
-     _inputDirName = dirName;
+      tree = (TTree*)gDirectory->Get("tree");
 
    }
-
-   cout << "Number of entries are " << tree->GetEntries() << endl;
    Init(tree);
-   
+   _inputFileName = filename;
 }
 
 yj_angularmc_eff::~yj_angularmc_eff()
@@ -529,82 +510,82 @@ void yj_angularmc_eff::Init(TTree *tree)
 //    fChain->SetBranchAddress("EvtInfo_vertexChi2", &EvtInfo_vertexChi2, &b_EvtInfo_vertexChi2);
 //    fChain->SetBranchAddress("EvtInfo_vertexNormChi2", &EvtInfo_vertexNormChi2, &b_EvtInfo_vertexNormChi2);
 //    fChain->SetBranchAddress("EvtInfo_vertexNdof", &EvtInfo_vertexNdof, &b_EvtInfo_vertexNdof);
-//    fChain->SetBranchAddress("genJetPx_", &genJetPx_, &b_genJetPx_);
-//    fChain->SetBranchAddress("genJetPy_", &genJetPy_, &b_genJetPy_);
-//    fChain->SetBranchAddress("genJetPz_", &genJetPz_, &b_genJetPz_);
-//    fChain->SetBranchAddress("genJetE_", &genJetE_, &b_genJetE_);
-//    fChain->SetBranchAddress("genJetP_", &genJetP_, &b_genJetP_);
-//    fChain->SetBranchAddress("genJetTheta_", &genJetTheta_, &b_genJetTheta_);
+   fChain->SetBranchAddress("genJetPx_", &genJetPx_, &b_genJetPx_);
+   fChain->SetBranchAddress("genJetPy_", &genJetPy_, &b_genJetPy_);
+   fChain->SetBranchAddress("genJetPz_", &genJetPz_, &b_genJetPz_);
+   fChain->SetBranchAddress("genJetE_", &genJetE_, &b_genJetE_);
+   fChain->SetBranchAddress("genJetP_", &genJetP_, &b_genJetP_);
+   fChain->SetBranchAddress("genJetTheta_", &genJetTheta_, &b_genJetTheta_);
    fChain->SetBranchAddress("genJetPt_", &genJetPt_, &b_genJetPt_);
    fChain->SetBranchAddress("genJetEta_", &genJetEta_, &b_genJetEta_);
    fChain->SetBranchAddress("genJetPhi_", &genJetPhi_, &b_genJetPhi_);
-//    fChain->SetBranchAddress("genJetEt_", &genJetEt_, &b_genJetEt_);
-//    fChain->SetBranchAddress("genJetQ_", &genJetQ_, &b_genJetQ_);
+   fChain->SetBranchAddress("genJetEt_", &genJetEt_, &b_genJetEt_);
+   fChain->SetBranchAddress("genJetQ_", &genJetQ_, &b_genJetQ_);
    fChain->SetBranchAddress("patJetPfAk05Pt_", &patJetPfAk05Pt_, &b_patJetPfAk05Pt_);
    fChain->SetBranchAddress("patJetPfAk05Eta_", &patJetPfAk05Eta_, &b_patJetPfAk05Eta_);
    fChain->SetBranchAddress("patJetPfAk05Phi_", &patJetPfAk05Phi_, &b_patJetPfAk05Phi_);
    fChain->SetBranchAddress("patJetPfAk05M_", &patJetPfAk05M_, &b_patJetPfAk05M_);
    fChain->SetBranchAddress("patJetPfAk05Rapidity_", &patJetPfAk05Rapidity_, &b_patJetPfAk05Rapidity_);
-//    fChain->SetBranchAddress("patJetPfAk05Px_", &patJetPfAk05Px_, &b_patJetPfAk05Px_);
-//    fChain->SetBranchAddress("patJetPfAk05Py_", &patJetPfAk05Py_, &b_patJetPfAk05Py_);
-//    fChain->SetBranchAddress("patJetPfAk05Pz_", &patJetPfAk05Pz_, &b_patJetPfAk05Pz_);
+   fChain->SetBranchAddress("patJetPfAk05Px_", &patJetPfAk05Px_, &b_patJetPfAk05Px_);
+   fChain->SetBranchAddress("patJetPfAk05Py_", &patJetPfAk05Py_, &b_patJetPfAk05Py_);
+   fChain->SetBranchAddress("patJetPfAk05Pz_", &patJetPfAk05Pz_, &b_patJetPfAk05Pz_);
    fChain->SetBranchAddress("patJetPfAk05En_", &patJetPfAk05En_, &b_patJetPfAk05En_);
-//    fChain->SetBranchAddress("patJetPfAk05UnCorrPt_", &patJetPfAk05UnCorrPt_, &b_patJetPfAk05UnCorrPt_);
-//    fChain->SetBranchAddress("patJetPfAk05UnCorrPx_", &patJetPfAk05UnCorrPx_, &b_patJetPfAk05UnCorrPx_);
-//    fChain->SetBranchAddress("patJetPfAk05UnCorrPy_", &patJetPfAk05UnCorrPy_, &b_patJetPfAk05UnCorrPy_);
-//    fChain->SetBranchAddress("patJetPfAk05UnCorrPz_", &patJetPfAk05UnCorrPz_, &b_patJetPfAk05UnCorrPz_);
-//    fChain->SetBranchAddress("patJetPfAk05UnCorrEnt_", &patJetPfAk05UnCorrEnt_, &b_patJetPfAk05UnCorrEnt_);
-//    fChain->SetBranchAddress("patJetPfAk05PhotEn_", &patJetPfAk05PhotEn_, &b_patJetPfAk05PhotEn_);
-//    fChain->SetBranchAddress("patJetPfAk05ElecEn_", &patJetPfAk05ElecEn_, &b_patJetPfAk05ElecEn_);
-//    fChain->SetBranchAddress("patJetPfAk05MuonEn_", &patJetPfAk05MuonEn_, &b_patJetPfAk05MuonEn_);
-//    fChain->SetBranchAddress("patJetPfAk05HfHadEn_", &patJetPfAk05HfHadEn_, &b_patJetPfAk05HfHadEn_);
-//    fChain->SetBranchAddress("patJetPfAk05HfEmEn_", &patJetPfAk05HfEmEn_, &b_patJetPfAk05HfEmEn_);
-//    fChain->SetBranchAddress("patJetPfAk05CharHadE_", &patJetPfAk05CharHadE_, &b_patJetPfAk05CharHadE_);
-//    fChain->SetBranchAddress("patJetPfAk05NeutHadE_", &patJetPfAk05NeutHadE_, &b_patJetPfAk05NeutHadE_);
-//    fChain->SetBranchAddress("patJetPfAk05CharEmE_", &patJetPfAk05CharEmE_, &b_patJetPfAk05CharEmE_);
-//    fChain->SetBranchAddress("patJetPfAk05CharMuE_", &patJetPfAk05CharMuE_, &b_patJetPfAk05CharMuE_);
-//    fChain->SetBranchAddress("patJetPfAk05NeutEmE_", &patJetPfAk05NeutEmE_, &b_patJetPfAk05NeutEmE_);
-//    fChain->SetBranchAddress("patJetPfAk05MuonMulti_", &patJetPfAk05MuonMulti_, &b_patJetPfAk05MuonMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05NeutMulti_", &patJetPfAk05NeutMulti_, &b_patJetPfAk05NeutMulti_);
+   fChain->SetBranchAddress("patJetPfAk05UnCorrPt_", &patJetPfAk05UnCorrPt_, &b_patJetPfAk05UnCorrPt_);
+   fChain->SetBranchAddress("patJetPfAk05UnCorrPx_", &patJetPfAk05UnCorrPx_, &b_patJetPfAk05UnCorrPx_);
+   fChain->SetBranchAddress("patJetPfAk05UnCorrPy_", &patJetPfAk05UnCorrPy_, &b_patJetPfAk05UnCorrPy_);
+   fChain->SetBranchAddress("patJetPfAk05UnCorrPz_", &patJetPfAk05UnCorrPz_, &b_patJetPfAk05UnCorrPz_);
+   fChain->SetBranchAddress("patJetPfAk05UnCorrEnt_", &patJetPfAk05UnCorrEnt_, &b_patJetPfAk05UnCorrEnt_);
+   fChain->SetBranchAddress("patJetPfAk05PhotEn_", &patJetPfAk05PhotEn_, &b_patJetPfAk05PhotEn_);
+   fChain->SetBranchAddress("patJetPfAk05ElecEn_", &patJetPfAk05ElecEn_, &b_patJetPfAk05ElecEn_);
+   fChain->SetBranchAddress("patJetPfAk05MuonEn_", &patJetPfAk05MuonEn_, &b_patJetPfAk05MuonEn_);
+   fChain->SetBranchAddress("patJetPfAk05HfHadEn_", &patJetPfAk05HfHadEn_, &b_patJetPfAk05HfHadEn_);
+   fChain->SetBranchAddress("patJetPfAk05HfEmEn_", &patJetPfAk05HfEmEn_, &b_patJetPfAk05HfEmEn_);
+   fChain->SetBranchAddress("patJetPfAk05CharHadE_", &patJetPfAk05CharHadE_, &b_patJetPfAk05CharHadE_);
+   fChain->SetBranchAddress("patJetPfAk05NeutHadE_", &patJetPfAk05NeutHadE_, &b_patJetPfAk05NeutHadE_);
+   fChain->SetBranchAddress("patJetPfAk05CharEmE_", &patJetPfAk05CharEmE_, &b_patJetPfAk05CharEmE_);
+   fChain->SetBranchAddress("patJetPfAk05CharMuE_", &patJetPfAk05CharMuE_, &b_patJetPfAk05CharMuE_);
+   fChain->SetBranchAddress("patJetPfAk05NeutEmE_", &patJetPfAk05NeutEmE_, &b_patJetPfAk05NeutEmE_);
+   fChain->SetBranchAddress("patJetPfAk05MuonMulti_", &patJetPfAk05MuonMulti_, &b_patJetPfAk05MuonMulti_);
+   fChain->SetBranchAddress("patJetPfAk05NeutMulti_", &patJetPfAk05NeutMulti_, &b_patJetPfAk05NeutMulti_);
    fChain->SetBranchAddress("patJetPfAk05CharMulti_", &patJetPfAk05CharMulti_, &b_patJetPfAk05CharMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05CharHadMulti_", &patJetPfAk05CharHadMulti_, &b_patJetPfAk05CharHadMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05NeutHadMulti_", &patJetPfAk05NeutHadMulti_, &b_patJetPfAk05NeutHadMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05PhotMulti_", &patJetPfAk05PhotMulti_, &b_patJetPfAk05PhotMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05ElecMulti_", &patJetPfAk05ElecMulti_, &b_patJetPfAk05ElecMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05HfHadMulti_", &patJetPfAk05HfHadMulti_, &b_patJetPfAk05HfHadMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05HfEmMulti_", &patJetPfAk05HfEmMulti_, &b_patJetPfAk05HfEmMulti_);
-//    fChain->SetBranchAddress("patJetPfAk05PhotEnFr_", &patJetPfAk05PhotEnFr_, &b_patJetPfAk05PhotEnFr_);
-//    fChain->SetBranchAddress("patJetPfAk05MuonEnFr_", &patJetPfAk05MuonEnFr_, &b_patJetPfAk05MuonEnFr_);
-//    fChain->SetBranchAddress("patJetPfAk05HfHadEnFr_", &patJetPfAk05HfHadEnFr_, &b_patJetPfAk05HfHadEnFr_);
-//    fChain->SetBranchAddress("patJetPfAk05HfEmEnFr_", &patJetPfAk05HfEmEnFr_, &b_patJetPfAk05HfEmEnFr_);
+   fChain->SetBranchAddress("patJetPfAk05CharHadMulti_", &patJetPfAk05CharHadMulti_, &b_patJetPfAk05CharHadMulti_);
+   fChain->SetBranchAddress("patJetPfAk05NeutHadMulti_", &patJetPfAk05NeutHadMulti_, &b_patJetPfAk05NeutHadMulti_);
+   fChain->SetBranchAddress("patJetPfAk05PhotMulti_", &patJetPfAk05PhotMulti_, &b_patJetPfAk05PhotMulti_);
+   fChain->SetBranchAddress("patJetPfAk05ElecMulti_", &patJetPfAk05ElecMulti_, &b_patJetPfAk05ElecMulti_);
+   fChain->SetBranchAddress("patJetPfAk05HfHadMulti_", &patJetPfAk05HfHadMulti_, &b_patJetPfAk05HfHadMulti_);
+   fChain->SetBranchAddress("patJetPfAk05HfEmMulti_", &patJetPfAk05HfEmMulti_, &b_patJetPfAk05HfEmMulti_);
+   fChain->SetBranchAddress("patJetPfAk05PhotEnFr_", &patJetPfAk05PhotEnFr_, &b_patJetPfAk05PhotEnFr_);
+   fChain->SetBranchAddress("patJetPfAk05MuonEnFr_", &patJetPfAk05MuonEnFr_, &b_patJetPfAk05MuonEnFr_);
+   fChain->SetBranchAddress("patJetPfAk05HfHadEnFr_", &patJetPfAk05HfHadEnFr_, &b_patJetPfAk05HfHadEnFr_);
+   fChain->SetBranchAddress("patJetPfAk05HfEmEnFr_", &patJetPfAk05HfEmEnFr_, &b_patJetPfAk05HfEmEnFr_);
    fChain->SetBranchAddress("patJetPfAk05NeutEmEFr_", &patJetPfAk05NeutEmEFr_, &b_patJetPfAk05NeutEmEFr_);
    fChain->SetBranchAddress("patJetPfAk05CharHadEFr_", &patJetPfAk05CharHadEFr_, &b_patJetPfAk05CharHadEFr_);
    fChain->SetBranchAddress("patJetPfAk05NeutHadEFr_", &patJetPfAk05NeutHadEFr_, &b_patJetPfAk05NeutHadEFr_);
    fChain->SetBranchAddress("patJetPfAk05CharEmEFr_", &patJetPfAk05CharEmEFr_, &b_patJetPfAk05CharEmEFr_);
    fChain->SetBranchAddress("patJetPfAk05CharMuEFr_", &patJetPfAk05CharMuEFr_, &b_patJetPfAk05CharMuEFr_);
    fChain->SetBranchAddress("patJetPfAk05JetNConstituents_", &patJetPfAk05JetNConstituents_, &b_patJetPfAk05JetNConstituents_);
-//    fChain->SetBranchAddress("trigResults", &trigResults, &b_trigResults);
-//    fChain->SetBranchAddress("trigPrescale", &trigPrescale, &b_trigPrescale);
-//    fChain->SetBranchAddress("trigName", &trigName, &b_trigName);
+   fChain->SetBranchAddress("trigResults", &trigResults, &b_trigResults);
+   fChain->SetBranchAddress("trigPrescale", &trigPrescale, &b_trigPrescale);
+   fChain->SetBranchAddress("trigName", &trigName, &b_trigName);
    fChain->SetBranchAddress("Photonrho25", &Photonrho25, &b_Photonrho25);
-//    fChain->SetBranchAddress("Photonrho44", &Photonrho44, &b_Photonrho44);
-//    fChain->SetBranchAddress("PhotonNumPh_", &PhotonNumPh_, &b_PhotonNumPh_);
+   fChain->SetBranchAddress("Photonrho44", &Photonrho44, &b_Photonrho44);
+   fChain->SetBranchAddress("PhotonNumPh_", &PhotonNumPh_, &b_PhotonNumPh_);
    fChain->SetBranchAddress("PhotonPt", &PhotonPt, &b_PhotonPt);
    fChain->SetBranchAddress("PhotonEta", &PhotonEta, &b_PhotonEta);
    fChain->SetBranchAddress("PhotonPhi", &PhotonPhi, &b_PhotonPhi);
    fChain->SetBranchAddress("PhotonEt", &PhotonEt, &b_PhotonEt);
    fChain->SetBranchAddress("PhotonEnergy", &PhotonEnergy, &b_PhotonEnergy);
-//    fChain->SetBranchAddress("PhotonPx", &PhotonPx, &b_PhotonPx);
-//    fChain->SetBranchAddress("PhotonPy", &PhotonPy, &b_PhotonPy);
-//    fChain->SetBranchAddress("PhotonPz", &PhotonPz, &b_PhotonPz);
-//    fChain->SetBranchAddress("PhotonR9", &PhotonR9, &b_PhotonR9);
-//    fChain->SetBranchAddress("PhotonPhiWidth", &PhotonPhiWidth, &b_PhotonPhiWidth);
-//    fChain->SetBranchAddress("PhotonEtaWidth", &PhotonEtaWidth, &b_PhotonEtaWidth);
-//    fChain->SetBranchAddress("PhotonScPhi", &PhotonScPhi, &b_PhotonScPhi);
+   fChain->SetBranchAddress("PhotonPx", &PhotonPx, &b_PhotonPx);
+   fChain->SetBranchAddress("PhotonPy", &PhotonPy, &b_PhotonPy);
+   fChain->SetBranchAddress("PhotonPz", &PhotonPz, &b_PhotonPz);
+   fChain->SetBranchAddress("PhotonR9", &PhotonR9, &b_PhotonR9);
+   fChain->SetBranchAddress("PhotonPhiWidth", &PhotonPhiWidth, &b_PhotonPhiWidth);
+   fChain->SetBranchAddress("PhotonEtaWidth", &PhotonEtaWidth, &b_PhotonEtaWidth);
+   fChain->SetBranchAddress("PhotonScPhi", &PhotonScPhi, &b_PhotonScPhi);
    fChain->SetBranchAddress("PhotonScEta", &PhotonScEta, &b_PhotonScEta);
    fChain->SetBranchAddress("PhotonSigmaIetaIeta", &PhotonSigmaIetaIeta, &b_PhotonSigmaIetaIeta);
-//    fChain->SetBranchAddress("PhotonSeedTime", &PhotonSeedTime, &b_PhotonSeedTime);
-//    fChain->SetBranchAddress("PhotonseedSeverity", &PhotonseedSeverity, &b_PhotonseedSeverity);
+   fChain->SetBranchAddress("PhotonSeedTime", &PhotonSeedTime, &b_PhotonSeedTime);
+   fChain->SetBranchAddress("PhotonseedSeverity", &PhotonseedSeverity, &b_PhotonseedSeverity);
    fChain->SetBranchAddress("PhotonhadronicOverEm", &PhotonhadronicOverEm, &b_PhotonhadronicOverEm);
    fChain->SetBranchAddress("PhotonecalRecHitSumEtConeDR04", &PhotonecalRecHitSumEtConeDR04, &b_PhotonecalRecHitSumEtConeDR04);
    fChain->SetBranchAddress("PhotonhcalTowerSumEtConeDR04", &PhotonhcalTowerSumEtConeDR04, &b_PhotonhcalTowerSumEtConeDR04);
@@ -612,19 +593,19 @@ void yj_angularmc_eff::Init(TTree *tree)
    fChain->SetBranchAddress("PhotonhasPixelSeed", &PhotonhasPixelSeed, &b_PhotonhasPixelSeed);
    fChain->SetBranchAddress("PhotonMCpthat", &PhotonMCpthat, &b_PhotonMCpthat);
    fChain->SetBranchAddress("PhotonisGenMatched", &PhotonisGenMatched, &b_PhotonisGenMatched);
-//    fChain->SetBranchAddress("PhotongenMomId", &PhotongenMomId, &b_PhotongenMomId);
-//    fChain->SetBranchAddress("PhotongenGrandMomId", &PhotongenGrandMomId, &b_PhotongenGrandMomId);
-//    fChain->SetBranchAddress("PhotongenNSiblings", &PhotongenNSiblings, &b_PhotongenNSiblings);
-//    fChain->SetBranchAddress("PhotongenMatchedE", &PhotongenMatchedE, &b_PhotongenMatchedE);
-//    fChain->SetBranchAddress("PhotongenMatchedPx", &PhotongenMatchedPx, &b_PhotongenMatchedPx);
-//    fChain->SetBranchAddress("PhotongenMatchedPy", &PhotongenMatchedPy, &b_PhotongenMatchedPy);
-//    fChain->SetBranchAddress("PhotongenMatchedPz", &PhotongenMatchedPz, &b_PhotongenMatchedPz);
-//    fChain->SetBranchAddress("PhotongenMatchedPt", &PhotongenMatchedPt, &b_PhotongenMatchedPt);
-//    fChain->SetBranchAddress("PhotongenMatchedEta", &PhotongenMatchedEta, &b_PhotongenMatchedEta);
-//    fChain->SetBranchAddress("PhotongenMatchedPhi", &PhotongenMatchedPhi, &b_PhotongenMatchedPhi);
-//    fChain->SetBranchAddress("PhotongenCalIsoDR04", &PhotongenCalIsoDR04, &b_PhotongenCalIsoDR04);
-//    fChain->SetBranchAddress("PhotongenTrkIsoDR04", &PhotongenTrkIsoDR04, &b_PhotongenTrkIsoDR04);
-//    fChain->SetBranchAddress("PhotongenIsoDR04", &PhotongenIsoDR04, &b_PhotongenIsoDR04);
+   fChain->SetBranchAddress("PhotongenMomId", &PhotongenMomId, &b_PhotongenMomId);
+   fChain->SetBranchAddress("PhotongenGrandMomId", &PhotongenGrandMomId, &b_PhotongenGrandMomId);
+   fChain->SetBranchAddress("PhotongenNSiblings", &PhotongenNSiblings, &b_PhotongenNSiblings);
+   fChain->SetBranchAddress("PhotongenMatchedE", &PhotongenMatchedE, &b_PhotongenMatchedE);
+   fChain->SetBranchAddress("PhotongenMatchedPx", &PhotongenMatchedPx, &b_PhotongenMatchedPx);
+   fChain->SetBranchAddress("PhotongenMatchedPy", &PhotongenMatchedPy, &b_PhotongenMatchedPy);
+   fChain->SetBranchAddress("PhotongenMatchedPz", &PhotongenMatchedPz, &b_PhotongenMatchedPz);
+   fChain->SetBranchAddress("PhotongenMatchedPt", &PhotongenMatchedPt, &b_PhotongenMatchedPt);
+   fChain->SetBranchAddress("PhotongenMatchedEta", &PhotongenMatchedEta, &b_PhotongenMatchedEta);
+   fChain->SetBranchAddress("PhotongenMatchedPhi", &PhotongenMatchedPhi, &b_PhotongenMatchedPhi);
+   fChain->SetBranchAddress("PhotongenCalIsoDR04", &PhotongenCalIsoDR04, &b_PhotongenCalIsoDR04);
+   fChain->SetBranchAddress("PhotongenTrkIsoDR04", &PhotongenTrkIsoDR04, &b_PhotongenTrkIsoDR04);
+   fChain->SetBranchAddress("PhotongenIsoDR04", &PhotongenIsoDR04, &b_PhotongenIsoDR04);
    Notify();
 }
 
