@@ -522,8 +522,6 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ngenjet->Fill(genJetPt_->size());
     h_nrecjet->Fill(patJetPfAk05Pt_->size());
 
-    if(genJetPt_->size()!=1)continue;
-
 
     // Find a good vertex first
     if(EvtInfo_nVtxGood<1) continue;
@@ -545,9 +543,11 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 	// then check if this photon is matched to a gen photon
  	if(!PhotonisGenMatched->at(ipho))continue;
 	
-// 	cout << "gen mom Id = " << PhotongenMomId->at(ipho) << endl;
 	// require it to match to a prompt photon
- 	if(fabs(PhotongenMomId->at(ipho))>22.1)continue; // not prompt photon 
+//  	if(fabs(PhotongenMomId->at(ipho))>22.1)continue; // not prompt photon 
+ 	if(fabs(PhotongenMomId->at(ipho)-22)>1e-6 && isDirPho)continue; // not prompt photon 
+ 	if(fabs(PhotongenMomId->at(ipho))>21.1 && isFraPho)continue; // not prompt photon 
+//  	cout << "gen mom Id = " << PhotongenMomId->at(ipho) << endl;
 // 	cout << "is a prompt photon" << endl;
 
 	// find the leading photon, usually there's only one in the MC
