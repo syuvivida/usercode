@@ -11,22 +11,20 @@ void call_displayTwofiles()
 
   gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_gentiso_all\",\"\",0,50,true,true)");
 
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jeteta_eff_EB_0_all\",\"\",-2.4,2.4)");
 
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_ptpho_all\",\"\",85,200,false,true)");
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jeteta_eff_EE_0_all\",\"\",-2.4,2.4)");
+  
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_phoeta_eff_allpt_0_all\",\"\",-2.3,2.3)");
 
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_ptjet_all\",\"\",30,400,false,true)");
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jetpt_eff_EB_0_all\",\"\", 30,300)");
 
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jetpt_eff_EB_0_all\",\"\",30,400,false,true)");
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jetpt_eff_EE_0_all\",\"\", 30,300)");
+  
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_phopt_eff_EB_0_all\",\"\",40,200)");
 
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jetpt_eff_EE_0_all\",\"\",30,400,false,true)");
+  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_phopt_eff_EE_0_all\",\"\",40,200)");
 
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_etapho_all\",\"\",-2.5,2.5)");
-
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_etapho_all\",\"\",-2.3,2.3,false,false,\"h_etapho_restricted\")");
-
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_etajet_all\",\"\",-2.4,2.4)");
-
-  gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_jeteta_eff_0_all\",\"\",-2.4,2.4)");
 
   gROOT->ProcessLine("displayTwofiles(\"combined_madgraph.root\",\"combined_pythia.root\",\"h_sieie_EB_all\",\"\",0,0.02,true)");
 

@@ -14,11 +14,6 @@ void call_combineMC_spectrum(std::string fileName)
   gROOT->ProcessLine(Form(
 			  "combineMC_spectrum(\"h_gentiso\",\"Gen-level track isolation [GeV]\",\"%s\",true)", fileName.data()));
 
-  gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_ptpho\",\"p_{T}(#gamma) [GeV]\",\"%s\",true)", fileName.data()));
-
-  gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_ptjet\",\"p_{T}(jet) [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_jetpt_eff_EB_0\", \"p_{T}(jet) with barrel photon [GeV]\",\"%s\",true)", fileName.data()));
@@ -27,16 +22,19 @@ void call_combineMC_spectrum(std::string fileName)
 "combineMC_spectrum(\"h_jetpt_eff_EE_0\", \"p_{T}(jet) with endcap photon [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_etapho\",\"#eta(#gamma)\",\"%s\",true)", fileName.data()));
-
-  gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_etajet\",\"#eta(jet)\",\"%s\",true)", fileName.data()));
-
-  gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_jeteta_eff_EB_0\",\"#eta(jet) with barrel photon\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_jeteta_eff_EE_0\",\"#eta(jet) with endcap photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_phopt_eff_EB_0\", \"p_{T}(barrel #gamma) [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_phopt_eff_EE_0\", \"p_{T}(endcap #gamma) [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_phoeta_eff_allpt_0\", \"#eta(#gamma)\",\"%s\",true)", fileName.data()));
 
 
   gROOT->ProcessLine(Form(
