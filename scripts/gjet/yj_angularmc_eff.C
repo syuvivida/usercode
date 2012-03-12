@@ -522,6 +522,9 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_ngenjet->Fill(genJetPt_->size());
     h_nrecjet->Fill(patJetPfAk05Pt_->size());
 
+    if(genJetPt_->size()!=1)continue;
+
+
     // Find a good vertex first
     if(EvtInfo_nVtxGood<1) continue;
     nPass[1]++;
