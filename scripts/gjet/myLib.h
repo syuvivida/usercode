@@ -2,7 +2,7 @@
 #include <TMath.h>
 
 namespace eiko {
-
+  // always put photon's or vector boston's Lorentz vector as l1, jet vector as l2
   Bool_t separated(TLorentzVector l1, TLorentzVector l2);
   Double_t zgamma(TLorentzVector l1, TLorentzVector l2);
   Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2);
