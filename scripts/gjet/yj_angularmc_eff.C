@@ -28,11 +28,12 @@ const double aeff[2][3]={
 
 
 
-void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
+void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpCorr)
 {
   if (fChain == 0) return;
   cout << "This is version 4" << endl;
   cout << "There are " << nPtBins << " pt bins" << endl;
+  cout << "require exclusive 1 jet: " << onlyOneJet << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
 
   //const double ystarMax = 1.4;  // if photon pt min~25 GeV
@@ -516,7 +517,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    //     if(jentry > 50000 ) break;
+//     if(jentry > 50000 ) break;
     nPass[0]++;
     h_pthat->Fill(PhotonMCpthat); // make sure we are checking the right MC samples
     h_ngenjet->Fill(genJetPt_->size());
@@ -633,6 +634,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
     double genJetMaxPt     = -9999.0;
     int leadingGenJetIndex = -1;
+    int nFiducialGenJets   = 0;
 
     // loop over generator-level jets
     for(unsigned int ij=0; ij < genJetPt_->size(); ij++)
@@ -642,6 +644,8 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
 
 	if(thisJetPt < 10.0)continue;
 	if(fabs(thisJetEta) > 3.0)continue;
+
+	nFiducialGenJets++;
 
 	// try to find the genJet that the highest gen pt
 	if(thisJetPt > genJetMaxPt)
@@ -656,6 +660,8 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if(leadingGenJetIndex <0)continue; // couldn't find a gen jet with pt > 10 GeV and |eta| < 3.0
     nPass[4]++;
 
+    
+    if(onlyOneJet && nFiducialGenJets!=1)continue;
 
     // find the reconstruction-level jet that is matched to this highest pt genJet
     int leadingJetIndex = matchGenToRecoJet(leadingGenJetIndex);
@@ -689,7 +695,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     //-------------------------------------------------------------------------
 
     TLorentzVector l4_sumjet(0,0,0,0);
-    int nFiducialJets = 0; // number of jets passing pt > 30 GeV, |eta| < 2.4, and matched to gen jet
+    int nFiducialRecoJets = 0; // number of jets passing pt > 30 GeV, |eta| < 2.4, and matched to gen jet
     double closestPt = -9999.;
     double closestEta = -9999.;
     double closestdR = 9999.;
@@ -701,7 +707,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
       int genJetIndex = matchRecoToGenJet(ijet);
       if(genJetIndex < 0)continue; // is this needed
 
-      nFiducialJets++;
+      nFiducialRecoJets++;
 
       TLorentzVector l4_thisJet(0,0,0,0);
       l4_thisJet.SetPtEtaPhiE(
@@ -790,7 +796,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     h_dRLeadingPhoJet[phoDecBinIndex]->Fill(gj_dR);
 
 
-    h_njet[phoDecBinIndex][0]->Fill(nFiducialJets);
+    h_njet[phoDecBinIndex][0]->Fill(nFiducialRecoJets);
     h_jetpt_eff[phoDecBinIndex][0]->Fill(leadingJetPt);
     h_jeteta_eff[phoDecBinIndex][0]->Fill(leadingJetEta);
 
@@ -869,7 +875,7 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     if(!isGoodLooseJet(leadingJetIndex))continue;
     //=============================================================
 
-    h_njet[phoDecBinIndex][1]->Fill(nFiducialJets);
+    h_njet[phoDecBinIndex][1]->Fill(nFiducialRecoJets);
     h_jetpt_eff[phoDecBinIndex][1]->Fill(leadingJetPt);
     h_jeteta_eff[phoDecBinIndex][1]->Fill(leadingJetEta);
 
@@ -964,7 +970,8 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     _inputFileName = "test.root";
 
   std::string prefix = "/home/syu/CVSCode/eff_";
-  if(applyCOMCut)prefix += "withCOMCut_";
+  if(onlyOneJet)     prefix += "exclusiveOneJet_";
+  if(applyCOMCut)    prefix += "withCOMCut_";
   if(applyPileUpCorr)prefix += "pileCorr_";
   TFile* outFile = new TFile(Form("%s%s",prefix.data(),_inputFileName.data()),"recreate");               
 
