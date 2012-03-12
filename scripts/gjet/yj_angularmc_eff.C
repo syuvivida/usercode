@@ -8,9 +8,11 @@
 
 // const double BARREL_MAXETA=1.4442;
 // const double ENDCAP_MINETA=1.566;
+// const double ENDCAP_MAXETA=2.5;
+
 const double BARREL_MAXETA=1.44;
 const double ENDCAP_MINETA=1.57;
-const double ENDCAP_MAXETA=2.5;
+const double ENDCAP_MAXETA=2.3;
 const int nDECs = 2;
 
 // double ptbound[]={85., 95., 110., 130., 160., 200.};
@@ -657,6 +659,9 @@ void yj_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
     // need to have a leading photon and a leading jet
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
     nPass[5]++;
+
+    if( !isFidJet(leadingJetIndex) )continue;
+    nPass[6]++;
 
     double leadingJetPt  = patJetPfAk05Pt_->at(leadingJetIndex);
     h_ptjet->Fill(leadingJetPt);

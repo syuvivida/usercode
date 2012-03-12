@@ -338,35 +338,35 @@
 "combineMC_eff(\"h_njet_EE\",\"Jet multiplicity in endcap\",1, 0.5,5.5)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_cost_COMZ_alljet_EB\",\"cos#theta^{*} in barrel (using all jets)\",4,0.0,0.95)");
+"combineMC_eff(\"h_cost_sumJet_EB_allpt\",\"cos#theta^{*} in barrel (using all jets)\",4,0.0,0.95)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_cost_COMZ_alljet_EE\",\"cos#theta^{*} in barrel (using all jets)\",4,0.0,0.95)");
+"combineMC_eff(\"h_cost_sumJet_EE_allpt\",\"cos#theta^{*} in barrel (using all jets)\",4,0.0,0.95)");
 
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_pstar_COMZ_alljet_EB\",\"p^{*} in barrel (using all jets)\",4,85,300)");
+"combineMC_eff(\"h_pstar_sumJet_EB_allpt\",\"p^{*} in barrel (using all jets)\",4,85,300)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_pstar_COMZ_alljet_EE\",\"p^{*} in endcap (using all jets)\",4,85,300)");
+"combineMC_eff(\"h_pstar_sumJet_EE_allpt\",\"p^{*} in endcap (using all jets)\",4,85,300)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_ystar_COMZ_alljet_EB\",\"y^{*} in barrel (using all jets)\",4,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_sumJet_EB_allpt\",\"y^{*} in barrel (using all jets)\",4,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_ystar_COMZ_alljet_EE\",\"y^{*} in endcap (using all jets)\",4,-2.4,2.4)");
+"combineMC_eff(\"h_ystar_sumJet_EE_allpt\",\"y^{*} in endcap (using all jets)\",4,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_alljetpt_eff_EB\",\"p_{T}(jet^{all}) with barrel photon\",4,30,200)");
+"combineMC_eff(\"h_sumjetpt_eff_EB\",\"p_{T}(jet^{all}) with barrel photon\",4,30,200)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_alljetpt_eff_EB\",\"p_{T}(jet^{all}) with barrel photon\",4,30,200)");
+"combineMC_eff(\"h_sumjetpt_eff_EB\",\"p_{T}(jet^{all}) with barrel photon\",4,30,200)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_alljeteta_eff_EE\",\"#eta(jet^{all}) with endcap photon\",4,-2.4,2.4)");
+"combineMC_eff(\"h_sumjeteta_eff_EE\",\"#eta(jet^{all}) with endcap photon\",4,-2.4,2.4)");
 
   gROOT->ProcessLine(
-"combineMC_eff(\"h_alljeteta_eff_EE\",\"#eta(jet^{all}) with endcap photon\",4,-2.4,2.4)");
+"combineMC_eff(\"h_sumjeteta_eff_EE\",\"#eta(jet^{all}) with endcap photon\",4,-2.4,2.4)");
 
 
   myWatch->Stop();

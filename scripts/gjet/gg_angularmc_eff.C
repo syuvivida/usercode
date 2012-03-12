@@ -783,7 +783,7 @@ void gg_angularmc_eff::Loop(bool applyCOMCut, bool applyPileUpCorr)
   //---------------------------------------------------------------------------------------
      
   
-  std::string remword  ="/data4/syu/7TeV_pythiaMC/";
+  std::string remword  ="/data4/syu/7TeV_ggNtuple/";
   std::string remword2 ="/data2/syu/7TeV_madgraphMC/";
 
   size_t pos  = _inputFileName.find(remword);

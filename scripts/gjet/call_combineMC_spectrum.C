@@ -21,7 +21,10 @@ void call_combineMC_spectrum(std::string fileName)
 "combineMC_spectrum(\"h_ptjet\",\"p_{T}(jet) [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_jetpt_eff_0\", \"p_{T}(jet) [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_jetpt_eff_EB_0\", \"p_{T}(jet) with barrel photon [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_jetpt_eff_EE_0\", \"p_{T}(jet) with endcap photon [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_etapho\",\"#eta(#gamma)\",\"%s\",true)", fileName.data()));
@@ -30,45 +33,48 @@ void call_combineMC_spectrum(std::string fileName)
 "combineMC_spectrum(\"h_etajet\",\"#eta(jet)\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_jeteta_eff_0\",\"#eta(jet)\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_jeteta_eff_EB_0\",\"#eta(jet) with barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_jeteta_eff_EE_0\",\"#eta(jet) with endcap photon\",\"%s\",true)", fileName.data()));
 
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_sieie_leadingEB\",\"Barrel #sigma_{i#eta i#eta}\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_sieie_EB\",\"Barrel #sigma_{i#eta i#eta}\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_eciso_leadingEB\",\"Barrel ISO_{ECAL} [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_eciso_EB\",\"Barrel ISO_{ECAL} [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_hciso_leadingEB\",\"Barrel ISO_{HCAL} [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_hciso_EB\",\"Barrel ISO_{HCAL} [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_tkiso_leadingEB\",\"Barrel ISO_{TRK} [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_tkiso_EB\",\"Barrel ISO_{TRK} [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_hovere_leadingEB\",\"Barrel H/E\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_hovere_EB\",\"Barrel H/E\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_pixel_leadingEB\",\"Barrel hasPixelSeed\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_pixel_EB\",\"Barrel hasPixelSeed\",\"%s\",true)", fileName.data()));
  
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_sieie_leadingEE\",\"Endcap #sigma_{i#eta i#eta}\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_sieie_EE\",\"Endcap #sigma_{i#eta i#eta}\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_eciso_leadingEE\",\"Endcap ISO_{ECAL} [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_eciso_EE\",\"Endcap ISO_{ECAL} [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_hciso_leadingEE\",\"Endcap ISO_{HCAL} [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_hciso_EE\",\"Endcap ISO_{HCAL} [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_tkiso_leadingEE\",\"Endcap ISO_{TRK} [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_tkiso_EE\",\"Endcap ISO_{TRK} [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_hovere_leadingEE\",\"Endcap H/E\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_hovere_EE\",\"Endcap H/E\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_pixel_leadingEE\",\"Endcap hasPixelSeed\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_pixel_EE\",\"Endcap hasPixelSeed\",\"%s\",true)", fileName.data()));
  
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_ptratio_EB_0\",\"Barrel p_{T}(jet)/p_{T}(#gamma)\",\"%s\",true)", fileName.data()));
@@ -121,10 +127,17 @@ void call_combineMC_spectrum(std::string fileName)
 
 
   gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_njetraw_EB\",\"Jet multiplicity with barrel photon\",\"%s\",true)", fileName.data()));
+			  "combineMC_spectrum(\"h_ngenjet\",\"Generator-level jet multiplicity\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_njetraw_EE\",\"Jet multiplicity with endcap photon\",\"%s\",true)", fileName.data()));
+			  "combineMC_spectrum(\"h_nrecjet\",\"Reconstruction-level jet multiplicity\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_njet_EB_0\",\"Fiducial jet multiplicity with barrel photon\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+			  "combineMC_spectrum(\"h_njet_EE_0\",\"Fiducial jet multiplicity with endcap photon\",\"%s\",true)", fileName.data()));
 
 
   gROOT->ProcessLine(Form(
@@ -153,37 +166,37 @@ void call_combineMC_spectrum(std::string fileName)
 			  "combineMC_spectrum(\"h_dRLeadingPhoJet_EE\",\"#Delta R of the leading photon (endcap) and jet\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_alljetpt_eff_EB_0\",\"p_{T}(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
+			  "combineMC_spectrum(\"h_sumjetpt_eff_EB_0\",\"p_{T}(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_alljetpt_eff_EE_0\",\"p_{T}(jet^{all}) with endcap photon\",\"%s\",true)", fileName.data()));
-
-
-  gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_alljeteta_eff_EB_0\",\"#eta(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
-
-  gROOT->ProcessLine(Form(
-			  "combineMC_spectrum(\"h_alljeteta_eff_EE_0\",\"#eta(jet^{all}) with endcap photon\",\"%s\",true)", fileName.data()));
+			  "combineMC_spectrum(\"h_sumjetpt_eff_EE_0\",\"p_{T}(jet^{all}) with endcap photon\",\"%s\",true)", fileName.data()));
 
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_cost_COMZ_alljet_EB_0\",\"Barrel cos#theta^{*} using all jets\",\"%s\",true)", fileName.data()));
+			  "combineMC_spectrum(\"h_sumjeteta_eff_EB_0\",\"#eta(jet^{all}) with barrel photon\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_pstar_COMZ_alljet_EB_0\",\"Barrel p^{*} using all jets [GeV]\",\"%s\",true)", fileName.data()));
-
-  gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_ystar_COMZ_alljet_EB_0\",\"Barrel y^{*} using all jets\",\"%s\",true)", fileName.data()));
+			  "combineMC_spectrum(\"h_sumjeteta_eff_EE_0\",\"#eta(jet^{all}) with endcap photon\",\"%s\",true)", fileName.data()));
 
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_cost_COMZ_alljet_EE_0\",\"Endcap cos#theta^{*} using all jets\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_cost_sumJet_EB_allpt_0\",\"Barrel cos#theta^{*} using all jets\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_pstar_COMZ_alljet_EE_0\",\"Endcap p^{*} using all jets [GeV]\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_pstar_sumJet_EB_allpt_0\",\"Barrel p^{*} using all jets [GeV]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
-"combineMC_spectrum(\"h_ystar_COMZ_alljet_EE_0\",\"Endcap y^{*} using all jets\",\"%s\",true)", fileName.data()));
+"combineMC_spectrum(\"h_ystar_sumJet_EB_allpt_0\",\"Barrel y^{*} using all jets\",\"%s\",true)", fileName.data()));
+
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_cost_sumJet_EE_allpt_0\",\"Endcap cos#theta^{*} using all jets\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_pstar_sumJet_EE_allpt_0\",\"Endcap p^{*} using all jets [GeV]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_ystar_sumJet_EE_allpt_0\",\"Endcap y^{*} using all jets\",\"%s\",true)", fileName.data()));
 
   myWatch->Stop();
   cout << myWatch->RealTime() << " seconds has passed! " << endl; 
