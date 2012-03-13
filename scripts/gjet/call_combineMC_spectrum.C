@@ -87,6 +87,12 @@ void call_combineMC_spectrum(std::string fileName)
 "combineMC_spectrum(\"h_nvtx_EE_0\",\"Endcap number of good vertices\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_gendphi_EB_0\",\"Generator-level #Delta #phi(barrel #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_gendphi_EB_1\",\"Generator-level #Delta #phi(barrel #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_dphi_EB_allpt_0\",\"#Delta #phi(barrel #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
@@ -104,6 +110,11 @@ void call_combineMC_spectrum(std::string fileName)
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_ystar_COMZ_EB_allpt_0\",\"Barrel y^{*}\",\"%s\",true)", fileName.data()));
 
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_gendphi_EE_0\",\"Generator-level #Delta #phi(endcap #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
+
+  gROOT->ProcessLine(Form(
+"combineMC_spectrum(\"h_gendphi_EE_1\",\"Generator-level #Delta #phi(endcap #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));
 
   gROOT->ProcessLine(Form(
 "combineMC_spectrum(\"h_dphi_EE_allpt_0\",\"#Delta #phi(endcap #gamma,jet) [radian]\",\"%s\",true)", fileName.data()));

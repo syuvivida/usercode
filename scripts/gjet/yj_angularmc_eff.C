@@ -265,7 +265,6 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
   for(int idec=0; idec < nDECs; idec ++){
     
-
     h2_ystar_pstar[idec] = (TH2D*)h2_ystar_pstar_template->Clone(Form("h2_ystar_pstar_%s",decName[idec].data()));
     h2_ystar_pstar[idec] -> SetXTitle("y^{*}");
     h2_ystar_pstar[idec] -> SetYTitle("p^{*} [GeV]");
@@ -292,6 +291,11 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
   }
 
+    
+  TH1D* h_gendphi[2][2];       // in EB and EE, before and after ID selections, but not for efficiency study,
+                               // only for debugging
+  TH1D* h_gendR[2][2];       // in EB and EE, before and after ID selections, but not for efficiency study,
+                               // only for debugging
   // histograms for efficiency
 
   TH1D* h_njet[2][2];                  // in EB and EE, before and after ID selections
@@ -337,6 +341,13 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
     for(int idec=0; idec< nDECs; idec++)
       {
+	h_gendphi[idec][ip] = (TH1D*)h_dphi_template->Clone(Form("h_gendphi_%s_%d",decName[idec].data(),ip));
+	h_gendphi[idec][ip] -> SetXTitle("Generator-level #Delta#phi(#gamma,jet^{1st})");
+
+
+	h_gendR[idec][ip] = (TH1D*)h_dR_template->Clone(Form("h_gendR_%s_%d",decName[idec].data(),ip));
+	h_gendR[idec][ip] -> SetXTitle("Generator-level #DeltaR(#gamma,jet^{1st})");
+
 
 	h_njet[idec][ip] = (TH1D*)h_njet_template->Clone(Form("h_njet_%s_%d", decName[idec].data(), ip));
 	h_njet[idec][ip] -> SetXTitle("Number of reconstructed jets");
@@ -523,10 +534,12 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     h_ngenjet->Fill(genJetPt_->size());
     h_nrecjet->Fill(patJetPfAk05Pt_->size());
 
-
+    if(onlyOneJet && genJetPt_->size() !=1)continue;
+    nPass[1]++;
+    
     // Find a good vertex first
     if(EvtInfo_nVtxGood<1) continue;
-    nPass[1]++;
+    nPass[2]++;
 
 
     int leadingPhotonIndex = -1;
@@ -563,9 +576,9 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     // end of leading photon search
 //     cout << "leadingPhotonIndex = " << leadingPhotonIndex << endl;
     if(leadingPhotonIndex<0)continue;
-    nPass[2]++;
+    nPass[3]++;
 
-    if(leadingPhotonIndex>0)nPass[3]++;
+    if(leadingPhotonIndex>0)nPass[4]++;
 
     double leadingPhotonEt = PhotonEt->at(leadingPhotonIndex);
     int phoPtBinIndex =  h_ptbin_template->GetXaxis()->FindBin(leadingPhotonEt)-1; 
@@ -627,50 +640,67 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 			PhotonEnergy->at(leadingPhotonIndex)
 			);
 
+    TLorentzVector l4_genpho(0,0,0,0);
+
+    l4_genpho.SetPxPyPzE(
+			 PhotongenMatchedPx->at(leadingPhotonIndex),
+			 PhotongenMatchedPy->at(leadingPhotonIndex),
+			 PhotongenMatchedPz->at(leadingPhotonIndex),
+			 PhotongenMatchedE->at(leadingPhotonIndex)
+			 );
+
+
     //-------------------------------------------------------------------------
     // find the gen jet index that has the highest pt and also find the matched
-    // reco jet, this gen jet needs to have pt > 10 GeV and |eta| < 3.0
+    // reco jet, this gen jet needs to have pt > 10 GeV and |eta| < 3.0, delta
+    // R < 0.5 with respect to gen photon
     //-------------------------------------------------------------------------
 
     double genJetMaxPt     = -9999.0;
     int leadingGenJetIndex = -1;
-    int nFiducialGenJets   = 0;
 
     // loop over generator-level jets
-    for(unsigned int ij=0; ij < genJetPt_->size(); ij++)
+    for(unsigned int ijet=0; ijet < genJetPt_->size(); ijet++)
       {
-	double thisJetPt = genJetPt_->at(ij);
-	double thisJetEta= genJetEta_->at(ij);
+	double thisJetPt = genJetPt_->at(ijet);
+	double thisJetEta= genJetEta_->at(ijet);
 
 	if(thisJetPt < 10.0)continue;
 	if(fabs(thisJetEta) > 3.0)continue;
 
-	nFiducialGenJets++;
+	TLorentzVector l4_thisGenJet(0,0,0,0);
+	l4_thisGenJet.SetPtEtaPhiE(
+				   genJetPt_->at(ijet),
+				   genJetEta_->at(ijet),
+				   genJetPhi_->at(ijet),
+				   genJetE_->at(ijet)
+				   );
+    
+ 	if(!eiko::separated(l4_genpho, l4_thisGenJet))continue;
+
 
 	// try to find the genJet that the highest gen pt
 	if(thisJetPt > genJetMaxPt)
 	  {
 	    genJetMaxPt                   = thisJetPt;
-	    leadingGenJetIndex            = ij;
+	    leadingGenJetIndex            = ijet;
 	  }
 
 
       } // end of loop over genJets
 
     if(leadingGenJetIndex <0)continue; // couldn't find a gen jet with pt > 10 GeV and |eta| < 3.0
-    nPass[4]++;
+    nPass[5]++;
 
     
-    if(onlyOneJet && nFiducialGenJets!=1)continue;
-
     // find the reconstruction-level jet that is matched to this highest pt genJet
     int leadingJetIndex = matchGenToRecoJet(leadingGenJetIndex);
     // need to have a leading photon and a leading jet
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
-    nPass[5]++;
+    nPass[6]++;
 
     if( !isFidJet(leadingJetIndex) )continue;
-    nPass[6]++;
+    nPass[7]++;
 
     double leadingJetPt  = patJetPfAk05Pt_->at(leadingJetIndex);
     h_ptjet->Fill(leadingJetPt);
@@ -686,6 +716,8 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 			   patJetPfAk05En_->at(leadingJetIndex)
 			   );
 
+    if(!eiko::separated(l4_pho, l4_1stjet))continue;
+    nPass[8]++;
 
 
     //-------------------------------------------------------------------------
@@ -744,8 +776,6 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     // Preselections                                    
     //-------------------------------------------------------------------------
     
-    if(!eiko::separated(l4_pho, l4_1stjet))continue;
-
     double gj_pstar_comZ = eiko::pstar_ZBoostToCM(l4_pho, l4_1stjet);
     double gj_ystar_comZ = eiko::ystar_ZBoostToCM(l4_pho, l4_1stjet);
 
@@ -754,7 +784,7 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
 
     if(applyCOMCut && !passCOMCut)continue;
-
+    nPass[9]++;
 
     //-------------------------------------------------------------------------
     // Now we plot distributions before and after cuts
@@ -795,6 +825,21 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     h_dRclosestjet[phoDecBinIndex]->Fill(closestdR);
     h_dRLeadingPhoJet[phoDecBinIndex]->Fill(gj_dR);
 
+
+    TLorentzVector l4_genjet(0,0,0,0);
+
+    l4_genjet.SetPtEtaPhiE(
+			   genJetPt_->at(leadingGenJetIndex),
+			   genJetEta_->at(leadingGenJetIndex),
+			   genJetPhi_->at(leadingGenJetIndex),
+			   genJetE_->at(leadingGenJetIndex)
+			   );
+    
+    double gendphi = eiko::deltaPhi(l4_genpho, l4_genjet);
+    h_gendphi[phoDecBinIndex][0]->Fill(gendphi);
+
+    double gendR   = l4_genpho.DeltaR(l4_genjet);
+    h_gendR[phoDecBinIndex][0]->Fill(gendR);
 
     h_njet[phoDecBinIndex][0]->Fill(nFiducialRecoJets);
     h_jetpt_eff[phoDecBinIndex][0]->Fill(leadingJetPt);
@@ -870,10 +915,13 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     // after applying cuts
 
     //=============================================================
-    if(!eiko::separated(l4_pho, l4_1stjet))continue;
     if(!isGoodPho(leadingPhotonIndex, applyPileUpCorr))continue;
     if(!isGoodLooseJet(leadingJetIndex))continue;
     //=============================================================
+    nPass[10]++;
+
+    h_gendphi[phoDecBinIndex][1]->Fill(gendphi);
+    h_gendR[phoDecBinIndex][1]->Fill(gendR);
 
     h_njet[phoDecBinIndex][1]->Fill(nFiducialRecoJets);
     h_jetpt_eff[phoDecBinIndex][1]->Fill(leadingJetPt);
@@ -1001,7 +1049,7 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
   h_etajet->Write();
 
   for(int idec=0; idec< nDECs; idec++){
-
+    
     h2_ystar_pstar[idec]->Write();
     h_ptclosestjet[idec]->Write();
     h_etaclosestjet[idec]->Write();
@@ -1012,8 +1060,12 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
       pf_nvtx_eciso[idec][ip]->Write();
       pf_nvtx_hciso[idec][ip]->Write();
       pf_nvtx_tkiso[idec][ip]->Write();
+      
+      h_gendphi[idec][ip]->Write();
+      h_gendR[idec][ip]->Write();
       h_njet[idec][ip]->Write();
 
+      
       h_jetpt_eff[idec][ip]->Write();
       h_jeteta_eff[idec][ip]->Write();
 
