@@ -534,7 +534,8 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     h_ngenjet->Fill(genJetPt_->size());
     h_nrecjet->Fill(patJetPfAk05Pt_->size());
 
-    if(onlyOneJet && genJetPt_->size() !=1)continue;
+    if(onlyOneJet && isDirPho && genJetPt_->size() !=1)continue;
+    if(onlyOneJet && isFraPho && genJetPt_->size() !=2)continue;
     nPass[1]++;
     
     // Find a good vertex first
