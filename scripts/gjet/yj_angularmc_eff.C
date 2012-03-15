@@ -28,13 +28,14 @@ const double aeff[2][3]={
 
 
 
-void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpCorr)
+void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUpCorr, bool onlyOneJet)
 {
   if (fChain == 0) return;
   cout << "This is version 4" << endl;
   cout << "There are " << nPtBins << " pt bins" << endl;
-  cout << "require exclusive 1 jet: " << onlyOneJet << endl;
+  cout << "require there is no jet within deltaR=0.5 of photon: " << noNearbyJet << endl;
   cout << "applyCOMCut: " << applyCOMCut << "\t applyPileUpCorr: " << applyPileUpCorr << endl;
+  cout << "require exclusive 1 jet: " << onlyOneJet << endl;
 
   //const double ystarMax = 1.4;  // if photon pt min~25 GeV
   const double ystarMax = 1.0;  // if photon pt min~ 85 GeV
@@ -589,48 +590,9 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     int phoDecBinIndex = phoDecCode(leadingPhotonIndex);
     h_etapho->Fill(leadingPhotonEta);
 
-    h_genciso->Fill(PhotongenCalIsoDR04->at(leadingPhotonIndex));
-    h_gentiso->Fill(PhotongenTrkIsoDR04->at(leadingPhotonIndex));
-
     // dummy proof, but already make the same requirement in isFidPho
     if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))continue;
     if(phoDecBinIndex < 0)continue;
-
-    // check the photon ID variable before making cuts on them
-    h_sieie[phoDecBinIndex] -> Fill(PhotonSigmaIetaIeta->at(leadingPhotonIndex));
-    h_hovere[phoDecBinIndex]-> Fill(PhotonhadronicOverEm->at(leadingPhotonIndex));
-    h_pixel[phoDecBinIndex] -> Fill(PhotonhasPixelSeed->at(leadingPhotonIndex));
-
-
-    double eciso = phoEcalIso(leadingPhotonIndex,false);
-    double hciso = phoHcalIso(leadingPhotonIndex,false);
-    double tkiso = phoTrkIso(leadingPhotonIndex,false);
-
-    double eciso_corr = phoEcalIso(leadingPhotonIndex,true);
-    double hciso_corr = phoHcalIso(leadingPhotonIndex,true);
-    double tkiso_corr = phoTrkIso(leadingPhotonIndex,true);
-
-
-    h_eciso[phoDecBinIndex] -> Fill(eciso);
-    h_hciso[phoDecBinIndex] -> Fill(hciso);
-    h_tkiso[phoDecBinIndex] -> Fill(tkiso);
-
-    // checking the isolation behaviour as a function of nvertex
-    pf_nvtx_eciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,eciso);
-    pf_nvtx_hciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,hciso);
-    pf_nvtx_tkiso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,tkiso);
-
-    // after pileup correction
-    h_eciso[phoDecBinIndex+2] -> Fill(eciso_corr);
-    h_hciso[phoDecBinIndex+2] -> Fill(hciso_corr);
-    h_tkiso[phoDecBinIndex+2] -> Fill(tkiso_corr);
-
-
-    // checking the isolation behaviour as a function of nvertex
-    pf_nvtx_eciso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,eciso_corr);
-    pf_nvtx_hciso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,hciso_corr);
-    pf_nvtx_tkiso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,tkiso_corr);
-
 
     // assign 4-vector of leading photon
     TLorentzVector l4_pho(0,0,0,0);
@@ -651,6 +613,7 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 			 );
 
 
+
     //-------------------------------------------------------------------------
     // find the gen jet index that has the highest pt and also find the matched
     // reco jet, this gen jet needs to have pt > 10 GeV and |eta| < 3.0, delta
@@ -659,6 +622,7 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
     double genJetMaxPt     = -9999.0;
     int leadingGenJetIndex = -1;
+    bool hasNearbyJet      = false;
 
     // loop over generator-level jets
     for(unsigned int ijet=0; ijet < genJetPt_->size(); ijet++)
@@ -677,7 +641,10 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 				   genJetE_->at(ijet)
 				   );
     
- 	if(!eiko::separated(l4_genpho, l4_thisGenJet))continue;
+ 	if(!eiko::separated(l4_genpho, l4_thisGenJet)){
+	  hasNearbyJet = true;
+	  continue;
+	}
 
 
 	// try to find the genJet that the highest gen pt
@@ -690,18 +657,22 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
       } // end of loop over genJets
 
-    if(leadingGenJetIndex <0)continue; // couldn't find a gen jet with pt > 10 GeV and |eta| < 3.0
+
+    if( noNearbyJet && hasNearbyJet)continue;
     nPass[5]++;
+    
+    if(leadingGenJetIndex <0)continue; // couldn't find a gen jet with pt > 10 GeV and |eta| < 3.0
+    nPass[6]++;
 
     
     // find the reconstruction-level jet that is matched to this highest pt genJet
     int leadingJetIndex = matchGenToRecoJet(leadingGenJetIndex);
     // need to have a leading photon and a leading jet
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
-    nPass[6]++;
+    nPass[7]++;
 
     if( !isFidJet(leadingJetIndex) )continue;
-    nPass[7]++;
+    nPass[8]++;
 
     double leadingJetPt  = patJetPfAk05Pt_->at(leadingJetIndex);
     h_ptjet->Fill(leadingJetPt);
@@ -718,7 +689,7 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 			   );
 
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
-    nPass[8]++;
+    nPass[9]++;
 
 
     //-------------------------------------------------------------------------
@@ -785,11 +756,54 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
 
 
     if(applyCOMCut && !passCOMCut)continue;
-    nPass[9]++;
+    nPass[10]++;
 
     //-------------------------------------------------------------------------
     // Now we plot distributions before and after cuts
     //-------------------------------------------------------------------------
+
+    //-------------------------------------------------------------------------
+    // First photon variables
+    //-------------------------------------------------------------------------
+
+    h_genciso->Fill(PhotongenCalIsoDR04->at(leadingPhotonIndex));
+    h_gentiso->Fill(PhotongenTrkIsoDR04->at(leadingPhotonIndex));
+
+
+    // check the photon ID variable before making cuts on them
+    h_sieie[phoDecBinIndex] -> Fill(PhotonSigmaIetaIeta->at(leadingPhotonIndex));
+    h_hovere[phoDecBinIndex]-> Fill(PhotonhadronicOverEm->at(leadingPhotonIndex));
+    h_pixel[phoDecBinIndex] -> Fill(PhotonhasPixelSeed->at(leadingPhotonIndex));
+
+
+    double eciso = phoEcalIso(leadingPhotonIndex,false);
+    double hciso = phoHcalIso(leadingPhotonIndex,false);
+    double tkiso = phoTrkIso(leadingPhotonIndex,false);
+
+    double eciso_corr = phoEcalIso(leadingPhotonIndex,true);
+    double hciso_corr = phoHcalIso(leadingPhotonIndex,true);
+    double tkiso_corr = phoTrkIso(leadingPhotonIndex,true);
+
+
+    h_eciso[phoDecBinIndex] -> Fill(eciso);
+    h_hciso[phoDecBinIndex] -> Fill(hciso);
+    h_tkiso[phoDecBinIndex] -> Fill(tkiso);
+
+    // checking the isolation behaviour as a function of nvertex
+    pf_nvtx_eciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,eciso);
+    pf_nvtx_hciso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,hciso);
+    pf_nvtx_tkiso[phoDecBinIndex][0]->Fill(EvtInfo_nVtxGood,tkiso);
+
+    // after pileup correction
+    h_eciso[phoDecBinIndex+2] -> Fill(eciso_corr);
+    h_hciso[phoDecBinIndex+2] -> Fill(hciso_corr);
+    h_tkiso[phoDecBinIndex+2] -> Fill(tkiso_corr);
+
+
+    // checking the isolation behaviour as a function of nvertex
+    pf_nvtx_eciso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,eciso_corr);
+    pf_nvtx_hciso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,hciso_corr);
+    pf_nvtx_tkiso[phoDecBinIndex][1]->Fill(EvtInfo_nVtxGood,tkiso_corr);
 
 
     double gj_zgamma = eiko::zgamma(l4_pho, l4_1stjet);
@@ -919,7 +933,7 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     if(!isGoodPho(leadingPhotonIndex, applyPileUpCorr))continue;
     if(!isGoodLooseJet(leadingJetIndex))continue;
     //=============================================================
-    nPass[10]++;
+    nPass[11]++;
 
     h_gendphi[phoDecBinIndex][1]->Fill(gendphi);
     h_gendR[phoDecBinIndex][1]->Fill(gendR);
@@ -1019,9 +1033,10 @@ void yj_angularmc_eff::Loop(bool onlyOneJet, bool applyCOMCut, bool applyPileUpC
     _inputFileName = "test.root";
 
   std::string prefix = "/home/syu/CVSCode/eff_";
-  if(onlyOneJet)     prefix += "exclusiveOneJet_";
+  if(noNearbyJet)    prefix += "hasNoNearbyJet_";
   if(applyCOMCut)    prefix += "withCOMCut_";
   if(applyPileUpCorr)prefix += "pileCorr_";
+  if(onlyOneJet)     prefix += "exclusiveOneJet_";
   TFile* outFile = new TFile(Form("%s%s",prefix.data(),_inputFileName.data()),"recreate");               
 
   h_pthat->Write();

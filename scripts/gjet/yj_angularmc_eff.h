@@ -310,7 +310,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(bool onlyOneJet=false, bool applyCOMCut=false, bool applyPileupCorr=true);
+   virtual void     Loop(bool noNearbyJet=false, bool applyCOMCut=false, bool applyPileupCorr=true, bool onlyOneJet=false);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual Int_t    phoDecCode(Int_t ipho);
