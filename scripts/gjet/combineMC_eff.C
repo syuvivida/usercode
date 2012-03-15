@@ -321,10 +321,11 @@ void combineMC_eff(std::string histoName, std::string xtitle, int rebin=1, doubl
 
    } // if there is more than one file, display each efficiency curve
 
-  TFile* outFile = new TFile(Form("effHistos/eff_%s.root",temp_histoName.data()),"recreate");               
-  eff_final->Write();
-  outFile->Close();
-  
+   TFile* outFile = new TFile(Form("effHistos/eff_%s.root",temp_histoName.data()),"recreate");               
+   eff_final->Write();
+   outFile->Close();
+
+   myMCFiles.clear();
 
 }
 
