@@ -72,7 +72,7 @@ void zee_angular::Loop()
   TH2D* h2d_mass_template = new TH2D("h2d_mass_template","",500,0,500,500,0,500);
   h2d_mass_template->SetXTitle("M_{jj} [GeV/c^{2}]");
 
-  TH1D* h_mass_template = new TH1D("h_mass_template","",200,20,220);
+  TH1D* h_mass_template = new TH1D("h_mass_template","",500, 0, 500);
   h_mass_template->SetXTitle("M_{ee} [GeV/c^{2}]");
 
   TH1D* h_cost_template = new TH1D("h_cost_template","", 100,0.0,1.0);
@@ -104,6 +104,10 @@ void zee_angular::Loop()
   TH1D* h_zmass_ID      = (TH1D*)h_mass_template->Clone("h_zmass_ID");
   h_zmass_ID->SetTitle("After WP80VBTF11 electron ID selections");
 
+  TH1D* h_mdiff         = (TH1D*)h_mass_template->Clone("h_mdiff");
+  h_mdiff->SetTitle("After WP80VBTF11 electron ID selections");
+  h_mdiff->SetXTitle("M_{Zjj}-M_{jj} [GeV]");
+
    
   // 0: inclusive, at least one jet, n>0: exclusive n jet (up to 6)
   const int NMAXJETS = 7; 
@@ -112,6 +116,8 @@ void zee_angular::Loop()
   TH1D* h_cost_COM3D[NMAXJETS];
   TH1D* h_cost_COMZ[NMAXJETS];
   TH1D* h_cost_sumJet[NMAXJETS];
+
+  TH1D* h_yB[NMAXJETS];
   TH1D* h_ystar[NMAXJETS];
   TH1D* h_ystar_COM3D[NMAXJETS];
   TH1D* h_ystar_COMZ[NMAXJETS];
@@ -134,6 +140,7 @@ void zee_angular::Loop()
   for(int ij=0; ij < NMAXJETS; ij++)
     {
       if(ij==0)jetprefix = "#geq 1 jets";
+      else if(ij==1)jetprefix = Form("= %d jet",ij);
       else jetprefix = Form("= %d jets",ij);
      
       threedprefix = jetprefix + ", boosted to the COM frame in 3D";
@@ -146,6 +153,9 @@ void zee_angular::Loop()
 
       h_ystar      [ij]  = (TH1D*)h_ystar_template->Clone(Form("h_ystar_%d",ij));
       h_ystar      [ij]  -> SetXTitle("0.5(y_{Z}-y_{jet^{1st}})");
+
+      h_yB         [ij]  = (TH1D*)h_ystar_template->Clone(Form("h_yB_%d",ij));
+      h_yB         [ij]  -> SetXTitle("0.5(y_{Z}+y_{jet^{1st}})");
 
       h_ystar_COM3D[ij]  = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COM3D_%d",ij));
       h_ystar_COMZ [ij]  = (TH1D*)h_ystar_template->Clone(Form("h_ystar_COMZ_%d",ij));
@@ -178,7 +188,8 @@ void zee_angular::Loop()
       h_cost_sumJet[ij]  -> SetTitle(sumjetprefix.data());
       h_ystar_sumJet[ij] -> SetTitle(sumjetprefix.data());
 
-      h_ystar      [ij]  -> SetTitle(jetprefix.data());
+      h_yB[ij]           -> SetTitle(jetprefix.data());
+      h_ystar[ij]        -> SetTitle(jetprefix.data());
       h_zpt[ij]          -> SetTitle(jetprefix.data());
       h_zy[ij]           -> SetTitle(jetprefix.data());
 
@@ -416,6 +427,9 @@ void zee_angular::Loop()
     double zsumj_cost_comZ  = eiko::cosThetaStar_ZBoostToCM(l4_z, l4_sumjet);
     h_cost_sumJet[0]     ->Fill(zsumj_cost_comZ);
 
+    double zj_yB          = eiko::yB(l4_z, l4_1stjet);
+    h_yB[0]              ->Fill(zj_yB);
+
     double zj_ystar       = eiko::ystar(l4_z, l4_1stjet);
     h_ystar[0]           ->Fill(zj_ystar);
 
@@ -448,6 +462,8 @@ void zee_angular::Loop()
     h_cost_COM3D[nGoodLooseJets]      ->Fill(zj_cost_com3D);
     h_cost_COMZ[nGoodLooseJets]       ->Fill(zj_cost_comZ);
     h_cost_sumJet[nGoodLooseJets]     ->Fill(zsumj_cost_comZ);
+
+    h_yB[nGoodLooseJets]              ->Fill(zj_yB);
     h_ystar[nGoodLooseJets]           ->Fill(zj_ystar);
     h_ystar_COM3D[nGoodLooseJets]     ->Fill(zj_ystar_com3D);
     h_ystar_COMZ[nGoodLooseJets]      ->Fill(zj_ystar_comZ);
@@ -471,7 +487,7 @@ void zee_angular::Loop()
 
     h2d_mjj_mzjj->Fill(mjj,mzjj);
     h2d_mjj_mdiff->Fill(mjj,mzjj-mjj);
-
+    h_mdiff->Fill(mzjj-mjj);
 
   } // end of loop over entries
 
@@ -495,12 +511,14 @@ void zee_angular::Loop()
   h2d_mjj_mdiff->Write();
   h_zmass_raw->Write();
   h_zmass_ID->Write();
+  h_mdiff->Write();
 
   for(int ij=0; ij< NMAXJETS; ij++){
 
     h_cost_COM3D[ij]->Write();
     h_cost_COMZ[ij]->Write();
     h_cost_sumJet[ij]->Write();
+    h_yB[ij]->Write();
     h_ystar[ij]->Write();
     h_ystar_COM3D[ij]->Write();
     h_ystar_COMZ[ij]->Write();
@@ -543,7 +561,7 @@ Bool_t zee_angular::isWP80VBTF11Ele(Int_t iele)
 {
   if(!isFidEle(iele))return false;
 
-  // // should have applied electron ID, but not the ID variables are not saved in Lovedeep's ntuple
+  // // should have applied electron ID, but not the ID variables are not saved in ntuples
   //   if(patElecMissingHits_->at(iele)>0)return false;
 
   //   if(fabs(patElecDist_->at(iele)) < 0.02)return false;
