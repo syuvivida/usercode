@@ -69,6 +69,9 @@ void zee_angular::Loop()
   // 
   //---------------------------------------------------------------------------------------------------------------------
 
+  TH2D* h2d_mass_template = new TH2D("h2d_mass_template","",500,0,500,500,0,500);
+  h2d_mass_template->SetXTitle("M_{jj} [GeV/c^{2}]");
+
   TH1D* h_mass_template = new TH1D("h_mass_template","",200,20,220);
   h_mass_template->SetXTitle("M_{ee} [GeV/c^{2}]");
 
@@ -87,6 +90,13 @@ void zee_angular::Loop()
   //   Defining histograms
   // 
   //---------------------------------------------------------------------------------------------------------------------
+
+
+  TH2D* h2d_mjj_mzjj = (TH2D*)h2d_mass_template->Clone("h2d_mjj_mzjj");
+  h2d_mjj_mzjj->SetYTitle("M_{Zjj} [GeV/c^{2}]");
+
+  TH2D* h2d_mjj_mdiff = (TH2D*)h2d_mass_template->Clone("h2d_mjj_mdiff");
+  h2d_mjj_mdiff->SetYTitle("M_{Zjj}-M_{jj} [GeV/c^{2}]");
 
   TH1D* h_zmass_raw     = (TH1D*)h_mass_template->Clone("h_zmass_raw");
   h_zmass_raw->SetTitle("Before any ID selections, after zee filter");
@@ -168,7 +178,15 @@ void zee_angular::Loop()
       h_cost_sumJet[ij]  -> SetTitle(sumjetprefix.data());
       h_ystar_sumJet[ij] -> SetTitle(sumjetprefix.data());
 
+      h_ystar      [ij]  -> SetTitle(jetprefix.data());
+      h_zpt[ij]          -> SetTitle(jetprefix.data());
+      h_zy[ij]           -> SetTitle(jetprefix.data());
 
+      h_leadingjetpt[ij]          -> SetTitle(jetprefix.data());
+      h_leadingjety[ij]           -> SetTitle(jetprefix.data());
+
+
+      
     }
 
 
@@ -293,7 +311,9 @@ void zee_angular::Loop()
     int nGoodLooseJets = 0; // number of jets passing loose jet PF ID
     bool findJetComponent = false;
     int leadingJetIndex = -1;
-    double maxJetPt = 0.0;
+    double maxJetPt = -9999.0;
+    int secondLeadingJetIndex = -1;
+    double secondJetMaxPt = -9999.0;
 
     for(unsigned int ijet=0; ijet < patJetPfAk05Pt_->size(); ijet++){
       
@@ -301,29 +321,38 @@ void zee_angular::Loop()
     
       TLorentzVector l4_thisJet(0,0,0,0);
       l4_thisJet.SetPtEtaPhiE(
- 			      patJetPfAk05Pt_->at(ijet),
- 			      patJetPfAk05Eta_->at(ijet),
- 			      patJetPfAk05Phi_->at(ijet),
- 			      patJetPfAk05En_->at(ijet)
- 			      );
-       // avoid overlap with electrons
+  			      patJetPfAk05Pt_->at(ijet),
+  			      patJetPfAk05Eta_->at(ijet),
+  			      patJetPfAk05Phi_->at(ijet),
+  			      patJetPfAk05En_->at(ijet)
+  			      );
+      // avoid overlap with electrons
       if(!eiko::separated(l4_thisJet,l4_ele1,0.3))continue;
       if(!eiko::separated(l4_thisJet,l4_ele2,0.3))continue;
-      
+    
       nGoodLooseJets++;
-       
+     
       l4_sumjet += l4_thisJet;
       findJetComponent = true;
 
       double thisJetPt = patJetPfAk05Pt_->at(ijet);
 
       // find the highest pt jet
-      if(thisJetPt > maxJetPt)
- 	{
- 	  leadingJetIndex = ijet;
- 	  maxJetPt = thisJetPt;
- 	}
-      
+	if(thisJetPt > maxJetPt)
+	  {
+	    secondJetMaxPt = maxJetPt;
+	    secondLeadingJetIndex = leadingJetIndex;
+
+	    maxJetPt = thisJetPt;
+	    leadingJetIndex= ijet;
+	  }
+	else if(thisJetPt > secondJetMaxPt)
+	  {
+	    secondJetMaxPt = thisJetPt;
+	    secondLeadingJetIndex = ijet;
+	  }
+
+
     } // end of loop over reconstructed jets
 
     h_njet->Fill(nGoodLooseJets);
@@ -336,20 +365,20 @@ void zee_angular::Loop()
 
     TLorentzVector l4_1stjet(0,0,0,0);
     l4_1stjet.SetPtEtaPhiE(
- 			   patJetPfAk05Pt_->at(leadingJetIndex),
- 			   patJetPfAk05Eta_->at(leadingJetIndex),
- 			   patJetPfAk05Phi_->at(leadingJetIndex),
- 			   patJetPfAk05En_->at(leadingJetIndex)
- 			   );
+  			   patJetPfAk05Pt_->at(leadingJetIndex),
+  			   patJetPfAk05Eta_->at(leadingJetIndex),
+  			   patJetPfAk05Phi_->at(leadingJetIndex),
+  			   patJetPfAk05En_->at(leadingJetIndex)
+  			   );
 
 
-   
-
-     //---------------------------------------------------------------------------------------------------------------------
-     //
-     //   start making angular histogram for at least one jet case
-     // 
-     //--------------------------------------------------------------------------------------------------------------------- 
+    
+    
+    //---------------------------------------------------------------------------------------------------------------------
+    //
+    //   start making angular histogram for at least one jet case
+    // 
+    //--------------------------------------------------------------------------------------------------------------------- 
 
     TLorentzVector l4_z = l4_ele1+l4_ele2;
 
@@ -395,14 +424,14 @@ void zee_angular::Loop()
 
 	
 
-     //---------------------------------------------------------------------------------------------------------------------
-     //
-     //   start making angular histogram for exclusive n jet case, up to NMAXJETS
-     // 
-     //--------------------------------------------------------------------------------------------------------------------- 
-    if(nGoodLooseJets > NMAXJETS) continue; // don't want array to go out of bound
+    //---------------------------------------------------------------------------------------------------------------------
+    //
+    //   start making angular histogram for exclusive n jet case, up to NMAXJETS
+    // 
+    //--------------------------------------------------------------------------------------------------------------------- 
+    if(nGoodLooseJets > NMAXJETS-1) continue; // don't want array to go out of bound
 
-    
+
     h_zpt[nGoodLooseJets]->Fill(zpt);
     h_zy[nGoodLooseJets]->Fill(zy);
     h_leadingjetpt[nGoodLooseJets]->Fill(jetpt);
@@ -418,7 +447,24 @@ void zee_angular::Loop()
     h_ystar_COMZ[nGoodLooseJets]      ->Fill(zj_ystar_comZ);
     h_ystar_sumJet[nGoodLooseJets]    ->Fill(zsumj_ystar_comZ);
 
+    if(secondLeadingJetIndex < 0)continue;
 
+
+    TLorentzVector l4_2ndjet(0,0,0,0);
+    l4_2ndjet.SetPtEtaPhiE(
+  			   patJetPfAk05Pt_->at(secondLeadingJetIndex),
+  			   patJetPfAk05Eta_->at(secondLeadingJetIndex),
+  			   patJetPfAk05Phi_->at(secondLeadingJetIndex),
+  			   patJetPfAk05En_->at(secondLeadingJetIndex)
+  			   );
+
+
+    
+    double mjj = (l4_1stjet + l4_2ndjet).M();
+    double mzjj = (l4_z + l4_1stjet + l4_2ndjet).M();
+
+    h2d_mjj_mzjj->Fill(mjj,mzjj);
+    h2d_mjj_mdiff->Fill(mjj,mzjj-mjj);
 
 
   } // end of loop over entries
@@ -439,6 +485,8 @@ void zee_angular::Loop()
 
   TFile* outFile = new TFile(Form("%s%s",prefix.data(),_inputFile.data()),"recreate");               
 
+  h2d_mjj_mzjj->Write();
+  h2d_mjj_mdiff->Write();
   h_zmass_raw->Write();
   h_zmass_ID->Write();
 
@@ -489,42 +537,42 @@ Bool_t zee_angular::isWP80VBTF11Ele(Int_t iele)
 {
   if(!isFidEle(iele))return false;
 
-// // should have applied electron ID, but not the ID variables are not saved in Lovedeep's ntuple
-//   if(patElecMissingHits_->at(iele)>0)return false;
+  // // should have applied electron ID, but not the ID variables are not saved in Lovedeep's ntuple
+  //   if(patElecMissingHits_->at(iele)>0)return false;
 
-//   if(fabs(patElecDist_->at(iele)) < 0.02)return false;
+  //   if(fabs(patElecDist_->at(iele)) < 0.02)return false;
 
-//   if(fabs(patElecDeltaCotTheta_->at(iele)) < 0.02)return false;
+  //   if(fabs(patElecDeltaCotTheta_->at(iele)) < 0.02)return false;
 
-//   bool isEB = fabs(patElecInBarrel_->at(iele)-1.0)<1e-6;
-//   bool isEE = fabs(patElecInEndcap_->at(iele)-1.0)<1e-6;
+  //   bool isEB = fabs(patElecInBarrel_->at(iele)-1.0)<1e-6;
+  //   bool isEE = fabs(patElecInEndcap_->at(iele)-1.0)<1e-6;
 
-//   double sieie = patElecSigIhIh_->at(iele);
-//   double dphi_in  = fabs(patElecDelPhiIn_->at(iele));
-//   double deta_in  = fabs(patElecDelEtaIn_->at(iele));
-//   double hadem = patElecHoE_->at(iele);
+  //   double sieie = patElecSigIhIh_->at(iele);
+  //   double dphi_in  = fabs(patElecDelPhiIn_->at(iele));
+  //   double deta_in  = fabs(patElecDelEtaIn_->at(iele));
+  //   double hadem = patElecHoE_->at(iele);
 
-//   // shower shape
-//   // barrel
-//   if( isEB && sieie > 0.01)return false;
-//   if( isEB && dphi_in > 0.06)return false;
-//   if( isEB && deta_in > 0.004)return false;
-//   if( isEB && hadem > 0.04)return false;
+  //   // shower shape
+  //   // barrel
+  //   if( isEB && sieie > 0.01)return false;
+  //   if( isEB && dphi_in > 0.06)return false;
+  //   if( isEB && deta_in > 0.004)return false;
+  //   if( isEB && hadem > 0.04)return false;
   
-//   // endcap
-//   if( isEE && sieie > 0.03)return false;
-//   if( isEE && dphi_in > 0.03)return false;
-//   if( isEE && deta_in > 0.007)return false;
-//   if( isEE && hadem > 0.15)return false;
+  //   // endcap
+  //   if( isEE && sieie > 0.03)return false;
+  //   if( isEE && dphi_in > 0.03)return false;
+  //   if( isEE && deta_in > 0.007)return false;
+  //   if( isEE && hadem > 0.15)return false;
   
   // pf isolation
-//   double pfiso = patElecChHadIso_->at(iele) +
-//     patElecNeHadIso_->at(iele) + patElecGamIso_->at(iele);
-//   double pt = patElecPt_->at(iele);
+  //   double pfiso = patElecChHadIso_->at(iele) +
+  //     patElecNeHadIso_->at(iele) + patElecGamIso_->at(iele);
+  //   double pt = patElecPt_->at(iele);
   
-//   double relative_pfiso = pfiso/pt;
+  //   double relative_pfiso = pfiso/pt;
 
-//   if( relative_pfiso > 0.2)return false;
+  //   if( relative_pfiso > 0.2)return false;
    
   
   return true;
