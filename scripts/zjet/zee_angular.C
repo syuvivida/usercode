@@ -277,11 +277,6 @@ void zee_angular::Loop()
 			     patElecEnergy_->at(jele));
 
 
-	double mZ = (l4_ele1+l4_ele2).M();
-
-
-  	h_zmass_ID->Fill(mZ);
-
  	findAZ = true;
 
 	break;
@@ -383,6 +378,13 @@ void zee_angular::Loop()
     //   start making angular histogram for at least one jet case
     // 
     //--------------------------------------------------------------------------------------------------------------------- 
+
+    double mZ = (l4_ele1+l4_ele2).M();
+
+
+    h_zmass_ID->Fill(mZ);
+
+    if(mZ < 76 || mZ > 106)continue;
 
     TLorentzVector l4_z = l4_ele1+l4_ele2;
 
