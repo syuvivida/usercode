@@ -138,7 +138,7 @@ void zee_angular::Loop()
      
       threedprefix = jetprefix + ", boosted to the COM frame in 3D";
       onedprefix   = jetprefix + ", boosted to the COM frame in z-direction";
-      sumjetprefix = "Sum all fiducial jets, boosted to the COM frame in z-direction";
+      sumjetprefix = jetprefix + ", sum all fiducial jets, boosted to the COM frame in z-direction";
 
       h_cost_COM3D[ij]  = (TH1D*)h_cost_template->Clone(Form("h_cost_COM3D_%d",ij));
       h_cost_COMZ [ij]  = (TH1D*)h_cost_template->Clone(Form("h_cost_COMZ_%d",ij));
@@ -182,8 +182,10 @@ void zee_angular::Loop()
       h_zpt[ij]          -> SetTitle(jetprefix.data());
       h_zy[ij]           -> SetTitle(jetprefix.data());
 
-      h_leadingjetpt[ij]          -> SetTitle(jetprefix.data());
-      h_leadingjety[ij]           -> SetTitle(jetprefix.data());
+      h_leadingjetpt[ij] -> SetTitle(jetprefix.data());
+      h_leadingjety[ij]  -> SetTitle(jetprefix.data());
+      h_sumjetpt[ij]     -> SetTitle(jetprefix.data());
+      h_sumjety[ij]      -> SetTitle(jetprefix.data());
 
 
       
@@ -236,6 +238,8 @@ void zee_angular::Loop()
 	  } // end of loop over names
       } // end of loop over trigger paths
 
+    // if this is a MC sample
+    if(run == 1)fireTrigger = true;
 
     if(!fireTrigger)continue;
     nPass[1]++;
