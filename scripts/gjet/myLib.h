@@ -3,7 +3,7 @@
 
 namespace eiko {
   // always put photon's or vector boston's Lorentz vector as l1, jet vector as l2
-  Bool_t separated(TLorentzVector l1, TLorentzVector l2);
+  Bool_t separated(TLorentzVector l1, TLorentzVector l2, double dRMax = 0.5);
   Double_t zgamma(TLorentzVector l1, TLorentzVector l2);
   Double_t deltaPhi(TLorentzVector l1, TLorentzVector l2);
   Double_t deltaR(double eta1, double phi1, double eta2, double phi2);
@@ -22,9 +22,9 @@ namespace eiko {
   void BoostToCM_3D(TLorentzVector& l1, TLorentzVector& l2);
   void BoostToCM_Z(TLorentzVector& l1, TLorentzVector& l2);
 
-  Bool_t separated(TLorentzVector l1, TLorentzVector l2) { 
+  Bool_t separated(TLorentzVector l1, TLorentzVector l2, double dRMax) { 
     Bool_t result = false;
-    if(l1.DeltaR(l2)>0.5)result=true; 
+    if(l1.DeltaR(l2)>dRMax)result=true; 
     return result;
   }
 
