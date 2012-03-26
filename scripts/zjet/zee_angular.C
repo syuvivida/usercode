@@ -72,6 +72,8 @@ void zee_angular::Loop()
   TH2D* h2d_mass_template = new TH2D("h2d_mass_template","",500,0,500,500,0,500);
   h2d_mass_template->SetXTitle("M_{jj} [GeV/c^{2}]");
 
+  TH2D* h2d_rapidity_template = new TH2D("h2d_rapidity_template","", 100,-5.0,5.0,100,-5.0,5.0);
+
   TH1D* h_mass_template = new TH1D("h_mass_template","",500, 0, 500);
   h_mass_template->SetXTitle("M_{ee} [GeV/c^{2}]");
 
@@ -97,6 +99,19 @@ void zee_angular::Loop()
 
   TH2D* h2d_mjj_mdiff = (TH2D*)h2d_mass_template->Clone("h2d_mjj_mdiff");
   h2d_mjj_mdiff->SetYTitle("M_{Zjj}-M_{jj} [GeV/c^{2}]");
+
+  TH2D* h2d_dy_zy = (TH2D*)h2d_rapidity_template->Clone("h2d_dy_zy");
+  h2d_dy_zy->SetXTitle("0.5(y_{Z}-y_{jet^{1st}})");
+  h2d_dy_zy->SetYTitle("y_{Z}");
+
+  TH2D* h2d_dy_jy = (TH2D*)h2d_rapidity_template->Clone("h2d_dy_jy");
+  h2d_dy_jy->SetXTitle("0.5(y_{Z}-y_{jet^{1st}})");
+  h2d_dy_jy->SetYTitle("y_{jet^{1st}}");
+
+  TH2D* h2d_zy_jy = (TH2D*)h2d_rapidity_template->Clone("h2d_zy_jy");
+  h2d_zy_jy->SetXTitle("y_{Z}");
+  h2d_zy_jy->SetYTitle("y_{jet^{1st}}");
+
 
   TH1D* h_zmass_raw     = (TH1D*)h_mass_template->Clone("h_zmass_raw");
   h_zmass_raw->SetTitle("Before any ID selections, after zee filter");
@@ -411,7 +426,6 @@ void zee_angular::Loop()
     double jety  = l4_1stjet.Rapidity();
     h_leadingjety[0]->Fill(jety);
 
-
     double sumjetpt = l4_sumjet.Pt();
     h_sumjetpt[0]->Fill(sumjetpt);
 
@@ -432,6 +446,10 @@ void zee_angular::Loop()
 
     double zj_ystar       = eiko::ystar(l4_z, l4_1stjet);
     h_ystar[0]           ->Fill(zj_ystar);
+
+    h2d_dy_zy            ->Fill(zj_ystar, zy);
+    h2d_dy_jy            ->Fill(zj_ystar, jety);
+    h2d_zy_jy            ->Fill(zy, jety);
 
     double zj_ystar_com3D = eiko::ystar_BoostToCM(l4_z, l4_1stjet);
     h_ystar_COM3D[0]     ->Fill(zj_ystar_com3D);
@@ -509,6 +527,11 @@ void zee_angular::Loop()
 
   h2d_mjj_mzjj->Write();
   h2d_mjj_mdiff->Write();
+
+  h2d_dy_zy->Write();
+  h2d_dy_jy->Write();
+  h2d_zy_jy->Write();
+
   h_zmass_raw->Write();
   h_zmass_ID->Write();
   h_mdiff->Write();
