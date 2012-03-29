@@ -411,6 +411,7 @@ void zee_angular::Loop()
     h_zmass_ID->Fill(mZ);
 
     if(mZ < 76 || mZ > 106)continue;
+    nPass[5]++;
 
     TLorentzVector l4_z = l4_ele1+l4_ele2;
 
