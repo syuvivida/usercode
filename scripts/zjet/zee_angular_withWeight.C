@@ -246,7 +246,7 @@ void zee_angular_withWeight::Loop(bool applyWeight)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
-//     if(jentry >10 ) break;
+    if(jentry >10 ) break;
 
     nPass[0]++;
 
@@ -254,6 +254,7 @@ void zee_angular_withWeight::Loop(bool applyWeight)
     if(applyWeight && PU_weight >= 0.0)eventWeight *= PU_weight;
     if(applyWeight && mcWeight_>0)eventWeight *= mcWeight_;
 
+    cout << "eventWeight = " << eventWeight << endl;
     //---------------------------------------------------------------------------------------------------------------------
     //
     //   Apply trigger selections
