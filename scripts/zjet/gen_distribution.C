@@ -140,6 +140,20 @@ void gen_distribution::Loop(int lepID, int DEBUG)
 	if(thisGenJetPt < 30.0)continue;
 	if(fabs(thisGenJetEta) > 2.4)continue;
 
+	TLorentzVector thisGenJet_l4(0,0,0,0);
+	
+	thisGenJet_l4.SetPtEtaPhiE(genJetPt_->at(ij),
+				   genJetEta_->at(ij),
+				   genJetPhi_->at(ij),
+				   genJetE_->at(ij));
+	
+	double dr_ep = l4_lepp.DeltaR(thisGenJet_l4);
+	double dr_em = l4_lepm.DeltaR(thisGenJet_l4);
+
+	if(leptonPID==11 && dr_ep < 0.3)continue;
+	if(leptonPID==11 && dr_em < 0.3)continue;
+
+
 	if(thisGenJetPt > maxGenJetPt)
 	  {
 	    maxGenJetPt = thisGenJetPt;
@@ -175,7 +189,8 @@ void gen_distribution::Loop(int lepID, int DEBUG)
    } // end of loop over entries
 
    std::string prefix = "genHisto_";
-   std::string remword  ="/scratch/syu/test_sherpa/genonly/";
+   //   std::string remword  ="/scratch/syu/test_sherpa/genonly/";
+   std::string remword  ="/scratch/syu/";
 
    size_t pos  = _inputFileName.find(remword);
 
