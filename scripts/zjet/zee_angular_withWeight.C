@@ -69,6 +69,9 @@ void zee_angular_withWeight::Loop(bool applyWeight)
   // 
   //---------------------------------------------------------------------------------------------------------------------
 
+  TH1D* h_nvtx_template = new TH1D("h_nvtx_template","",31,-0.5,30.5);
+  h_nvtx_template->Sumw2();
+
   TH2D* h2d_mass_template = new TH2D("h2d_mass_template","",500,0,500,500,0,500);
   h2d_mass_template->SetXTitle("M_{jj} [GeV/c^{2}]");
   h2d_mass_template->Sumw2();
@@ -102,6 +105,14 @@ void zee_angular_withWeight::Loop(bool applyWeight)
   //   Defining histograms
   // 
   //---------------------------------------------------------------------------------------------------------------------
+
+  TH1D* h_nvtx_before = (TH1D*)h_nvtx_template->Clone("h_nvtx_before");
+  h_nvtx_before->SetXTitle("Number of vertices");
+  h_nvtx_before->SetTitle("Before pile-up reweighting");
+
+  TH1D* h_nvtx_after = (TH1D*)h_nvtx_template->Clone("h_nvtx_after");
+  h_nvtx_after->SetXTitle("Number of vertices");
+  h_nvtx_after->SetTitle("After pile-up reweighting");
 
 
   TH2D* h2d_mjj_mzjj = (TH2D*)h2d_mass_template->Clone("h2d_mjj_mzjj");
@@ -427,8 +438,12 @@ void zee_angular_withWeight::Loop(bool applyWeight)
 
     h_zmass_ID->Fill(mZ, eventWeight);
 
-    if(mZ < 76 || mZ > 106)continue;
+    if(mZ < 70 || mZ > 110)continue;
     nPass[5]++;
+
+
+    h_nvtx_before->Fill(EvtInfo_NumVtx,1.0);
+    h_nvtx_after ->Fill(EvtInfo_NumVtx,eventWeight);
 
     TLorentzVector l4_z = l4_ele1+l4_ele2;
 
@@ -544,6 +559,9 @@ void zee_angular_withWeight::Loop(bool applyWeight)
 
   TFile* outFile = new TFile(Form("%s%s",prefix.data(),_inputFile.data()),"recreate");               
 
+  h_nvtx_before->Write();
+  h_nvtx_after->Write();
+
   h2d_mjj_mzjj->Write();
   h2d_mjj_mdiff->Write();
 
@@ -573,6 +591,7 @@ void zee_angular_withWeight::Loop(bool applyWeight)
     h_leadingjety[ij]->Write();
     h_sumjetpt[ij]->Write();
     h_sumjety[ij]->Write();
+
 
   }
 
@@ -606,9 +625,9 @@ Bool_t zee_angular_withWeight::isWP80VBTF11Ele(Int_t iele)
   // // should have applied electron ID, but not the ID variables are not saved in ntuples
   //   if(patElecMissingHits_->at(iele)>0)return false;
 
-  //   if(fabs(patElecDist_->at(iele)) < 0.02)return false;
-
-  //   if(fabs(patElecDeltaCotTheta_->at(iele)) < 0.02)return false;
+  //   if(fabs(patElecDist_->at(iele)) < 0.02 
+  //      && fabs(patElecDeltaCotTheta_->at(iele)) < 0.02)
+  //   return false;
 
   //   bool isEB = fabs(patElecInBarrel_->at(iele)-1.0)<1e-6;
   //   bool isEE = fabs(patElecInEndcap_->at(iele)-1.0)<1e-6;
