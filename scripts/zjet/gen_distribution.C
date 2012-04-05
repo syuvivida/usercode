@@ -204,7 +204,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
      _inputFileName.swap(_inputFileName.erase(pos,remword.length()));
 
 
-   TFile* outFile = new TFile(Form("genHisto_%s_%s",leptonName.data(),
+   TFile* outFile = new TFile(Form("%s_%s_%s",prefix.data(),
+				   leptonName.data(),
 				   _inputFileName.data()),"recreate");       
         
  
