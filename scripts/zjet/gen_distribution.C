@@ -6,17 +6,18 @@
 #include <TLorentzVector.h>
 
 
-void gen_distribution::Loop(int lepID, int DEBUG)
+void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 {
    if (fChain == 0) return;
    TH1D* h_y_template = new TH1D("h_y_template","",25,-2.5,2.5);
 
    TH1D* h_yB    = (TH1D*)h_y_template->Clone("h_yB");
    h_yB->SetXTitle("0.5(y_{Z}+y_{jet})");
+   h_yB->Sumw2();
 
    TH1D* h_ystar = (TH1D*)h_y_template->Clone("h_ystar");
    h_ystar->SetXTitle("0.5(y_{Z}-y_{jet})");
-
+   h_ystar->Sumw2();
 
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -41,6 +42,11 @@ void gen_distribution::Loop(int lepID, int DEBUG)
 
       int lepPlusIndex = -1;
       int lepMinusIndex = -1;
+
+      double eventWeight = 1;
+
+      if(applyWeight && PU_weight >= 0.0)eventWeight *= PU_weight;
+      if(applyWeight && mcWeight_>0)eventWeight *= mcWeight_;
 
 
       for(unsigned int igen=0; igen < genParId_->size(); igen++){
@@ -182,13 +188,14 @@ void gen_distribution::Loop(int lepID, int DEBUG)
       double yB = 0.5*(yz + yj);
       double ystar = 0.5*(yz-yj);
 
-      h_yB->Fill(yB);
-      h_ystar->Fill(ystar);
+      h_yB->Fill(yB,eventWeight);
+      h_ystar->Fill(ystar,eventWeight);
 
 
    } // end of loop over entries
 
-   std::string prefix = "genHisto_";
+   std::string prefix = "weighted_genHisto_";
+   if(!applyWeight)prefix = "raw_genHisto_";
    std::string remword  ="/data4/syu/Zjet_genNtuple/";
 
    size_t pos  = _inputFileName.find(remword);
