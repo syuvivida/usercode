@@ -9,7 +9,27 @@
 void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 {
    if (fChain == 0) return;
+
+   TH1D* h_pt_template = new TH1D("h_pt_template","",80,0,400);
+
+   TH1D* h_zpt   = (TH1D*)h_pt_template->Clone("h_zpt");
+   h_zpt->SetXTitle("p_{T}(Z) [GeV]");
+   h_zpt->Sumw2();
+
+   TH1D* h_jetpt = (TH1D*)h_pt_template->Clone("h_jetpt");
+   h_jetpt->SetXTitle("p_{T}(jet) [GeV]");
+   h_jetpt->Sumw2();
+ 
    TH1D* h_y_template = new TH1D("h_y_template","",25,-2.5,2.5);
+
+   TH1D* h_zy    = (TH1D*)h_y_template->Clone("h_zy");
+   h_zy->SetXTitle("y_{Z}");
+   h_zy->Sumw2();
+
+   TH1D* h_jety    = (TH1D*)h_y_template->Clone("h_jety");
+   h_jety->SetXTitle("y_{jet}");
+   h_jety->Sumw2();
+
 
    TH1D* h_yB    = (TH1D*)h_y_template->Clone("h_yB");
    h_yB->SetXTitle("0.5(y_{Z}+y_{jet})");
@@ -187,6 +207,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 			genJetPhi_->at(maxGenJetIndex),
 			genJetE_->at(maxGenJetIndex));
 
+      double ptz = l4_z.Pt();
+      double ptjet = l4_j.Pt();
 
       double yz = l4_z.Rapidity();
       double yj = l4_j.Rapidity();
@@ -194,6 +216,10 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
       double yB = 0.5*(yz + yj);
       double ystar = 0.5*(yz-yj);
 
+      h_zpt->Fill(ptz,eventWeight);
+      h_jetpt->Fill(ptjet,eventWeight); 
+      h_zy->Fill(yz,eventWeight);
+      h_jety->Fill(yj,eventWeight);
       h_yB->Fill(yB,eventWeight);
       h_ystar->Fill(ystar,eventWeight);
 
@@ -221,6 +247,12 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
  
    h_yB->Write();
    h_ystar->Write();
+  
+   h_zy->Write();
+   h_zpt->Write();
+
+   h_jety->Write();   
+   h_jetpt->Write();
 
    outFile->Close();
 
