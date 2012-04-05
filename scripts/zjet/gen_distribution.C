@@ -194,8 +194,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 
    } // end of loop over entries
 
-   std::string prefix = "weighted_genHisto_";
-   if(!applyWeight)prefix = "raw_genHisto_";
+   std::string prefix = "weighted_genHisto";
+   if(!applyWeight)prefix = "raw_genHisto";
    std::string remword  ="/data4/syu/Zjet_genNtuple/";
 
    size_t pos  = _inputFileName.find(remword);
