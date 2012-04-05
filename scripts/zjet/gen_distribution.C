@@ -189,8 +189,7 @@ void gen_distribution::Loop(int lepID, int DEBUG)
    } // end of loop over entries
 
    std::string prefix = "genHisto_";
-   //   std::string remword  ="/scratch/syu/test_sherpa/genonly/";
-   std::string remword  ="/scratch/syu/";
+   std::string remword  ="/data4/syu/Zjet_genNtuple/";
 
    size_t pos  = _inputFileName.find(remword);
 
