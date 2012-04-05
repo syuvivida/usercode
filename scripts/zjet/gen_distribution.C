@@ -38,7 +38,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
-//       if(jentry > 50000)break;
+      //       if(jentry > 50)break;
 
       int lepPlusIndex = -1;
       int lepMinusIndex = -1;
@@ -47,8 +47,12 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 
       if(applyWeight && PU_weight >= 0.0)eventWeight *= PU_weight;
       if(applyWeight && mcWeight_>0)eventWeight *= mcWeight_;
-
-
+      
+      if(DEBUG==1){
+	cout << "PU_weight = " << PU_weight << "\t nvertex = " << EvtInfo_NumVtx << endl;
+	 cout << "MCweight = " << mcWeight_ << endl;
+         cout << "eventWeight = " << eventWeight << endl;
+      }
       for(unsigned int igen=0; igen < genParId_->size(); igen++){
 
 	if(lepPlusIndex < 0 && fabs(genParId_->at(igen)-(-leptonPID))<1e-6 && 
@@ -156,8 +160,10 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 	double dr_ep = l4_lepp.DeltaR(thisGenJet_l4);
 	double dr_em = l4_lepm.DeltaR(thisGenJet_l4);
 
-	if(leptonPID==11 && dr_ep < 0.3)continue;
-	if(leptonPID==11 && dr_em < 0.3)continue;
+	if(dr_ep < 0.3)continue;
+	if(dr_em < 0.3)continue;
+	//	if(leptonPID==11 && dr_ep < 0.3)continue;
+	//	if(leptonPID==11 && dr_em < 0.3)continue;
 
 
 	if(thisGenJetPt > maxGenJetPt)
@@ -191,7 +197,11 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
       h_yB->Fill(yB,eventWeight);
       h_ystar->Fill(ystar,eventWeight);
 
-
+      if(DEBUG==1){
+	double dR1 = l4_lepp.DeltaR(l4_j);
+        double dR2 = l4_lepm.DeltaR(l4_j);
+        cout << "dR1 = " << dR1 << "\t dR2=" << dR2 << endl;
+      }
    } // end of loop over entries
 
    std::string prefix = "weighted_genHisto";
