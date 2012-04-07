@@ -75,21 +75,22 @@ void compareSherpaMadgraph(std::string sherpafile, std::string madgraphfile,
     }
 
 
-   float scale_mc = (float)hsherpa->Integral(binLo,binHi)/(float)hmadgraph->Integral(binLo,binHi);
-   cout << "binLo = " << binLo << ", binHi = " << binHi << endl;
-   cout << "xmin = " << xmin << "xmax = " << xmax << endl;
+  //   float scale_mc = (float)hsherpa->Integral(binLo,binHi)/(float)hmadgraph->Integral(binLo,binHi);
+  //   cout << "binLo = " << binLo << ", binHi = " << binHi << endl;
+  //   cout << "xmin = " << xmin << "xmax = " << xmax << endl;
 
-//    hmadgraph->Sumw2();
-//    hmadgraph->Scale(scale_mc);
+  //   hmadgraph->Sumw2();
+  //   hmadgraph->Scale(scale_mc);
 
-   float scale_sherpa   = 1000.0*4.890*3048.0/30607750;
-   float scale_madgraph = 1000.0*4.890*3048.0/36209629;
+    float scale_sherpa   = 1000.0*4.890*3048.0/4.71644910071102437e+06;
+                                         
+    float scale_madgraph = 1000.0*4.890*3048.0/3.59644320000000000e+07;
 
-   hsherpa->Sumw2();
-   hsherpa->Scale(scale_sherpa);
+    hsherpa->Sumw2();
+    hsherpa->Scale(scale_sherpa);
 
-   hmadgraph->Sumw2();
-   hmadgraph->Scale(scale_madgraph);
+    hmadgraph->Sumw2();
+    hmadgraph->Scale(scale_madgraph);
 
    cout << "hmadgraph integral = " << hmadgraph->Integral() << endl;
    cout << "hsherpa integral = "   << hsherpa->Integral() << endl;;
