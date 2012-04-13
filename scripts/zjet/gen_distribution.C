@@ -115,11 +115,13 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 	if(leptonPID==13 && pt > 20.0 && fabs(eta) < 2.1)nPt20++;
 	if(leptonPID==13 && pt > 10.0 && fabs(eta) < 2.1)nPt10++;
 
-	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
-	   fabs(eta) < 2.5)nPt20++;
+ 	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
+ 	   fabs(eta) < 2.4)nPt20++;
 
-	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
-	   fabs(eta) < 1.446)nPt20++;
+ 	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
+ 	   fabs(eta) < 1.446)nPt20++;
+
+// 	if(leptonPID==11 && pt > 20.0 && fabs(eta) < 2.4)nPt20++;
 
       }
 
