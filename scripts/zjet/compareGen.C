@@ -23,27 +23,22 @@ void compareGen(std::string mcfile1, std::string mcfile2,
   TFile *fmc2   = TFile::Open(mcfile2.data());
 
   h1  = (TH1F*)(fmc1->Get(var.data()));
-  //  h2    = (TH1F*)(fmc2->Get("id6"));
-  h2    = (TH1F*)(fmc2->Get(var.data()));
+  h2    = (TH1F*)(fmc2->Get("id6"));
+  // h2    = (TH1F*)(fmc2->Get(var.data()));
 
   TH1D* hscale =(TH1D*) h1->Clone("hscale");
   hscale->SetYTitle(Form("%s/%s",mcName1.data(),mcName2.data()));
 
-  int nREBIN=2;
-  if(var.find("pt")!= std::string::npos)
-    nREBIN=4;
-
   h1->GetXaxis()->SetNdivisions(5);
   h1->GetYaxis()->SetDecimals();
-  h1->Rebin(nREBIN);
 
   h2->GetXaxis()->SetNdivisions(5);
   h2->GetYaxis()->SetDecimals();
-  h2->Rebin(nREBIN);
+
 
   hscale->GetXaxis()->SetNdivisions(5);
   hscale->GetYaxis()->SetDecimals();
-  hscale->Rebin(nREBIN);
+
 
   h1->SetLineColor(2);
   h1->SetMarkerColor(2);
