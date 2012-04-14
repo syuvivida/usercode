@@ -132,7 +132,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(int lepID, bool applyWeight=true, int DEBUG=0); // 13: muon, 11: electron
+   virtual void     Loop(int lepID, bool applyWeight=true, bool exclusive=false, int DEBUG=0); // 13: muon, 11: electron
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 

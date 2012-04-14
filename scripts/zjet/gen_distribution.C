@@ -6,7 +6,7 @@
 #include <TLorentzVector.h>
 
 
-void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
+void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEBUG)
 {
    if (fChain == 0) return;
 
@@ -70,8 +70,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
       
       if(DEBUG==1){
 	cout << "PU_weight = " << PU_weight << "\t nvertex = " << EvtInfo_NumVtx << endl;
-	 cout << "MCweight = " << mcWeight_ << endl;
-         cout << "eventWeight = " << eventWeight << endl;
+	cout << "MCweight = " << mcWeight_ << endl;
+        cout << "eventWeight = " << eventWeight << endl;
       }
       for(unsigned int igen=0; igen < genParId_->size(); igen++){
 
@@ -115,13 +115,13 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 	if(leptonPID==13 && pt > 20.0 && fabs(eta) < 2.1)nPt20++;
 	if(leptonPID==13 && pt > 10.0 && fabs(eta) < 2.1)nPt10++;
 
- 	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
- 	   fabs(eta) < 2.4)nPt20++;
+	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
+	 	   fabs(eta) < 2.4)nPt20++;
 
- 	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
- 	   fabs(eta) < 1.446)nPt20++;
+	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
+		   fabs(eta) < 1.446)nPt20++;
 
-// 	if(leptonPID==11 && pt > 20.0 && fabs(eta) < 2.4)nPt20++;
+ 	if(!exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) < 2.5)nPt20++;
 
       }
 
@@ -162,7 +162,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
       // now look for jets
       double maxGenJetPt = -9999;
       int maxGenJetIndex = -1;
-
+      int nGenJet = 0;
 
       for(unsigned int ij = 0; ij < genJetPt_->size(); ij ++){
 
@@ -186,7 +186,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 	if(dr_em < 0.3)continue;
 	//	if(leptonPID==11 && dr_ep < 0.3)continue;
 	//	if(leptonPID==11 && dr_em < 0.3)continue;
-
+        nGenJet++; 
 
 	if(thisGenJetPt > maxGenJetPt)
 	  {
@@ -202,6 +202,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 
       if(maxGenJetIndex < 0)continue;
 
+      if(exclusive && nGenJet!=1)continue;
       
       TLorentzVector l4_j(0,0,0,0);
       l4_j.SetPtEtaPhiE(genJetPt_->at(maxGenJetIndex),
@@ -234,6 +235,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, int DEBUG)
 
    std::string prefix = "weighted_genHisto";
    if(!applyWeight)prefix = "raw_genHisto";
+   if(exclusive)prefix += "_exclusive1Jet";
    std::string remword  ="/data4/syu/Zjet_genNtuple/";
 
    size_t pos  = _inputFileName.find(remword);
