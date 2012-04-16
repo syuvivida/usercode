@@ -1,7 +1,7 @@
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 
 void compareGen(std::string mcfile1, std::string mcfile2, 
-		std::string var,
+		std::string var1, std::string var2,
 		std::string mcName1="SHERPA",
 		std::string mcName2="MADGRAPH",
 		float xmin=-9999.0, float xmax=-9999.0,
@@ -16,15 +16,14 @@ void compareGen(std::string mcfile1, std::string mcfile2,
   TH1F* h2;
 
   char tempName[300];
-
-
+  if(var2 ==  "" )var2=var1;
+  
   // first get the histogram files
   TFile *fmc1 = TFile::Open(mcfile1.data());
   TFile *fmc2   = TFile::Open(mcfile2.data());
 
-  h1  = (TH1F*)(fmc1->Get(var.data()));
-  h2    = (TH1F*)(fmc2->Get("id6"));
-  // h2    = (TH1F*)(fmc2->Get(var.data()));
+  h1  = (TH1F*)(fmc1->Get(var1.data()));
+  h2    = (TH1F*)(fmc2->Get(var2.data()));
 
   TH1D* hscale =(TH1D*) h1->Clone("hscale");
   hscale->SetYTitle(Form("%s/%s",mcName1.data(),mcName2.data()));
@@ -73,15 +72,16 @@ void compareGen(std::string mcfile1, std::string mcfile2,
     }
 
 
-   float scale_mc = (float)h1->Integral(binLo,binHi)/(float)h2->Integral(binLo,binHi);
-   cout << "binLo = " << binLo << ", binHi = " << binHi << endl;
-   cout << "xmin = " << xmin << "xmax = " << xmax << endl;
+  float scale_mc = (float)h1->Integral(binLo,binHi)/(float)h2->Integral(binLo,binHi);
+//   cout << "binLo = " << binLo << ", binHi = " << binHi << endl;
+//    cout << "xmin = " << xmin << "xmax = " << xmax << endl;
 
-   h2->Sumw2();
-   h2->Scale(scale_mc);
+  h2->Sumw2();
+//   scale_mc = 1000.0*4.890*3048.0/2.29809910000000000e+07;
+  h2->Scale(scale_mc);
 
-   cout << "h2 integral = " << h2->Integral() << endl;
-   cout << "h1 integral = "   << h1->Integral() << endl;;
+  cout << "h2 integral = " << h2->Integral() << endl;
+  cout << "h1 integral = "   << h1->Integral() << endl;;
 
   // get the ratio
   double chi2 = 0;
@@ -198,11 +198,11 @@ void compareGen(std::string mcfile1, std::string mcfile2,
   gSystem->mkdir(dirName.data());
 
   std::string filename;
-  std::string psname = dirName + "/" + var;
+  std::string psname = dirName + "/" + var1;
   if(output !="test")
     psname = dirName+ "/" + output;
   else
-    psname = dirName+ "/" + var;
+    psname = dirName+ "/" + var1;
   filename = psname + ".eps";
   c1->Print(filename.data());
   filename = psname + ".gif";
