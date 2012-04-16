@@ -81,4 +81,32 @@ void plotFEWZ(std::string inputFile, std::string xtitle="0.5(y_{Z}-y_{jet1})",
   c3->Print(Form("%s.pdf",outputPrefix.data()));
 
 
+  const int n = nBIN;
+  float histoX[n+1];
+  for(int i=0; i< n; i++)
+    histoX[i] = y[i]-ey[i];
+
+  histoX[n] = y[n-1]+ey[n-1];
+
+  for(int i=0; i<= n; i++)
+    cout << histoX[i] << endl;
+
+
+  TH1F* h_central = new TH1F("h_central","",n,histoX);
+  for(int i=1; i<= n; i++)
+    {
+      h_central->SetBinContent(i,cvalue[i-1]);
+      h_central->SetBinError(i,evalue[i-1]);
+    }
+
+  TFile* outFile = new TFile(Form("%s.root",outputPrefix.data()),"recreate");   
+  gr_central->SetName("gr_central");
+  gr_central->Write();
+  gr_pdf->SetName("gr_pdf");
+  gr_pdf->Write();
+  h_central->Write();
+
+  outFile->Close();
+
+
 }
