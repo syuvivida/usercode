@@ -10,26 +10,29 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 {
    if (fChain == 0) return;
 
-   TH1D* h_pt_template = new TH1D("h_pt_template","",80,0,400);
+   TH1D* h_zpt_template = new TH1D("h_zpt_template","",100,0,100);
 
-   TH1D* h_zpt   = (TH1D*)h_pt_template->Clone("h_zpt");
+   TH1D* h_zpt   = (TH1D*)h_zpt_template->Clone("h_zpt");
    h_zpt->SetXTitle("p_{T}(Z) [GeV]");
    h_zpt->Sumw2();
 
-   TH1D* h_jetpt = (TH1D*)h_pt_template->Clone("h_jetpt");
+   TH1D* h_jetpt_template = new TH1D("h_jetpt_template","",80,0,400);
+
+   TH1D* h_jetpt = (TH1D*)h_jetpt_template->Clone("h_jetpt");
    h_jetpt->SetXTitle("p_{T}(jet) [GeV]");
    h_jetpt->Sumw2();
- 
-   TH1D* h_y_template = new TH1D("h_y_template","",25,-2.5,2.5);
 
-   TH1D* h_zy    = (TH1D*)h_y_template->Clone("h_zy");
+   TH1D* h_ypart_template = new TH1D("h_ypart_template","",60,-3.0,3.0); 
+
+   TH1D* h_zy    = (TH1D*)h_ypart_template->Clone("h_zy");
    h_zy->SetXTitle("y_{Z}");
    h_zy->Sumw2();
 
-   TH1D* h_jety    = (TH1D*)h_y_template->Clone("h_jety");
+   TH1D* h_jety    = (TH1D*)h_ypart_template->Clone("h_jety");
    h_jety->SetXTitle("y_{jet}");
    h_jety->Sumw2();
 
+   TH1D* h_y_template = new TH1D("h_y_template","",25,-2.5,2.5);
 
    TH1D* h_yB    = (TH1D*)h_y_template->Clone("h_yB");
    h_yB->SetXTitle("0.5(y_{Z}+y_{jet})");
