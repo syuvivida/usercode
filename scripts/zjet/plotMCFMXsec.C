@@ -4,8 +4,7 @@ void plotMCFMXsec(std::string file="ZEE_atleast1jet_tota_mstw200_eiko.root",
 {
 
   const double fBinsPt[]={30,40,55,75,105,150,210,315,500};
-//   const double fBinsPt[]={30,40,55,75,105,150,210,315};
-  const int nPtBins = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1-1;
+  const int nPtBins = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 
   cout << "There are " << nPtBins << " bins." << endl;
 
@@ -22,17 +21,18 @@ void plotMCFMXsec(std::string file="ZEE_atleast1jet_tota_mstw200_eiko.root",
   TH1D* h_data_jetpt;
 
   TFile *fmcfm = TFile::Open(file.data());
-  TFile *fdata = TFile::Open("DiffCrossSection.root");
+  TFile *fdata = TFile::Open("DiffCrossSection_1515.root");
   
   h_mcfm_original =  (TH1F*)(fmcfm->Get(histoName.data()));
   h_mcfm_original -> SetName("h_mcfm_original");
 
-  h_data_jetpt = (TH1D*)(fdata->Get("JetPt_Z1jet"));
+  h_data_jetpt = (TH1D*)(fdata->Get("r15JetPt_Z1jet"));
+//   h_data_jetpt = (TH1D*)(fdata->Get("FirstJetPt_Z1jet"));
   h_data_jetpt -> SetName("h_data_jetpt");
 
   double default_width = h_mcfm_original->GetBinWidth(1);
 
-  for(int i=1; i<= nPtBins; i++)
+  for(int i=1; i<= nPtBins-1; i++)
     {
       cout << "i = " << i << endl;
       int BinStart = h_mcfm_original->FindBin(fBinsPt[i-1]);
@@ -66,6 +66,7 @@ void plotMCFMXsec(std::string file="ZEE_atleast1jet_tota_mstw200_eiko.root",
       cout << "Differential cross section = " << mcfm_diff << " fb/GeV" << endl;
 
       h_mcfm_jetpt->SetBinContent(i,mcfm_diff);
+      h_mcfm_jetpt->SetBinError(i,1e-4);
 
 
     }
@@ -77,7 +78,7 @@ void plotMCFMXsec(std::string file="ZEE_atleast1jet_tota_mstw200_eiko.root",
   h_mcfm_jetpt->Draw("same");
   h_data_jetpt->Draw("esame");
 
-  TFile* outFile = new TFile(Form("data_mcfm_%s",file.data()),"recreate");       
+  TFile* outFile = new TFile(Form("1515data_mcfm_%s",file.data()),"recreate");       
   
   h_mcfm_original->Write();
   h_mcfm_jetpt->Write();

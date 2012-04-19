@@ -9,6 +9,18 @@
 void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEBUG)
 {
    if (fChain == 0) return;
+   const double fBinsPt[]={30,40,55,75,105,150,210,315,500};
+   const int nPtBins = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
+
+   cout << "There are " << nPtBins << " bins." << endl;
+
+   const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
+   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
+
+   cout << "There are " << nYBins << " bins." << endl;
+
+   TH1D* h_mc_jetpt = new TH1D("h_mc_jetpt","",nPtBins,fBinsPt);
+   TH1D* h_mc_jety = new TH1D("h_mc_jety","",nYBins, fBinsY);
 
    TH1D* h_zpt_template = new TH1D("h_zpt_template","",100,0,100);
 
@@ -118,13 +130,18 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 	if(leptonPID==13 && pt > 20.0 && fabs(eta) < 2.1)nPt20++;
 	if(leptonPID==13 && pt > 10.0 && fabs(eta) < 2.1)nPt10++;
 
-	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
-	 	   fabs(eta) < 2.4)nPt20++;
+	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
+	   fabs(eta) < 2.4)nPt20++;
 
-	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
-		   fabs(eta) < 1.446)nPt20++;
+	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
+	   fabs(eta) < 1.446)nPt20++;
+// 	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
+// 	 	   fabs(eta) < 2.4)nPt20++;
 
- 	if(!exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) < 2.5)nPt20++;
+// 	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
+// 		   fabs(eta) < 1.446)nPt20++;
+
+//  	if(!exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) < 2.5)nPt20++;
 
       }
 
@@ -187,8 +204,6 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
 	if(dr_ep < 0.3)continue;
 	if(dr_em < 0.3)continue;
-	//	if(leptonPID==11 && dr_ep < 0.3)continue;
-	//	if(leptonPID==11 && dr_em < 0.3)continue;
         nGenJet++; 
 
 	if(thisGenJetPt > maxGenJetPt)
@@ -221,6 +236,9 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
       double yB = 0.5*(yz + yj);
       double ystar = 0.5*(yz-yj);
+
+      h_mc_jetpt->Fill(ptjet,eventWeight);
+      h_mc_jety->Fill(fabs(yj),eventWeight);
 
       h_zpt->Fill(ptz,eventWeight);
       h_jetpt->Fill(ptjet,eventWeight); 
@@ -260,6 +278,9 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    h_jety->Write();   
    h_jetpt->Write();
+
+   h_mc_jetpt->Write();
+   h_mc_jety->Write();
 
    outFile->Close();
 

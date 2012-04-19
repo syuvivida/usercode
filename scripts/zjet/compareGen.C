@@ -1,12 +1,15 @@
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 
 void compareGen(std::string mcfile1, std::string mcfile2, 
-		std::string var1, std::string var2,
-		std::string mcName1="SHERPA",
-		std::string mcName2="MADGRAPH",
+		std::string var1, std::string var2="",
+		std::string xtitle, 
+		std::string output="test",
+		std::string header="Z(#rightarrow ee)+#geq 1 jet",
+		std::string mcName1="Data",
+		std::string mcName2="Madgraph",
 		float xmin=-9999.0, float xmax=-9999.0,
-		bool logScale=false, 
-		std::string output="test")
+		bool logScale=true
+		)
 {
   
   setTDRStyle();
@@ -33,7 +36,6 @@ void compareGen(std::string mcfile1, std::string mcfile2,
 
   h2->GetXaxis()->SetNdivisions(5);
   h2->GetYaxis()->SetDecimals();
-
 
   hscale->GetXaxis()->SetNdivisions(5);
   hscale->GetYaxis()->SetDecimals();
@@ -76,9 +78,9 @@ void compareGen(std::string mcfile1, std::string mcfile2,
 //   cout << "binLo = " << binLo << ", binHi = " << binHi << endl;
 //    cout << "xmin = " << xmin << "xmax = " << xmax << endl;
 
-  h2->Sumw2();
-//   scale_mc = 1000.0*4.890*3048.0/2.29809910000000000e+07;
-  h2->Scale(scale_mc);
+//   h2->Sumw2();
+// //   scale_mc = 1000.0*4.890*3048.0/2.29809910000000000e+07;
+//   h2->Scale(scale_mc);
 
   cout << "h2 integral = " << h2->Integral() << endl;
   cout << "h1 integral = "   << h1->Integral() << endl;;
@@ -109,7 +111,13 @@ void compareGen(std::string mcfile1, std::string mcfile2,
 
 
     // now calculate the ratio
-    if(nmc==0 || nmcerr==0 || ndata==0 || ndataerr==0)continue;
+    if(nmc==0 || nmcerr==0 || ndata==0 || ndataerr==0)
+      {
+	hscale->SetBinContent(i,-9999);
+	hscale->SetBinError(i,1e-4);
+	continue;
+      }
+
     cout << "Bin " << i << " ratio = " << ndata/nmc << endl;
     hscale->SetBinContent(i,ndata/nmc);
     double err = 0;
@@ -119,7 +127,9 @@ void compareGen(std::string mcfile1, std::string mcfile2,
 
   }
 
-  
+  for(int i=1;i<=hscale->GetNbinsX();i++)
+    cout << i << ": " << hscale->GetBinContent(i) << endl;
+
   h1->GetXaxis()->SetRangeUser(xmin,xmax);
   h2->GetXaxis()->SetRangeUser(xmin,xmax);
   hscale->GetXaxis()->SetRangeUser(xmin,xmax);
@@ -149,13 +159,14 @@ void compareGen(std::string mcfile1, std::string mcfile2,
     }
 
 
-  float x1NDC = 0.691;
-  float y1NDC = 0.757;
-  float x2NDC = 0.894;
-  float y2NDC = 0.973;
+  float x1NDC = 0.725;
+  float y1NDC = 0.615;
+  float x2NDC = 0.928;
+  float y2NDC = 0.951;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
+  leg->SetHeader(header.data());
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetTextSize(0.04);
@@ -179,8 +190,11 @@ void compareGen(std::string mcfile1, std::string mcfile2,
   gPad->SetTickx();
   gStyle->SetOptFit(1);
   hscale->SetTitle("");
-  hscale->SetMaximum(3.0);
-  hscale->SetMinimum(-0.5);
+  hscale->GetXaxis()->SetTitle(xtitle.data());
+//   hscale->SetMaximum(3.0);
+//   hscale->SetMinimum(0.1);
+  hscale->SetMaximum(2.0);
+  hscale->SetMinimum(0.5);
   hscale->SetTitleOffset(1.2,"Y");
   hscale->Draw("e1");
   TF1* fline = new TF1("fline","pol1");
@@ -190,7 +204,7 @@ void compareGen(std::string mcfile1, std::string mcfile2,
   fline->SetLineWidth(3);
   fline->SetLineColor(6);
   fline->SetNpx(2500);
-  hscale->Fit("fline","","");
+//   hscale->Fit("fline","","");
   l2->Draw("same");
 
 
