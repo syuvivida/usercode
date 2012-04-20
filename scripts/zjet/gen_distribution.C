@@ -66,18 +66,19 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    // dummy proof, in case someone put a negative number
    int leptonPID = abs(lepID); 
+
+   int nPass[30];
    
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
-      //       if(jentry > 50)break;
+
+      nPass[0]++;
 
       int lepPlusIndex = -1;
       int lepMinusIndex = -1;
-
       double eventWeight = 1;
 
       if(applyWeight && PU_weight >= 0.0)eventWeight *= PU_weight;
@@ -108,6 +109,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
       // do not find m+ or lep-
       if(lepPlusIndex < 0 || lepMinusIndex < 0)continue;
 
+      nPass[1]++;
+
       if(DEBUG==1){
 	cout << "lepPlusIndex = " << lepPlusIndex << "\t pt=" << 
 	  genParPt_->at(lepPlusIndex) << "\t eta=" << 
@@ -127,21 +130,28 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 	double pt  = genParPt_->at(indexNumbers[ip]);
 	double eta = genParEta_->at(indexNumbers[ip]);
 
+	// muon
 	if(leptonPID==13 && pt > 20.0 && fabs(eta) < 2.1)nPt20++;
 	if(leptonPID==13 && pt > 10.0 && fabs(eta) < 2.1)nPt10++;
 
-	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
-	   fabs(eta) < 2.4)nPt20++;
+	if(leptonPID==11 && pt > 20.0 && ( 
+					  (fabs(eta) > 1.566 && 
+					   fabs(eta) < 2.4) ||
 
-	if(leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
-	   fabs(eta) < 1.446)nPt20++;
+					  (fabs(eta) > 0.0 && 
+					   fabs(eta) < 1.446
+					   )
+					  ))nPt20++;
+
+
+
 // 	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 1.566 && 
 // 	 	   fabs(eta) < 2.4)nPt20++;
 
 // 	if(exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) > 0.0 && 
 // 		   fabs(eta) < 1.446)nPt20++;
 
-//  	if(!exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) < 2.5)nPt20++;
+//  	if(!exclusive && leptonPID==11 && pt > 20.0 && fabs(eta) < 2.4)nPt20++;
 
       }
 
@@ -150,6 +160,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
       if(leptonPID==13 && (nPt20 < 1 || nPt10 < 2))continue;
       if(leptonPID==11 && (nPt20 < 2))continue;
+
+      nPass[2]++;
 
 
       TLorentzVector l4_lepp(0,0,0,0);
@@ -178,6 +190,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
       if(DEBUG==1)
 	cout << "dilepton mass = " << mll << endl;
       
+      nPass[3]++;
 
       // now look for jets
       double maxGenJetPt = -9999;
@@ -220,8 +233,12 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
       if(maxGenJetIndex < 0)continue;
 
+      nPass[4]++;
+
       if(exclusive && nGenJet!=1)continue;
-      
+     
+      nPass[5]++;
+ 
       TLorentzVector l4_j(0,0,0,0);
       l4_j.SetPtEtaPhiE(genJetPt_->at(maxGenJetIndex),
 			genJetEta_->at(maxGenJetIndex),
