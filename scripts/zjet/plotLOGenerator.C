@@ -7,7 +7,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
 
   cout << "There are " << nPtBins << " bins." << endl;
 
-  const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4,2.7};
+  const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
 
   cout << "There are " << nYBins << " bins." << endl;
