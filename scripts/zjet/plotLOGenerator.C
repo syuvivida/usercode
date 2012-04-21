@@ -7,7 +7,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
 
   cout << "There are " << nPtBins << " bins." << endl;
 
-  const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
+  const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4,2.7};
   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
 
   cout << "There are " << nYBins << " bins." << endl;
@@ -23,20 +23,18 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
   TH1D* h_data_jety;
 
   TFile *fmc = TFile::Open(file.data());
-  TFile *fdata = TFile::Open("DiffCrossSection_1515.root");
+  TFile *fdata = TFile::Open("DiffCrossSection.root");
   
   h_mc_jetpt =  (TH1D*)(fmc->Get("h_mc_jetpt"));
   h_mc_jetpt -> SetName("h_mc_jetpt");
   h_mc_jety =  (TH1D*)(fmc->Get("h_mc_jety"));
   h_mc_jety  -> SetName("h_mc_jety");
 
-  h_data_jetpt = (TH1D*)(fdata->Get("r15JetPt_Z1jet"));
+  h_data_jetpt = (TH1D*)(fdata->Get("JetPt_Z1jet"));
   h_data_jetpt -> SetName("h_data_jetpt");
-//   h_data_jetpt = (TH1D*)(fdata->Get("FirstJetPt_Z1jet"));
 
   h_data_jety  = (TH1D*)(fdata->Get("JetY_Z1jet"));
   h_data_jety -> SetName("h_data_jety");
-//   h_data_jety  = (TH1D*)(fdata->Get("FirstJetY_Z1jet"));
 
   TH1D* h_diff_mc_jetpt = (TH1D*)h_mc_jetpt->Clone("h_diff_mc_jetpt");
   TH1D* h_diff_mc_jety  = (TH1D*)h_mc_jety->Clone("h_diff_mc_jety"); 
@@ -89,7 +87,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
   h_diff_mc_jety ->Draw("same");
   h_data_jety ->Draw("esame");
 
-  TFile* outFile = new TFile(Form("1515data_mc_%s",file.data()),"recreate");       
+  TFile* outFile = new TFile(Form("20120420data_mc_%s",file.data()),"recreate");       
   
   h_diff_mc_jety->Write();
   h_diff_mc_jetpt->Write();
