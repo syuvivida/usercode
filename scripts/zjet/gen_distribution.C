@@ -11,37 +11,71 @@
 void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEBUG)
 {
    if (fChain == 0) return;
-   const double fBinsPt[]={30,40,55,75,105,150,210,315,500};
-   const int nPtBins = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
 
-   cout << "There are " << nPtBins << " bins." << endl;
+   const double fBinsPt01[]= {30,40,55,75,105,150,210,315,500};
+   const double fBinsPt02[]= {30,40,55,75,105,150,210,315,450};
+   const double fBinsPt03[]= {30,40,55,75,105,150,300};
+   const double fBinsPt04[]= {30,40,55,75,105,200};
+  
+   int nPtBins01 = sizeof(fBinsPt01)/sizeof(fBinsPt01[0])-1;
+   cout << "There are " << nPtBins01 << " bins in 1st leading jet" << endl;
+
+   int nPtBins02 = sizeof(fBinsPt02)/sizeof(fBinsPt02[0])-1;
+   cout << "There are " << nPtBins02 << " bins in 2nd leading jet" << endl;
+
+   int nPtBins03 = sizeof(fBinsPt03)/sizeof(fBinsPt03[0])-1;
+   cout << "There are " << nPtBins03 << " bins in 3rd leading jet" << endl;
+
+   int nPtBins04 = sizeof(fBinsPt04)/sizeof(fBinsPt04[0])-1;
+   cout << "There are " << nPtBins04 << " bins in 4th leading jet" << endl;
 
    const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
    const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
 
    cout << "There are " << nYBins << " bins." << endl;
 
-   const int nMAXJETS=10;
-
-
+   const int nMAXJETS=4;
+   
+   TH1D* h_njet = new TH1D("h_njet","",6,-0.5,5.5);
+   h_njet->SetXTitle("#geq n jet");
+   h_njet->Sumw2();
 
    TH1D* h_mc_jetpt[nMAXJETS];
    TH1D* h_mc_jety[nMAXJETS];
 
-   TH1D* h_predict_jetpt_template = new TH1D("h_predict_jetpt_template","",nPtBins,fBinsPt);
-   TH1D* h_predict_jety_template = new TH1D("h_predict_jety_template","",nYBins,fBinsY);
-
+   TH1D* h_predict_jetpt_template = new TH1D("h_predict_jetpt_template","",nPtBins01,fBinsPt01);
+   h_predict_jetpt_template->Sumw2();
    TH1D* h_leadingjet_pt = (TH1D*)h_predict_jetpt_template->Clone("h_leadingjet_pt");
+   h_leadingjet_pt->Sumw2();
+   
+
+   h_mc_jetpt[0] = new TH1D(Form("h_mc_jetpt%02i",1),"1st leading jet",nPtBins01,fBinsPt01);
+   h_mc_jetpt[1] = new TH1D(Form("h_mc_jetpt%02i",2),"2nd leading jet",nPtBins02,fBinsPt02);
+   h_mc_jetpt[2] = new TH1D(Form("h_mc_jetpt%02i",3),"3rd leading jet",nPtBins03,fBinsPt03);
+   h_mc_jetpt[3] = new TH1D(Form("h_mc_jetpt%02i",4),"4th leading jet",nPtBins04,fBinsPt04);
+
+   TH1D* h_predict_jety_template = new TH1D("h_predict_jety_template","",nYBins,fBinsY);
+   h_predict_jety_template->Sumw2();
+
    TH1D* h_leadingjet_y = (TH1D*)h_predict_jety_template->Clone("h_leadingjet_y");
-  
+   h_leadingjet_y->Sumw2();
+
    for(int ij=0; ij<nMAXJETS; ij++){
 
-     h_mc_jetpt[ij] = (TH1D*)h_predict_jetpt_template->Clone(Form("h_mc_jetpt%02i",ij+1));
+     h_mc_jetpt[ij]->SetXTitle("p_{T}(jet) [GeV]");
+
+     h_mc_jetpt[ij]->Sumw2();
 
      h_mc_jety[ij] = (TH1D*)h_predict_jety_template->Clone(Form("h_mc_jety%02i",ij+1));
+     h_mc_jety[ij]->SetXTitle("Rapidity(jet)");
+
+     h_mc_jety[ij]->Sumw2();
+
    }
 
    TH1D* h_zpt_template = new TH1D("h_zpt_template","",100,0,100);
+   h_zpt_template->Sumw2();
+
 
    TH1D* h_zpt   = (TH1D*)h_zpt_template->Clone("h_zpt");
    h_zpt->SetXTitle("p_{T}(Z) [GeV]");
@@ -94,8 +128,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       sorted_genJetEtMap.clear();
-
-//       if(jentry > 1000) break;
+      //      if(jentry > 1000) break;
 
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
@@ -221,7 +254,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
       // now look for jets
       double maxGenJetPt = -9999;
       int maxGenJetIndex = -1;
-      unsigned int nGenJet = 0;
+      unsigned int nGenJets = 0;
 
 
       for(unsigned int ij = 0; ij < genJetPt_->size(); ij ++){
@@ -244,7 +277,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
 	if(dr_ep < 0.3)continue;
 	if(dr_em < 0.3)continue;
-        nGenJet++; 
+        nGenJets++; 
         sorted_genJetEtMap.insert(std::pair<double, int>(thisGenJetPt,ij));  
 
 	if(thisGenJetPt > maxGenJetPt)
@@ -256,7 +289,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
       }
       
-      if(nGenJet!= sorted_genJetEtMap.size())
+      if(nGenJets!= sorted_genJetEtMap.size())
         { 
           cout << "errors in map size" << endl;
           continue;
@@ -265,11 +298,15 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
       if(DEBUG==1)
 	cout << "max gen jet index = " << maxGenJetIndex << endl;
 
+      for(int ik=0; ik<h_njet->GetNbinsX(); ik++)
+	if(nGenJets>= ik)
+	  h_njet->Fill(ik,eventWeight);
+
       if(maxGenJetIndex < 0)continue;
 
       nPass[4]++;
 
-      if(exclusive && nGenJet!=1)continue;
+      if(exclusive && nGenJets!=1)continue;
      
       nPass[5]++;
  
@@ -296,7 +333,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 	cout << "Now ordered jets" << endl;
       int countGenJet=0;
       for (mapIter it_part= sorted_genJetEtMap.begin();
-                   it_part != sorted_genJetEtMap.end() && countGenJet<10; ++it_part)
+                   it_part != sorted_genJetEtMap.end() && countGenJet< nMAXJETS; ++it_part)
       {
         double pt_mapthis = genJetPt_->at(it_part->second);
 
@@ -346,6 +383,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
    TFile* outFile = new TFile(Form("%s_%s_%s",prefix.data(),
 				   leptonName.data(),
 				   _inputFileName.data()),"recreate");       
+
+   h_njet->Write();
         
    h_leadingjet_pt->Write();
    h_leadingjet_y->Write();
@@ -362,6 +401,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
      h_mc_jetpt[ij]->Write();
      h_mc_jety[ij]->Write();
    }
+
+
    outFile->Close();
 
 }
