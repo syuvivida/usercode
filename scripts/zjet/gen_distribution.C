@@ -299,12 +299,23 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
                    it_part != sorted_genJetEtMap.end() && countGenJet<10; ++it_part)
       {
         double pt_mapthis = genJetPt_->at(it_part->second);
-        double eta_mapthis = genJetEta_->at(it_part->second);
+
+	int jet_index = it_part->second;
+
+	TLorentzVector l4_jthis(0,0,0,0);
+	l4_jthis.SetPtEtaPhiE(genJetPt_->at(jet_index),
+			      genJetEta_->at(jet_index),
+			      genJetPhi_->at(jet_index),
+			      genJetE_->at(jet_index));
+
+	double y_mapthis  = l4_jthis.Rapidity();
 	
 	if(DEBUG==1)
-	  cout << "pt = " << pt_mapthis << "\t eta = " << eta_mapthis << endl;
+	  cout << "pt = " << pt_mapthis << "\t y = " << y_mapthis << endl;
+
         h_mc_jetpt[countGenJet]->Fill(pt_mapthis,eventWeight);
-        h_mc_jety[countGenJet]->Fill(fabs(eta_mapthis),eventWeight);
+        h_mc_jety[countGenJet]->Fill(fabs(y_mapthis),eventWeight);
+
         countGenJet++;
       }
       h_zpt->Fill(ptz,eventWeight);

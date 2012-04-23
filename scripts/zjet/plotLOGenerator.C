@@ -13,86 +13,133 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
   cout << "There are " << nYBins << " bins." << endl;
     
 
-  TH1D* h_mc_jetpt;
-  TH1D* h_mc_jety; 
-  TH1D* h_diff_mc_jetpt;
-  TH1D* h_diff_mc_jety; 
+  const int nJets=4;
+  TH1D* h_diff_mc_jetpt[nJets];
+  TH1D* h_diff_mc_jety[nJets]; 
   
+  TH1D* h_mc_jetpt[nJets];
+  TH1D* h_mc_jety[nJets];
 
-  TH1D* h_data_jetpt;
-  TH1D* h_data_jety;
+
+  TH1D* h_data_jetpt[nJets];
+  TH1D* h_data_jety[nJets];
 
   TFile *fmc = TFile::Open(file.data());
-  TFile *fdata = TFile::Open("DiffCrossSection.root");
-  
-  h_mc_jetpt =  (TH1D*)(fmc->Get("h_mc_jetpt"));
-  h_mc_jetpt -> SetName("h_mc_jetpt");
-  h_mc_jety =  (TH1D*)(fmc->Get("h_mc_jety"));
-  h_mc_jety  -> SetName("h_mc_jety");
-
-  h_data_jetpt = (TH1D*)(fdata->Get("JetPt_Z1jet"));
-  h_data_jetpt -> SetName("h_data_jetpt");
-
-  h_data_jety  = (TH1D*)(fdata->Get("JetY_Z1jet"));
-  h_data_jety -> SetName("h_data_jety");
-
-  TH1D* h_diff_mc_jetpt = (TH1D*)h_mc_jetpt->Clone("h_diff_mc_jetpt");
-  TH1D* h_diff_mc_jety  = (TH1D*)h_mc_jety->Clone("h_diff_mc_jety"); 
-
 
   double xsec = 3048.0*1000;
   double ngen = 2.29809910000000000e+07; // madgraph, 3.38254373785480205e+06 sherpa
-  h_mc_jetpt->Sumw2();
-  h_mc_jety->Sumw2();
   
-  h_mc_jetpt->Scale(xsec/ngen);
-  h_mc_jety->Scale(xsec/ngen);
+  
+  for(int ij=0; ij< nJets; ij++){
 
-  for(int i=1; i<= h_mc_jetpt->GetNbinsX(); i++)
+    h_mc_jetpt[ij] =  (TH1D*)(fmc->Get(Form("h_mc_jetpt%02i",ij+1)));
+    h_mc_jetpt[ij] -> SetName(Form("h_mc_jetpt%02i",ij+1));
+    h_mc_jety[ij]  =  (TH1D*)(fmc->Get(Form("h_mc_jety%02i",ij+1)));
+    h_mc_jety[ij]  -> SetName(Form("h_mc_jety%02i",ij+1));
+
+    h_mc_jetpt[ij]->Sumw2();
+    h_mc_jetpt[ij]->Scale(xsec/ngen);
+    h_mc_jety[ij]->Sumw2();
+    h_mc_jety[ij]->Scale(xsec/ngen);
+
+
+    h_diff_mc_jetpt[ij] =  new TH1D(Form("h_diff_mc_jetpt%02i",ij+1),"",nPtBins,fBinsPt);
+    h_diff_mc_jety[ij]  =  new TH1D(Form("h_diff_mc_jety%02i",ij+1),"",nYBins,fBinsY);
+
+  }
+
+
+  for(int ij=0; ij < nJets; ij++){
+    for(int k=1; k<= h_mc_jetpt[ij]->GetNbinsX(); k++)
     {
+      double binWidth = h_mc_jetpt[ij]->GetBinWidth(k);
+      double xsec = h_mc_jetpt[ij]->GetBinContent(k);
+      double diff_xsec = xsec/binWidth;
 
-      double xsec = h_mc_jetpt->GetBinContent(i);
-      double diff_xsec = xsec/h_mc_jetpt->GetBinWidth(i);
+      double xsec_err = h_mc_jetpt[ij]->GetBinError(k);
+      double diff_xsec_err = xsec_err/binWidth;
+//       cout << "jet " << ij+1 << " pt bin " << k << ": diff_xsec = " << diff_xsec << endl;
+      h_diff_mc_jetpt[ij]->SetBinContent(k,diff_xsec);
+      h_diff_mc_jetpt[ij]->SetBinError(k,diff_xsec_err);
+    }
+  }
 
-      h_diff_mc_jetpt->SetBinContent(i,diff_xsec);
-      h_diff_mc_jetpt->SetBinError(i,1e-4);
+
+  for(int ij=0; ij < nJets; ij++){
+    for(int k=1; k<= h_mc_jety[ij]->GetNbinsX(); k++)
+    {
+      double binWidth = h_mc_jety[ij]->GetBinWidth(k);
+      double xsec = h_mc_jety[ij]->GetBinContent(k);
+      double diff_xsec = xsec/binWidth;
+
+      double xsec_err = h_mc_jety[ij]->GetBinError(k);
+      double diff_xsec_err = xsec_err/binWidth;
+      
+//       cout << "jet " << ij+1 << " y bin " << k << ": diff_xsec = " << diff_xsec << endl;
+
+      h_diff_mc_jety[ij]->SetBinContent(k,diff_xsec);
+      h_diff_mc_jety[ij]->SetBinError(k,diff_xsec_err);
+    }
+  }
+  
+
+  cout << "Final cross check" << endl;
+  cout << "as a function of pt" << endl;
+
+  for(int ij=0; ij < 4; ij++)
+    {
+      cout << "=============================================" << endl;
+      cout << "jet " << (ij+1) << endl;
+      double total_xsec = 0;
+
+      for(int k=1; k<= h_diff_mc_jetpt[ij]->GetNbinsX();k++){
+	cout << "Bin " << k  << ": " 
+	     << h_diff_mc_jetpt[ij] -> GetBinContent(k)
+	     << " +- " << h_diff_mc_jetpt[ij] -> GetBinError(k)
+	     << " fb/GeV" << endl;
+
+	total_xsec += h_diff_mc_jetpt[ij] -> GetBinContent(k)*
+	  h_diff_mc_jetpt[ij] ->GetBinWidth(k);
+	
+      }
+      cout << "total xsec = " << total_xsec << " fb" << endl;
+      cout << "=============================================" << endl;
     }
 
-  for(int i=1; i<= h_mc_jety->GetNbinsX(); i++)
+
+  cout << "as a function of Y" << endl;
+  for(int ij=0; ij < 4; ij++)
     {
+      cout << "=============================================" << endl;
+      cout << "jet " << ij+1 << endl;
+      double total_xsec = 0;
+      for(int k=1; k<= h_diff_mc_jety[ij]->GetNbinsX(); k++){
+	cout << "Bin " << k  << ": " 
+	     << h_diff_mc_jety[ij] -> GetBinContent(k)
+	     << " +- " << h_diff_mc_jety[ij] -> GetBinError(k)
+	     << " fb/GeV" << endl;
 
-      double xsec = h_mc_jety->GetBinContent(i);
-      double diff_xsec = xsec/h_mc_jety->GetBinWidth(i);
-
-      h_diff_mc_jety->SetBinContent(i,diff_xsec);
-      h_diff_mc_jety->SetBinError(i,1e-4);
+	total_xsec += h_diff_mc_jety[ij] -> GetBinContent(k)*
+	  h_diff_mc_jety[ij] ->GetBinWidth(k);
+	
+      }
+      cout << "total xsec = " << total_xsec << " fb" << endl;
+      cout << "=============================================" << endl;
     }
 
-  TCanvas* c1 = new TCanvas("c1","",0,0,500,500);
-
-  h_diff_mc_jetpt->SetLineColor(2);
-  h_data_jetpt->SetMarkerSize(1);
-  h_data_jetpt->SetMarkerStyle(8);
-  h_data_jetpt->Draw("e");
-  h_diff_mc_jetpt->Draw("same");
-  h_data_jetpt->Draw("esame");
-
-
-  TCanvas* c2 = new TCanvas("c2","",500,0,500,500);
-
-  h_diff_mc_jety ->SetLineColor(2);
-  h_data_jety ->SetMarkerSize(1);
-  h_data_jety ->SetMarkerStyle(8);
-  h_data_jety ->Draw("e");
-  h_diff_mc_jety ->Draw("same");
-  h_data_jety ->Draw("esame");
-
-  TFile* outFile = new TFile(Form("20120420data_mc_%s",file.data()),"recreate");       
+  TFile* outFile = new TFile(Form("20120423_%s",file.data()),"recreate");       
   
-  h_diff_mc_jety->Write();
-  h_diff_mc_jetpt->Write();
-  h_data_jetpt->Write();
-  h_data_jety->Write();
- 
+  for(int ij=0;ij<nJets;ij++)
+    {
+       h_diff_mc_jetpt[ij]->Write();
+       h_diff_mc_jety[ij]->Write();
+
+    }
+
+  
   outFile->Close();
+
+
+
+
 }
