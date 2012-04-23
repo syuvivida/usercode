@@ -2,15 +2,29 @@
 void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root")
 {
 
-  const double fBinsPt[]={30,40,55,75,105,150,210,315,500};
-  const int nPtBins = sizeof(fBinsPt)/sizeof(fBinsPt[0])-1;
+   const double fBinsPt01[]= {30,40,55,75,105,150,210,315,500};
+   const double fBinsPt02[]= {30,40,55,75,105,150,210,315,450};
+   const double fBinsPt03[]= {30,40,55,75,105,150,300};
+   const double fBinsPt04[]= {30,40,55,75,105,200};
+  
+   int nPtBins01 = sizeof(fBinsPt01)/sizeof(fBinsPt01[0])-1;
+   cout << "There are " << nPtBins01 << " bins in 1st leading jet" << endl;
 
-  cout << "There are " << nPtBins << " bins." << endl;
+   int nPtBins02 = sizeof(fBinsPt02)/sizeof(fBinsPt02[0])-1;
+   cout << "There are " << nPtBins02 << " bins in 2nd leading jet" << endl;
 
-  const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
-  const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
+   int nPtBins03 = sizeof(fBinsPt03)/sizeof(fBinsPt03[0])-1;
+   cout << "There are " << nPtBins03 << " bins in 3rd leading jet" << endl;
 
-  cout << "There are " << nYBins << " bins." << endl;
+   int nPtBins04 = sizeof(fBinsPt04)/sizeof(fBinsPt04[0])-1;
+   cout << "There are " << nPtBins04 << " bins in 4th leading jet" << endl;
+
+   const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
+   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
+
+   cout << "There are " << nYBins << " bins." << endl;
+
+
     
 
   const int nJets=4;
@@ -42,12 +56,14 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
     h_mc_jety[ij]->Sumw2();
     h_mc_jety[ij]->Scale(xsec/ngen);
 
-
-    h_diff_mc_jetpt[ij] =  new TH1D(Form("h_diff_mc_jetpt%02i",ij+1),"",nPtBins,fBinsPt);
     h_diff_mc_jety[ij]  =  new TH1D(Form("h_diff_mc_jety%02i",ij+1),"",nYBins,fBinsY);
 
   }
 
+  h_diff_mc_jetpt[0] =  new TH1D(Form("h_diff_mc_jetpt%02i",1),"",nPtBins01,fBinsPt01);
+  h_diff_mc_jetpt[1] =  new TH1D(Form("h_diff_mc_jetpt%02i",2),"",nPtBins02,fBinsPt02);
+  h_diff_mc_jetpt[2] =  new TH1D(Form("h_diff_mc_jetpt%02i",3),"",nPtBins03,fBinsPt03);
+  h_diff_mc_jetpt[3] =  new TH1D(Form("h_diff_mc_jetpt%02i",4),"",nPtBins04,fBinsPt04);
 
   for(int ij=0; ij < nJets; ij++){
     for(int k=1; k<= h_mc_jetpt[ij]->GetNbinsX(); k++)
@@ -58,7 +74,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
 
       double xsec_err = h_mc_jetpt[ij]->GetBinError(k);
       double diff_xsec_err = xsec_err/binWidth;
-//       cout << "jet " << ij+1 << " pt bin " << k << ": diff_xsec = " << diff_xsec << endl;
+      cout << "jet " << ij+1 << " pt bin " << k << ": diff_xsec = " << diff_xsec << endl;
       h_diff_mc_jetpt[ij]->SetBinContent(k,diff_xsec);
       h_diff_mc_jetpt[ij]->SetBinError(k,diff_xsec_err);
     }
@@ -75,7 +91,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
       double xsec_err = h_mc_jety[ij]->GetBinError(k);
       double diff_xsec_err = xsec_err/binWidth;
       
-//       cout << "jet " << ij+1 << " y bin " << k << ": diff_xsec = " << diff_xsec << endl;
+      cout << "jet " << ij+1 << " y bin " << k << ": diff_xsec = " << diff_xsec << endl;
 
       h_diff_mc_jety[ij]->SetBinContent(k,diff_xsec);
       h_diff_mc_jety[ij]->SetBinError(k,diff_xsec_err);
@@ -86,11 +102,12 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
   cout << "Final cross check" << endl;
   cout << "as a function of pt" << endl;
 
-  for(int ij=0; ij < 4; ij++)
+  double total_xsec_pt[4]={0};
+
+  for(int ij=0; ij < nJets; ij++)
     {
       cout << "=============================================" << endl;
       cout << "jet " << (ij+1) << endl;
-      double total_xsec = 0;
 
       for(int k=1; k<= h_diff_mc_jetpt[ij]->GetNbinsX();k++){
 	cout << "Bin " << k  << ": " 
@@ -98,42 +115,45 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
 	     << " +- " << h_diff_mc_jetpt[ij] -> GetBinError(k)
 	     << " fb/GeV" << endl;
 
-	total_xsec += h_diff_mc_jetpt[ij] -> GetBinContent(k)*
+	total_xsec_pt[ij] += h_diff_mc_jetpt[ij] -> GetBinContent(k)*
 	  h_diff_mc_jetpt[ij] ->GetBinWidth(k);
 	
       }
-      cout << "total xsec = " << total_xsec << " fb" << endl;
+      cout << "total xsec = " << total_xsec_pt[ij] << " fb" << endl;
       cout << "=============================================" << endl;
     }
 
 
   cout << "as a function of Y" << endl;
-  for(int ij=0; ij < 4; ij++)
+
+  double total_xsec_y[4]={0};
+
+  for(int ij=0; ij < nJets; ij++)
     {
       cout << "=============================================" << endl;
       cout << "jet " << ij+1 << endl;
-      double total_xsec = 0;
       for(int k=1; k<= h_diff_mc_jety[ij]->GetNbinsX(); k++){
 	cout << "Bin " << k  << ": " 
 	     << h_diff_mc_jety[ij] -> GetBinContent(k)
 	     << " +- " << h_diff_mc_jety[ij] -> GetBinError(k)
-	     << " fb/GeV" << endl;
+	     << " fb" << endl;
 
-	total_xsec += h_diff_mc_jety[ij] -> GetBinContent(k)*
+	total_xsec_y[ij] += h_diff_mc_jety[ij] -> GetBinContent(k)*
 	  h_diff_mc_jety[ij] ->GetBinWidth(k);
 	
       }
-      cout << "total xsec = " << total_xsec << " fb" << endl;
+      cout << "total xsec = " << total_xsec_y[ij] << " fb" << endl;
       cout << "=============================================" << endl;
     }
 
-  TFile* outFile = new TFile(Form("20120423_%s",file.data()),"recreate");       
+  TFile* outFile = new TFile(Form("new_20120423_%s",file.data()),"recreate");       
   
   for(int ij=0;ij<nJets;ij++)
     {
        h_diff_mc_jetpt[ij]->Write();
        h_diff_mc_jety[ij]->Write();
-
+       cout << "Ratio of pt over y integrated cross section = "
+	    << total_xsec_pt[ij]/total_xsec_y[ij] << endl;
     }
 
   
