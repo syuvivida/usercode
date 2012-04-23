@@ -4,6 +4,8 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TLorentzVector.h>
+#include <map>
+
 
 
 void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEBUG)
@@ -19,8 +21,25 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    cout << "There are " << nYBins << " bins." << endl;
 
-   TH1D* h_mc_jetpt = new TH1D("h_mc_jetpt","",nPtBins,fBinsPt);
-   TH1D* h_mc_jety = new TH1D("h_mc_jety","",nYBins, fBinsY);
+   const int nMAXJETS=10;
+
+
+
+   TH1D* h_mc_jetpt[nMAXJETS];
+   TH1D* h_mc_jety[nMAXJETS];
+
+   TH1D* h_predict_jetpt_template = new TH1D("h_predict_jetpt_template","",nPtBins,fBinsPt);
+   TH1D* h_predict_jety_template = new TH1D("h_predict_jety_template","",nYBins,fBinsY);
+
+   TH1D* h_leadingjet_pt = (TH1D*)h_predict_jetpt_template->Clone("h_leadingjet_pt");
+   TH1D* h_leadingjet_y = (TH1D*)h_predict_jety_template->Clone("h_leadingjet_y");
+  
+   for(int ij=0; ij<nMAXJETS; ij++){
+
+     h_mc_jetpt[ij] = (TH1D*)h_predict_jetpt_template->Clone(Form("h_mc_jetpt%02i",ij+1));
+
+     h_mc_jety[ij] = (TH1D*)h_predict_jety_template->Clone(Form("h_mc_jety%02i",ij+1));
+   }
 
    TH1D* h_zpt_template = new TH1D("h_zpt_template","",100,0,100);
 
@@ -69,8 +88,15 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    int nPass[30];
    
+   typedef map<double, int,  std::greater<double> > myMap;
+   myMap sorted_genJetEtMap;
+   typedef myMap::iterator mapIter;
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+      sorted_genJetEtMap.clear();
+
+//       if(jentry > 1000) break;
+
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -195,7 +221,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
       // now look for jets
       double maxGenJetPt = -9999;
       int maxGenJetIndex = -1;
-      int nGenJet = 0;
+      unsigned int nGenJet = 0;
+
 
       for(unsigned int ij = 0; ij < genJetPt_->size(); ij ++){
 
@@ -218,6 +245,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 	if(dr_ep < 0.3)continue;
 	if(dr_em < 0.3)continue;
         nGenJet++; 
+        sorted_genJetEtMap.insert(std::pair<double, int>(thisGenJetPt,ij));  
 
 	if(thisGenJetPt > maxGenJetPt)
 	  {
@@ -228,6 +256,12 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
       }
       
+      if(nGenJet!= sorted_genJetEtMap.size())
+        { 
+          cout << "errors in map size" << endl;
+          continue;
+	}
+
       if(DEBUG==1)
 	cout << "max gen jet index = " << maxGenJetIndex << endl;
 
@@ -254,9 +288,25 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
       double yB = 0.5*(yz + yj);
       double ystar = 0.5*(yz-yj);
 
-      h_mc_jetpt->Fill(ptjet,eventWeight);
-      h_mc_jety->Fill(fabs(yj),eventWeight);
-
+      h_leadingjet_pt->Fill(ptjet,eventWeight);
+      h_leadingjet_y->Fill(fabs(yj),eventWeight);
+      
+      
+      if(DEBUG==1)
+	cout << "Now ordered jets" << endl;
+      int countGenJet=0;
+      for (mapIter it_part= sorted_genJetEtMap.begin();
+                   it_part != sorted_genJetEtMap.end() && countGenJet<10; ++it_part)
+      {
+        double pt_mapthis = genJetPt_->at(it_part->second);
+        double eta_mapthis = genJetEta_->at(it_part->second);
+	
+	if(DEBUG==1)
+	  cout << "pt = " << pt_mapthis << "\t eta = " << eta_mapthis << endl;
+        h_mc_jetpt[countGenJet]->Fill(pt_mapthis,eventWeight);
+        h_mc_jety[countGenJet]->Fill(fabs(eta_mapthis),eventWeight);
+        countGenJet++;
+      }
       h_zpt->Fill(ptz,eventWeight);
       h_jetpt->Fill(ptjet,eventWeight); 
       h_zy->Fill(yz,eventWeight);
@@ -286,7 +336,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 				   leptonName.data(),
 				   _inputFileName.data()),"recreate");       
         
- 
+   h_leadingjet_pt->Write();
+   h_leadingjet_y->Write();
    h_yB->Write();
    h_ystar->Write();
   
@@ -296,9 +347,10 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
    h_jety->Write();   
    h_jetpt->Write();
 
-   h_mc_jetpt->Write();
-   h_mc_jety->Write();
-
+   for(int ij=0; ij < nMAXJETS; ij++){
+     h_mc_jetpt[ij]->Write();
+     h_mc_jety[ij]->Write();
+   }
    outFile->Close();
 
 }
