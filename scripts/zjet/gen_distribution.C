@@ -12,6 +12,15 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 {
    if (fChain == 0) return;
 
+   bool isSherpa=false;
+
+   size_t pos_sherpa  = _inputFileName.find("sherpa");
+
+   if(pos_sherpa!= std::string::npos)
+     isSherpa=true;
+
+   if(isSherpa)cout << "This is a sherpa MC sample" << endl;
+
    const double fBinsPt01[]= {30,40,55,75,105,150,210,315,500};
    const double fBinsPt02[]= {30,40,55,75,105,150,210,315,450};
    const double fBinsPt03[]= {30,40,55,75,105,150,300};
@@ -44,6 +53,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
    h_jetpt_power_template->SetXTitle("p_{T}(jet)^{gen} [GeV]");
    h_jetpt_power_template->Sumw2();
    TH1D* h_jetpt_power[nMAXJETS+1];
+   TH1D* h_jetp_power[nMAXJETS+1];
    
    TH1D* h_mc_jetpt[nMAXJETS];
    TH1D* h_mc_jety[nMAXJETS];
@@ -68,6 +78,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
    for(int ij=0; ij<nMAXJETS; ij++){
 
      h_jetpt_power[ij] = (TH1D*)h_jetpt_power_template->Clone(Form("h_jetpt_power%02i",ij+1));
+     h_jetp_power[ij]  = (TH1D*)h_jetpt_power_template->Clone(Form("h_jetp_power%02i",ij+1));
+     h_jetp_power[ij]  -> SetXTitle("p(jet) [GeV]");
 
      h_mc_jetpt[ij]->SetXTitle("p_{T}(jet) [GeV]");
      h_mc_jetpt[ij]->Sumw2();
@@ -80,6 +92,10 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    h_jetpt_power[4] = (TH1D*)h_jetpt_power_template->Clone("h_jetpt_power_inclusive");
    h_jetpt_power[4]->Sumw2();
+
+   h_jetp_power[4] = (TH1D*)h_jetpt_power_template->Clone("h_jetp_power_inclusive");
+   h_jetp_power[4]->Sumw2();
+   h_jetp_power[4]->SetXTitle("p(jet) [GeV]");
 
    TH1D* h_zpt_template = new TH1D("h_zpt_template","",100,0,100);
    h_zpt_template->Sumw2();
@@ -295,8 +311,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 	  }
 
 	h_jetpt_power[4]->Fill(thisGenJetPt,eventWeight);
-
-
+	h_jetp_power[4]->Fill(thisGenJet_l4.P(),eventWeight);
+	
       } // end of loop over jets
       
       if(nGenJets!= sorted_genJetEtMap.size())
@@ -364,6 +380,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
         h_mc_jety[countGenJet]->Fill(fabs(y_mapthis),eventWeight);
 
 	h_jetpt_power[countGenJet]->Fill(pt_mapthis,eventWeight);	
+	h_jetp_power[countGenJet] ->Fill(l4_jthis.P(),eventWeight);
 
         countGenJet++;
       }
@@ -416,10 +433,12 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
    for(int ij=0; ij < nMAXJETS; ij++){
      h_mc_jetpt[ij]->Write();
      h_mc_jety[ij]->Write();
-     h_jetpt_power[ij]->Write();
    }
 
-   h_jetpt_power[4]->Write();
+   for(int ij=0; ij < nMAXJETS+1; ij++){
+     h_jetpt_power[ij]->Write();
+     h_jetp_power[ij]->Write();
+   }
    outFile->Close();
 
 }
