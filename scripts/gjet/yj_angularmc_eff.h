@@ -314,6 +314,7 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual Int_t    phoDecCode(Int_t ipho);
+   virtual Int_t    gen_phoDecCode(Int_t ipho);
    virtual Bool_t   isGoodPho(Int_t ipho, bool applyPileupCorr=false);
    virtual Double_t phoEcalIso(Int_t ipho, bool applyPileupCorr=false);
    virtual Double_t phoHcalIso(Int_t ipho, bool applyPileupCorr=false);
