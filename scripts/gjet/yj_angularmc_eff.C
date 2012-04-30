@@ -105,6 +105,10 @@ void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUp
 
   TH1D* h_ystar_template = new TH1D("h_ystar_template","",100,-5.0,5.0);
 
+  TH1D* h_yB_template_oneside = new TH1D("h_yB_template_oneside","",18,0,1.8);
+
+  TH1D* h_ystar_template_oneside = new TH1D("h_ystar_template_oneside","",18,0,1.8);
+
   TH1D* h_sieie_template = new TH1D("h_sieie_template","", 100, 0,0.1);
   
   TH1D* h_eciso_template = new TH1D("h_eciso_template","", 240, -10.0, 50.0);
@@ -336,11 +340,20 @@ void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUp
   TH1D* h_genystar[nDECs];
   TH1D* h_genyB[nDECs];
 
+  TH1D* h_genystar_oneside[nDECs][2];
+  TH1D* h_genyB_oneside[nDECs][2];
+
 
   for(int ip=0; ip<2; ip++){
 
     for(int idec=0; idec< nDECs; idec++)
       {
+	h_genystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_genystar_%s_%d", decName[idec].data(),ip));
+	h_genystar_oneside[idec][ip] -> SetXTitle("Generator-level 0.5 | y^{#gamma} - y^{1stjet}| ");
+    
+	h_genyB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_genyB_%s_%d", decName[idec].data(),ip));
+	h_genyB_oneside[idec][ip] -> SetXTitle("Generator-level 0.5|y^{#gamma} + y^{1stjet}|");
+	
 	h_njet[idec][ip] = (TH1D*)h_njet_template->Clone(Form("h_njet_%s_%d", decName[idec].data(), ip));
 	h_njet[idec][ip] -> SetXTitle("Number of reconstructed jets");
 
@@ -394,7 +407,7 @@ void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUp
     
     h_genyB[idec] = (TH1D*)h_yB_template->Clone(Form("h_genyB_%s", decName[idec].data()));
     h_genyB[idec] -> SetXTitle("Generator-level 0.5(y^{#gamma} + y^{1stjet})");
-    
+
 
     for(int ipt=0; ipt < nPtBins+1; ipt++){
       for(int ip=0; ip < 2; ip ++){
@@ -681,6 +694,9 @@ void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUp
       {
 	h_genystar[gen_phoDecBinIndex]->Fill(genystar);
 	h_genyB[gen_phoDecBinIndex]->Fill(genyB);
+
+	h_genystar_oneside[gen_phoDecBinIndex][0]->Fill(fabs(genystar));
+	h_genyB_oneside[gen_phoDecBinIndex][0]->Fill(fabs(genyB));
       }
     
 
@@ -970,6 +986,9 @@ void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUp
     h_ystar_COM3D[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar_com3D);
     h_ystar_COMZ[phoDecBinIndex][phoPtBinIndex][1]->Fill(gj_ystar_comZ);
 
+    h_genystar_oneside[phoDecBinIndex][1]->Fill(fabs(gj_ystar));
+    h_genyB_oneside[phoDecBinIndex][1]->Fill(fabs(gj_yB));
+
 
     // lumping all fiducial jets together
     if(findSumJet){
@@ -1078,6 +1097,10 @@ void yj_angularmc_eff::Loop(bool noNearbyJet, bool applyCOMCut, bool applyPileUp
     h_genyB[idec]->Write();
 
     for(int ip=0; ip<2; ip++){
+
+      h_genystar_oneside[idec][ip]->Write();
+      h_genyB_oneside[idec][ip]->Write();
+
       pf_nvtx_eciso[idec][ip]->Write();
       pf_nvtx_hciso[idec][ip]->Write();
       pf_nvtx_tkiso[idec][ip]->Write();
