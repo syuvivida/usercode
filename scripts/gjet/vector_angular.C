@@ -105,11 +105,11 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     for(int idec=0; idec< nDECs; idec++)
       {
 	h_genystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_genystar_%s_%d", decName[idec].data(),ip));
-	h_genystar_oneside[idec][ip] -> SetXTitle("Generator-level 0.5 | y^{#gamma} - y^{1stjet}| ");
+	h_genystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
         h_genystar_oneside[idec][ip] -> Sumw2();
 
 	h_genyB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_genyB_%s_%d", decName[idec].data(),ip));
-	h_genyB_oneside[idec][ip] -> SetXTitle("Generator-level 0.5|y^{#gamma} + y^{1stjet}|");
+	h_genyB_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} + y^{1stjet}|");
 	h_genyB_oneside[idec][ip] -> Sumw2();
       } // end of loop over barrel and endcap
 
