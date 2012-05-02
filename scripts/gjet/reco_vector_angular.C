@@ -80,12 +80,12 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   h_nrecjet -> SetTitle("Before applying any selections");
   h_nrecjet -> Sumw2();
 
-// 0: generator-level, 
-// 1: generator-level, after requiring a gen jet, a gen photon, and a reco-photon, 
-// 2: generator-level, after requiring a gen jet, a gen photon, a reco-photon, and a reco-jet
-// 3: generator-level, after requiring also the ID cuts
-// 4: reconstruction-level distribution after only requiring reco-objects
-// 5: reconstruction-level distribution after requiring reco-objects and ID
+  // 0: generator-level, 
+  // 1: generator-level, after requiring a gen jet, a gen photon, and a reco-photon, 
+  // 2: generator-level, after requiring a gen jet, a gen photon, a reco-photon, and a reco-jet
+  // 3: generator-level, after requiring also the ID cuts
+  // 4: reconstruction-level distribution after only requiring reco-objects
+  // 5: reconstruction-level distribution after requiring reco-objects and ID
 
   const int NPROCS = 6;
   TH1D* h_ystar_oneside[nDECs][NPROCS]; 
@@ -95,10 +95,10 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   TH1D* h_yjet[nDECs][NPROCS];
 
 
-  for(int ip=0; ip< NPROCS; ip++){
+  for(int idec=0; idec< nDECs; idec++)
+    {
+      for(int ip=0; ip< NPROCS; ip++){
 
-    for(int idec=0; idec< nDECs; idec++)
-      {
 	h_ystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_ystar_%s_%d", decName[idec].data(),ip));
 	h_ystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
         h_ystar_oneside[idec][ip] -> Sumw2();
@@ -117,7 +117,7 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
       } // end of loop over barrel and endcap
 
-  }
+    }
   
   //---------------------------------------------------------------------------------------------------------------------
   //
@@ -132,7 +132,7 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-//     if(jentry > 5000 ) break;
+    //     if(jentry > 5000 ) break;
     // weight
     double event_weight = 1;
     if(PU_weight >0) event_weight *= PU_weight;

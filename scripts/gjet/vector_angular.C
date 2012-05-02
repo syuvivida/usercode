@@ -75,6 +75,10 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   h_pthat   -> SetTitle("Before applying any selections");
   h_pthat   -> Sumw2();
 
+  TH1D* h_genpt_gamma = (TH1D*)h_pt_template->Clone("h_genpt_gamma");
+  h_genpt_gamma -> SetXTitle("Generator-level p_{T}(#gamma) [GeV/c]");
+  h_genpt_gamma->Sumw2();
+
   TH1D* h_ngenjet     = (TH1D*)h_njet_template->Clone("h_ngenjet");
   h_ngenjet -> SetXTitle("Number of generator-level jets");
   h_ngenjet -> SetTitle("Before applying any selections");
@@ -85,12 +89,12 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   h_nrecjet -> SetTitle("Before applying any selections");
   h_nrecjet -> Sumw2();
 
-// 0: generator-level, 
-// 1: generator-level, after requiring a gen jet, a gen photon, and a reco-photon, 
-// 2: generator-level, after requiring a gen jet, a gen photon, a reco-photon, and a reco-jet
-// 3: generator-level, after requiring also the ID cuts
-// 4: reconstruction-level distribution after only requiring reco-objects
-// 5: reconstruction-level distribution after requiring reco-objects and ID
+  // 0: generator-level, 
+  // 1: generator-level, after requiring a gen jet, a gen photon, and a reco-photon, 
+  // 2: generator-level, after requiring a gen jet, a gen photon, a reco-photon, and a reco-jet
+  // 3: generator-level, after requiring also the ID cuts
+  // 4: reconstruction-level distribution after only requiring reco-objects
+  // 5: reconstruction-level distribution after requiring reco-objects and ID
 
   const int NPROCS = 6;
   TH1D* h_ystar_oneside[nDECs][NPROCS]; 
@@ -99,10 +103,11 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   TH1D* h_ygamma[nDECs][NPROCS];
   TH1D* h_yjet[nDECs][NPROCS];
 
-  for(int ip=0; ip< NPROCS; ip++){
+  for(int idec=0; idec< nDECs; idec++)
+    {
 
-    for(int idec=0; idec< nDECs; idec++)
-      {
+      for(int ip=0; ip< NPROCS; ip++){
+
 	h_ystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_ystar_%s_%d", decName[idec].data(),ip));
 	h_ystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
         h_ystar_oneside[idec][ip] -> Sumw2();
@@ -121,7 +126,7 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
       } // end of loop over barrel and endcap
 
-  }
+    }
   
   //---------------------------------------------------------------------------------------------------------------------
   //
@@ -136,7 +141,7 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-//     if(jentry > 5000 ) break;
+    //     if(jentry > 5000 ) break;
     // weight
     double event_weight = 1;
     if(PU_weight >0) event_weight *= PU_weight;
@@ -149,11 +154,11 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     // generator-level information
     //-------------------------------------------------------------------------
 
-
     //-------------------------------------------------------------------------
     // now find generator-level photon
     //-------------------------------------------------------------------------
     int genPhotonIndex = -1;
+    int noFidCutGenPhotonIndex = -1;
     for(unsigned int ipart=0; ipart < genParE_->size(); ipart++)
       {
         if(genParSt_->at(ipart)!=1)continue;
@@ -161,11 +166,17 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
         int momId = genMomParId_->at(ipart);
         if(isDirPho && momId!=22)continue;
         if(isFraPho && momId > 21)continue;
+	if(noFidCutGenPhotonIndex <0)
+	  noFidCutGenPhotonIndex = ipart;
         if(!gen_isFidPho(ipart))continue;
         if(genPhotonIndex< 0)
 	  genPhotonIndex = ipart;
         else break;
       }
+
+    if(noFidCutGenPhotonIndex<0)continue;
+    nPass[1]++;
+    h_genpt_gamma->Fill(genParPt_->at(noFidCutGenPhotonIndex));
 
     if(genPhotonIndex < 0)continue; 
     nPass[2]++;
@@ -275,8 +286,8 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 	// require it to match to a prompt photon
  	if(fabs(patPhotongenMomId->at(ipho)-22)>1e-6 && isDirPho)continue; // not prompt photon 
  	if(fabs(patPhotongenMomId->at(ipho))>21.1 && isFraPho)continue; // not prompt photon 
-//  	cout << "gen mom Id = " << patPhotongenMomId->at(ipho) << endl;
-// 	cout << "is a prompt photon" << endl;
+	//  	cout << "gen mom Id = " << patPhotongenMomId->at(ipho) << endl;
+	// 	cout << "is a prompt photon" << endl;
 
 	// find the leading photon, usually there's only one in the MC
 	double thisPhoPt= patPhotonEt->at(ipho);      
@@ -436,7 +447,11 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   h_ngenjet->Write();
   h_nrecjet->Write();
 
+  h_genpt_gamma->Write();
+    
+
   for(int idec=0; idec< nDECs; idec++){
+
     for(int ip=0; ip< NPROCS; ip++){
       h_ystar_oneside[idec][ip]->Write();
       h_yB_oneside[idec][ip]->Write();
