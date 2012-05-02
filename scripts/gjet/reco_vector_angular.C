@@ -54,9 +54,10 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   // 
   //---------------------------------------------------------------------------------------------------------------------
   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500); h_pt_template->Sumw2();
-  TH1D* h_njet_template = new TH1D("h_njet_template","",21,-0.5,20.5); h_njet_template->Sumw2();
-  TH1D* h_yB_template_oneside = new TH1D("h_yB_template_oneside","",18,0,1.8); h_yB_template_oneside->Sumw2();
-  TH1D* h_ystar_template_oneside = new TH1D("h_ystar_template_oneside","",18,0,1.8); h_ystar_template_oneside->Sumw2();
+  TH1D* h_njet_template = new TH1D("h_njet_template","",11,-0.5,10.5); h_njet_template->Sumw2();
+  TH1D* h_yB_template_oneside = new TH1D("h_yB_template_oneside","",25,0,2.5); h_yB_template_oneside->Sumw2();
+  TH1D* h_ystar_template_oneside = new TH1D("h_ystar_template_oneside","",25,0,2.5); h_ystar_template_oneside->Sumw2();
+  TH1D* h_y_template = new TH1D("h_y_template","",60,-3.0,3.0); h_y_template->Sumw2();
 
   //---------------------------------------------------------------------------------------------------------------------
   //
@@ -87,21 +88,33 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 // 5: reconstruction-level distribution after requiring reco-objects and ID
 
   const int NPROCS = 6;
-  TH1D* h_genystar_oneside[nDECs][NPROCS]; 
-  TH1D* h_genyB_oneside[nDECs][NPROCS];
+  TH1D* h_ystar_oneside[nDECs][NPROCS]; 
+  TH1D* h_yB_oneside[nDECs][NPROCS];
+  
+  TH1D* h_ygamma[nDECs][NPROCS];
+  TH1D* h_yjet[nDECs][NPROCS];
 
 
   for(int ip=0; ip< NPROCS; ip++){
 
     for(int idec=0; idec< nDECs; idec++)
       {
-	h_genystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_genystar_%s_%d", decName[idec].data(),ip));
-	h_genystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
-        h_genystar_oneside[idec][ip] -> Sumw2();
+	h_ystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_ystar_%s_%d", decName[idec].data(),ip));
+	h_ystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
+        h_ystar_oneside[idec][ip] -> Sumw2();
 
-	h_genyB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_genyB_%s_%d", decName[idec].data(),ip));
-	h_genyB_oneside[idec][ip] -> SetXTitle("0.5*|y^{#gamma} + y^{1stjet}|");
-	h_genyB_oneside[idec][ip] -> Sumw2();
+	h_yB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_yB_%s_%d", decName[idec].data(),ip));
+	h_yB_oneside[idec][ip] -> SetXTitle("0.5*|y^{#gamma} + y^{1stjet}|");
+	h_yB_oneside[idec][ip] -> Sumw2();
+
+	h_ygamma[idec][ip] = (TH1D*)h_y_template->Clone(Form("h_ygamma_%s_%d", decName[idec].data(),ip));
+	h_ygamma[idec][ip] -> SetXTitle("y^{#gamma}");
+	h_ygamma[idec][ip] -> Sumw2();
+
+	h_yjet[idec][ip] = (TH1D*)h_y_template->Clone(Form("h_yjet_%s_%d", decName[idec].data(),ip));
+	h_yjet[idec][ip] -> SetXTitle("y^{1stjet}");
+	h_yjet[idec][ip] -> Sumw2();
+
       } // end of loop over barrel and endcap
 
   }
@@ -119,7 +132,7 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    //    if(jentry > 5000 ) break;
+//     if(jentry > 5000 ) break;
     // weight
     double event_weight = 1;
     if(PU_weight >0) event_weight *= PU_weight;
@@ -221,6 +234,8 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     if(leadingPhotonIndex<0 || leadingJetIndex<0)continue;
     nPass[4]++;
+
+    if(DEBUG)cout << "leadingJetIndex = " << leadingJetIndex << endl;
     
     // assign 4-vector of leading jet
     TLorentzVector l4_1stjet(0,0,0,0);
@@ -233,15 +248,21 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     nPass[10]++;
 
-    double gj_yB     = eiko::yB(l4_pho, l4_1stjet);    
-    double gj_ystar   = eiko::ystar(l4_pho, l4_1stjet);
+    double y_gamma = l4_pho.Rapidity();
+    double y_1stjet = l4_1stjet.Rapidity();
+
+    double gj_ystar = 0.5*(y_gamma-y_1stjet);
+    double gj_yB    = 0.5*(y_gamma+y_1stjet);
 
 
     //=============================================================
     nPass[11]++;
 
-    h_genystar_oneside[phoDecBinIndex][5]->Fill(fabs(gj_ystar), event_weight);
-    h_genyB_oneside[phoDecBinIndex][5]->Fill(fabs(gj_yB), event_weight);
+    h_ystar_oneside[phoDecBinIndex][5]->Fill(fabs(gj_ystar), event_weight);
+    h_yB_oneside[phoDecBinIndex][5]->Fill(fabs(gj_yB), event_weight);
+    
+    h_ygamma[phoDecBinIndex][5]->Fill(y_gamma, event_weight);
+    h_yjet[phoDecBinIndex][5]->Fill(y_1stjet, event_weight);
 
 
   } // end of loop over entries
@@ -270,8 +291,12 @@ void reco_vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
   for(int idec=0; idec< nDECs; idec++){
     for(int ip=0; ip< NPROCS; ip++){
-      h_genystar_oneside[idec][ip]->Write();
-      h_genyB_oneside[idec][ip]->Write();
+      h_ystar_oneside[idec][ip]->Write();
+      h_yB_oneside[idec][ip]->Write();
+
+      h_ygamma[idec][ip]->Write();
+      h_yjet[idec][ip]->Write();
+
     } // end of loop over process, ip=0 before cut, 1 after cut
 
   } // end of loop over barrel and endcap

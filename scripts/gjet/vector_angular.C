@@ -10,9 +10,6 @@ const double BARREL_MAXETA=1.4442;
 const double ENDCAP_MINETA=1.566;
 const double ENDCAP_MAXETA=2.5;
 
-// const double BARREL_MAXETA=1.44;
-// const double ENDCAP_MINETA=1.57;
-// const double ENDCAP_MAXETA=2.3;
 const int nDECs = 2;
 
 double ptbound[]={40., 45., 50., 55., 60., 65., 70., 75., 85., 95., 110., 130., 160., 200.};
@@ -57,10 +54,10 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   // 
   //---------------------------------------------------------------------------------------------------------------------
   TH1D* h_pt_template = new TH1D("h_pt_template","",500,0,500); h_pt_template->Sumw2();
-  TH1D* h_njet_template = new TH1D("h_njet_template","",21,-0.5,20.5); h_njet_template->Sumw2();
-  TH1D* h_ptbin_template= new TH1D("h_ptbin_template","", nPtBins, ptbound);  
-  TH1D* h_yB_template_oneside = new TH1D("h_yB_template_oneside","",18,0,1.8); h_yB_template_oneside->Sumw2();
-  TH1D* h_ystar_template_oneside = new TH1D("h_ystar_template_oneside","",18,0,1.8); h_ystar_template_oneside->Sumw2();
+  TH1D* h_njet_template = new TH1D("h_njet_template","",11,-0.5,10.5); h_njet_template->Sumw2();
+  TH1D* h_yB_template_oneside = new TH1D("h_yB_template_oneside","",25,0,2.5); h_yB_template_oneside->Sumw2();
+  TH1D* h_ystar_template_oneside = new TH1D("h_ystar_template_oneside","",25,0,2.5); h_ystar_template_oneside->Sumw2();
+  TH1D* h_y_template = new TH1D("h_y_template","",60,-3.0,3.0); h_y_template->Sumw2();
 
   //---------------------------------------------------------------------------------------------------------------------
   //
@@ -68,7 +65,7 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   // 
   //---------------------------------------------------------------------------------------------------------------------
 
-  string decName[4];
+  string decName[2];
   decName[0] = "EB";
   decName[1] = "EE";
 
@@ -96,21 +93,32 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 // 5: reconstruction-level distribution after requiring reco-objects and ID
 
   const int NPROCS = 6;
-  TH1D* h_genystar_oneside[nDECs][NPROCS]; 
-  TH1D* h_genyB_oneside[nDECs][NPROCS];
+  TH1D* h_ystar_oneside[nDECs][NPROCS]; 
+  TH1D* h_yB_oneside[nDECs][NPROCS];
 
+  TH1D* h_ygamma[nDECs][NPROCS];
+  TH1D* h_yjet[nDECs][NPROCS];
 
   for(int ip=0; ip< NPROCS; ip++){
 
     for(int idec=0; idec< nDECs; idec++)
       {
-	h_genystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_genystar_%s_%d", decName[idec].data(),ip));
-	h_genystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
-        h_genystar_oneside[idec][ip] -> Sumw2();
+	h_ystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_ystar_%s_%d", decName[idec].data(),ip));
+	h_ystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
+        h_ystar_oneside[idec][ip] -> Sumw2();
 
-	h_genyB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_genyB_%s_%d", decName[idec].data(),ip));
-	h_genyB_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} + y^{1stjet}|");
-	h_genyB_oneside[idec][ip] -> Sumw2();
+	h_yB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_yB_%s_%d", decName[idec].data(),ip));
+	h_yB_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} + y^{1stjet}|");
+	h_yB_oneside[idec][ip] -> Sumw2();
+
+	h_ygamma[idec][ip] = (TH1D*)h_y_template->Clone(Form("h_ygamma_%s_%d", decName[idec].data(),ip));
+	h_ygamma[idec][ip] -> SetXTitle("y^{#gamma}");
+	h_ygamma[idec][ip] -> Sumw2();
+
+	h_yjet[idec][ip] = (TH1D*)h_y_template->Clone(Form("h_yjet_%s_%d", decName[idec].data(),ip));
+	h_yjet[idec][ip] -> SetXTitle("y^{1stjet}");
+	h_yjet[idec][ip] -> Sumw2();
+
       } // end of loop over barrel and endcap
 
   }
@@ -128,7 +136,7 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    //    if(jentry > 5000 ) break;
+    if(jentry > 5000 ) break;
     // weight
     double event_weight = 1;
     if(PU_weight >0) event_weight *= PU_weight;
@@ -228,15 +236,21 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 			   genJetE_->at(leadingGenJetIndex)
 			   );
     
-    double genystar = eiko::ystar(l4_genpho,l4_genjet);
-    double genyB    = eiko::yB(l4_genpho,l4_genjet);
+
+    double geny_gamma  = l4_genpho.Rapidity();
+    double geny_1stjet = l4_genjet.Rapidity();
+
+    double genystar    = 0.5*(geny_gamma-geny_1stjet);
+    double genyB       = 0.5*(geny_gamma+geny_1stjet);
   
     int gen_phoDecBinIndex = gen_phoDecCode(genPhotonIndex);
     if(DEBUG && gen_phoDecBinIndex <0) cout << "gen_phoDecBinIndex = " <<  gen_phoDecBinIndex << endl;
 
-    h_genystar_oneside[gen_phoDecBinIndex][0]->Fill(fabs(genystar), event_weight);
-    h_genyB_oneside[gen_phoDecBinIndex][0]->Fill(fabs(genyB), event_weight);
+    h_ystar_oneside[gen_phoDecBinIndex][0]->Fill(fabs(genystar), event_weight);
+    h_yB_oneside[gen_phoDecBinIndex][0]->Fill(fabs(genyB), event_weight);
     
+    h_ygamma[gen_phoDecBinIndex][0]->Fill(geny_gamma, event_weight);
+    h_yjet[gen_phoDecBinIndex][0]->Fill(geny_1stjet, event_weight);
 
     //-------------------------------------------------------------------------
     // now find reconstructed information
@@ -279,23 +293,16 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     if(leadingPhotonIndex>0)nPass[7]++;
 
-    double leadingPhotonEt = patPhotonEt->at(leadingPhotonIndex);
-    int phoPtBinIndex =  h_ptbin_template->GetXaxis()->FindBin(leadingPhotonEt)-1; 
 
     int phoDecBinIndex = rec_phoDecCode(leadingPhotonIndex);
-
-    // dummy proof, but already make the same requirement in isFidPho
-    if(phoPtBinIndex < 0 || phoPtBinIndex > (nPtBins-1))
-      {
-        if(DEBUG)
-          cout << "phoPtBinIndex = " << phoPtBinIndex << endl;
-        continue;
-      }
-    nPass[1]++;
     if(phoDecBinIndex < 0)
       {
         if(DEBUG)
-          cout << "phoDecBinIndex = " << phoDecBinIndex << endl;
+	  {
+            cout << "reco SCEta  = " << patPhotonScEta->at(leadingPhotonIndex) << "\t"; 
+	    cout << "reco photon eta = " << patPhotonEta->at(leadingPhotonIndex) << "\t";
+            cout << "phoDecBinIndex = " << phoDecBinIndex << endl;
+	  }
         continue;
       }
     nPass[8]++;
@@ -309,8 +316,11 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 			patPhotonEnergy->at(leadingPhotonIndex)
 			);
 
-    h_genystar_oneside[gen_phoDecBinIndex][1]->Fill(fabs(genystar), event_weight);
-    h_genyB_oneside[gen_phoDecBinIndex][1]->Fill(fabs(genyB), event_weight);    
+    h_ystar_oneside[gen_phoDecBinIndex][1]->Fill(fabs(genystar), event_weight);
+    h_yB_oneside[gen_phoDecBinIndex][1]->Fill(fabs(genyB), event_weight);    
+
+    h_ygamma[gen_phoDecBinIndex][1]->Fill(geny_gamma, event_weight);
+    h_yjet[gen_phoDecBinIndex][1]->Fill(geny_1stjet, event_weight);
 
     //-------------------------------------------------------------------------
     // now loop over all reco jets and find the leading jet without matching 
@@ -357,17 +367,28 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 			   );
 
     if(!eiko::separated(l4_pho, l4_1stjet))continue;
+    if(DEBUG)cout << "leadingJetIndex = " << leadingJetIndex << endl;
+
 
     nPass[10]++;
 
-    h_genystar_oneside[gen_phoDecBinIndex][2]->Fill(fabs(genystar), event_weight);
-    h_genyB_oneside[gen_phoDecBinIndex][2]->Fill(fabs(genyB), event_weight);
-    
+    h_ystar_oneside[gen_phoDecBinIndex][2]->Fill(fabs(genystar), event_weight);
+    h_yB_oneside[gen_phoDecBinIndex][2]->Fill(fabs(genyB), event_weight);
 
-    double gj_yB     = eiko::yB(l4_pho, l4_1stjet);    
-    double gj_ystar   = eiko::ystar(l4_pho, l4_1stjet);
-    h_genystar_oneside[phoDecBinIndex][4]->Fill(fabs(gj_ystar), event_weight);
-    h_genyB_oneside[phoDecBinIndex][4]->Fill(fabs(gj_yB), event_weight);
+    h_ygamma[gen_phoDecBinIndex][2]->Fill(geny_gamma, event_weight);
+    h_yjet[gen_phoDecBinIndex][2]->Fill(geny_1stjet, event_weight);
+
+    double y_gamma = l4_pho.Rapidity();
+    double y_1stjet = l4_1stjet.Rapidity();
+
+    double gj_ystar = 0.5*(y_gamma-y_1stjet);
+    double gj_yB    = 0.5*(y_gamma+y_1stjet);
+    
+    h_ystar_oneside[phoDecBinIndex][4]->Fill(fabs(gj_ystar), event_weight);
+    h_yB_oneside[phoDecBinIndex][4]->Fill(fabs(gj_yB), event_weight);
+
+    h_ygamma[phoDecBinIndex][4]->Fill(y_gamma, event_weight);
+    h_yjet[phoDecBinIndex][4]->Fill(y_1stjet, event_weight);
 
     // apply ID cuts
 
@@ -376,11 +397,18 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     //=============================================================
     nPass[11]++;
 
-    h_genystar_oneside[gen_phoDecBinIndex][3]->Fill(fabs(genystar), event_weight);
-    h_genyB_oneside[gen_phoDecBinIndex][3]->Fill(fabs(genyB), event_weight);
+    h_ystar_oneside[gen_phoDecBinIndex][3]->Fill(fabs(genystar), event_weight);
+    h_yB_oneside[gen_phoDecBinIndex][3]->Fill(fabs(genyB), event_weight);
+
+    h_ygamma[gen_phoDecBinIndex][3]->Fill(geny_gamma, event_weight);
+    h_yjet[gen_phoDecBinIndex][3]->Fill(geny_1stjet, event_weight);
+
     
-    h_genystar_oneside[phoDecBinIndex][5]->Fill(fabs(gj_ystar), event_weight);
-    h_genyB_oneside[phoDecBinIndex][5]->Fill(fabs(gj_yB), event_weight);
+    h_ystar_oneside[phoDecBinIndex][5]->Fill(fabs(gj_ystar), event_weight);
+    h_yB_oneside[phoDecBinIndex][5]->Fill(fabs(gj_yB), event_weight);
+
+    h_ygamma[phoDecBinIndex][5]->Fill(y_gamma, event_weight);
+    h_yjet[phoDecBinIndex][5]->Fill(y_1stjet, event_weight);
 
 
   } // end of loop over entries
@@ -410,8 +438,10 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
   for(int idec=0; idec< nDECs; idec++){
     for(int ip=0; ip< NPROCS; ip++){
-      h_genystar_oneside[idec][ip]->Write();
-      h_genyB_oneside[idec][ip]->Write();
+      h_ystar_oneside[idec][ip]->Write();
+      h_yB_oneside[idec][ip]->Write();
+      h_ygamma[idec][ip]->Write();
+      h_yjet[idec][ip]->Write();
     } // end of loop over process, ip=0 before cut, 1 after cut
 
   } // end of loop over barrel and endcap
@@ -450,9 +480,9 @@ Bool_t vector_angular::gen_isFidPho (Int_t ipart)
 
 Bool_t vector_angular::isFidPho (double pt, double eta)
 {
-  if(phoDecCode(eta)<0)return false;
   if(pt < ptbound[0])return false;
-  if(pt > ptbound[nPtBins])return false;
+  //  if(pt > ptbound[nPtBins])return false;
+  if(phoDecCode(eta)<0)return false;
   return true;
 }
 
