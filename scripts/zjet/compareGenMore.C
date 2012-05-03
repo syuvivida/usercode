@@ -3,7 +3,7 @@
 void compareGenMore(std::string mcfile1, std::string mcfile2, std::string mcfile3,
 		    std::string var1, std::string var2="", std::string var3="",
 		    std::string output="test",
-		    std::string headertitle="Z(#rightarrow#mu#mu)+1 jet",
+		    std::string headertitle="Z(#rightarrow ee)+1 jet",
 		    std::string mcName1="Sherpa",
 		    std::string mcName2="Madgraph",
 		    std::string mcName3="MCFM",
@@ -53,8 +53,8 @@ void compareGenMore(std::string mcfile1, std::string mcfile2, std::string mcfile
   hscale2_3->GetYaxis()->SetDecimals();
 
 
-  int COLOR[2]={2,4};
-  int MARKERSTYLE[2]={24,21};
+  int COLOR[3]={4,2,kOrange-1};
+  int MARKERSTYLE[3]={24,21,29};
 
   h1->SetLineColor(COLOR[0]);
   h1->SetMarkerColor(COLOR[0]);
@@ -67,10 +67,10 @@ void compareGenMore(std::string mcfile1, std::string mcfile2, std::string mcfile
   h2->SetMarkerSize(1);
   h2->SetMarkerStyle(MARKERSTYLE[1]);
 
-  h3->SetLineColor(1);
-  h3->SetMarkerColor(1);
+  h3->SetLineColor(COLOR[2]);
+  h3->SetMarkerColor(COLOR[2]);
   h3->SetMarkerSize(1);
-  h3->SetMarkerStyle(29);
+  h3->SetMarkerStyle(MARKERSTYLE[2]);
 
   // if normalizing to the same area, set the scale 
 
