@@ -64,30 +64,30 @@ public :
    vector<double>  *EvtInfo_VertexZ_;
    Double_t        ptHat_;
    Double_t        mcWeight_;
-   vector<double>  *genParPx_;
-   vector<double>  *genParPy_;
-   vector<double>  *genParPz_;
+   //   vector<double>  *genParPx_;
+   //   vector<double>  *genParPy_;
+   //   vector<double>  *genParPz_;
    vector<double>  *genParE_;
-   vector<double>  *genParP_;
-   vector<double>  *genParTheta_;
+   //   vector<double>  *genParP_;
+   //   vector<double>  *genParTheta_;
    vector<double>  *genParPt_;
    vector<double>  *genParEta_;
    vector<double>  *genParPhi_;
-   vector<double>  *genParEt_;
+   //   vector<double>  *genParEt_;
    vector<double>  *genParQ_;
    vector<double>  *genParId_;
    vector<double>  *genParSt_;
-   vector<double>  *genJetPx_;
-   vector<double>  *genJetPy_;
-   vector<double>  *genJetPz_;
+   //   vector<double>  *genJetPx_;
+   //   vector<double>  *genJetPy_;
+   //   vector<double>  *genJetPz_;
    vector<double>  *genJetE_;
-   vector<double>  *genJetP_;
-   vector<double>  *genJetTheta_;
+   //   vector<double>  *genJetP_;
+   //   vector<double>  *genJetTheta_;
    vector<double>  *genJetPt_;
    vector<double>  *genJetEta_;
    vector<double>  *genJetPhi_;
-   vector<double>  *genJetEt_;
-   vector<double>  *genJetQ_;
+   //   vector<double>  *genJetEt_;
+   //   vector<double>  *genJetQ_;
 
    // List of branches
    TBranch        *b_PU_weight;   //!
@@ -101,30 +101,30 @@ public :
    TBranch        *b_EvtInfo_VertexZ_;   //!
    TBranch        *b_ptHat_;   //!
    TBranch        *b_mcWeight_;   //!
-   TBranch        *b_genParPx_;   //!
-   TBranch        *b_genParPy_;   //!
-   TBranch        *b_genParPz_;   //!
+   //   TBranch        *b_genParPx_;   //!
+   //   TBranch        *b_genParPy_;   //!
+   //   TBranch        *b_genParPz_;   //!
    TBranch        *b_genParE_;   //!
-   TBranch        *b_genParP_;   //!
-   TBranch        *b_genParTheta_;   //!
+   //   TBranch        *b_genParP_;   //!
+   //   TBranch        *b_genParTheta_;   //!
    TBranch        *b_genParPt_;   //!
    TBranch        *b_genParEta_;   //!
    TBranch        *b_genParPhi_;   //!
-   TBranch        *b_genParEt_;   //!
+   //   TBranch        *b_genParEt_;   //!
    TBranch        *b_genParQ_;   //!
    TBranch        *b_genParId_;   //!
    TBranch        *b_genParSt_;   //!
-   TBranch        *b_genJetPx_;   //!
-   TBranch        *b_genJetPy_;   //!
-   TBranch        *b_genJetPz_;   //!
+   //   TBranch        *b_genJetPx_;   //!
+   //   TBranch        *b_genJetPy_;   //!
+   //   TBranch        *b_genJetPz_;   //!
    TBranch        *b_genJetE_;   //!
-   TBranch        *b_genJetP_;   //!
-   TBranch        *b_genJetTheta_;   //!
+   //   TBranch        *b_genJetP_;   //!
+   //   TBranch        *b_genJetTheta_;   //!
    TBranch        *b_genJetPt_;   //!
    TBranch        *b_genJetEta_;   //!
    TBranch        *b_genJetPhi_;   //!
-   TBranch        *b_genJetEt_;   //!
-   TBranch        *b_genJetQ_;   //!
+   //   TBranch        *b_genJetEt_;   //!
+   //   TBranch        *b_genJetQ_;   //!
 
    gen_distribution(std::string filename,TTree *tree=0);
    virtual ~gen_distribution();
@@ -202,30 +202,30 @@ void gen_distribution::Init(TTree *tree)
    EvtInfo_VertexX_ = 0;
    EvtInfo_VertexY_ = 0;
    EvtInfo_VertexZ_ = 0;
-   genParPx_ = 0;
-   genParPy_ = 0;
-   genParPz_ = 0;
+   //   genParPx_ = 0;
+   //   genParPy_ = 0;
+   //   genParPz_ = 0;
    genParE_ = 0;
-   genParP_ = 0;
-   genParTheta_ = 0;
+   //   genParP_ = 0;
+   //   genParTheta_ = 0;
    genParPt_ = 0;
    genParEta_ = 0;
    genParPhi_ = 0;
-   genParEt_ = 0;
+   //   genParEt_ = 0;
    genParQ_ = 0;
    genParId_ = 0;
    genParSt_ = 0;
-   genJetPx_ = 0;
-   genJetPy_ = 0;
-   genJetPz_ = 0;
+   //   genJetPx_ = 0;
+   //   genJetPy_ = 0;
+   //   genJetPz_ = 0;
    genJetE_ = 0;
-   genJetP_ = 0;
-   genJetTheta_ = 0;
+   //   genJetP_ = 0;
+   //   genJetTheta_ = 0;
    genJetPt_ = 0;
    genJetEta_ = 0;
    genJetPhi_ = 0;
-   genJetEt_ = 0;
-   genJetQ_ = 0;
+   //   genJetEt_ = 0;
+   //   genJetQ_ = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -243,30 +243,30 @@ void gen_distribution::Init(TTree *tree)
    fChain->SetBranchAddress("EvtInfo_VertexZ_", &EvtInfo_VertexZ_, &b_EvtInfo_VertexZ_);
    fChain->SetBranchAddress("ptHat_", &ptHat_, &b_ptHat_);
    fChain->SetBranchAddress("mcWeight_", &mcWeight_, &b_mcWeight_);
-   fChain->SetBranchAddress("genParPx_", &genParPx_, &b_genParPx_);
-   fChain->SetBranchAddress("genParPy_", &genParPy_, &b_genParPy_);
-   fChain->SetBranchAddress("genParPz_", &genParPz_, &b_genParPz_);
+   //   fChain->SetBranchAddress("genParPx_", &genParPx_, &b_genParPx_);
+   //   fChain->SetBranchAddress("genParPy_", &genParPy_, &b_genParPy_);
+   //   fChain->SetBranchAddress("genParPz_", &genParPz_, &b_genParPz_);
    fChain->SetBranchAddress("genParE_", &genParE_, &b_genParE_);
-   fChain->SetBranchAddress("genParP_", &genParP_, &b_genParP_);
-   fChain->SetBranchAddress("genParTheta_", &genParTheta_, &b_genParTheta_);
+   //   fChain->SetBranchAddress("genParP_", &genParP_, &b_genParP_);
+   //   fChain->SetBranchAddress("genParTheta_", &genParTheta_, &b_genParTheta_);
    fChain->SetBranchAddress("genParPt_", &genParPt_, &b_genParPt_);
    fChain->SetBranchAddress("genParEta_", &genParEta_, &b_genParEta_);
    fChain->SetBranchAddress("genParPhi_", &genParPhi_, &b_genParPhi_);
-   fChain->SetBranchAddress("genParEt_", &genParEt_, &b_genParEt_);
+   //   fChain->SetBranchAddress("genParEt_", &genParEt_, &b_genParEt_);
    fChain->SetBranchAddress("genParQ_", &genParQ_, &b_genParQ_);
    fChain->SetBranchAddress("genParId_", &genParId_, &b_genParId_);
    fChain->SetBranchAddress("genParSt_", &genParSt_, &b_genParSt_);
-   fChain->SetBranchAddress("genJetPx_", &genJetPx_, &b_genJetPx_);
-   fChain->SetBranchAddress("genJetPy_", &genJetPy_, &b_genJetPy_);
-   fChain->SetBranchAddress("genJetPz_", &genJetPz_, &b_genJetPz_);
+   //   fChain->SetBranchAddress("genJetPx_", &genJetPx_, &b_genJetPx_);
+   //   fChain->SetBranchAddress("genJetPy_", &genJetPy_, &b_genJetPy_);
+   //   fChain->SetBranchAddress("genJetPz_", &genJetPz_, &b_genJetPz_);
    fChain->SetBranchAddress("genJetE_", &genJetE_, &b_genJetE_);
-   fChain->SetBranchAddress("genJetP_", &genJetP_, &b_genJetP_);
-   fChain->SetBranchAddress("genJetTheta_", &genJetTheta_, &b_genJetTheta_);
+   //   fChain->SetBranchAddress("genJetP_", &genJetP_, &b_genJetP_);
+   //   fChain->SetBranchAddress("genJetTheta_", &genJetTheta_, &b_genJetTheta_);
    fChain->SetBranchAddress("genJetPt_", &genJetPt_, &b_genJetPt_);
    fChain->SetBranchAddress("genJetEta_", &genJetEta_, &b_genJetEta_);
    fChain->SetBranchAddress("genJetPhi_", &genJetPhi_, &b_genJetPhi_);
-   fChain->SetBranchAddress("genJetEt_", &genJetEt_, &b_genJetEt_);
-   fChain->SetBranchAddress("genJetQ_", &genJetQ_, &b_genJetQ_);
+   //   fChain->SetBranchAddress("genJetEt_", &genJetEt_, &b_genJetEt_);
+   //   fChain->SetBranchAddress("genJetQ_", &genJetQ_, &b_genJetQ_);
    Notify();
 }
 

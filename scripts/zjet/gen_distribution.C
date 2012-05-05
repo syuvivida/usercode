@@ -49,7 +49,7 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    const int nMAXJETS=4;
 
-   TH1D* h_jetpt_power_template = new TH1D("h_jetpt_power_template","",100,30,530);
+   TH1D* h_jetpt_power_template = new TH1D("h_jetpt_power_template","",500,30,530);
    h_jetpt_power_template->SetXTitle("p_{T}(jet)^{gen} [GeV]");
    h_jetpt_power_template->Sumw2();
    TH1D* h_jetpt_power[nMAXJETS+1];
@@ -411,7 +411,8 @@ void gen_distribution::Loop(int lepID, bool applyWeight, bool exclusive, int DEB
 
    if(pos!= std::string::npos)
      _inputFileName.swap(_inputFileName.erase(pos,remword.length()));
-
+   else
+     _inputFileName = "test.root";     
 
    TFile* outFile = new TFile(Form("%s_%s_%s",prefix.data(),
 				   leptonName.data(),
