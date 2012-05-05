@@ -41,7 +41,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
   TFile *fmc = TFile::Open(file.data());
 
   double xsec = 3048.0*1000;
-  double ngen = 2.29809910000000000e+07; // madgraph, 3.38254373785480205e+06 sherpa
+  double ngen = 2.59785100000000000e+07;//2.29809910000000000e+07; // madgraph, 3.38254373785480205e+06 sherpa
   
   
   for(int ij=0; ij< nJets; ij++){
@@ -146,7 +146,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
       cout << "=============================================" << endl;
     }
 
-  TFile* outFile = new TFile(Form("new_20120423_%s",file.data()),"recreate");       
+  TFile* outFile = new TFile(Form("spectrum_%s",file.data()),"recreate");       
   
   for(int ij=0;ij<nJets;ij++)
     {
