@@ -9,7 +9,6 @@
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
-//const double mindR=0.3;
 const double mindR=0.5;
 
 const double minElePt = 20.0;
@@ -17,14 +16,14 @@ const double minEleBarrelEta = 0.0;
 const double maxEleBarrelEta = 1.446;
 
 const double minEleEndcapEta = 1.566;
-const double maxEleEndcapEta = 2.4;
-const double minMee = 70.0;
-const double maxMee =110.0;
+const double maxEleEndcapEta = 2.1;
+const double minMee = 76.0;
+const double maxMee =106.0;
 
 const double minMuoPt = 20.0;
-const double maxMuoEta = 2.4;
-const double minMmm = 70.0;
-const double maxMmm =110.0;
+const double maxMuoEta = 2.1;
+const double minMmm = 76.0;
+const double maxMmm =106.0;
 
 
 void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool applyWeight, int DEBUG  )
