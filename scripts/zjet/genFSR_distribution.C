@@ -9,7 +9,8 @@
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
-const double mindR=0.3;
+//const double mindR=0.3;
+const double mindR=0.5;
 
 const double minElePt = 20.0;
 const double minEleBarrelEta = 0.0;
@@ -21,9 +22,9 @@ const double minMee = 70.0;
 const double maxMee =110.0;
 
 const double minMuoPt = 20.0;
-const double maxMuoEta = 2.1;
-const double minMmm = 76.0;
-const double maxMmm =106.0;
+const double maxMuoEta = 2.4;
+const double minMmm = 70.0;
+const double maxMmm =110.0;
 
 
 void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool applyWeight, int DEBUG  )
@@ -65,6 +66,10 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
 
   cout << "There are " << nYBins << " bins." << endl;
+
+  TH1D* h_nvtx = new TH1D("h_nvtx","",41.5,-0.5,40.5);
+  h_nvtx->SetXTitle("Number of good vertices");
+  h_nvtx->Sumw2();
 
   TH1D* h_njet = new TH1D("h_njet","",6,-0.5,5.5);
   h_njet->SetXTitle("#geq n jet");
@@ -211,6 +216,9 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
       cout << "MCweight = " << mcWeight_ << endl;
       cout << "eventWeight = " << eventWeight << endl;
     }
+
+    h_nvtx->Fill(EvtInfo_NumVtx, eventWeight);
+ 
     for(unsigned int igen=0; igen < genParId_->size(); igen++){
 
       int PID       = genParId_->at(igen);
@@ -467,6 +475,7 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
 				  leptonName.data(),
 				  _inputFileName.data()),"recreate");       
 
+  h_nvtx->Write();
   h_njet->Write();
         
   h_leadingjet_pt->Write();
