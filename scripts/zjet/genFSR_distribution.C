@@ -6,6 +6,7 @@
 #include <TLorentzVector.h>
 #include <map>
 
+const double minZPt  =40.0;
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
@@ -26,7 +27,8 @@ const double minMmm = 76.0;
 const double maxMmm =106.0;
 
 
-void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool applyWeight, int DEBUG  )
+void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight, 
+			       bool beforeFSR, int DEBUG)
 {
   if (fChain == 0) return;
   cout << "=========================================================" << endl;
@@ -160,8 +162,10 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
   cout << "Running mode: " << endl;
   cout << "beforeFSR=" << beforeFSR << "\t exclusive=" << exclusive 
        << "\t applyWeight=" <<  applyWeight << "\t DEBUG=" << DEBUG << endl;
+  cout << endl;
   cout << "The cuts applied: " << endl;
-
+  
+  cout << " minZPt= " << minZPt << endl;
   cout << " minJetPt= " << minJetPt << endl;
   cout << " maxJetEta= " << maxJetEta << endl;
   cout << " mindR= " << mindR << endl;
@@ -195,7 +199,7 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     sorted_genJetEtMap.clear();
-    //      if(jentry > 1000) break;
+//     if(jentry > 1000) break;
 
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
@@ -391,6 +395,12 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
     if(exclusive && nGenJets!=1)continue;
      
     nPass[5]++;
+
+
+    double ptz = l4_z.Pt();
+
+    if(ptz < minZPt)continue;
+
  
     TLorentzVector l4_j(0,0,0,0);
     l4_j.SetPtEtaPhiE(genJetPt_->at(maxGenJetIndex),
@@ -398,7 +408,6 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
 		      genJetPhi_->at(maxGenJetIndex),
 		      genJetE_->at(maxGenJetIndex));
 
-    double ptz = l4_z.Pt();
     double ptjet = l4_j.Pt();
 
     double yz = l4_z.Rapidity();
@@ -412,7 +421,7 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
       
       
     if(DEBUG==1)
-      cout << "Now ordered jets" << endl;
+      cout << "Now ordering jets" << endl;
     int countGenJet=0;
     for (mapIter it_part= sorted_genJetEtMap.begin();
 	 it_part != sorted_genJetEtMap.end() && countGenJet< nMAXJETS; ++it_part)
@@ -462,6 +471,8 @@ void genFSR_distribution::Loop(int lepID, bool beforeFSR, bool exclusive, bool a
   if(!applyWeight)prefix = "raw";
   if(exclusive)prefix += "_exclusive1Jet";
   if(beforeFSR)prefix += "_beforeFSR";
+  if(minZPt>1e-6)prefix += Form("_zPt%d",(int)minZPt);
+
   std::string remword  ="/data2/syu/zjet_vectorNtuple/";
 
   size_t pos  = _inputFileName.find(remword);

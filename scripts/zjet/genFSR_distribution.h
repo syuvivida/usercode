@@ -100,7 +100,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(int lepID, bool beforeFSR=false, bool exclusive=false, bool applyWeight=true, int DEBUG=0);
+   virtual void     Loop(int lepID, bool exclusive=false, bool applyWeight=true, bool beforeFSR=false, int DEBUG=0);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    std::string _inputFileName;
