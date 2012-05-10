@@ -6,9 +6,13 @@
 #include <TProfile.h>
 #include "myLib.h"
 
+// const double BARREL_MAXETA=1.44;
+// const double ENDCAP_MINETA=1.57;
+// const double ENDCAP_MAXETA=2.5;
 const double BARREL_MAXETA=1.4442;
 const double ENDCAP_MINETA=1.566;
 const double ENDCAP_MAXETA=2.5;
+
 
 const int nDECs = 2;
 
@@ -58,6 +62,8 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   TH1D* h_yB_template_oneside = new TH1D("h_yB_template_oneside","",25,0,2.5); h_yB_template_oneside->Sumw2();
   TH1D* h_ystar_template_oneside = new TH1D("h_ystar_template_oneside","",25,0,2.5); h_ystar_template_oneside->Sumw2();
   TH1D* h_y_template = new TH1D("h_y_template","",60,-3.0,3.0); h_y_template->Sumw2();
+  TH1D* h_cost_template = new TH1D("h_cost_template","",25,0.0,1.0);
+  TH1D* h_nvtx_template = new TH1D("h_nvtx_template","",30,0.5,30.5); h_nvtx_template->Sumw2();
 
   //---------------------------------------------------------------------------------------------------------------------
   //
@@ -73,21 +79,17 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   TH1D* h_pthat       = (TH1D*)h_pt_template->Clone("h_pthat");
   h_pthat   -> SetXTitle("#hat{p_{T}} of the MC sample [GeV]");
   h_pthat   -> SetTitle("Before applying any selections");
-  h_pthat   -> Sumw2();
 
   TH1D* h_genpt_gamma = (TH1D*)h_pt_template->Clone("h_genpt_gamma");
   h_genpt_gamma -> SetXTitle("Generator-level p_{T}(#gamma) [GeV/c]");
-  h_genpt_gamma->Sumw2();
 
   TH1D* h_ngenjet     = (TH1D*)h_njet_template->Clone("h_ngenjet");
   h_ngenjet -> SetXTitle("Number of generator-level jets");
   h_ngenjet -> SetTitle("Before applying any selections");
-  h_ngenjet -> Sumw2();
 
   TH1D* h_nrecjet     = (TH1D*)h_njet_template->Clone("h_nrecjet");
   h_nrecjet -> SetXTitle("Number of reconstruction-level jets");
   h_nrecjet -> SetTitle("Before applying any selections");
-  h_nrecjet -> Sumw2();
 
   // 0: generator-level, 
   // 1: generator-level, after requiring a gen jet, a gen photon, and a reco-photon, 
@@ -103,6 +105,10 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
   TH1D* h_ygamma[nDECs][NPROCS];
   TH1D* h_yjet[nDECs][NPROCS];
 
+  TH1D* h_cost[nDECs][NPROCS];
+  TH1D* h_nvtx[nDECs][NPROCS];
+
+
   for(int idec=0; idec< nDECs; idec++)
     {
 
@@ -110,19 +116,22 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
 	h_ystar_oneside[idec][ip] = (TH1D*)h_ystar_template_oneside->Clone(Form("h_ystar_%s_%d", decName[idec].data(),ip));
 	h_ystar_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} - y^{1stjet}| ");
-        h_ystar_oneside[idec][ip] -> Sumw2();
 
 	h_yB_oneside[idec][ip] = (TH1D*)h_yB_template_oneside->Clone(Form("h_yB_%s_%d", decName[idec].data(),ip));
 	h_yB_oneside[idec][ip] -> SetXTitle("0.5*| y^{#gamma} + y^{1stjet}|");
-	h_yB_oneside[idec][ip] -> Sumw2();
 
 	h_ygamma[idec][ip] = (TH1D*)h_y_template->Clone(Form("h_ygamma_%s_%d", decName[idec].data(),ip));
 	h_ygamma[idec][ip] -> SetXTitle("y^{#gamma}");
-	h_ygamma[idec][ip] -> Sumw2();
 
 	h_yjet[idec][ip] = (TH1D*)h_y_template->Clone(Form("h_yjet_%s_%d", decName[idec].data(),ip));
 	h_yjet[idec][ip] -> SetXTitle("y^{1stjet}");
-	h_yjet[idec][ip] -> Sumw2();
+
+        h_cost[idec][ip] = (TH1D*)h_cost_template->Clone(Form("h_cost_%s_%d", decName[idec].data(), ip));
+        h_cost[idec][ip] -> SetXTitle("cos#theta^{*}");
+
+	h_nvtx[idec][ip] = (TH1D*)h_nvtx_template->Clone(Form("h_nvtx_%s_%d",
+							      decName[idec].data(),ip));
+	h_nvtx[idec][ip] -> SetXTitle("Number of good vertices");	
 
       } // end of loop over barrel and endcap
 
@@ -141,11 +150,14 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    //     if(jentry > 5000 ) break;
+//     if(jentry > 5000 ) break;
     // weight
     double event_weight = 1;
     if(PU_weight >0) event_weight *= PU_weight;
     if(mcWeight_ >0) event_weight *= mcWeight_;
+
+    int nvtx = EvtInfo_NumVtx;
+    if(DEBUG)cout << "Number of vertices in this event = " << nvtx << endl;
 
     nPass[0]++;
     h_pthat->Fill(patPhotonMCpthat, event_weight); // make sure we are checking the right MC samples
@@ -263,6 +275,13 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
     h_ygamma[gen_phoDecBinIndex][0]->Fill(geny_gamma, event_weight);
     h_yjet[gen_phoDecBinIndex][0]->Fill(geny_1stjet, event_weight);
 
+    double gen_cost = eiko::cosThetaStar(l4_genpho, l4_genjet);
+   
+    h_cost[gen_phoDecBinIndex][0]->Fill(gen_cost, event_weight);
+  
+    h_nvtx[gen_phoDecBinIndex][0]->Fill(nvtx, event_weight);
+    
+
     //-------------------------------------------------------------------------
     // now find reconstructed information
     //-------------------------------------------------------------------------
@@ -332,6 +351,8 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     h_ygamma[gen_phoDecBinIndex][1]->Fill(geny_gamma, event_weight);
     h_yjet[gen_phoDecBinIndex][1]->Fill(geny_1stjet, event_weight);
+    h_cost[gen_phoDecBinIndex][1]->Fill(gen_cost, event_weight);
+    h_nvtx[gen_phoDecBinIndex][1]->Fill(nvtx, event_weight);
 
     //-------------------------------------------------------------------------
     // now loop over all reco jets and find the leading jet without matching 
@@ -388,6 +409,8 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     h_ygamma[gen_phoDecBinIndex][2]->Fill(geny_gamma, event_weight);
     h_yjet[gen_phoDecBinIndex][2]->Fill(geny_1stjet, event_weight);
+    h_cost[gen_phoDecBinIndex][2]->Fill(gen_cost, event_weight);
+    h_nvtx[gen_phoDecBinIndex][2]->Fill(nvtx, event_weight);
 
     double y_gamma = l4_pho.Rapidity();
     double y_1stjet = l4_1stjet.Rapidity();
@@ -400,6 +423,10 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     h_ygamma[phoDecBinIndex][4]->Fill(y_gamma, event_weight);
     h_yjet[phoDecBinIndex][4]->Fill(y_1stjet, event_weight);
+ 
+    double gj_cost = eiko::cosThetaStar(l4_pho,l4_1stjet);
+    h_cost[phoDecBinIndex][4]->Fill(gj_cost, event_weight);
+    h_nvtx[phoDecBinIndex][4]->Fill(nvtx, event_weight);
 
     // apply ID cuts
 
@@ -413,13 +440,17 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
 
     h_ygamma[gen_phoDecBinIndex][3]->Fill(geny_gamma, event_weight);
     h_yjet[gen_phoDecBinIndex][3]->Fill(geny_1stjet, event_weight);
+    h_cost[gen_phoDecBinIndex][3]->Fill(gen_cost, event_weight);
+    h_nvtx[gen_phoDecBinIndex][3]->Fill(nvtx, event_weight);   
 
-    
+ 
     h_ystar_oneside[phoDecBinIndex][5]->Fill(fabs(gj_ystar), event_weight);
     h_yB_oneside[phoDecBinIndex][5]->Fill(fabs(gj_yB), event_weight);
 
     h_ygamma[phoDecBinIndex][5]->Fill(y_gamma, event_weight);
     h_yjet[phoDecBinIndex][5]->Fill(y_1stjet, event_weight);
+    h_cost[phoDecBinIndex][5]->Fill(gj_cost, event_weight);
+    h_nvtx[phoDecBinIndex][5]->Fill(nvtx, event_weight);
 
 
   } // end of loop over entries
@@ -457,6 +488,9 @@ void vector_angular::Loop(bool onlyOneJet, bool DEBUG)
       h_yB_oneside[idec][ip]->Write();
       h_ygamma[idec][ip]->Write();
       h_yjet[idec][ip]->Write();
+      h_cost[idec][ip]->Write();
+      h_nvtx[idec][ip]->Write();
+
     } // end of loop over process, ip=0 before cut, 1 after cut
 
   } // end of loop over barrel and endcap
