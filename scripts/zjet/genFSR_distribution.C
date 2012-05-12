@@ -6,7 +6,7 @@
 #include <TLorentzVector.h>
 #include <map>
 
-const double minZPt  =40.0;
+const double minZPt  =0.0;
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
@@ -45,6 +45,11 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
     isMadgraph=true;
   if(isMadgraph)cout << "This is a madgraph MC sample" << endl;
 
+  bool isPythia=false;
+  size_t pos_pythia  = _inputFileName.find("pythia");
+  if(pos_pythia!= std::string::npos)
+    isPythia=true;
+  if(isPythia)cout << "This is a pythia MC sample" << endl;
 
   const double fBinsPt01[]= {30,40,55,75,105,150,210,315,500};
   const double fBinsPt02[]= {30,40,55,75,105,150,210,315,450};
@@ -67,6 +72,10 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
 
   cout << "There are " << nYBins << " bins." << endl;
+
+  TH1D* h_mZ   = new TH1D("h_mZ","",200,20.0,220.0);
+  h_mZ->SetXTitle("M_{ll} [GeV/c^{2}");
+  h_mZ->Sumw2();
 
   TH1D* h_nvtx = new TH1D("h_nvtx","",41.5,-0.5,40.5);
   h_nvtx->SetXTitle("Number of good vertices");
@@ -228,10 +237,12 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
       int motherPID = genMomParId_->at(igen);
       int status    = genParSt_->at(igen);
       bool isFromZAfterFSR  = ((isMadgraph && motherPID == PID) ||
+			       (isPythia && motherPID == PID) ||
 			       (isSherpa && motherPID  < -9998)) 
 	&& (status == 1);
 
       bool isFromZBeforeFSR = ((isMadgraph && motherPID == 23) ||
+			       (isPythia && motherPID == 23) ||
 			       (isSherpa && motherPID  < -9998)) 
 	&& (status == 3);   
 
@@ -326,6 +337,8 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
 
 
     double mll = l4_z.M();
+
+    h_mZ->Fill(mll);
 
     if(leptonPID==13 && (mll < minMmm || mll > maxMmm))continue;
     if(leptonPID==11 && (mll < minMee || mll > maxMee))continue;
@@ -484,7 +497,7 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   TFile* outFile = new TFile(Form("%s_%s_%s",prefix.data(),
 				  leptonName.data(),
 				  _inputFileName.data()),"recreate");       
-
+  h_mZ->Write();
   h_nvtx->Write();
   h_njet->Write();
         
