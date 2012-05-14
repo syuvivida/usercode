@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ -z $7 ] ; then
-    echo "Usage: $0 [JOB] [PROC] [PART] [STRING] [NITER] [PDFGROUP] [PDFSET]"
+if [ -z $9 ] ; then
+    echo "Usage: $0 [JOB] [PROC] [PART] [STRING] [NITER] [PDFGROUP] [PDFSET] [RENSCALE] [FAC_SCALE]"
     echo "PART: lord, real, virt, tota"
-    echo "If PDFSET is -1, will do PDF error evalulation."
+    echo "If PDFSET is -1 and STRING is PDF4LHC, will do PDF error evalulation."
     exit 1
 fi
 
@@ -19,9 +19,9 @@ JOB=$1
 PROC=$2
 PART=$3
 STRING=$4
-SCALE='sqrt(M^2+pt34^2)'
+#SCALE='sqrt(M^2+pt34^2)'
 #SCALE='HT'
-#SCALE='m(34)'
+SCALE='m(34)'
 NITER=$5
 PDFGROUP=$6
 PDFSET=$7
@@ -30,8 +30,10 @@ M34MAX=106
 INCLUSIVE=false
 RJETLEP=0.5
 ETALEP=2.1
+RENScale=$8
+FAScale=$9
 
-FILENAME=angular_mcfm_${PROC}_${PART}_${PDFGROUP}_${PDFSET}_${STRING}.DAT
+FILENAME=angular_mcfm_${PROC}_${PART}_${PDFGROUP}_${PDFSET}_${RENScale}_${FAScale}_${STRING}_${JOB}.DAT
 
 echo "JOB index " $JOB
 echo "SEED = " $SEED
@@ -39,6 +41,8 @@ echo Will do: $PROC $PART $STRING $SCALE $NITER $PDFGROUP $PDFSET $RJETLEP
 echo "Dilepton mass cut:" $M34MIN"~"$M34MAX" GeV/c^2"
 echo "Lepton eta cut: |eta| < " $ETALEP
 echo "Inclusive: " $INCLUSIVE
+echo "Factorization scale: " $FAScale " x " $SCALE
+echo "Renormalization scale: " $RENScale " x " $SCALE
 echo "Output file name: " $FILENAME
 
 cat > ${FILENAME} << EOF
@@ -57,13 +61,13 @@ cat > ${FILENAME} << EOF
 [General options to specify the process and execution]
 ${PROC}	        [nproc]
 '${PART}'  	[part 'lord','real' or 'virt','tota']
-'${STRING}${JOB}'            ['runstring']
+'${STRING}'    ['runstring']
 7000d0		[sqrts in GeV]
 +1		[ih1 =1 for proton and -1 for antiproton]
 +1		[ih2 =1 for proton and -1 for antiproton]
 120d0		[hmass]
-1.0d0		[scale:QCD scale choice]
-1.0d0		[facscale:QCD fac_scale choice]
+${RENScale}d0		[scale:QCD scale choice]
+${FAScale}d0		[facscale:QCD fac_scale choice]
 '${SCALE}'      [dynamicscale, of the four momentum sum of outgoing parton]
 .false.		[zerowidth]
 .false.		[removebr]
