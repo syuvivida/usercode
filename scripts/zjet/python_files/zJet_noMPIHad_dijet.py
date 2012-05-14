@@ -113,7 +113,7 @@ process.generator = cms.EDFilter("Pythia6GeneratorFilter",
 
 
 process.TFileService = cms.Service("TFileService", fileName =
-				   cms.string('7TeV_pythia_zJet_noMPI.root'))
+				   cms.string('7TeV_pythia_zJet_noMPIHad_dijet.root'))
 
 baseJetSel = cms.PSet(
   Jets=cms.InputTag("selectedPatJetsPFlow")
