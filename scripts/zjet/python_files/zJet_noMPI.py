@@ -36,10 +36,12 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.303.2.7 $'),
+    version = cms.untracked.string('$Revision: 1.2 $'),
     annotation = cms.untracked.string('zJet.py nevts:10'),
     name = cms.untracked.string('PyReleaseValidation')
 )
+
+
 
 # Additional output definition
 
@@ -50,7 +52,7 @@ process.generator = cms.EDFilter("Pythia6GeneratorFilter",
     pythiaPylistVerbosity = cms.untracked.int32(0),
     filterEfficiency = cms.untracked.double(1.0),
     pythiaHepMCVerbosity = cms.untracked.bool(False),
-    displayPythiaCards   = cms.untracked.bool(True),				 
+    displayPythiaCards   = cms.untracked.bool(True),    				 
     comEnergy = cms.double(7000.0),				 
     maxEventsToPrint = cms.untracked.int32(0),
     PythiaParameters = cms.PSet(
@@ -62,15 +64,15 @@ process.generator = cms.EDFilter("Pythia6GeneratorFilter",
 	'MSTP(2)=1      ! which order running alphaS', 
 	'MSTP(51)=10042 ! structure function chosen (external PDF CTEQ6L1)',
 	'MSTP(52)=2     ! work with LHAPDF',
-	
+
 	'PARP(82)=1.832 ! pt cutoff for multiparton interactions', 
 	'PARP(89)=1800. ! sqrts for which PARP82 is set', 
 	'PARP(90)=0.275 ! Multiple interactions: rescaling power', 
-	
-        'MSTP(95)=6     ! CR (color reconnection parameters)',
-        'PARP(77)=1.016 ! CR',
-        'PARP(78)=0.538 ! CR',
 
+	'MSTP(95)=6     ! CR (color reconnection parameters)',
+	'PARP(77)=1.016 ! CR',
+	'PARP(78)=0.538 ! CR',
+	
 	'PARP(80)=0.1   ! Prob. colored parton from BBR',
 	
 	'PARP(83)=0.356 ! Multiple interactions: matter distribution parameter', 
@@ -81,10 +83,10 @@ process.generator = cms.EDFilter("Pythia6GeneratorFilter",
 	'MSTP(91)=1     ! Gaussian primordial kT', 
 	'PARP(93)=10.0  ! primordial kT-max', 
 	
-	'MSTP(81)=0     ! multiple parton interactions 1 is Pythia default', 
+	'MSTP(81)=20    ! multiple parton interactions 1 is Pythia default', 
 	'MSTP(82)=4     ! Defines the multi-parton model', 
 	),
-        processParameters = cms.vstring(
+	processParameters = cms.vstring(
 	'MSEL = 0        ! user defined processes',
 	'MSUB(15) = 1    ! ff -> Z0 f',
 	'MSUB(30) = 1    ! ff -> Z0 g',
@@ -103,8 +105,8 @@ process.generator = cms.EDFilter("Pythia6GeneratorFilter",
 	'CKIN(3) = 20    ! minimum pt hat for hard interactions',
 	'CKIN(4) = -1    ! maximum pt hat for hard interactions',
 	),
-	
-        parameterSets = cms.vstring('pythiaUESettings', 
+
+	parameterSets = cms.vstring('pythiaUESettings', 
 				    'processParameters')
 	)
 				 )
