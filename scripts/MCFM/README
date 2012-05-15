@@ -1,0 +1,27 @@
+
+(1) Download tar ball from http://wwwlapp.in2p3.fr/lapth/PHOX_FAMILY/src/jetphox_1.0.tar.gz
+
+mkdir test_jetphox
+cd test_jetphox
+tar xvzf jetphox_1.0.tar.gz
+
+(2) copy the right Makefile for CDF machines
+
+cd jetphox_1.0/working/
+cp -p cp -p ~/runJetPhox/Makefile_golden Makefile
+
+(3) compile for first trial
+
+gmake bases
+
+perl start.pl --parameter parameter.indat
+
+(4) 
+
+
+./para_CMS.sh _CMScteq61M_120 cteq6 200 1.0D0 120. 2.0D0
+
+./para_CMS.sh _CMScteq61M_250 cteq6 200 1.0D0 250. 2.0D0
+
+./para_CDF.sh _CDFcteq61M_300 cteq6 200 1.0D0 300. 2.0D0
+
