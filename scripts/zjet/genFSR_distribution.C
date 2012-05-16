@@ -136,29 +136,29 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   TH1D* h_zpt   = (TH1D*)h_zpt_template->Clone("h_zpt");
   h_zpt->SetXTitle("p_{T}(Z) [GeV]");
 
-  TH1D* h_jetpt_template = new TH1D("h_jetpt_template","",80,0,400);
+  TH1D* h_jetpt_template = new TH1D("h_jetpt_template","",40,0,400);
   h_jetpt_template->Sumw2();
 
   TH1D* h_jetpt = (TH1D*)h_jetpt_template->Clone("h_jetpt");
   h_jetpt->SetXTitle("p_{T}(jet) [GeV]");
 
-  TH1D* h_ypart_template = new TH1D("h_ypart_template","",60,-3.0,3.0); 
+  TH1D* h_ypart_template = new TH1D("h_ypart_template","",15,0.0,3.0); 
   h_ypart_template->Sumw2();
 
   TH1D* h_zy    = (TH1D*)h_ypart_template->Clone("h_zy");
-  h_zy->SetXTitle("y_{Z}");
+  h_zy->SetXTitle("|y_{Z}|");
 
   TH1D* h_jety    = (TH1D*)h_ypart_template->Clone("h_jety");
-  h_jety->SetXTitle("y_{jet}");
+  h_jety->SetXTitle("|y_{jet}|");
 
-  TH1D* h_y_template = new TH1D("h_y_template","",25,-2.5,2.5);
+  TH1D* h_y_template = new TH1D("h_y_template","",15,0.0,3.0);
   h_y_template->Sumw2();
 
   TH1D* h_yB    = (TH1D*)h_y_template->Clone("h_yB");
-  h_yB->SetXTitle("0.5(y_{Z}+y_{jet})");
+  h_yB->SetXTitle("0.5|y_{Z}+y_{jet}|");
 
   TH1D* h_ystar = (TH1D*)h_y_template->Clone("h_ystar");
-  h_ystar->SetXTitle("0.5(y_{Z}-y_{jet})");
+  h_ystar->SetXTitle("0.5|y_{Z}-y_{jet}|");
 
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -468,10 +468,10 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
 
     h_zpt->Fill(ptz,eventWeight);
     h_jetpt->Fill(ptjet,eventWeight); 
-    h_zy->Fill(yz,eventWeight);
-    h_jety->Fill(yj,eventWeight);
-    h_yB->Fill(yB,eventWeight);
-    h_ystar->Fill(ystar,eventWeight);
+    h_zy->Fill(fabs(yz),eventWeight);
+    h_jety->Fill(fabs(yj),eventWeight);
+    h_yB->Fill(fabs(yB),eventWeight);
+    h_ystar->Fill(fabs(ystar),eventWeight);
 
     if(DEBUG==1){
       double dR1 = l4_lepp.DeltaR(l4_j);
