@@ -130,7 +130,7 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   h_jetp_power[4] = (TH1D*)h_jetpt_power_template->Clone("h_jetp_power_inclusive");
   h_jetp_power[4]->SetXTitle("p(jet) [GeV]");
 
-  TH1D* h_zpt_template = new TH1D("h_zpt_template","",100,0,100);
+  TH1D* h_zpt_template = new TH1D("h_zpt_template","",40,0,400);
   h_zpt_template->Sumw2();
 
   TH1D* h_zpt   = (TH1D*)h_zpt_template->Clone("h_zpt");
