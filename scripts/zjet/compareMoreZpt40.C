@@ -1,16 +1,16 @@
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 
-void compareMore(
+void compareMoreZpt40(
       		 std::string datavar="h_ystar",
 		 std::string var3="id6",
 		 std::string output="test",
-		 std::string datafile="unified_angular_distributions/rebinnings/nozptcut/cts_CorrectedPlotsNoZPtCut_patJet.root",
-		 std::string mcfile1="unified_angular_distributions/rebinnings/nozptcut/weighted_exclusive1Jet_electron_genMore_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
-		 std::string mcfile2="unified_angular_distributions/rebinnings/nozptcut/weighted_exclusive1Jet_electron_genMore_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-		 std::string mcfile3="unified_angular_distributions/rebinnings/nozptcut/Z_1jet_tota_cteq61._1___1___00ZPT00.root",
+		 std::string datafile="unified_angular_distributions/rebinnings/zpt40/cts_CorrectedPlotsZPtCut_patJet.root",
+		 std::string mcfile1="unified_angular_distributions/rebinnings/zpt40/weighted_exclusive1Jet_zPt40_electron_genMore_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
+		 std::string mcfile2="unified_angular_distributions/rebinnings/zpt40/weighted_exclusive1Jet_zPt40_electron_genMore_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
+		 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq61._1___1___40ZPT00.root",
 		 std::string var1="", std::string var2="", 
 		 float xmin=-9999.0, float xmax=-9999.0,
-		 std::string headertitle="Z(#rightarrow ee)+1 jet: no cut on p_{T}(Z)",
+		 std::string headertitle="Z(#rightarrow ee)+1 jet: p_{T}(Z)>40 GeV/c",
 		 std::string dataName="CMS Data",
 		 std::string mcName1="Sherpa",
 		 std::string mcName2="Madgraph",
@@ -251,9 +251,9 @@ void compareMore(
   std::string filename;
   std::string psname = dirName + "/" + var1;
   if(output !="test")
-    psname = dirName+ "/zPt00" + output;
+    psname = dirName+ "/zPt40" + output;
   else
-    psname = dirName+ "/zPt00" + var1;
+    psname = dirName+ "/zPt40" + var1;
   filename = psname + ".eps";
   c1->Print(filename.data());
   filename = psname + ".gif";
