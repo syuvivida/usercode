@@ -23,10 +23,10 @@ void plotMCFMXsec_Z2jet(std::string file="Z_2jet_tota_CT10_mcfm.root")
 
   TFile *fmcfm = TFile::Open(file.data());
   
-  h_mcfm_original_pt =  (TH1F*)(fmcfm->Get("id5"));
+  h_mcfm_original_pt =  (TH1F*)(fmcfm->Get("id7"));
   h_mcfm_original_pt -> SetName("h_mcfm_original_pt");
 
-  h_mcfm_original_y =  (TH1F*)(fmcfm->Get("id6"));
+  h_mcfm_original_y =  (TH1F*)(fmcfm->Get("id8"));
   h_mcfm_original_y -> SetName("h_mcfm_original_y");
 
   double total_y_xsec = 0;
@@ -117,7 +117,7 @@ void plotMCFMXsec_Z2jet(std::string file="Z_2jet_tota_CT10_mcfm.root")
 
   cout << "Ratio = " << total_pt_xsec/total_y_xsec << endl;
 
-  TFile* outFile = new TFile(Form("mcfm_%s",file.data()),"recreate");       
+  TFile* outFile = new TFile(Form("mcfm2jetXsec_%s",file.data()),"recreate");       
   
   h_diff_mcfm_jetpt02->Write();
   h_diff_mcfm_jety02->Write();
