@@ -30,6 +30,11 @@ const double maxMmm =106.0;
 void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight, 
 			       bool beforeFSR, int DEBUG)
 {
+
+  //=============================================================================
+  //   Print out information
+  //=============================================================================
+
   if (fChain == 0) return;
   cout << "=========================================================" << endl;
 
@@ -72,6 +77,49 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
 
   cout << "There are " << nYBins << " bins." << endl;
+
+  Long64_t nentries = fChain->GetEntriesFast();
+
+  cout << _inputFileName << " has " << nentries << " entries." << endl;
+  std::string leptonName;
+  if(abs(lepID)==13)leptonName = "muon";
+  else if(abs(lepID)==11)leptonName = "electron";
+
+  cout << "Running mode: " << endl;
+  cout << "beforeFSR=" << beforeFSR << "\t exclusive=" << exclusive 
+       << "\t applyWeight=" <<  applyWeight << "\t DEBUG=" << DEBUG << endl;
+  cout << endl;
+  cout << "The cuts applied: " << endl;
+  
+  cout << " minZPt= " << minZPt << endl;
+  cout << " minJetPt= " << minJetPt << endl;
+  cout << " maxJetEta= " << maxJetEta << endl;
+  cout << " mindR= " << mindR << endl;
+
+  cout << "studying " << leptonName << endl;
+  if(abs(lepID)==11){
+    cout << " minElePt= " << minElePt << endl;
+    cout << " minEleBarrelEta = " << minEleBarrelEta << endl;
+    cout << " maxEleBarrelEta = " << maxEleBarrelEta << endl;
+    cout << " minEleEndcapEta = " << minEleEndcapEta << endl;
+    cout << " maxEleEndcapEta = " << maxEleEndcapEta << endl;
+    cout << " minMee = " << minMee << endl;
+    cout << " maxMee = " << maxMee << endl;
+  }
+  else if(abs(lepID)==13){
+    cout << " minMuoPt = " << minMuoPt << endl;
+    cout << " maxMuoEta = " << maxMuoEta << endl;
+    cout << " minMmm = " << minMmm << endl;
+    cout << " maxMmm = " << maxMmm << endl;
+  }
+  cout << "=========================================================" << endl;
+
+  // dummy proof, in case someone put a negative number
+  int leptonPID = abs(lepID); 
+
+  //=============================================================================
+  //   Book histograms
+  //=============================================================================
 
   TH1D* h_mZ   = new TH1D("h_mZ","",200,20.0,220.0);
   h_mZ->SetXTitle("M_{ll} [GeV/c^{2}");
@@ -161,44 +209,6 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   h_ystar->SetXTitle("0.5|y_{Z}-y_{jet}|");
 
 
-  Long64_t nentries = fChain->GetEntriesFast();
-
-  cout << _inputFileName << " has " << nentries << " entries." << endl;
-  std::string leptonName;
-  if(abs(lepID)==13)leptonName = "muon";
-  else if(abs(lepID)==11)leptonName = "electron";
-
-  cout << "Running mode: " << endl;
-  cout << "beforeFSR=" << beforeFSR << "\t exclusive=" << exclusive 
-       << "\t applyWeight=" <<  applyWeight << "\t DEBUG=" << DEBUG << endl;
-  cout << endl;
-  cout << "The cuts applied: " << endl;
-  
-  cout << " minZPt= " << minZPt << endl;
-  cout << " minJetPt= " << minJetPt << endl;
-  cout << " maxJetEta= " << maxJetEta << endl;
-  cout << " mindR= " << mindR << endl;
-
-  cout << "studying " << leptonName << endl;
-  if(abs(lepID)==11){
-    cout << " minElePt= " << minElePt << endl;
-    cout << " minEleBarrelEta = " << minEleBarrelEta << endl;
-    cout << " maxEleBarrelEta = " << maxEleBarrelEta << endl;
-    cout << " minEleEndcapEta = " << minEleEndcapEta << endl;
-    cout << " maxEleEndcapEta = " << maxEleEndcapEta << endl;
-    cout << " minMee = " << minMee << endl;
-    cout << " maxMee = " << maxMee << endl;
-  }
-  else if(abs(lepID)==13){
-    cout << " minMuoPt = " << minMuoPt << endl;
-    cout << " maxMuoEta = " << maxMuoEta << endl;
-    cout << " minMmm = " << minMmm << endl;
-    cout << " maxMmm = " << maxMmm << endl;
-  }
-  cout << "=========================================================" << endl;
-
-  // dummy proof, in case someone put a negative number
-  int leptonPID = abs(lepID); 
 
   int nPass[30];
    
