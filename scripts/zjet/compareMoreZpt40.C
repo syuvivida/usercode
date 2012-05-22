@@ -59,10 +59,8 @@ void compareMoreZpt40(
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
-//     hscale[i]->SetMaximum(2.0);
-//     hscale[i]->SetMinimum(0.0);
-    hscale[i]->SetMaximum(1.5);
-    hscale[i]->SetMinimum(0.5);
+    hscale[i]->SetMaximum(2.05);
+    hscale[i]->SetMinimum(0.0);
     hscale[i]->SetTitleOffset(1.2,"Y");
 
     h[i]->SetTitle("");
@@ -173,7 +171,7 @@ void compareMoreZpt40(
   for(int ih=0; ih < NHISTOS; ih++){
 
     h[ih]->SetMaximum(1.1*max);
-
+    h[ih]->SetMinimum(-0.015);
   }
 
   cout << "here" << endl;
@@ -199,10 +197,10 @@ void compareMoreZpt40(
 
   cout << "here3" << endl;
 
-  float x1NDC = 0.491512;
-  float y1NDC = 0.629745;
-  float x2NDC = 0.710455;
-  float y2NDC = 0.943808;
+  float x1NDC = 0.504787;
+  float y1NDC = 0.641732;
+  float x2NDC = 0.723731;
+  float y2NDC = 0.953398;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
