@@ -171,7 +171,10 @@ void compareMoreZpt40(
   for(int ih=0; ih < NHISTOS; ih++){
 
     h[ih]->SetMaximum(1.1*max);
-    h[ih]->SetMinimum(-0.015);
+    if(!logScale)
+      h[ih]->SetMinimum(-0.015);
+    else
+      h[ih]->SetMinimum(0.001);
   }
 
   cout << "here" << endl;
