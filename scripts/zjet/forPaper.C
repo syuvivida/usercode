@@ -3,6 +3,7 @@
 void forPaper(
       		 std::string datavar="h_ystar",
 		 std::string var3="id6",
+		 std::string xtitle="|0.5(Y_{Z}-Y_{jet})|",
 		 bool logScale=false,
 		 std::string output="test",
 		 std::string datafile="unified_angular_distributions/rebinnings/zpt40/cts_CorrectedPlotsZPtCut_patJet.root",
@@ -50,7 +51,7 @@ void forPaper(
 
     hscale[i]   =(TH1D*) h[0]->Clone(Form("hscale%02i",i));
     hscale[i]   ->SetYTitle(Form("Ratio to %s",mcName3.data()));
-    
+    hscale[i]   ->SetXTitle(xtitle.data());
 //     hscale[i]   ->GetXaxis()->SetNdivisions(5);
     hscale[i]   ->GetXaxis()->SetDecimals();
     hscale[i]   ->GetYaxis()->SetDecimals();
@@ -62,6 +63,7 @@ void forPaper(
     hscale[i]->SetTitle("");
     hscale[i]->SetMaximum(2.05);
     hscale[i]->SetMinimum(0.0);
+    hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
     h[i]->SetTitle("");
