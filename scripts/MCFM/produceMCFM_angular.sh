@@ -19,6 +19,7 @@ JOB=$1
 PROC=$2
 PART=$3
 STRING=$4${JOB}
+#STRING=$4
 #SCALE='sqrt(M^2+pt34^2)'
 #SCALE='HT'
 SCALE='m(34)'
