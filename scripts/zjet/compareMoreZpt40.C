@@ -11,7 +11,7 @@ void compareMoreZpt40(
 		 std::string var1="", std::string var2="", 
 		 float xmin=-9999.0, float xmax=-9999.0,
 		 std::string headertitle="Z(#rightarrow ee)+1 jet: p_{T}(Z)>40 GeV/c",
-		 std::string dataName="CMS Data",
+		 std::string dataName="Data",
 		 std::string mcName1="Sherpa",
 		 std::string mcName2="Madgraph",
 		 std::string mcName3="MCFM",
@@ -45,6 +45,21 @@ void compareMoreZpt40(
   int COLOR[NHISTOS]={1,4,2,kOrange-1};
   int MARKERSTYLE[NHISTOS]={8,24,21,29};
 
+  std::string xtitle;
+
+  if(datavar=="h_ystar")
+    xtitle = "0.5|Y_{Z}-Y_{jet}|";
+  else if(datavar=="h_yB")
+    xtitle = "0.5|Y_{Z}+Y_{jet}|";
+  else if(datavar=="h_jetpt")
+    xtitle = "p_{T}(jet) [GeV/c]";
+  else if(datavar=="h_jety")
+    xtitle = "Y(jet)";
+  else if(datavar=="h_zpt")
+    xtitle = "p_{T}(Z) [GeV/c]";
+  else if(datavar=="h_zy")
+    xtitle = "Y(Z)";
+
   for(int i=0; i < NHISTOS; i++){
 
     hscale[i]   =(TH1D*) h[0]->Clone(Form("hscale%02i",i));
@@ -53,6 +68,7 @@ void compareMoreZpt40(
 //     hscale[i]   ->GetXaxis()->SetNdivisions(5);
     hscale[i]   ->GetXaxis()->SetDecimals();
     hscale[i]   ->GetYaxis()->SetDecimals();
+    hscale[i]   ->SetXTitle(xtitle.data());
 
     hscale[i]->SetLineColor(COLOR[i]);
     hscale[i]->SetMarkerColor(COLOR[i]);
@@ -61,6 +77,7 @@ void compareMoreZpt40(
     hscale[i]->SetTitle("");
     hscale[i]->SetMaximum(2.05);
     hscale[i]->SetMinimum(0.0);
+    hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
     h[i]->SetTitle("");
@@ -170,7 +187,7 @@ void compareMoreZpt40(
 
   for(int ih=0; ih < NHISTOS; ih++){
 
-    h[ih]->SetMaximum(1.1*max);
+    h[ih]->SetMaximum(1.3*max);
     if(!logScale)
       h[ih]->SetMinimum(-0.015);
     else
@@ -201,9 +218,9 @@ void compareMoreZpt40(
   cout << "here3" << endl;
 
   float x1NDC = 0.504787;
-  float y1NDC = 0.641732;
+  float y1NDC = 0.555424;
   float x2NDC = 0.723731;
-  float y2NDC = 0.953398;
+  float y2NDC = 0.867090;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
@@ -218,6 +235,10 @@ void compareMoreZpt40(
   leg->AddEntry(h[3], mcName3.data());
   leg->Draw("same");
 
+  TLatex *lar = new TLatex(x1NDC, 0.91, "CMS   #sqrt{s} = 7 TeV, L_{int} = 4.9 fb^{-1}");
+  lar->SetNDC(kTRUE);
+  lar->SetTextSize(0.05);
+  lar->Draw();
 
   c1->cd(2);
   gStyle->SetStatW       (0.3);
