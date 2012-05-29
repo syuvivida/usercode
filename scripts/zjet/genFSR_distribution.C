@@ -133,6 +133,10 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   h_njet->SetXTitle("#geq n jet");
   h_njet->Sumw2();
 
+  TH2D* h2_ystarpstar = new TH2D("h2_ystarpstar","",60,-3.0,3.0,125,0,250);
+  h2_ystarpstar->SetXTitle("0.5(Y_{Z}-Y_{jet})");
+  h2_ystarpstar->SetYTitle("p_{T}cosh[0.5(Y_{Z}-Y_{jet})]");
+
   const int nMAXJETS=4;
 
   TH1D* h_jetpt_power_template = new TH1D("h_jetpt_power_template","",500,30,530);
@@ -441,7 +445,7 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
 
     h_leadingjet_pt->Fill(ptjet,eventWeight);
     h_leadingjet_y->Fill(fabs(yj),eventWeight);
-      
+     
       
     if(DEBUG==1)
       cout << "Now ordering jets" << endl;
@@ -483,6 +487,10 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
     h_yB->Fill(fabs(yB),eventWeight);
     h_ystar->Fill(fabs(ystar),eventWeight);
 
+    h2_ystarpstar->Fill(ystar,ptjet*TMath::CosH(ystar),eventWeight);
+ 
+
+
     if(DEBUG==1){
       double dR1 = l4_lepp.DeltaR(l4_j);
       double dR2 = l4_lepm.DeltaR(l4_j);
@@ -507,6 +515,8 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
   TFile* outFile = new TFile(Form("%s_%s_%s",prefix.data(),
 				  leptonName.data(),
 				  _inputFileName.data()),"recreate");       
+
+  h2_ystarpstar->Write();
   h_mZ->Write();
   h_nvtx->Write();
   h_njet->Write();
