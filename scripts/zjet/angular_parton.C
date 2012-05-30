@@ -14,7 +14,7 @@ const double mindR=0.5;
 
 const double minElePt = 20.0;
 const double minEleBarrelEta = 0.0;
-const double maxEleBarrelEta = 1.446;
+const double maxEleBarrelEta = 1.442;
 
 const double minEleEndcapEta = 1.566;
 const double maxEleEndcapEta = 2.1;

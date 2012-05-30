@@ -610,7 +610,7 @@ Bool_t zee_angular_withWeight::isFidEle (Int_t iele)
   if(pt < 20.0)return false;
   
   double eta = patElecEta_->at(iele); // should use supercluster eta, but this variable is not filled
-  bool ingap= fabs(eta)>1.446 && fabs(eta)< 1.566;
+  bool ingap= fabs(eta)>1.442 && fabs(eta)< 1.566;
   if(ingap)return false;
 
   if(fabs(eta) > 2.4)return false;
