@@ -345,9 +345,11 @@ void angular_parton::Loop(int lepID, bool exclusive, bool applyWeight, int DEBUG
       int motherPID = genMomParId_->at(igen);
 
       if(status!=3)continue;
-      if(abs(PID)>6)continue;
+      if(abs(PID)>6 && PID!=21)continue;
       if(motherPID!=10002)continue;
 
+//       cout << "PID = " << PID << endl;
+      
       double thisPartonPt  = genParPt_->at(igen);
       double thisPartonEta = genParEta_->at(igen);
 
