@@ -48,7 +48,7 @@ void forPaperZEE(
     }
   else if(datavar=="h_jety")
     {
-      xtitle = "Y(jet)";
+      xtitle = "|Y(jet)|";
       output = "YJetEle";
     }
   else if(datavar=="h_zpt")
@@ -58,7 +58,7 @@ void forPaperZEE(
     }
   else if(datavar=="h_zy")
     {
-      xtitle = "Y(Z)";
+      xtitle = "|Y(Z)|";
       output = "YZedEle";
     }
 
