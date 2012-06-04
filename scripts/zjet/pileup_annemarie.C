@@ -8,7 +8,7 @@
 #include "myLib.h"
 
 
-const double minZPt  = 0.0;
+const double minZPt  =40.0;
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
@@ -255,12 +255,15 @@ void pileup_annemarie::Loop(bool match)
 //     int partonMyIndex = matchRecoToParton(leadingJetIndex);
 //     if(match && partonMyIndex < 0)continue;
 //     cout << "After partonPID = " << genParId_->at(partonMyIndex) << endl;
+    
+    int genJetMyIndex = matchRecoToGenJet(leadingJetIndex);
+    if(match && genJetMyIndex < 0)continue;
 
     int partonPID = abs(patJetPfAk05GenPartonID_->at(leadingJetIndex));
 //     cout << "leadingJetIndex =" << leadingJetIndex << endl;
 //     cout << "Before partonPID = " << partonPID << endl;
 
-    if(match && partonPID>5 && partonPID!=21)continue;
+//     if(match && partonPID>5 && partonPID!=21)continue;
 //     cout << "After partonPID = " << partonPID << endl;
     nPass[3]++;
     
@@ -461,6 +464,29 @@ Int_t pileup_annemarie::matchRecoToParton(Int_t ijet)
 	}
       
     } // end of loop over generator-level information
+      
+  return matchedGenIndex;
+}
+
+Int_t pileup_annemarie::matchRecoToGenJet(Int_t ijet)
+{  
+  int matchedGenIndex = -1;
+  for(unsigned int k=0; k< genJetPt_->size(); k++)
+    {
+
+      double dR = eiko::deltaR(genJetEta_->at(k),genJetPhi_->at(k),
+			       patJetPfAk05Eta_->at(ijet),patJetPfAk05Phi_->at(ijet)); 
+
+      double relPt = genJetPt_->at(k)>1e-6? 
+	fabs(genJetPt_->at(k)-patJetPfAk05Pt_->at(ijet))/genJetPt_->at(k): -9999.0;
+
+      if(dR<0.4 && relPt < 3.0)
+	{
+	  matchedGenIndex = k;
+	  break;
+	}
+      
+    } // end of loop over generator-level jets
       
   return matchedGenIndex;
 }
