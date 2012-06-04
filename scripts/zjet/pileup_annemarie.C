@@ -8,7 +8,7 @@
 #include "myLib.h"
 
 
-const double minZPt  = 0.0;
+const double minZPt  =40.0;
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
