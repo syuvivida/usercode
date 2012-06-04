@@ -468,6 +468,7 @@ public :
 
    virtual Bool_t   isFidJet (Int_t ijet);
    virtual Bool_t   isGoodLooseJet(Int_t ijet);
+   virtual Int_t    matchRecoToParton(Int_t ijet); // return matched index in genInfo
 
 };
 

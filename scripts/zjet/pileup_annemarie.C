@@ -8,7 +8,7 @@
 #include "myLib.h"
 
 
-const double minZPt  =40.0;
+const double minZPt  = 0.0;
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
@@ -217,14 +217,15 @@ void pileup_annemarie::Loop(bool match)
       // avoid overlap with electrons
       if(!eiko::separated(l4_thisJet,l4_ele1,mindR))continue;
       if(!eiko::separated(l4_thisJet,l4_ele2,mindR))continue;
-      
-      nGoodLooseJets++;
-     
+           
       double thisJetPt = patJetPfAk05Pt_->at(ijet);
 
 //       int PID = abs(patJetPfAk05GenPartonID_->at(ijet));
-
+      
 //       if(PID > 5 && PID!=21)continue;
+
+      nGoodLooseJets++;
+
 
       // find the highest pt jet
       if(thisJetPt > maxJetPt)
@@ -251,8 +252,12 @@ void pileup_annemarie::Loop(bool match)
   			   patJetPfAk05En_->at(leadingJetIndex)
   			   );
 
+//     int partonMyIndex = matchRecoToParton(leadingJetIndex);
+//     if(match && partonMyIndex < 0)continue;
+//     cout << "After partonPID = " << genParId_->at(partonMyIndex) << endl;
 
     int partonPID = abs(patJetPfAk05GenPartonID_->at(leadingJetIndex));
+//     cout << "leadingJetIndex =" << leadingJetIndex << endl;
 //     cout << "Before partonPID = " << partonPID << endl;
 
     if(match && partonPID>5 && partonPID!=21)continue;
@@ -260,11 +265,11 @@ void pileup_annemarie::Loop(bool match)
     nPass[3]++;
     
     
-    //---------------------------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     //
     //   start making angular histogram for at least one jet case
     // 
-    //--------------------------------------------------------------------------------------------------------------------- 
+    //-------------------------------------------------------------------------
 
 
 
@@ -314,7 +319,7 @@ void pileup_annemarie::Loop(bool match)
   std::string suffix = "nomatch";
   if(match) suffix = "yesmatch";
 
-  TFile* outFile = new TFile(Form("anne-marie_ZPt%02i_%s.root",(int)minZPt,suffix.data()),"recreate");               
+  TFile* outFile = new TFile(Form("anne-marie_myZPt%02i_%s.root",(int)minZPt,suffix.data()),"recreate");               
 
   h_nvtx_before->Write();
   h_nvtx_after->Write();
@@ -426,5 +431,37 @@ Bool_t pileup_annemarie::isGoodLooseJet(Int_t ijet)
 
   return true;
 
+}
+
+Int_t pileup_annemarie::matchRecoToParton(Int_t ijet)
+{  
+  int matchedGenIndex = -1;
+  for(unsigned int k=0; k< genParPt_->size(); k++)
+    {
+      int status    = genParSt_->at(k);
+      int PID       = abs(genParId_->at(k));
+      int motherPID = genMomParId_->at(k);
+
+      if(status!=3)continue;
+      if(PID>5 && PID!=21)continue;
+      if(motherPID!=10002)continue;
+
+      double dR = eiko::deltaR(genParEta_->at(k),genParPhi_->at(k),
+			       patJetPfAk05Eta_->at(ijet),
+			       patJetPfAk05Phi_->at(ijet)); 
+
+      double relPt = genParPt_->at(k)>1e-6? 
+	fabs(genParPt_->at(k)-patJetPfAk05Pt_->at(ijet))/genParPt_->at(k)
+	: -9999.0;
+
+      if(dR<0.4 && relPt < 3.0)
+	{
+	  matchedGenIndex = k;
+	  break;
+	}
+      
+    } // end of loop over generator-level information
+      
+  return matchedGenIndex;
 }
 
