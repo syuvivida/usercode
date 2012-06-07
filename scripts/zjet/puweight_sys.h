@@ -13,7 +13,10 @@
 #include <TFile.h>
 #include <string>
 #include <iostream>
-
+#include <TBranch.h>
+#include <TLeaf.h>
+#include <TSystemDirectory.h>
+#include <TList.h>
 using namespace std;
 
 
@@ -480,6 +483,7 @@ public :
 #ifdef puweight_sys_cxx
 puweight_sys::puweight_sys(std::string filename, TTree *tree)
 {
+  /*
   if (tree == 0) {
     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.data());
     if (!f) {
@@ -490,6 +494,34 @@ puweight_sys::puweight_sys(std::string filename, TTree *tree)
 
   }
   Init(tree);
+  */
+
+  if (tree == 0) {
+    TChain* pho = new TChain("tree/tree");
+    TSystemDirectory *base = new TSystemDirectory("root","root");
+    base->SetDirectory(filename.data());
+    TList *listOfFiles = base->GetListOfFiles();
+    TIter fileIt(listOfFiles);
+    TFile *fileH = new TFile();
+    int nfile=0;
+    while(fileH = (TFile*)fileIt()) {
+      std::string fileN = fileH->GetName();
+      std::string baseString = "zjets_mc_nofilter";
+      if( fileH->IsFolder())  continue;
+      if(fileN.find(baseString) == std::string::npos)continue;
+      cout << fileN.data() << endl;
+      nfile++;
+      pho->Add(fileN.data());
+    }
+
+    cout << "Opening " << nfile << " files " << endl;
+    tree = pho;
+
+  }
+
+  cout << "Number of entries are " << tree->GetEntries() << endl;
+  Init(tree);
+   
   _inputFile = filename;
 }
 

@@ -176,7 +176,7 @@ void puweight_sys::Loop(bool match)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
-//     if(jentry >1000 ) break;
+    //    if(jentry >1000 ) break;
 
     nPass[0]++;
     // determining the weights from the number of true interactions
@@ -386,7 +386,7 @@ void puweight_sys::Loop(bool match)
     _inputFile = "test.root";
 
 
-  TFile* outFile = new TFile(Form("puweight_sys_ZPt%02i_%s_%s",
+  TFile* outFile = new TFile(Form("/home/syu/ZJets/CMSSW_4_4_4/src/scripts/puweight_sys_ZPt%02i_%s_%s.root",
 				  (int)minZPt,suffix.data(),
 				  _inputFile.data()),"recreate");            
    
