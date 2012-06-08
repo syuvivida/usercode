@@ -98,8 +98,10 @@ void forPaperZEE(
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
-    hscale[i]->SetMaximum(2.05);
-    hscale[i]->SetMinimum(0.0);
+//     hscale[i]->SetMaximum(2.05);
+//     hscale[i]->SetMinimum(0.0);
+    hscale[i]->SetMaximum(1.45);
+    hscale[i]->SetMinimum(0.4);
     hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
