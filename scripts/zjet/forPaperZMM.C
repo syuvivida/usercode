@@ -7,7 +7,7 @@ void forPaperZMM(
 		 std::string datafile="DoubleMu2011_EffCorr_ZpT40_absY_051412.root",
 		 std::string mcfile1="DYToLL-sherpa_GEN_ZpT40_absY_051412.root", 
 		 std::string mcfile2="DYJetsToLL_GEN_ZpT40_absY_051412.root", 
-		 std::string mcfile3="Z_1jet_tota_cteq61._1___1___ex_m34.root",
+		 std::string mcfile3="Z_1jet_tota_cteq66._1___1___40ZPT100.root",
 		 std::string var1="", std::string var2="", 
 		 float xmin=-9999.0, float xmax=-9999.0,
 		 std::string headertitle="Z(#rightarrow #mu#mu)+1 jet",
@@ -68,6 +68,11 @@ void forPaperZMM(
   TFile *fmc1   = TFile::Open(mcfile1.data());
   TFile *fmc2   = TFile::Open(mcfile2.data());
   TFile *fmc3   = TFile::Open(mcfile3.data());
+
+  cout << "Opening " << fdata->GetName() << endl;
+  cout << "Opening " << fmc1->GetName() << endl;
+  cout << "Opening " << fmc2->GetName() << endl;
+  cout << "Opening " << fmc3->GetName() << endl;
 
   h[0] = (TH1F*)(fdata->Get(datavar.data()));
   h[1]    = (TH1F*)(fmc1->Get(var1.data()));

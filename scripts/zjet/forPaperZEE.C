@@ -7,7 +7,7 @@ void forPaperZEE(
 		 std::string datafile="unified_angular_distributions/rebinnings/zpt40/cts_CorrectedPlotsZPtCut_patJet.root",
 		 std::string mcfile1="unified_angular_distributions/rebinnings/zpt40/weighted_exclusive1Jet_zPt40_electron_genMore_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
 		 std::string mcfile2="unified_angular_distributions/rebinnings/zpt40/weighted_exclusive1Jet_zPt40_electron_genMore_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-		 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq61._1___1___40ZPT00.root",
+		 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66._1___1___40ZPT100.root",
 		 std::string var1="", std::string var2="", 
 		 float xmin=-9999.0, float xmax=-9999.0,
 		 std::string headertitle="Z(#rightarrow ee)+1 jet",
@@ -68,6 +68,11 @@ void forPaperZEE(
   TFile *fmc1   = TFile::Open(mcfile1.data());
   TFile *fmc2   = TFile::Open(mcfile2.data());
   TFile *fmc3   = TFile::Open(mcfile3.data());
+
+  cout << "Opening " << fdata->GetName() << endl;
+  cout << "Opening " << fmc1->GetName() << endl;
+  cout << "Opening " << fmc2->GetName() << endl;
+  cout << "Opening " << fmc3->GetName() << endl;
 
   h[0] = (TH1F*)(fdata->Get(datavar.data()));
   h[1]    = (TH1F*)(fmc1->Get(var1.data()));
