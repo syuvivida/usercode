@@ -75,9 +75,9 @@ Double_t Fall2011[50] = {
 double Data[50]={2.44414e+06,1.25579e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
 
 
-double DataUp[50]={2.44414e+06,1.25579e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
+double DataUp[50]={2.44414e+06,1.3e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
 
-double DataDown[50]={2.44414e+06,1.25579e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
+double DataDown[50]={2.44414e+06,1.2e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
 
 
 standalone_LumiReWeighting::standalone_LumiReWeighting(int mode) {
@@ -86,17 +86,37 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int mode) {
   std::vector<float> MC_distr;
   std::vector<float> Lumi_distr;
 
+  switch (mode)
+    {
+    case 0:
+      std::cout << "Using central value " << std::endl;
+      break;
+    case 1:
+      std::cout << "Using +1 sigma 5% value " << std::endl;
+      break;
+    case -1:
+      std::cout << "Using -1 sigma 5% value " << std::endl;
+      break;
+    default:
+      std::cout << "Using central value " << std::endl;
+      break;
+    } // end of switch
+
   for( int i=0; i<50; ++i) {
     switch (mode){
     case 0:
       Lumi_distr.push_back(Data[i]);
+      break;
     case 1:
       Lumi_distr.push_back(DataUp[i]);
+      break;
     case -1:
       Lumi_distr.push_back(DataDown[i]);
+      break;
     default:
       Lumi_distr.push_back(Data[i]);
-    }
+      break;
+    } // end of switch
     MC_distr.push_back(Fall2011[i]);
   }
 
@@ -108,26 +128,32 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int mode) {
   // first, check they are the same size...
 
   if( MC_distr.size() != Lumi_distr.size() ){   
-
+    std::cout << "MC_distr.size() = " << MC_distr.size() << std::endl;
+    std::cout << "Lumi_distr.size() = " << Lumi_distr.size() << std::endl;
     std::cerr <<"ERROR: standalone_LumiReWeighting: input vectors have different sizes. Quitting... \n";
 
   }
 
   Int_t NBins = MC_distr.size();
 
-  weights_ = new TH1F("luminumer","luminumer",NBins,-0.5, float(NBins)-0.5);
-  TH1F* den = new TH1F("lumidenom","lumidenom",NBins,-0.5, float(NBins)-0.5) ;
+  weights_ = new TH1F(Form("luminumer_%d",mode),
+		      Form("luminumer_%d",mode),
+		      NBins,-0.5, float(NBins)-0.5);
+
+  TH1F* den = new TH1F(Form("lumidenom_%d",mode),
+		       Form("lumidenom_%d",mode),
+		       NBins,-0.5, float(NBins)-0.5);
 
   for(int ibin = 1; ibin<NBins+1; ++ibin ) {
     weights_->SetBinContent(ibin, Lumi_distr[ibin-1]);
     den->SetBinContent(ibin,MC_distr[ibin-1]);
   }
 
-  std::cout << " Lumi/Pileup Data Input " << std::endl;
+  std::cout << "Data Input " << std::endl;
   for(int ibin = 1; ibin<NBins+1; ++ibin){
     std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
   }
-  std::cout << " Lumi/Pileup MC Input " << std::endl;
+  std::cout << "MC Input " << std::endl;
   for(int ibin = 1; ibin<NBins+1; ++ibin){
     std::cout << "   " << ibin-1 << " " << den->GetBinContent(ibin) << std::endl;
   }
@@ -145,7 +171,7 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int mode) {
 
   weights_->Divide( den );  // so now the average weight should be 1.0    
 
-  std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+  std::cout << "Reweighting: Computed Weights per In-Time Nint " << std::endl;
 
 
   for(int ibin = 1; ibin<NBins+1; ++ibin){
