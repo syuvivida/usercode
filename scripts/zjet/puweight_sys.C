@@ -41,7 +41,7 @@ void puweight_sys::Loop(bool match)
 
   const int nPUBin = 50;
   TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,
-				   -0.5,nPUBin-0.5);
+ 				   -0.5,nPUBin-0.5);
   h_nint_template->SetXTitle("Number of interactions");
   h_nint_template->Sumw2();
 
@@ -69,13 +69,19 @@ void puweight_sys::Loop(bool match)
   //---------------------------------------------------------------------------
 
   // first debugging histograms
-  TH1D* h_puweight_original = (TH1D*)h_puweight_template->Clone("h_puweight_original");
+  // from Fall2011 MC
+  TH1D* h_input_nint_mc   = (TH1D*)h_nint_template->Clone("h_input_nint_mc");
 
-  TH1D* h_nint_data = (TH1D*)h_nint_template->Clone("h_nint_data");
-  TH1D* h_nint_mc   = (TH1D*)h_nint_template->Clone("h_nint_mc");
-  TH1D* h_nint_mc_before = (TH1D*)h_nint_template->Clone("h_nint_mc_before");
-  TH1D* h_nint_mc_after_official= 
-    (TH1D*)h_nint_template->Clone("h_nint_mc_after_official");
+  // from Data/Fall2011
+  TH1D* h_puweight_original = (TH1D*)h_puweight_template->Clone("h_puweight_original"); 
+
+  TH1D* h_true_nint_mc_before = (TH1D*)h_nint_template->Clone("h_true_nint_mc_before");
+  TH1D* h_true_nint_mc_after_original= 
+    (TH1D*)h_nint_template->Clone("h_true_nint_mc_after_original");
+
+  TH1D* h_event_nint_mc_before = (TH1D*)h_nint_template->Clone("h_event_nint_mc_before");
+  TH1D* h_event_nint_mc_after_original = (TH1D*)h_nint_template->Clone("h_event_nint_mc_after_original");
+
 
   TH1D* h_nvtx_before = (TH1D*)h_nvtx_template->Clone("h_nvtx_before");
   h_nvtx_before->SetTitle("Before pile-up reweighting");
@@ -90,8 +96,10 @@ void puweight_sys::Loop(bool match)
   const int NMAXJETS = 7; 
   const int NPROC = 3;  // 0: central, 1: up, 2: down
 
+  TH1D* h_input_nint_data[NPROC]; 
   TH1D* h_puweight_standalone[NPROC]; 
-  TH1D* h_nint_mc_after_standalone[NPROC];
+  TH1D* h_true_nint_mc_after_standalone[NPROC];
+  TH1D* h_event_nint_mc_after_standalone[NPROC];
 
   // correlation histograms
   TH1D* h_yB[NMAXJETS][NPROC];
@@ -107,11 +115,16 @@ void puweight_sys::Loop(bool match)
 
   for(int ip=0; ip < NPROC; ip++)
     {
+      h_input_nint_data[ip] = (TH1D*)h_nint_template->Clone(
+					                    Form("h_input_nint_data_%s",proprefix[ip].data()));
+      
       h_puweight_standalone[ip] = (TH1D*)h_puweight_template->Clone
 	(Form("h_puweight_standalone_%s",proprefix[ip].data()));
-      h_nint_mc_after_standalone[ip] = (TH1D*)h_nint_template->Clone
-	(Form("h_nint_mc_after_standalone_%s",proprefix[ip].data()));
-  
+      h_true_nint_mc_after_standalone[ip] = (TH1D*)h_nint_template->Clone
+	(Form("h_true_nint_mc_after_standalone_%s",proprefix[ip].data()));
+      h_event_nint_mc_after_standalone[ip] = (TH1D*)h_nint_template->Clone
+	(Form("h_event_nint_mc_after_standalone_%s",proprefix[ip].data()));
+
       for(int ij=0; ij < NMAXJETS; ij++)
 	{
 	  if(ij==0)jetprefix = "#geq 1 jets";
@@ -154,9 +167,12 @@ void puweight_sys::Loop(bool match)
 
   // assigning numbers to get the input histograms for data and MC 
   // number of true interactins
+
   for(int i=0; i < nPUBin; i++){
-    h_nint_data->SetBinContent(i+1,Data[i]);
-    h_nint_mc  ->SetBinContent(i+1,Fall2011[i]);
+    h_input_nint_data[0]->SetBinContent(i+1,Data[i]);
+    h_input_nint_data[1]->SetBinContent(i+1,DataUp[i]);
+    h_input_nint_data[2]->SetBinContent(i+1,DataDown[i]);
+    h_input_nint_mc  ->SetBinContent(i+1,Fall2011[i]);
   }
 
 
@@ -167,8 +183,9 @@ void puweight_sys::Loop(bool match)
   Long64_t nentries = fChain->GetEntriesFast();
 
   cout << " has " << nentries << " entries." << endl;
-  standalone_LumiReWeighting LumiWeights_;
-  double scaleInt[NPROC] = {1.0,1.05,0.95};
+  standalone_LumiReWeighting LumiWeights_central(0);
+  standalone_LumiReWeighting LumiWeights_up(+1);
+  standalone_LumiReWeighting LumiWeights_down(-1);
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -176,36 +193,43 @@ void puweight_sys::Loop(bool match)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
-    //    if(jentry >1000 ) break;
+//     if(jentry >10000 ) break;
 
     nPass[0]++;
     // determining the weights from the number of true interactions
 
     h_puweight_original->Fill(PU_weight);
 
-    double mctrueInt[NPROC]={0,0,0};
-    double myWeight[NPROC]={0,0,0};
+    double mctrueInt = PU_nTrueInt;
+    int    mcEvtInt  = PU_nPUVert;
+    double myPUWeight[NPROC]={0,0,0};
     double eventWeight[NPROC]={1.0,1.0,1.0}; // including the weights of sherpa
+
 
     for(int ip=0; ip < NPROC; ip++)
       {
-	mctrueInt[ip] = PU_nTrueInt*scaleInt[ip];
-// 	cout << "mc true interaction[" << ip << "] =  " << 
-// 	  mctrueInt[ip] << endl;
+	if(ip==0)
+	  myPUWeight[ip] = LumiWeights_central.weight(mctrueInt);
+	else if(ip==1)
+	  myPUWeight[ip] = LumiWeights_up.weight(mctrueInt);
+	else if(ip==2)
+	  myPUWeight[ip] = LumiWeights_down.weight(mctrueInt);
 
-	myWeight[ip] = LumiWeights_.weight(mctrueInt[ip]);
-
-	if(myWeight[ip] >= 0.0)eventWeight[ip] *= myWeight[ip];
+	if(myPUWeight[ip] >= 0.0)eventWeight[ip] *= myPUWeight[ip];
 	if(mcWeight_>0)eventWeight[ip] *= mcWeight_;
 
-	h_puweight_standalone[ip]->Fill(myWeight[ip]);
-	h_nint_mc_after_standalone[ip]->Fill(mctrueInt[ip],myWeight[ip]);
+	h_puweight_standalone[ip]->Fill(myPUWeight[ip]);
+	h_true_nint_mc_after_standalone[ip]->Fill(mctrueInt,eventWeight[ip]);
+	h_event_nint_mc_after_standalone[ip]->Fill(mcEvtInt, eventWeight[ip]);
 
       }
     
-    h_nint_mc_before->Fill(mctrueInt[0]);
-    h_nint_mc_after_official->Fill(mctrueInt[0],PU_weight);
-    
+    h_true_nint_mc_before->Fill(mctrueInt);
+    h_true_nint_mc_after_original->Fill(mctrueInt,PU_weight*mcWeight_);
+   
+    h_event_nint_mc_before->Fill(mcEvtInt);
+    h_event_nint_mc_after_original->Fill(mcEvtInt,PU_weight*mcWeight_);
+ 
     //---------------------------------------------------------------------------------------------------------------------
     //
     //   Look for a Z with two good electron legs
@@ -389,23 +413,25 @@ void puweight_sys::Loop(bool match)
   TFile* outFile = new TFile(Form("/home/syu/ZJets/CMSSW_4_4_4/src/scripts/puweight_sys_ZPt%02i_%s_%s.root",
 				  (int)minZPt,suffix.data(),
 				  _inputFile.data()),"recreate");            
-   
+
+  h_input_nint_mc            -> Write();
   h_puweight_original        -> Write();
-  h_nint_data                -> Write();
-  h_nint_mc                  -> Write();
-  h_nint_mc_before           -> Write();
-  h_nint_mc_after_official   -> Write();
+  h_true_nint_mc_before           -> Write();
+  h_true_nint_mc_after_original   -> Write();
+  h_event_nint_mc_before     -> Write();
+  h_event_nint_mc_after_original->Write();
+
   h_nvtx_before              -> Write();
   h_nvtx_after               -> Write();
   h_zmass_ID                 -> Write();
-  h_nvtx_before->Write();
-  h_nvtx_after->Write();
 
 
   for(int ip=0; ip < NPROC; ip++){
 
+    h_input_nint_data[ip]    -> Write();
     h_puweight_standalone[ip]->Write();
-    h_nint_mc_after_standalone[ip]->Write();
+    h_true_nint_mc_after_standalone[ip]->Write();
+    h_event_nint_mc_after_standalone[ip]->Write();
 
     for(int ij=0; ij< NMAXJETS; ij++){
 
