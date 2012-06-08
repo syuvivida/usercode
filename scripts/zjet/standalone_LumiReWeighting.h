@@ -28,9 +28,9 @@ using namespace std;
 class standalone_LumiReWeighting {
  public:
     
-  standalone_LumiReWeighting();
+  standalone_LumiReWeighting(int mode=0); // 0: central, -1: down, +1: up
   virtual ~standalone_LumiReWeighting();
-  double weight( int npv ) ;
+  double weight( int npv) ; 
   void weightOOT_init(); 
 
  protected:

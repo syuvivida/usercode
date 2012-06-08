@@ -75,14 +75,28 @@ Double_t Fall2011[50] = {
 double Data[50]={2.44414e+06,1.25579e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
 
 
-standalone_LumiReWeighting::standalone_LumiReWeighting() {
+double DataUp[50]={2.44414e+06,1.25579e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
+
+double DataDown[50]={2.44414e+06,1.25579e+06,3.42957e+06,5.18618e+07,2.54054e+08,4.36586e+08,4.86031e+08,4.63551e+08,4.18993e+08,3.84891e+08,3.65724e+08,3.41505e+08,3.22711e+08,3.0886e+08,2.87693e+08,2.5129e+08,1.99438e+08,1.40551e+08,8.66577e+07,4.6234e+07,2.12058e+07,8.37396e+06,2.88178e+06,882886,246537,63900.8,15571.6,3628.24,840.61,211.248,66.7507,32.1445,26.92,33.3738,47.1181,66.9628,92.522,123.311,158.278,195.606,232.736,266.603,294.026,312.195,319.142,314.095,297.617,271.501,238.455,1.93299e+07};
+
+
+standalone_LumiReWeighting::standalone_LumiReWeighting(int mode) {
 
   
   std::vector<float> MC_distr;
   std::vector<float> Lumi_distr;
 
   for( int i=0; i<50; ++i) {
-    Lumi_distr.push_back(Data[i]);
+    switch (mode){
+    case 0:
+      Lumi_distr.push_back(Data[i]);
+    case 1:
+      Lumi_distr.push_back(DataUp[i]);
+    case -1:
+      Lumi_distr.push_back(DataDown[i]);
+    default:
+      Lumi_distr.push_back(Data[i]);
+    }
     MC_distr.push_back(Fall2011[i]);
   }
 
@@ -109,6 +123,15 @@ standalone_LumiReWeighting::standalone_LumiReWeighting() {
     den->SetBinContent(ibin,MC_distr[ibin-1]);
   }
 
+  std::cout << " Lumi/Pileup Data Input " << std::endl;
+  for(int ibin = 1; ibin<NBins+1; ++ibin){
+    std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
+  }
+  std::cout << " Lumi/Pileup MC Input " << std::endl;
+  for(int ibin = 1; ibin<NBins+1; ++ibin){
+    std::cout << "   " << ibin-1 << " " << den->GetBinContent(ibin) << std::endl;
+  }
+
   // check integrals, make sure things are normalized
 
   float deltaH = weights_->Integral();
@@ -123,6 +146,7 @@ standalone_LumiReWeighting::standalone_LumiReWeighting() {
   weights_->Divide( den );  // so now the average weight should be 1.0    
 
   std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+
 
   for(int ibin = 1; ibin<NBins+1; ++ibin){
     std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
