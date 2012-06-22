@@ -8,6 +8,7 @@ const int HADZ=1;
 
 const double MIN_JETPT  =30.0;
 const double MIN_JETBETA= 0.2;
+const double MAX_JETETA = 2.4;
 
 // b-tagging jet probability cuts
 const double MIN_BTAG_JP_LOOSE  = 0.275; 

@@ -21,7 +21,6 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Lepton.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
@@ -183,12 +182,12 @@ void ZZTree::Fill(const edm::Event& iEvent)
       // LOOK FOR TWO GOOD CHARGED LEPTONS
       int nLepPtHi=0;
       int nLepPtLo=0;
-
+      
+      const reco::Candidate*  myLepton[2];  
       for(unsigned int il=0; il < 2; il++)
 	{
-
-	  const reco::Candidate*  lep = h.daughter(LEPZ)->daughter(il)->masterClone().get();
-	  double pt = lep->pt();
+	  myLepton[il]= h.daughter(LEPZ)->daughter(il)->masterClone().get();
+	  double pt = myLepton[il]->pt();
 	  
  	  if(pt >MIN_LEPPT1) nLepPtHi++;
  	  if(pt >MIN_LEPPT2) nLepPtLo++;
@@ -198,8 +197,8 @@ void ZZTree::Fill(const edm::Event& iEvent)
       if(nLepPtHi < 1)continue;
       if(nLepPtLo < 2)continue;
       
-      bool OppCharge = h.daughter(LEPZ)->daughter(0)->masterClone().get()->charge()*
-	h.daughter(LEPZ)->daughter(1)->masterClone().get()->charge() < 0 ? true: false;
+      bool OppCharge = myLepton[0]->charge()*myLepton[1]->charge() < 0 ? 
+	true: false;
 
       if(!OppCharge)continue;
 
@@ -327,41 +326,36 @@ void ZZTree::Fill(const edm::Event& iEvent)
       int nGoodJets=0;
       int nLooseBTags=0;
       int nMediumBTags=0;
+      const pat::Jet * myJet[2];
 
       for(unsigned int ijet=0; ijet < 2; ijet++){	 
 	
-	const pat::Jet * myJet =
+	myJet[ijet] =
 	  dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
 					 masterClone().get());
 
-	double pt  = myJet->pt();
+	double pt  = myJet[ijet]->pt();
  	if(pt < MIN_JETPT)continue;
 	
-
+	double eta = myJet[ijet]->eta();
+	if(fabs(eta)> MAX_JETETA)continue;
+	
 	// to suppress jets from pileups
-	double puBeta = myJet->userFloat("puBeta");
+	double puBeta = myJet[ijet]->userFloat("puBeta");
  	if(puBeta < MIN_JETBETA)continue;
 
+	
+	if(deltaR(myLepton[0]->eta(), myLepton[0]->phi(),
+		  myJet[ijet]->eta(), myJet[ijet]->phi()) < MIN_DR_JETLEP)continue;
 
-	bool separatedFromLepton=false;
-	for(unsigned int il=0; il < 2; il++)
-	  {
-	    const reco::Candidate*  lep = h.daughter(LEPZ)->daughter(il)->masterClone().get();
-
-	    if(deltaR(lep->eta(), lep->phi(),
-		      myJet->eta(), myJet->phi()) > MIN_DR_JETLEP)
-	      separatedFromLepton=true;
-
-	  }
-
-	if(!separatedFromLepton)continue;
+	if(deltaR(myLepton[1]->eta(), myLepton[1]->phi(),
+		  myJet[ijet]->eta(), myJet[ijet]->phi()) < MIN_DR_JETLEP)continue;
 	  
 
-	double eta = myJet->eta();
 	bool isLoose  = false;
 	bool isMedium = false;
-	double jpBTag = myJet->bDiscriminator("jetProbabilityBJetTags");
-	int flavor    = myJet->partonFlavour();
+	double jpBTag = myJet[ijet]->bDiscriminator("jetProbabilityBJetTags");
+	int flavor    = myJet[ijet]->partonFlavour();
 	
 	if(jpBTag > MIN_BTAG_JP_LOOSE)isLoose=true;
 	if(jpBTag > MIN_BTAG_JP_MEDIUM)isMedium=true;
@@ -390,9 +384,10 @@ void ZZTree::Fill(const edm::Event& iEvent)
   
       //     if(hcand <0)continue; // there is no higgs candidate for this lepton type
   
-  
+      
       const pat::CompositeCandidate & goodH = (*hzzlljj)[hcand];
       const reco::Candidate * Zll = goodH.daughter(LEPZ);
+
       const reco::Candidate * Zjj = goodH.daughter(HADZ);
       //Final selection in categories
 
@@ -406,12 +401,29 @@ void ZZTree::Fill(const edm::Event& iEvent)
       double zllEta_local = Zll->eta();
       double zllPhi_local = Zll->phi();
       double zllM_local   = Zll->mass();
-
+      double zlldR_local  = deltaR(myLepton[0]->eta(),myLepton[0]->phi(),
+				   myLepton[1]->eta(),myLepton[1]->phi());
+      
       double zjjPt_local  = Zjj->pt();
       double zjjEta_local = Zjj->eta();
       double zjjPhi_local = Zjj->phi();
       double zjjM_local   = Zjj->mass();
       double zjjM_refit_local = goodH.userFloat("ZjjRefitMass");
+      double zjjdR_local  = deltaR(myJet[0]->eta(),myJet[0]->phi(),
+				   myJet[1]->eta(),myJet[1]->phi());
+
+      double jet0Pt_local = myJet[0]->pt();
+      double jet0Eta_local = myJet[0]->eta();
+
+      double jet0GenPt_local;
+      double jet0GenEta_local;
+      matchedGenJetPt(iEvent,myJet[0],jet0GenPt_local,jet0GenEta_local);
+
+      double jet1Pt_local = myJet[1]->pt();
+      double jet1Eta_local = myJet[1]->eta();
+      double jet1GenPt_local;
+      double jet1GenEta_local;
+      matchedGenJetPt(iEvent,myJet[1],jet1GenPt_local,jet1GenEta_local);
 
       double heliLD_local = goodH.userFloat("helyLD");
       double heliLD_refit_local = goodH.userFloat("helyLDRefit");
@@ -443,12 +455,24 @@ void ZZTree::Fill(const edm::Event& iEvent)
       zllEta_.push_back(zllEta_local);
       zllPhi_.push_back(zllPhi_local);
       zllM_.push_back(zllM_local);
+      zlldR_.push_back(zlldR_local);
 
       zjjPt_.push_back(zjjPt_local);
       zjjEta_.push_back(zjjEta_local);
       zjjPhi_.push_back(zjjPhi_local);
       zjjM_.push_back(zjjM_local);
       zjjMRefit_.push_back(zjjM_refit_local);
+      zjjdR_.push_back(zjjdR_local);
+
+      jet0Pt_.push_back(jet0Pt_local);
+      jet0GenPt_.push_back(jet0GenPt_local);
+      jet1Pt_.push_back(jet1Pt_local);
+      jet1GenPt_.push_back(jet1GenPt_local);
+
+      jet0Eta_.push_back(jet0Eta_local);
+      jet0GenEta_.push_back(jet0GenEta_local);
+      jet1Eta_.push_back(jet1Eta_local);
+      jet1GenEta_.push_back(jet1GenEta_local);
 
 
       heliLD_.push_back(heliLD_local);
@@ -574,12 +598,25 @@ ZZTree::SetBranches(){
   AddBranch(&zllEta_,"zllEta");
   AddBranch(&zllPhi_,"zllPhi");
   AddBranch(&zllM_,"zllM");
+  AddBranch(&zlldR_,"zlldR");
 
   AddBranch(&zjjPt_,"zjjPt");
   AddBranch(&zjjEta_,"zjjEta");
   AddBranch(&zjjPhi_,"zjjPhi");
   AddBranch(&zjjM_,"zjjM");
   AddBranch(&zjjMRefit_,"zjjMRefit");
+  AddBranch(&zjjdR_,"zjjdR");
+
+  AddBranch(&jet0Pt_,"jet0Pt");
+  AddBranch(&jet0GenPt_,"jet0GenPt");
+  AddBranch(&jet0Eta_,"jet0Eta");
+  AddBranch(&jet0GenEta_,"jet0GenEta");
+
+  AddBranch(&jet1Pt_,"jet1Pt");
+  AddBranch(&jet1GenPt_,"jet1GenPt");
+  AddBranch(&jet1Eta_,"jet1Eta");
+  AddBranch(&jet1GenEta_,"jet1GenEta");
+
 
   AddBranch(&heliLD_,"heliLD");
   AddBranch(&heliLDRefit_,"heliLDRefit");
@@ -684,12 +721,25 @@ ZZTree::Clear(){
   zllEta_.clear();
   zllPhi_.clear();
   zllM_.clear();
+  zlldR_.clear();
 
   zjjPt_.clear();
   zjjEta_.clear();
   zjjPhi_.clear();
   zjjM_.clear();
   zjjMRefit_.clear();
+  zjjdR_.clear();
+
+  jet0Pt_.clear();
+  jet0GenPt_.clear();
+  jet1Pt_.clear();
+  jet1GenPt_.clear();
+
+  jet0Eta_.clear();
+  jet0GenEta_.clear();
+  jet1Eta_.clear();
+  jet1GenEta_.clear();
+
 
   heliLD_.clear();
   heliLDRefit_.clear();
@@ -779,4 +829,53 @@ ZZTree::Clear(){
   eID17.clear();
   */
 
+}
+
+void ZZTree::matchedGenJetPt(const edm::Event& iEvent, const pat::Jet* recJet,
+			     double &maxGenJetPt, double& maxGenJetEta)
+{
+  double recJetPt  = recJet->pt();
+  double recJetEta = recJet->eta();
+  double recJetPhi = recJet->phi();
+  
+  maxGenJetPt= -99999.0;
+  maxGenJetEta= -99999.0;
+  edm::Handle<reco::GenJetCollection> genJetsHandle;
+  if( not iEvent.getByLabel("ak5GenJets",genJetsHandle)){ 
+    edm::LogInfo("GenAnalyzer") << "genJets not found, "
+      "skipping event"; 
+    return;
+  }
+  const reco::GenJetCollection* genJetColl = &(*genJetsHandle);
+  reco::GenJetCollection::const_iterator gjeti = genJetColl->begin();
+   
+  for(; gjeti!=genJetColl->end();gjeti++){
+
+    reco::GenParticle gjet = *gjeti;
+    double thisGenJetPt  = gjet.pt();
+    double thisGenJetEta = gjet.eta();
+    double thisGenJetPhi = gjet.phi();
+    
+    if(thisGenJetPt < 10.0)continue;
+    if(fabs(thisGenJetEta)>5.0)continue;
+
+
+    double dR = deltaR(thisGenJetEta, thisGenJetPhi,
+			     recJetEta, recJetPhi);
+
+    double relPt = fabs(thisGenJetPt- recJetPt)/thisGenJetPt;
+
+    if(dR<0.4 //&& relPt < 3.0
+       && thisGenJetPt > maxGenJetPt
+       )
+      {
+	maxGenJetPt = thisGenJetPt;
+	maxGenJetEta = thisGenJetEta;
+      }
+
+
+  } // loop over genjets
+
+  return;
+   
 }
