@@ -54,7 +54,7 @@ void mjj::Loop(int DEBUG)
   h_dR_template->Sumw2();
   h_dR_template->SetXTitle("#Delta R");
   h_dR_template->SetYTitle(Form("Candidates per %.1f",
-				 h_dR_template->GetBinWidth(1)));
+				h_dR_template->GetBinWidth(1)));
 
   // status=3 level
   TH1D* h_mh_parton = (TH1D*)h_mh_template->Clone("h_mh_parton");
@@ -131,7 +131,7 @@ void mjj::Loop(int DEBUG)
 
   }
   Long64_t nentries = fChain->GetEntriesFast();
-  standalone_LumiReWeighting LumiWeights_central(0);
+  standalone_LumiReWeighting LumiWeights_central(2012,0);
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -273,6 +273,9 @@ void mjj::Loop(int DEBUG)
     }
     
     if(LEPTYPE==-1)continue;
+    if(lep1Index<0 || lep2Index<0)continue;
+    if(lep1PostIndex<0 || lep2PostIndex<0)continue;
+    if(q1Index<0 || q2Index<0)continue;
     // now look for gen jets
 
     //================================================================
@@ -369,9 +372,9 @@ void mjj::Loop(int DEBUG)
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = (jet1+jet2).M();
 
-      h_mh_stable->Fill(mH_particle, PU_weight);
-      h_mll_stable->Fill(mZll_particle,PU_weight);
-      h_mjj_stable->Fill(mZjj_particle,PU_weight);
+      h_mh_stable->Fill(mH_particle);
+      h_mll_stable->Fill(mZll_particle);
+      h_mjj_stable->Fill(mZjj_particle);
 
     }
 
@@ -379,56 +382,56 @@ void mjj::Loop(int DEBUG)
     // RECONSTRUCTION LEVEL
     //================================================================
     
-    for(int ih=0; ih < higgsM->size(); ih++){
       
-      int best = bestHCand;
+    int best = bestHCand;
 
-      double mh_rec = higgsM->at(best);
-      double mll_rec = zllM->at(best);
-      double mjj_rec = zjjM->at(best);
+    if(best<0)continue;
 
-      h_mh_rec->Fill(mh_rec, PU_weight);
-      h_mll_rec->Fill(mll_rec, PU_weight);
-      h_mjj_rec->Fill(mjj_rec, PU_weight);
+    double mh_rec = higgsM->at(best);
+    double mll_rec = zllM->at(best);
+    double mjj_rec = zjjM->at(best);
+
+    h_mh_rec->Fill(mh_rec, PU_weight);
+    h_mll_rec->Fill(mll_rec, PU_weight);
+    h_mjj_rec->Fill(mjj_rec, PU_weight);
 
 
-      double dr_ll = zlldR->at(best);
-      h_dR_ll->Fill(dr_ll, PU_weight);
-      int dRLL_index = h_dR->FindBin(dr_ll)-1;
+    double dr_ll = zlldR->at(best);
+    h_dR_ll->Fill(dr_ll, PU_weight);
+    int dRLL_index = h_dR->FindBin(dr_ll)-1;
 
-      if(dRLL_index>=0 && dRLL_index < NBINS)
-	h_mll_recdR[dRLL_index]->Fill(mll_rec, PU_weight);
+    if(dRLL_index>=0 && dRLL_index < NBINS)
+      h_mll_recdR[dRLL_index]->Fill(mll_rec, PU_weight);
 
-      double dr_jj = zjjdR->at(best);
-      h_dR_jj->Fill(dr_jj, PU_weight);
-      int dRJJ_index = h_dR->FindBin(dr_jj)-1;
+    double dr_jj = zjjdR->at(best);
+    h_dR_jj->Fill(dr_jj, PU_weight);
+    int dRJJ_index = h_dR->FindBin(dr_jj)-1;
 
-      if(dRJJ_index>=0 && dRJJ_index < NBINS)
-	h_mjj_recdR[dRJJ_index]->Fill(mjj_rec, PU_weight);
+    if(dRJJ_index>=0 && dRJJ_index < NBINS)
+      h_mjj_recdR[dRJJ_index]->Fill(mjj_rec, PU_weight);
 
       
-      for(int ijet=0; ijet < jetIndex->size(); ijet++){
+    for(int ijet=0; ijet < jetIndex->size(); ijet++){
 
-	int jet_index = jetIndex->at(ijet);
+      int jet_index = jetIndex->at(ijet);
 	
-	if(jet_index < 0 ) continue;
-	if(jet_index > 1 ) continue;
-	if(jetHiggsIndex->at(ijet)!=best)continue;
-	if(jetGenPt->at(ijet)<1e-6) continue;
+      if(jet_index < 0 ) continue;
+      if(jet_index > 1 ) continue;
+      if(jetHiggsIndex->at(ijet)!=best)continue;
+      if(jetGenPt->at(ijet)<1e-6) continue;
 
-	double ratio = jetPt->at(ijet)/jetGenPt->at(ijet);
-	h_jec[jet_index]->Fill(ratio, PU_weight);
+      double ratio = jetPt->at(ijet)/jetGenPt->at(ijet);
+      h_jec[jet_index]->Fill(ratio, PU_weight);
 
-	if(dRJJ_index>=0 && dRJJ_index <NBINS)
-	  {
-	    h_jec_dR[dRJJ_index][jet_index]->Fill(ratio, PU_weight);
-	  }
+      if(dRJJ_index>=0 && dRJJ_index <NBINS)
+	{
+	  h_jec_dR[dRJJ_index][jet_index]->Fill(ratio, PU_weight);
+	}
 
 	
-      } // end of loop over jets
+    } // end of loop over jets
 
 
-    }
   }
 
 
