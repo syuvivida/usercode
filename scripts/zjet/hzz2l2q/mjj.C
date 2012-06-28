@@ -36,14 +36,14 @@ void mjj::Loop(int DEBUG)
   h_mll_template->SetYTitle(Form("Candidates per %d GeV/c^{2}",
 				 (int)h_mll_template->GetBinWidth(1)));
 
-  TH1D* h_mjj_template = new TH1D("h_mjj_template","",35,60,130);
+  TH1D* h_mjj_template = new TH1D("h_mjj_template","",14,60,130);
   h_mjj_template->Sumw2();
   h_mjj_template->SetXTitle("M_{jj} [GeV/c^{2}]");
   h_mjj_template->SetYTitle(Form("Candidates per %d GeV/c^{2}",
 				 (int)h_mjj_template->GetBinWidth(1)));
 
 
-  TH1D* h_jec_template = new TH1D("h_jec_template","",50,0,2.5);
+  TH1D* h_jec_template = new TH1D("h_jec_template","",20,0.5,1.5);
   h_jec_template->Sumw2();
   h_jec_template->SetXTitle("p_{T}^{REC}(jet)/p_{T}^{GEN}(jet)");
   h_jec_template->SetYTitle(Form("Candidates per %.1f",
