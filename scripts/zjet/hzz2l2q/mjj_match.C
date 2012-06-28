@@ -1,5 +1,5 @@
-#define mjj_cxx
-#include "mjj.h"
+#define mjj_match_cxx
+#include "mjj_match.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -18,7 +18,7 @@ Double_t deltaR(double eta1, double phi1, double eta2, double phi2)
 
 }
 
-void mjj::Loop(int DEBUG)
+void mjj_match::Loop(int DEBUG)
 {
   if (fChain == 0) return;
 
@@ -263,7 +263,7 @@ void mjj::Loop(int DEBUG)
 
 
       } // end of loop over gen particles
-
+    /*
     if(DEBUG==1){
       cout << "LEPTYPE = " << LEPTYPE << endl;
       cout << "lep1 = " << lep1Index << "\t lep2 = " << lep2Index << endl;
@@ -271,12 +271,11 @@ void mjj::Loop(int DEBUG)
       cout << "q1 =" << q1Index << "\t q2Index = " << q2Index << endl;
       //       cout << "jet1 = " << jet1Index << "\t jet2Index = " << jet2Index << endl;
     }
-    
+    */
     if(LEPTYPE==-1)continue;
     if(lep1Index<0 || lep2Index<0)continue;
     if(lep1PostIndex<0 || lep2PostIndex<0)continue;
     if(q1Index<0 || q2Index<0)continue;
-
 
     double mH_parton = (lep1+lep2+q1+q2).M();
 
@@ -286,7 +285,6 @@ void mjj::Loop(int DEBUG)
     h_mh_parton->Fill(mH_parton);
     h_mll_parton->Fill(mZll_parton);
     h_mjj_parton->Fill(mZjj_parton);
-
 
 
     // now look for gen jets
@@ -299,11 +297,6 @@ void mjj::Loop(int DEBUG)
     TLorentzVector jet1(0,0,0,0);
     TLorentzVector jet2(0,0,0,0);
     int jet1Index=-1, jet2Index=-1;
-    //     int leadingJetIndex = -1;
-    //     double maxJetPt = -9999.0;
-    //     int secondLeadingJetIndex = -1;
-    //     double secondJetMaxPt = -9999.0;
-
     for(unsigned int ijet =0; ijet < genJetPt_->size(); ijet++)
       {
 	
@@ -329,46 +322,10 @@ void mjj::Loop(int DEBUG)
  	    jet2Index = ijet;
  	  }
 
-	// 	double thisJetPt = genJetPt_->at(ijet);
-
-	// 	// find the highest pt jet
-	// 	if(thisJetPt > maxJetPt)
-	// 	  {
-	// 	    secondJetMaxPt = maxJetPt;
-	// 	    secondLeadingJetIndex = leadingJetIndex;
-
-	// 	    maxJetPt = thisJetPt;
-	// 	    leadingJetIndex= ijet;
-	// 	  }
-	// 	else if(thisJetPt > secondJetMaxPt)
-	// 	  {
-	// 	    secondJetMaxPt = thisJetPt;
-	// 	    secondLeadingJetIndex = ijet;
-	// 	  }
-	
-
       }
-
-    //      jet1Index = leadingJetIndex;
-    //      jet2Index = secondLeadingJetIndex;
 
 
     if(jet1Index>=0 && jet2Index>=0){
-
-      //     jet1.SetPtEtaPhiE(
-      //      		      genJetPt_->at(jet1Index),
-      //      		      genJetEta_->at(jet1Index),
-      //      		      genJetPhi_->at(jet1Index),
-      //      		      genJetE_->at(jet1Index)
-      //      		      );
-
-
-      //     jet2.SetPtEtaPhiE(
-      //      		      genJetPt_->at(jet2Index),
-      //      		      genJetEta_->at(jet2Index),
-      //      		      genJetPhi_->at(jet2Index),
-      //      		      genJetE_->at(jet2Index)
-      //      		      );
 
 
       double mH_particle = (jet1+jet2+lep1_post+lep2_post).M();
@@ -385,9 +342,35 @@ void mjj::Loop(int DEBUG)
     // RECONSTRUCTION LEVEL
     //================================================================
     
-      
-    int best = bestHCand;
+    int nHiggs=0;
+    int best= -1;
 
+    // check for MC Truth
+    for(int ih=0; ih<higgsM->size(); ih++){
+
+      int nMatched=0;
+      for(int ijet=0; ijet<jetPartonPt->size(); ijet++){
+
+	if(jetHiggsIndex->at(ijet)!=ih)continue;
+
+	int jet_index = jetIndex->at(ijet);
+	//	if(DEBUG)
+	//	  cout << "jet index = " << jet_index << endl;
+	if(jet_index<0)continue;
+	if(jet_index>1)continue;
+	if(jetPartonPt->at(ijet)<1e-6)continue;
+
+	nMatched++;
+	
+      } // end of loop over jets
+      if(nMatched==2){
+	nHiggs++;
+	best = ih;
+      }
+    } // end of loop over higgs candidate
+
+    if(DEBUG && nHiggs>1)cout << "nHiggs=" << nHiggs << endl;
+    if(nHiggs!=1)continue;
     if(best<0)continue;
 
     double mh_rec = higgsM->at(best);
@@ -438,7 +421,7 @@ void mjj::Loop(int DEBUG)
   }
 
 
-  TFile* outFile = new TFile(Form("mjj_%s",_inputFileName.data()),
+  TFile* outFile = new TFile(Form("partonmatched_mjj_%s",_inputFileName.data()),
 			     "recreate");            
 
   h_mh_parton->Write();
@@ -472,7 +455,7 @@ void mjj::Loop(int DEBUG)
 }
 
 
-Bool_t mjj::matchGenToParton(Int_t igen, Int_t ijet){
+Bool_t mjj_match::matchGenToParton(Int_t igen, Int_t ijet){
 
   Bool_t matched = false;
   Double_t dR = deltaR(genParEta_->at(igen), genParPhi_->at(igen),
