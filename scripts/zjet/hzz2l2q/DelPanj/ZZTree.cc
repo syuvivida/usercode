@@ -15,7 +15,7 @@
 #include "DataFormats/Candidate/interface/CompositeCandidateFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
-// #include "DataFormats/RecoCandidate/interface/IsoDeposit.h"
+
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -94,11 +94,13 @@ ZZTree::AddBranchArray(const int arraySize, double* x, std::string name){
 ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   e2012ID_ ( iConfig.getParameter<edm::ParameterSet>("e2012IDSet")),
   mu2012ID_ ( iConfig.getParameter<edm::ParameterSet>("mu2012IDSet")),
+  e2012Tag_ ( iConfig.getParameter<edm::ParameterSet>("e2012TagSet")),
+  mu2012NoIso_ ( iConfig.getParameter<edm::ParameterSet>("mu2012NoIsoSet")),
   hzzeejj_(iConfig.getParameter<edm::InputTag>("hzzeejjTag")),
   hzzmmjj_ (iConfig.getParameter<edm::InputTag>("hzzmmjjTag")),
   eleRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("eleRhoIso")),
   muoRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("muoRhoIso"))//,
-	      //   primaryVertexInputTag_(iConfig.getParameter<edm::InputTag>("primaryVertex")),
+  //   primaryVertexInputTag_(iConfig.getParameter<edm::InputTag>("primaryVertex")),
 
 {
   tree_=tree; 
@@ -152,12 +154,19 @@ void ZZTree::Fill(const edm::Event& iEvent)
   e2012ID_.SetData(isData);
   e2012ID_.SetRho(ele_rho);
 
+  e2012Tag_.SetData(isData);
+  e2012Tag_.SetRho(ele_rho);
+
   // rho for muon
   edm::Handle<double> muo_rho_event;
   iEvent.getByLabel(muoRhoIsoInputTag_,muo_rho_event);
   double muo_rho= *(muo_rho_event.product());
+
   mu2012ID_.SetData(isData);
   mu2012ID_.SetRho(muo_rho);
+
+  mu2012NoIso_.SetData(isData);
+  mu2012NoIso_.SetRho(muo_rho);
 
   //initialize variables
   int hcand = -1;
@@ -214,47 +223,55 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	  const pat::Electron* myEle
 	    = dynamic_cast<const pat::Electron*>(h.daughter(LEPZ)->daughter(iele)->masterClone().get());
 
-	  std::map<std::string, bool> Pass = e2012ID_.CutRecord(*myEle); 
-   	  if(!PassAll(Pass))continue; // 2012 loose electron ID	  
+	  std::map<std::string, bool> Pass    = e2012ID_.CutRecord(*myEle); 
+	  std::map<std::string, bool> PassTag = e2012Tag_.CutRecord(*myEle); 
+
+
+	  int separatedFromJet = 0;
+	  for(unsigned int ijet=0; ijet < 2; ijet++){	 
+	    const pat::Jet* tempJet=
+	      dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
+					     masterClone().get());
+
+	    if(deltaR(myEle->eta(), myEle->phi(),
+		      tempJet->eta(), tempJet->phi()) < MIN_DR_JETLEP)continue;
+
+	    separatedFromJet++;
+	  }
+
+	  if(separatedFromJet<2)continue;
+
+
+	  lepIndex_.push_back(iele);
+	  lepE_.push_back(myLepton[iele]->energy());
+	  lepPt_.push_back(myLepton[iele]->pt());
+	  lepEta_.push_back(myLepton[iele]->eta());
+	  lepPhi_.push_back(myLepton[iele]->phi());
+
+	  TLorentzVector genLep(0,0,0,0);
+	  matchedLep(iEvent, myLepton[iele], genLep);
+
+	  if(genLep.E()<1e-6){
+	    lepGenE_.push_back(DUMMY);
+	    lepGenPt_.push_back(DUMMY);
+	    lepGenEta_.push_back(DUMMY);
+	    lepGenPhi_.push_back(DUMMY);
+	  }
+	  else {
+	    lepGenE_.push_back(genLep.E());
+	    lepGenPt_.push_back(genLep.Pt());
+	    lepGenEta_.push_back(genLep.Eta());
+	    lepGenPhi_.push_back(genLep.Phi());
+	  }
+
+	  int passOrNot = PassAll(Pass);
+ 	  if(PassAll(PassTag))passOrNot += 4;
+
+	  lepPassId_.push_back(passOrNot);
+
+   	  if(passOrNot==0)continue; // 2012 loose electron ID	  
 	  nPassID++;
 	  
-	  /*
-	    eID01.push_back(myEle->pt());
-	    eID02.push_back(myEle->superCluster()->eta());
-	    eID03.push_back(myEle->deltaEtaSuperClusterTrackAtVtx());
-	    eID04.push_back(myEle->deltaPhiSuperClusterTrackAtVtx());
-	    eID05.push_back(myEle->sigmaIetaIeta());
-	    eID06.push_back(myEle->hadronicOverEm());
-	    eID07.push_back(myEle->userFloat("dxy"));
-	    eID08.push_back(myEle->userFloat("dz"));
-	    eID09.push_back(fabs(1.0/myEle->ecalEnergy() - 
-	    myEle->eSuperClusterOverP()/myEle->ecalEnergy()));
-	    eID10.push_back(myEle->convDcot());
-	    eID11.push_back(myEle->convDist());
-	    eID12.push_back(myEle->userFloat("hasMatchConv"));
-	    eID13.push_back(myEle->gsfTrack().get()->trackerExpectedHitsInner().numberOfHits());
-	  
-	    double iso1 = myEle->chargedHadronIso();
-	    double iso2 = myEle->neutralHadronIso();
-	    double iso3 = myEle->photonIso();
-	  
-	    ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_ = 
-	    isData? ElectronEffectiveArea::kEleEAData2011:
-	    ElectronEffectiveArea::kEleEAFall11MC;
-      
-	    ElectronEffectiveArea::ElectronEffectiveAreaType effAreaType_ =
-	    ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03;      
- 
-	    double AEff = ElectronEffectiveArea::GetElectronEffectiveArea
-	    (effAreaType_, fabs(myEle->superCluster()->eta()), effAreaTarget_);
-
-	    double iso4 = iso1 + std::max(0.0, iso2+iso3-ele_rho*AEff);
-	  
-	    eID14.push_back(iso1);
-	    eID15.push_back(iso2);
-	    eID16.push_back(iso3);
-	    eID17.push_back(iso4);
-	  */
 
 	}
       } // if it's an electron type
@@ -267,51 +284,53 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	  const pat::Muon* myMuo
 	    = dynamic_cast<const pat::Muon*>(h.daughter(LEPZ)->daughter(imuo)->masterClone().get());
 	  std::map<std::string, bool> Pass = mu2012ID_.CutRecord(*myMuo);
-	  if(!PassAll(Pass))continue; // 2012 Tight Muon ID
+	  std::map<std::string, bool> PassNoIso = mu2012NoIso_.CutRecord(*myMuo);
+
+	  int separatedFromJet = 0;
+	  for(unsigned int ijet=0; ijet < 2; ijet++){	 
+	    const pat::Jet* tempJet=
+	      dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
+					     masterClone().get());
+
+	    if(deltaR(myMuo->eta(), myMuo->phi(),
+		      tempJet->eta(), tempJet->phi()) < MIN_DR_JETLEP)continue;
+
+	    separatedFromJet++;
+	  }
+
+	  if(separatedFromJet<2)continue;
+
+	  lepIndex_.push_back(imuo+2);
+	  lepE_.push_back(myLepton[imuo]->energy());
+	  lepPt_.push_back(myLepton[imuo]->pt());
+	  lepEta_.push_back(myLepton[imuo]->eta());
+	  lepPhi_.push_back(myLepton[imuo]->phi());
+
+	  TLorentzVector genLep(0,0,0,0);
+	  matchedLep(iEvent, myLepton[imuo], genLep);
+
+	  if(genLep.E()<1e-6){
+	    lepGenE_.push_back(DUMMY);
+	    lepGenPt_.push_back(DUMMY);
+	    lepGenEta_.push_back(DUMMY);
+	    lepGenPhi_.push_back(DUMMY);
+	  }
+	  else {
+	    lepGenE_.push_back(genLep.E());
+	    lepGenPt_.push_back(genLep.Pt());
+	    lepGenEta_.push_back(genLep.Eta());
+	    lepGenPhi_.push_back(genLep.Phi());
+	  }
+	  // int passOrNot = PassAll(Pass);
+	  int passOrNot = PassAll(PassNoIso);
+	  if(PassAll(Pass)) passOrNot += 4;
+
+	  lepPassId_.push_back(passOrNot);
+
+   	  if(passOrNot==0)continue; // 2012 tight muon ID	  
+
 	  nPassID++;
 	  	  
-	  /*
-	    double pt    =  myMuo->pt();
-	    double eta   =  myMuo->eta();
-	    double iso1  =  myMuo->pfIsolationR04().sumChargedHadronPt;
-	    double iso2  =  myMuo->pfIsolationR04().sumNeutralHadronEt;
-	    double iso3  =  myMuo->pfIsolationR04().sumPhotonEt;
-	    double isoPU =  myMuo->pfIsolationR04().sumPUPt;    
-	    double iso4Beta = iso1 + std::max(iso3+iso2-0.5*isoPU,0.);
-	    MuonEffectiveArea::MuonEffectiveAreaTarget effAreaTarget_ = 
- 	    isData? MuonEffectiveArea::kMuEAData2012:
- 	    MuonEffectiveArea::kMuEAData2012;
-	    // 	MuonEffectiveArea::kMuEAFall11MC;
-	    MuonEffectiveArea::MuonEffectiveAreaType effAreaType_= 
- 	    MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
-	    double Area = MuonEffectiveArea::GetMuonEffectiveArea(
-	    effAreaType_, fabs(eta), effAreaTarget_);
-
-	    double iso4Rho =  iso1 + std::max(iso3+iso2-muo_rho*Area,0.);
-	    double isoBeta = iso4Beta/pt;	  
-	    double isoRho  = iso4Rho/pt;
-
-
-	    muID01.push_back(isoBeta);
-	    // 	  muID01.push_back(myMuo->isGlobalMuon());
-	    muID02.push_back(myMuo->isPFMuon());
-	    muID03.push_back(myMuo->isTrackerMuon());
-	    if(myMuo->isTrackerMuon() && myMuo->isGlobalMuon()){
-	    muID04.push_back(myMuo->globalTrack()->normalizedChi2());
-	    muID05.push_back(myMuo->globalTrack()->hitPattern().numberOfValidMuonHits());
-	    muID06.push_back(myMuo->numberOfMatchedStations());
-	    muID07.push_back(myMuo->dB());
-	    double dzV =myMuo->userFloat("dzVtx") ;
-	    muID08.push_back(dzV);
-	    muID09.push_back(myMuo->innerTrack()->hitPattern().numberOfValidPixelHits());
-	    muID10.push_back(myMuo->innerTrack()->hitPattern().trackerLayersWithMeasurement());
-	    }
-	    muID11.push_back(myMuo->pfIsolationR04().sumChargedHadronPt);
-	    muID12.push_back(myMuo->pfIsolationR04().sumNeutralHadronEt);
-	    muID13.push_back(myMuo->pfIsolationR04().sumPhotonEt);
-	    muID14.push_back(myMuo->pfIsolationR04().sumPUPt);
-	    muID15.push_back(isoRho);
-	  */
 
 	} // end of loop over muon
       } // if is a muon type
@@ -412,19 +431,8 @@ void ZZTree::Fill(const edm::Event& iEvent)
       double zjjdR_local  = deltaR(myJet[0]->eta(),myJet[0]->phi(),
 				   myJet[1]->eta(),myJet[1]->phi());
 
-      double jet0Pt_local = myJet[0]->pt();
-      double jet0Eta_local = myJet[0]->eta();
 
-      double jet0GenPt_local;
-      double jet0GenEta_local;
-      matchedGenJetPt(iEvent,myJet[0],jet0GenPt_local,jet0GenEta_local);
-
-      double jet1Pt_local = myJet[1]->pt();
-      double jet1Eta_local = myJet[1]->eta();
-      double jet1GenPt_local;
-      double jet1GenEta_local;
-      matchedGenJetPt(iEvent,myJet[1],jet1GenPt_local,jet1GenEta_local);
-
+      
       double heliLD_local = goodH.userFloat("helyLD");
       double heliLD_refit_local = goodH.userFloat("helyLDRefit");
 
@@ -444,6 +452,7 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	  best_mZjj = zjjM_local;
 	  bestHCand_ = bestHCandIndex;
 	}
+
     
       higgsPt_.push_back(higgsPt_local);
       higgsEta_.push_back(higgsEta_local);
@@ -464,15 +473,54 @@ void ZZTree::Fill(const edm::Event& iEvent)
       zjjMRefit_.push_back(zjjM_refit_local);
       zjjdR_.push_back(zjjdR_local);
 
-      jet0Pt_.push_back(jet0Pt_local);
-      jet0GenPt_.push_back(jet0GenPt_local);
-      jet1Pt_.push_back(jet1Pt_local);
-      jet1GenPt_.push_back(jet1GenPt_local);
+      for(int isjet=0; isjet<2; isjet++)
+	{
 
-      jet0Eta_.push_back(jet0Eta_local);
-      jet0GenEta_.push_back(jet0GenEta_local);
-      jet1Eta_.push_back(jet1Eta_local);
-      jet1GenEta_.push_back(jet1GenEta_local);
+	  jetIndex_.push_back(isjet);
+	  jetHiggsIndex_.push_back(bestHCandIndex);
+	  jetE_.push_back(myJet[isjet]->energy());
+	  jetPt_.push_back(myJet[isjet]->pt());
+	  jetEta_.push_back(myJet[isjet]->eta());
+	  jetPhi_.push_back(myJet[isjet]->phi());
+
+	  TLorentzVector tempGenJet(0,0,0,0);
+	  matchedGenJet(iEvent, myJet[isjet], tempGenJet);
+
+	  if(tempGenJet.E()<1e-6){
+	    jetGenE_.push_back(DUMMY);
+	    jetGenPt_.push_back(DUMMY);
+	    jetGenEta_.push_back(DUMMY);
+	    jetGenPhi_.push_back(DUMMY);
+	  }
+	  else{
+	    jetGenE_.push_back(tempGenJet.E());
+	    jetGenPt_.push_back(tempGenJet.Pt());
+	    jetGenEta_.push_back(tempGenJet.Eta());
+	    jetGenPhi_.push_back(tempGenJet.Phi());
+	  }
+
+	  TLorentzVector tempParton(0,0,0,0);
+	  matchedParton(iEvent, myJet[isjet], tempParton);
+
+	  if(tempParton.E()<1e-6){
+	    jetPartonE_.push_back(DUMMY);
+	    jetPartonPt_.push_back(DUMMY);
+	    jetPartonEta_.push_back(DUMMY);
+	    jetPartonPhi_.push_back(DUMMY);
+	  }
+	  else {
+	    jetPartonE_.push_back(tempParton.E());
+	    jetPartonPt_.push_back(tempParton.Pt());
+	    jetPartonEta_.push_back(tempParton.Eta());
+	    jetPartonPhi_.push_back(tempParton.Phi());
+	  }
+
+	  int passLoose = passLooseJetID(myJet[isjet])? 1:0;
+	  jetPassId_.push_back(passLoose);
+
+	  
+	}
+
 
 
       heliLD_.push_back(heliLD_local);
@@ -536,40 +584,40 @@ void ZZTree::Fill(const edm::Event& iEvent)
       /*
 
 
-      for(unsigned int ijet=0; ijet < 2; ijet++){	 
-      const pat::Jet * thisJet = 
-      dynamic_cast<const pat::Jet *>(goodH.daughter(HADZ)->daughter(ijet)->
-      masterClone().get());
+	for(unsigned int ijet=0; ijet < 2; ijet++){	 
+	const pat::Jet * thisJet = 
+	dynamic_cast<const pat::Jet *>(goodH.daughter(HADZ)->daughter(ijet)->
+	masterClone().get());
 
-      jetPt_[ijet]  = thisJet->pt();
-      jetEta_[ijet] = thisJet->eta();
-      jetPhi_[ijet] = thisJet->phi();
-      jetE_[ijet]   = thisJet->energy();
+	jetPt_[ijet]  = thisJet->pt();
+	jetEta_[ijet] = thisJet->eta();
+	jetPhi_[ijet] = thisJet->phi();
+	jetE_[ijet]   = thisJet->energy();
 
-      jetRefitPt_[ijet]  = goodH.userFloat(Form("j%dRefitPt",ijet+1));
-      jetRefitEta_[ijet] = goodH.userFloat(Form("j%dRefitEta",ijet+1));
-      jetRefitPhi_[ijet] = goodH.userFloat(Form("j%dRefitPhi",ijet+1));
-      jetRefitE_[ijet]   = goodH.userFloat(Form("j%dRefitE",ijet+1));
-
-
-      } // end of loop over jets
+	jetRefitPt_[ijet]  = goodH.userFloat(Form("j%dRefitPt",ijet+1));
+	jetRefitEta_[ijet] = goodH.userFloat(Form("j%dRefitEta",ijet+1));
+	jetRefitPhi_[ijet] = goodH.userFloat(Form("j%dRefitPhi",ijet+1));
+	jetRefitE_[ijet]   = goodH.userFloat(Form("j%dRefitE",ijet+1));
 
 
+	} // end of loop over jets
 
-      lepType_ = ilep;
+
+
+	lepType_ = ilep;
     
-      for(unsigned int il=0; il < 2; il++){	 
+	for(unsigned int il=0; il < 2; il++){	 
 
-      const reco::Candidate* thisLep = 
-      (goodH.daughter(LEPZ)->daughter(il)->
-      masterClone().get());
+	const reco::Candidate* thisLep = 
+	(goodH.daughter(LEPZ)->daughter(il)->
+	masterClone().get());
       
-      lepPt_[il]  = thisLep->pt();
-      lepEta_[il] = thisLep->eta();
-      lepPhi_[il] = thisLep->phi();
-      lepE_[il]   = thisLep->energy();
+	lepPt_[il]  = thisLep->pt();
+	lepEta_[il] = thisLep->eta();
+	lepPhi_[il] = thisLep->phi();
+	lepE_[il]   = thisLep->energy();
 
-      } // end of loop over jets
+	} // end of loop over jets
       */
 
     } // end of loop over Higgs candidates  
@@ -607,15 +655,35 @@ ZZTree::SetBranches(){
   AddBranch(&zjjMRefit_,"zjjMRefit");
   AddBranch(&zjjdR_,"zjjdR");
 
-  AddBranch(&jet0Pt_,"jet0Pt");
-  AddBranch(&jet0GenPt_,"jet0GenPt");
-  AddBranch(&jet0Eta_,"jet0Eta");
-  AddBranch(&jet0GenEta_,"jet0GenEta");
+  AddBranch(&jetIndex_,"jetIndex");
+  AddBranch(&jetHiggsIndex_,"jetHiggsIndex");
+  AddBranch(&jetE_,"jetE");
+  AddBranch(&jetPt_,"jetPt");
+  AddBranch(&jetEta_,"jetEta");
+  AddBranch(&jetPhi_,"jetPhi");
 
-  AddBranch(&jet1Pt_,"jet1Pt");
-  AddBranch(&jet1GenPt_,"jet1GenPt");
-  AddBranch(&jet1Eta_,"jet1Eta");
-  AddBranch(&jet1GenEta_,"jet1GenEta");
+  AddBranch(&jetGenE_,"jetGenE");
+  AddBranch(&jetGenPt_,"jetGenPt");
+  AddBranch(&jetGenEta_,"jetGenEta");
+  AddBranch(&jetGenPhi_,"jetGenPhi");
+ 
+  AddBranch(&jetPartonE_,"jetPartonE");
+  AddBranch(&jetPartonPt_,"jetPartonPt");
+  AddBranch(&jetPartonEta_,"jetPartonEta");
+  AddBranch(&jetPartonPhi_,"jetPartonPhi");
+ 
+  AddBranch(&jetPassId_,"jetPassId");
+
+  AddBranch(&lepIndex_,"lepIndex");
+  AddBranch(&lepE_,"lepE");
+  AddBranch(&lepPt_,"lepPt");
+  AddBranch(&lepEta_,"lepEta");
+  AddBranch(&lepPhi_,"lepPhi");
+  AddBranch(&lepGenE_,"lepGenE");
+  AddBranch(&lepGenPt_,"lepGenPt");
+  AddBranch(&lepGenEta_,"lepGenEta");
+  AddBranch(&lepGenPhi_,"lepGenPhi");
+  AddBranch(&lepPassId_,"lepPassId");
 
 
   AddBranch(&heliLD_,"heliLD");
@@ -628,74 +696,42 @@ ZZTree::SetBranches(){
 
   /*
 
-  AddBranch(&higgsPt_,  "higgsPt");
-  AddBranch(&higgsEta_, "higgsEta");
-  AddBranch(&higgsPhi_, "higgsPhi");
-  AddBranch(&higgsM_,   "higgsM");
+    AddBranch(&higgsPt_,  "higgsPt");
+    AddBranch(&higgsEta_, "higgsEta");
+    AddBranch(&higgsPhi_, "higgsPhi");
+    AddBranch(&higgsM_,   "higgsM");
 
-  AddBranch(&zllPt_,  "zllPt");
-  AddBranch(&zllEta_, "zllEta");
-  AddBranch(&zllPhi_, "zllPhi");
-  AddBranch(&zllM_,   "zllM");
+    AddBranch(&zllPt_,  "zllPt");
+    AddBranch(&zllEta_, "zllEta");
+    AddBranch(&zllPhi_, "zllPhi");
+    AddBranch(&zllM_,   "zllM");
 
-  AddBranch(&zjjPt_,  "zjjPt");
-  AddBranch(&zjjEta_, "zjjEta");
-  AddBranch(&zjjPhi_, "zjjPhi");
-  AddBranch(&zjjM_,   "zjjM");
+    AddBranch(&zjjPt_,  "zjjPt");
+    AddBranch(&zjjEta_, "zjjEta");
+    AddBranch(&zjjPhi_, "zjjPhi");
+    AddBranch(&zjjM_,   "zjjM");
 
-  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
-  AddBranchArray(arraySize, jetPt_,  "jetPt");
-  AddBranchArray(arraySize, jetEta_, "jetEta");
-  AddBranchArray(arraySize, jetPhi_, "jetPhi");
-  AddBranchArray(arraySize, jetE_,   "jetE");
-  AddBranchArray(arraySize, jetRefitPt_,  "jetRefitPt");
-  AddBranchArray(arraySize, jetRefitEta_, "jetRefitEta");
-  AddBranchArray(arraySize, jetRefitPhi_, "jetRefitPhi");
-  AddBranchArray(arraySize, jetRefitE_, "jetRefitE");
+    int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
+    AddBranchArray(arraySize, jetPt_,  "jetPt");
+    AddBranchArray(arraySize, jetEta_, "jetEta");
+    AddBranchArray(arraySize, jetPhi_, "jetPhi");
+    AddBranchArray(arraySize, jetE_,   "jetE");
+    AddBranchArray(arraySize, jetRefitPt_,  "jetRefitPt");
+    AddBranchArray(arraySize, jetRefitEta_, "jetRefitEta");
+    AddBranchArray(arraySize, jetRefitPhi_, "jetRefitPhi");
+    AddBranchArray(arraySize, jetRefitE_, "jetRefitE");
 
   
-  AddBranch(&lepType_,   "lepType");
+    AddBranch(&lepType_,   "lepType");
 
-  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
-  AddBranchArray(arraySize, lepPt_,  "lepPt");
-  AddBranchArray(arraySize, lepEta_, "lepEta");
-  AddBranchArray(arraySize, lepPhi_, "lepPhi");
-  AddBranchArray(arraySize, lepE_,   "lepE");
-
-  AddBranch(&muID01, "muID01");
-  AddBranch(&muID02, "muID02");
-  AddBranch(&muID03, "muID03");
-  AddBranch(&muID04, "muID04");
-  AddBranch(&muID05, "muID05");
-  AddBranch(&muID06, "muID06");
-  AddBranch(&muID07, "muID07");
-  AddBranch(&muID08, "muID08");
-  AddBranch(&muID09, "muID09");
-  AddBranch(&muID10, "muID10");
-  AddBranch(&muID11, "muID11");
-  AddBranch(&muID12, "muID12");
-  AddBranch(&muID13, "muID13");
-  AddBranch(&muID14, "muID14");
-  AddBranch(&muID15, "muID15");
+    arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
+    AddBranchArray(arraySize, lepPt_,  "lepPt");
+    AddBranchArray(arraySize, lepEta_, "lepEta");
+    AddBranchArray(arraySize, lepPhi_, "lepPhi");
+    AddBranchArray(arraySize, lepE_,   "lepE");
 
 
-  AddBranch(&eID01, "eID01");
-  AddBranch(&eID02, "eID02");
-  AddBranch(&eID03, "eID03");
-  AddBranch(&eID04, "eID04");
-  AddBranch(&eID05, "eID05");
-  AddBranch(&eID06, "eID06");
-  AddBranch(&eID07, "eID07");
-  AddBranch(&eID08, "eID08");
-  AddBranch(&eID09, "eID09");
-  AddBranch(&eID10, "eID10");
-  AddBranch(&eID11, "eID11");
-  AddBranch(&eID12, "eID12");
-  AddBranch(&eID13, "eID13");
-  AddBranch(&eID14, "eID14");
-  AddBranch(&eID15, "eID15");
-  AddBranch(&eID16, "eID16");
-  AddBranch(&eID17, "eID17");
+
   */
 
 }
@@ -708,8 +744,8 @@ ZZTree::Clear(){
   nAllHCand_ = 0;
   bestHCand_ = -1;
 
-  metSig_ = -99999.;
-  metSigNoPU_= -99999.;
+  metSig_ = DUMMY;
+  metSigNoPU_= DUMMY;
 
   higgsPt_.clear();
   higgsEta_.clear();
@@ -730,15 +766,35 @@ ZZTree::Clear(){
   zjjMRefit_.clear();
   zjjdR_.clear();
 
-  jet0Pt_.clear();
-  jet0GenPt_.clear();
-  jet1Pt_.clear();
-  jet1GenPt_.clear();
+  jetIndex_.clear();
+  jetHiggsIndex_.clear();
+  jetE_.clear();
+  jetPt_.clear();
+  jetEta_.clear();
+  jetPhi_.clear();
 
-  jet0Eta_.clear();
-  jet0GenEta_.clear();
-  jet1Eta_.clear();
-  jet1GenEta_.clear();
+  jetGenE_.clear();
+  jetGenPt_.clear();
+  jetGenEta_.clear();
+  jetGenPhi_.clear();
+
+  jetPartonE_.clear();
+  jetPartonPt_.clear();
+  jetPartonEta_.clear();
+  jetPartonPhi_.clear();
+
+  jetPassId_.clear();
+
+  lepIndex_.clear();
+  lepE_.clear();
+  lepPt_.clear();
+  lepEta_.clear();
+  lepPhi_.clear();
+  lepGenE_.clear();
+  lepGenPt_.clear();
+  lepGenEta_.clear();
+  lepGenPhi_.clear();
+  lepPassId_.clear();
 
 
   heliLD_.clear();
@@ -748,98 +804,20 @@ ZZTree::Clear(){
   lepType_.clear();
   passBit_.clear();
 
-  /*
-
-  higgsPt_  = -99999.0;
-  higgsEta_ = -99999.0;
-  higgsPhi_ = -99999.0;
-  higgsM_   = -99999.0;
-
-  zllPt_  = -99999.0;
-  zllEta_ = -99999.0;
-  zllPhi_ = -99999.0;
-  zllM_   = -99999.0;
-
-  zjjPt_  = -99999.0;
-  zjjEta_ = -99999.0;
-  zjjPhi_ = -99999.0;
-  zjjM_   = -99999.0;
-
-
-  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
-
-  for(int i=0; i<arraySize;i++)
-  {
-  jetPt_[i] =-99999.0;
-  jetEta_[i]=-99999.0;
-  jetPhi_[i]=-99999.0;
-  jetE_[i]  =-99999.0;
-  jetRefitPt_[i] =-99999.0;
-  jetRefitEta_[i]=-99999.0;
-  jetRefitPhi_[i]=-99999.0;
-  jetRefitE_[i]=-99999.0;
-
-  }
-  lepType_ = -1;
-  
-  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
-
-  for(int i=0; i<arraySize;i++)
-  {
-  lepPt_[i] =-99999.0;
-  lepEta_[i]=-99999.0;
-  lepPhi_[i]=-99999.0;
-  lepE_[i]  =-99999.0;
-
-  }
-
-  muID01.clear();
-  muID02.clear();
-  muID03.clear();
-  muID04.clear();
-  muID05.clear();
-  muID06.clear();
-  muID07.clear();
-  muID08.clear();
-  muID09.clear();
-  muID10.clear();
-  muID11.clear();
-  muID12.clear();
-  muID13.clear();
-  muID14.clear();
-  muID15.clear();
-
-
-  eID01.clear();
-  eID02.clear();
-  eID03.clear();
-  eID04.clear();
-  eID05.clear();
-  eID06.clear();
-  eID07.clear();
-  eID08.clear();
-  eID09.clear();
-  eID10.clear();
-  eID11.clear();
-  eID12.clear();
-  eID13.clear();
-  eID14.clear();
-  eID15.clear();
-  eID16.clear();
-  eID17.clear();
-  */
 
 }
 
-void ZZTree::matchedGenJetPt(const edm::Event& iEvent, const pat::Jet* recJet,
-			     double &maxGenJetPt, double& maxGenJetEta)
+void ZZTree::matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet,
+			   TLorentzVector& genJet)
 {
   double recJetPt  = recJet->pt();
   double recJetEta = recJet->eta();
   double recJetPhi = recJet->phi();
   
-  maxGenJetPt= -99999.0;
-  maxGenJetEta= -99999.0;
+  genJet.SetPtEtaPhiE(0,0,0,0);
+
+  double maxGenJetPt= DUMMY;
+
   edm::Handle<reco::GenJetCollection> genJetsHandle;
   if( not iEvent.getByLabel("ak5GenJets",genJetsHandle)){ 
     edm::LogInfo("GenAnalyzer") << "genJets not found, "
@@ -861,7 +839,7 @@ void ZZTree::matchedGenJetPt(const edm::Event& iEvent, const pat::Jet* recJet,
 
 
     double dR = deltaR(thisGenJetEta, thisGenJetPhi,
-			     recJetEta, recJetPhi);
+		       recJetEta, recJetPhi);
 
     double relPt = fabs(thisGenJetPt- recJetPt)/thisGenJetPt;
 
@@ -870,7 +848,13 @@ void ZZTree::matchedGenJetPt(const edm::Event& iEvent, const pat::Jet* recJet,
        )
       {
 	maxGenJetPt = thisGenJetPt;
-	maxGenJetEta = thisGenJetEta;
+	genJet.SetPtEtaPhiE(
+			    gjet.pt(),
+			    gjet.eta(),
+			    gjet.phi(),
+			    gjet.energy()
+			    );
+
       }
 
 
@@ -879,3 +863,343 @@ void ZZTree::matchedGenJetPt(const edm::Event& iEvent, const pat::Jet* recJet,
   return;
    
 }
+
+
+void ZZTree::matchedParton(const edm::Event& iEvent, const pat::Jet* recJet,
+			   TLorentzVector& parton)
+{
+  double recJetEta = recJet->eta();
+  double recJetPhi = recJet->phi();
+  
+  parton.SetPtEtaPhiE(0,0,0,0);
+
+  edm::Handle<reco::GenParticleCollection> genParticleHandle;
+  if(not iEvent.getByLabel("genParticles", genParticleHandle))
+    {
+      std::cout<<
+	"ZZTree: Generator Level Information not found\n"
+	       <<std::endl;
+      return;
+    }
+
+
+  const reco::GenParticleCollection* genColl= &(*genParticleHandle);
+  reco::GenParticleCollection::const_iterator geni = genColl->begin();
+
+  int genIndex=-1;
+  for(; geni!=genColl->end() && genIndex < 50;geni++){
+    reco::GenParticle gen = *geni;
+    
+    genIndex++;
+    
+    int pid = abs(gen.pdgId());
+    int mompid = -9999;
+    if( gen.numberOfMothers() ==1 ) 
+      mompid = abs(gen.mother()->pdgId());
+
+    if(gen.status()!=3)continue;
+    if(mompid!=23)continue; 
+    if(pid > 6)continue;
+    
+    double thispt = gen.pt();
+    if(thispt <10.0)continue;
+    if(fabs(gen.eta())>5.0)continue;
+
+    double dR = deltaR(gen.eta(), gen.phi(),
+		       recJetEta, recJetPhi);
+    
+    if(dR<0.4)
+      {
+	parton.SetPtEtaPhiE(
+			    gen.pt(),
+			    gen.eta(),
+			    gen.phi(),
+			    gen.energy()
+			    );
+	break;
+      }
+
+
+  } // loop over gen particles
+
+  return;
+   
+}
+
+
+void ZZTree::matchedLep(const edm::Event& iEvent, const reco::Candidate* recLep,
+			TLorentzVector& genLep)
+{
+  double recEta = recLep->eta();
+  double recPhi = recLep->phi();
+  
+  genLep.SetPtEtaPhiE(0,0,0,0);
+
+  edm::Handle<reco::GenParticleCollection> genParticleHandle;
+  if(not iEvent.getByLabel("genParticles", genParticleHandle))
+    {
+      std::cout<<
+	"ZZTree: Generator Level Information not found\n"
+	       <<std::endl;
+      return;
+    }
+
+
+  const reco::GenParticleCollection* genColl= &(*genParticleHandle);
+  reco::GenParticleCollection::const_iterator geni = genColl->begin();
+
+  int genIndex=-1;
+
+  for(; geni!=genColl->end() && genIndex < 50;geni++){
+    reco::GenParticle gen = *geni;
+    
+    genIndex++;
+    
+    int pid = abs(gen.pdgId());
+    int mompid = -9999;
+    if( gen.numberOfMothers() ==1 ) 
+      mompid = abs(gen.mother()->pdgId());
+
+    if(gen.status()!=1)continue;
+    if(mompid!=11 && mompid!=13  )continue; 
+    if(pid!=11 && pid!=13)continue;
+    
+    double thispt = gen.pt();
+    if(thispt <10.0)continue;
+    if(fabs(gen.eta())>5.0)continue;
+
+    if(gen.charge() * recLep->charge()<0)continue;
+
+    double dR = deltaR(gen.eta(), gen.phi(),
+		       recEta, recPhi);
+    
+    if(dR<0.4)
+      {
+	genLep.SetPtEtaPhiE(
+			    gen.pt(),
+			    gen.eta(),
+			    gen.phi(),
+			    gen.energy()
+			    );
+	break;
+      }
+
+
+  } // loop over gen particles
+
+  return;
+   
+}
+
+
+bool ZZTree::passLooseJetID(const pat::Jet* recjet)
+{
+  double eta = recjet->eta();
+  if(recjet->getPFConstituents().size() <= 1)return false;                                                                               
+  if(recjet->neutralHadronEnergyFraction() >= 0.99)return false;
+  if(recjet->neutralEmEnergyFraction() >= 0.99)return false;
+  //   // for the tracker region
+  if(fabs(eta)<2.4 && recjet->chargedHadronEnergyFraction()<= 0.0)return false;
+  if(fabs(eta)<2.4 && recjet->chargedEmEnergyFraction() >= 0.99)return false;
+  if(fabs(eta)<2.4 && recjet->chargedMultiplicity() <= 0)return false;
+  return true;
+
+}
+
+/*
+  eID01.push_back(myEle->pt());
+  eID02.push_back(myEle->superCluster()->eta());
+  eID03.push_back(myEle->deltaEtaSuperClusterTrackAtVtx());
+  eID04.push_back(myEle->deltaPhiSuperClusterTrackAtVtx());
+  eID05.push_back(myEle->sigmaIetaIeta());
+  eID06.push_back(myEle->hadronicOverEm());
+  eID07.push_back(myEle->userFloat("dxy"));
+  eID08.push_back(myEle->userFloat("dz"));
+  eID09.push_back(fabs(1.0/myEle->ecalEnergy() - 
+  myEle->eSuperClusterOverP()/myEle->ecalEnergy()));
+  eID10.push_back(myEle->convDcot());
+  eID11.push_back(myEle->convDist());
+  eID12.push_back(myEle->userFloat("hasMatchConv"));
+  eID13.push_back(myEle->gsfTrack().get()->trackerExpectedHitsInner().numberOfHits());
+	  
+  double iso1 = myEle->chargedHadronIso();
+  double iso2 = myEle->neutralHadronIso();
+  double iso3 = myEle->photonIso();
+	  
+  ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_ = 
+  isData? ElectronEffectiveArea::kEleEAData2011:
+  ElectronEffectiveArea::kEleEAFall11MC;
+      
+  ElectronEffectiveArea::ElectronEffectiveAreaType effAreaType_ =
+  ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03;      
+ 
+  double AEff = ElectronEffectiveArea::GetElectronEffectiveArea
+  (effAreaType_, fabs(myEle->superCluster()->eta()), effAreaTarget_);
+
+  double iso4 = iso1 + std::max(0.0, iso2+iso3-ele_rho*AEff);
+	  
+  eID14.push_back(iso1);
+  eID15.push_back(iso2);
+  eID16.push_back(iso3);
+  eID17.push_back(iso4);
+*/
+
+
+/*
+  double pt    =  myMuo->pt();
+  double eta   =  myMuo->eta();
+  double iso1  =  myMuo->pfIsolationR04().sumChargedHadronPt;
+  double iso2  =  myMuo->pfIsolationR04().sumNeutralHadronEt;
+  double iso3  =  myMuo->pfIsolationR04().sumPhotonEt;
+  double isoPU =  myMuo->pfIsolationR04().sumPUPt;    
+  double iso4Beta = iso1 + std::max(iso3+iso2-0.5*isoPU,0.);
+  MuonEffectiveArea::MuonEffectiveAreaTarget effAreaTarget_ = 
+  isData? MuonEffectiveArea::kMuEAData2012:
+  MuonEffectiveArea::kMuEAData2012;
+  // 	MuonEffectiveArea::kMuEAFall11MC;
+  MuonEffectiveArea::MuonEffectiveAreaType effAreaType_= 
+  MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
+  double Area = MuonEffectiveArea::GetMuonEffectiveArea(
+  effAreaType_, fabs(eta), effAreaTarget_);
+
+  double iso4Rho =  iso1 + std::max(iso3+iso2-muo_rho*Area,0.);
+  double isoBeta = iso4Beta/pt;	  
+  double isoRho  = iso4Rho/pt;
+
+
+  muID01.push_back(isoBeta);
+  // 	  muID01.push_back(myMuo->isGlobalMuon());
+  muID02.push_back(myMuo->isPFMuon());
+  muID03.push_back(myMuo->isTrackerMuon());
+  if(myMuo->isTrackerMuon() && myMuo->isGlobalMuon()){
+  muID04.push_back(myMuo->globalTrack()->normalizedChi2());
+  muID05.push_back(myMuo->globalTrack()->hitPattern().numberOfValidMuonHits());
+  muID06.push_back(myMuo->numberOfMatchedStations());
+  muID07.push_back(myMuo->dB());
+  double dzV =myMuo->userFloat("dzVtx") ;
+  muID08.push_back(dzV);
+  muID09.push_back(myMuo->innerTrack()->hitPattern().numberOfValidPixelHits());
+  muID10.push_back(myMuo->innerTrack()->hitPattern().trackerLayersWithMeasurement());
+  }
+  muID11.push_back(myMuo->pfIsolationR04().sumChargedHadronPt);
+  muID12.push_back(myMuo->pfIsolationR04().sumNeutralHadronEt);
+  muID13.push_back(myMuo->pfIsolationR04().sumPhotonEt);
+  muID14.push_back(myMuo->pfIsolationR04().sumPUPt);
+  muID15.push_back(isoRho);
+*/
+
+/*
+
+  higgsPt_  = DUMMY;
+  higgsEta_ = DUMMY;
+  higgsPhi_ = DUMMY;
+  higgsM_   = DUMMY;
+
+  zllPt_  = DUMMY;
+  zllEta_ = DUMMY;
+  zllPhi_ = DUMMY;
+  zllM_   = DUMMY;
+
+  zjjPt_  = DUMMY;
+  zjjEta_ = DUMMY;
+  zjjPhi_ = DUMMY;
+  zjjM_   = DUMMY;
+
+
+  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
+
+  for(int i=0; i<arraySize;i++)
+  {
+  jetPt_[i] =DUMMY;
+  jetEta_[i]=DUMMY;
+  jetPhi_[i]=DUMMY;
+  jetE_[i]  =DUMMY;
+  jetRefitPt_[i] =DUMMY;
+  jetRefitEta_[i]=DUMMY;
+  jetRefitPhi_[i]=DUMMY;
+  jetRefitE_[i]=DUMMY;
+
+  }
+  lepType_ = -1;
+  
+  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
+
+  for(int i=0; i<arraySize;i++)
+  {
+  lepPt_[i] =DUMMY;
+  lepEta_[i]=DUMMY;
+  lepPhi_[i]=DUMMY;
+  lepE_[i]  =DUMMY;
+
+  }
+
+  AddBranch(&eID01, "eID01");
+  AddBranch(&eID02, "eID02");
+  AddBranch(&eID03, "eID03");
+  AddBranch(&eID04, "eID04");
+  AddBranch(&eID05, "eID05");
+  AddBranch(&eID06, "eID06");
+  AddBranch(&eID07, "eID07");
+  AddBranch(&eID08, "eID08");
+  AddBranch(&eID09, "eID09");
+  AddBranch(&eID10, "eID10");
+  AddBranch(&eID11, "eID11");
+  AddBranch(&eID12, "eID12");
+  AddBranch(&eID13, "eID13");
+  AddBranch(&eID14, "eID14");
+  AddBranch(&eID15, "eID15");
+  AddBranch(&eID16, "eID16");
+  AddBranch(&eID17, "eID17");
+
+  eID01.clear();
+  eID02.clear();
+  eID03.clear();
+  eID04.clear();
+  eID05.clear();
+  eID06.clear();
+  eID07.clear();
+  eID08.clear();
+  eID09.clear();
+  eID10.clear();
+  eID11.clear();
+  eID12.clear();
+  eID13.clear();
+  eID14.clear();
+  eID15.clear();
+  eID16.clear();
+  eID17.clear();
+
+  AddBranch(&muID01, "muID01");
+  AddBranch(&muID02, "muID02");
+  AddBranch(&muID03, "muID03");
+  AddBranch(&muID04, "muID04");
+  AddBranch(&muID05, "muID05");
+  AddBranch(&muID06, "muID06");
+  AddBranch(&muID07, "muID07");
+  AddBranch(&muID08, "muID08");
+  AddBranch(&muID09, "muID09");
+  AddBranch(&muID10, "muID10");
+  AddBranch(&muID11, "muID11");
+  AddBranch(&muID12, "muID12");
+  AddBranch(&muID13, "muID13");
+  AddBranch(&muID14, "muID14");
+  AddBranch(&muID15, "muID15");
+
+  muID01.clear();
+  muID02.clear();
+  muID03.clear();
+  muID04.clear();
+  muID05.clear();
+  muID06.clear();
+  muID07.clear();
+  muID08.clear();
+  muID09.clear();
+  muID10.clear();
+  muID11.clear();
+  muID12.clear();
+  muID13.clear();
+  muID14.clear();
+  muID15.clear();
+
+
+*/

@@ -3,6 +3,8 @@
 
 // jet kinematic cut
 
+const double DUMMY = -99999.0;
+
 const int LEPZ=0;
 const int HADZ=1;
 

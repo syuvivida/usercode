@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include "TTree.h"
+#include "TLorentzVector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -14,7 +15,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/Math/interface/LorentzVector.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "DelPanj/TreeMaker/interface/utils.h"
 #include "DelPanj/TreeMaker/interface/muSelector.h"
 #include "DelPanj/TreeMaker/interface/eSelector.h"
@@ -50,16 +51,23 @@ class ZZTree{
   void AddBranch(std::vector<int>*, std::string name);
   void AddBranchArray(const int arraySize, double* x, std::string name);
 
-  void matchedGenJetPt(const edm::Event& iEvent, const pat::Jet* recJet, double& genPt, double& genEta);
+  void matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet, TLorentzVector& genJet);
+  void matchedParton(const edm::Event& iEvent, const pat::Jet* recJet, TLorentzVector& parton);
+  void matchedLep(const edm::Event& iEvent, const reco::Candidate*, TLorentzVector& genLep);
+
+  bool passLooseJetID(const pat::Jet* recJet);
 
   edm::InputTag hzzeejj_;
   edm::InputTag hzzmmjj_;
   edm::InputTag eleRhoIsoInputTag_;
   edm::InputTag muoRhoIsoInputTag_;
 //   edm::InputTag primaryVertexInputTag_;
-
   eSelector e2012ID_;
   muSelector mu2012ID_;
+
+  // for study
+  eSelector e2012Tag_;
+  muSelector mu2012NoIso_;
 
   TTree* tree_;
 
@@ -89,14 +97,36 @@ class ZZTree{
   std::vector<double> zjjM_;
   std::vector<double> zjjMRefit_;
   std::vector<double> zjjdR_; // deltaR between two jets   
-  std::vector<double> jet0Pt_;
-  std::vector<double> jet0GenPt_;
-  std::vector<double> jet0Eta_;
-  std::vector<double> jet0GenEta_;
-  std::vector<double> jet1Pt_;
-  std::vector<double> jet1GenPt_;
-  std::vector<double> jet1Eta_;
-  std::vector<double> jet1GenEta_;
+
+  std::vector<int>    jetIndex_;
+  std::vector<int>    jetHiggsIndex_;
+  std::vector<double> jetE_;
+  std::vector<double> jetPt_;
+  std::vector<double> jetEta_;
+  std::vector<double> jetPhi_;
+
+  std::vector<double> jetGenE_;
+  std::vector<double> jetGenPt_;
+  std::vector<double> jetGenEta_;
+  std::vector<double> jetGenPhi_;
+
+  std::vector<double> jetPartonE_;
+  std::vector<double> jetPartonPt_;
+  std::vector<double> jetPartonEta_;
+  std::vector<double> jetPartonPhi_;
+
+  std::vector<int>    jetPassId_;
+
+  std::vector<int>    lepIndex_;
+  std::vector<double> lepE_;
+  std::vector<double> lepPt_;
+  std::vector<double> lepEta_;
+  std::vector<double> lepPhi_;
+  std::vector<double> lepGenE_;
+  std::vector<double> lepGenPt_;
+  std::vector<double> lepGenEta_;
+  std::vector<double> lepGenPhi_;
+  std::vector<int>    lepPassId_;
 
   std::vector<double> heliLD_;
   std::vector<double> heliLDRefit_;
@@ -138,22 +168,6 @@ class ZZTree{
   double lepPhi_[2];
   double lepE_[2];
 
-  std::vector<double> muID01;
-  std::vector<double> muID02;
-  std::vector<double> muID03;
-  std::vector<double> muID04;
-  std::vector<double> muID05;
-  std::vector<double> muID06;
-  std::vector<double> muID07;
-  std::vector<double> muID08;
-  std::vector<double> muID09;
-  std::vector<double> muID10;
-  std::vector<double> muID11;
-  std::vector<double> muID12;
-  std::vector<double> muID13;
-  std::vector<double> muID14;
-  std::vector<double> muID15;
-
   std::vector<double> eID01;
   std::vector<double> eID02;
   std::vector<double> eID03;
@@ -171,6 +185,24 @@ class ZZTree{
   std::vector<double> eID15;
   std::vector<double> eID16;
   std::vector<double> eID17;
+
+
+  std::vector<double> muID01;
+  std::vector<double> muID02;
+  std::vector<double> muID03;
+  std::vector<double> muID04;
+  std::vector<double> muID05;
+  std::vector<double> muID06;
+  std::vector<double> muID07;
+  std::vector<double> muID08;
+  std::vector<double> muID09;
+  std::vector<double> muID10;
+  std::vector<double> muID11;
+  std::vector<double> muID12;
+  std::vector<double> muID13;
+  std::vector<double> muID14;
+  std::vector<double> muID15;
+
   */
   
 };
