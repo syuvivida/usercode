@@ -96,7 +96,8 @@ void mjj_match::Loop(int DEBUG)
 
 
   // separated in dR
-  const double dRArray[]={0.5,1.0,1.5,2.0,2.5,3.0,3.5};
+//   const double dRArray[]={0.5,1.0,1.5,2.0,2.5,3.0,3.5};
+  const double dRArray[]={0.0,1.0,2.0,3.5};
   const int NBINS = sizeof(dRArray)/sizeof(dRArray[0])-1;
 
   TH1D* h_dR = new TH1D("h_dR","",NBINS,dRArray);

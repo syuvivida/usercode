@@ -96,7 +96,8 @@ void mjj::Loop(int DEBUG)
 
 
   // separated in dR
-  const double dRArray[]={0.5,1.0,1.5,2.0,2.5,3.0,3.5};
+  const double dRArray[]={0.0,1.0,2.0,3.5};
+//   const double dRArray[]={0.5,1.0,1.5,2.0,2.5,3.0,3.5};
   const int NBINS = sizeof(dRArray)/sizeof(dRArray[0])-1;
 
   TH1D* h_dR = new TH1D("h_dR","",NBINS,dRArray);
@@ -402,6 +403,8 @@ void mjj::Loop(int DEBUG)
     double dr_ll = zlldR->at(best);
     h_dR_ll->Fill(dr_ll, PU_weight);
     int dRLL_index = h_dR->FindBin(dr_ll)-1;
+    if(DEBUG)
+      cout << "dr_ll = " << dr_ll << "\t dRLL_index = " << dRLL_index << endl;
 
     if(dRLL_index>=0 && dRLL_index < NBINS)
       h_mll_recdR[dRLL_index]->Fill(mll_rec, PU_weight);
@@ -412,6 +415,8 @@ void mjj::Loop(int DEBUG)
 
     if(dRJJ_index>=0 && dRJJ_index < NBINS)
       h_mjj_recdR[dRJJ_index]->Fill(mjj_rec, PU_weight);
+    if(DEBUG)
+      cout << "dr_ll = " << dr_ll << "\t dRLL_index = " << dRLL_index << endl;
 
       
     for(int ijet=0; ijet < jetIndex->size(); ijet++){
