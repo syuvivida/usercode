@@ -15,10 +15,8 @@
 #include "DataFormats/Candidate/interface/CompositeCandidateFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
-
-
-#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Lepton.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 
@@ -26,7 +24,7 @@
 
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 
-#include "FWCore/Framework/interface/MakerMacros.h"
+// #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
@@ -94,8 +92,8 @@ ZZTree::AddBranchArray(const int arraySize, double* x, std::string name){
 ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   e2012ID_ ( iConfig.getParameter<edm::ParameterSet>("e2012IDSet")),
   mu2012ID_ ( iConfig.getParameter<edm::ParameterSet>("mu2012IDSet")),
-  e2012Tag_ ( iConfig.getParameter<edm::ParameterSet>("e2012TagSet")),
-  mu2012NoIso_ ( iConfig.getParameter<edm::ParameterSet>("mu2012NoIsoSet")),
+  // e2012Tag_ ( iConfig.getParameter<edm::ParameterSet>("e2012TagSet")),
+  // mu2012NoIso_ ( iConfig.getParameter<edm::ParameterSet>("mu2012NoIsoSet")),
   hzzeejj_(iConfig.getParameter<edm::InputTag>("hzzeejjTag")),
   hzzmmjj_ (iConfig.getParameter<edm::InputTag>("hzzmmjjTag")),
   eleRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("eleRhoIso")),
@@ -130,6 +128,12 @@ ZZTree::~ZZTree()
 void ZZTree::Fill(const edm::Event& iEvent)
 {
   Clear();
+
+  //============================================================================
+  // 
+  //       OBTAIN EVENT-LEVEL VARIABLES
+  //  
+  //============================================================================
   
   bool isData = iEvent.isRealData();
 
@@ -154,8 +158,8 @@ void ZZTree::Fill(const edm::Event& iEvent)
   e2012ID_.SetData(isData);
   e2012ID_.SetRho(ele_rho);
 
-  e2012Tag_.SetData(isData);
-  e2012Tag_.SetRho(ele_rho);
+  // e2012Tag_.SetData(isData);
+  // e2012Tag_.SetRho(ele_rho);
 
   // rho for muon
   edm::Handle<double> muo_rho_event;
@@ -165,8 +169,14 @@ void ZZTree::Fill(const edm::Event& iEvent)
   mu2012ID_.SetData(isData);
   mu2012ID_.SetRho(muo_rho);
 
-  mu2012NoIso_.SetData(isData);
-  mu2012NoIso_.SetRho(muo_rho);
+  // mu2012NoIso_.SetData(isData);
+  // mu2012NoIso_.SetRho(muo_rho);
+
+  //============================================================================
+  // 
+  //    NOW WE START LOOKING FOR HIGGS CANDIDATES
+  //  
+  //============================================================================
 
   //initialize variables
   int hcand = -1;
@@ -188,20 +198,34 @@ void ZZTree::Fill(const edm::Event& iEvent)
     for(unsigned i=0; i<hzzlljj->size(); i++){
       const pat::CompositeCandidate & h = (*hzzlljj)[i];	
 
+      const reco::Candidate*  myLepton[2];  
+      for(unsigned int il=0; il < 2; il++)
+	myLepton[il]= h.daughter(LEPZ)->daughter(il)->masterClone().get();
+
+      const pat::Jet * myJet[2];
+      for(unsigned int ijet=0; ijet < 2; ijet++)
+	myJet[ijet] =
+	  dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
+					 masterClone().get());
+      
       // LOOK FOR TWO GOOD CHARGED LEPTONS
       int nLepPtHi=0;
       int nLepPtLo=0;
-      
-      const reco::Candidate*  myLepton[2];  
-      for(unsigned int il=0; il < 2; il++)
-	{
-	  myLepton[il]= h.daughter(LEPZ)->daughter(il)->masterClone().get();
-	  double pt = myLepton[il]->pt();
-	  
- 	  if(pt >MIN_LEPPT1) nLepPtHi++;
- 	  if(pt >MIN_LEPPT2) nLepPtLo++;
 
-	}
+      for(unsigned int il=0; il < 2; il++){
+	
+	if(deltaR(myLepton[il]->eta(), myLepton[il]->phi(),
+		  myJet[0]->eta(), myJet[0]->phi()) < MIN_DR_JETLEP)continue;
+
+	if(deltaR(myLepton[il]->eta(), myLepton[il]->phi(),
+		  myJet[1]->eta(), myJet[1]->phi()) < MIN_DR_JETLEP)continue;
+
+
+	double pt = myLepton[il]->pt();	  
+	if(pt >MIN_LEPPT1) nLepPtHi++;
+	if(pt >MIN_LEPPT2) nLepPtLo++;
+
+      }
 
       if(nLepPtHi < 1)continue;
       if(nLepPtLo < 2)continue;
@@ -224,55 +248,36 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	    = dynamic_cast<const pat::Electron*>(h.daughter(LEPZ)->daughter(iele)->masterClone().get());
 
 	  std::map<std::string, bool> Pass    = e2012ID_.CutRecord(*myEle); 
-	  std::map<std::string, bool> PassTag = e2012Tag_.CutRecord(*myEle); 
+	  // std::map<std::string, bool> PassTag = e2012Tag_.CutRecord(*myEle); 
+	  // lepIndex_.push_back(iele);
+	  // lepE_.push_back(myLepton[iele]->energy());
+	  // lepPt_.push_back(myLepton[iele]->pt());
+	  // lepEta_.push_back(myLepton[iele]->eta());
+	  // lepPhi_.push_back(myLepton[iele]->phi());
 
+	  // TLorentzVector genLep(0,0,0,0);
+	  // matchedLep(iEvent, myLepton[iele], genLep);
 
-	  int separatedFromJet = 0;
-	  for(unsigned int ijet=0; ijet < 2; ijet++){	 
-	    const pat::Jet* tempJet=
-	      dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
-					     masterClone().get());
-
-	    if(deltaR(myEle->eta(), myEle->phi(),
-		      tempJet->eta(), tempJet->phi()) < MIN_DR_JETLEP)continue;
-
-	    separatedFromJet++;
-	  }
-
-	  if(separatedFromJet<2)continue;
-
-
-	  lepIndex_.push_back(iele);
-	  lepE_.push_back(myLepton[iele]->energy());
-	  lepPt_.push_back(myLepton[iele]->pt());
-	  lepEta_.push_back(myLepton[iele]->eta());
-	  lepPhi_.push_back(myLepton[iele]->phi());
-
-	  TLorentzVector genLep(0,0,0,0);
-	  matchedLep(iEvent, myLepton[iele], genLep);
-
-	  if(genLep.E()<1e-6){
-	    lepGenE_.push_back(DUMMY);
-	    lepGenPt_.push_back(DUMMY);
-	    lepGenEta_.push_back(DUMMY);
-	    lepGenPhi_.push_back(DUMMY);
-	  }
-	  else {
-	    lepGenE_.push_back(genLep.E());
-	    lepGenPt_.push_back(genLep.Pt());
-	    lepGenEta_.push_back(genLep.Eta());
-	    lepGenPhi_.push_back(genLep.Phi());
-	  }
+	  // if(genLep.E()<1e-6){
+	  //   lepGenE_.push_back(DUMMY);
+	  //   lepGenPt_.push_back(DUMMY);
+	  //   lepGenEta_.push_back(DUMMY);
+	  //   lepGenPhi_.push_back(DUMMY);
+	  // }
+	  // else {
+	  //   lepGenE_.push_back(genLep.E());
+	  //   lepGenPt_.push_back(genLep.Pt());
+	  //   lepGenEta_.push_back(genLep.Eta());
+	  //   lepGenPhi_.push_back(genLep.Phi());
+	  // }
 
 	  int passOrNot = PassAll(Pass);
- 	  if(PassAll(PassTag))passOrNot += 4;
+	  // if(PassAll(PassTag))passOrNot += 4;
 
-	  lepPassId_.push_back(passOrNot);
+	  // lepPassId_.push_back(passOrNot);
 
-   	  if(passOrNot==0)continue; // 2012 loose electron ID	  
+	  if(passOrNot==0)continue; // 2012 loose electron ID	  
 	  nPassID++;
-	  
-
 	}
       } // if it's an electron type
 
@@ -284,54 +289,42 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	  const pat::Muon* myMuo
 	    = dynamic_cast<const pat::Muon*>(h.daughter(LEPZ)->daughter(imuo)->masterClone().get());
 	  std::map<std::string, bool> Pass = mu2012ID_.CutRecord(*myMuo);
-	  std::map<std::string, bool> PassNoIso = mu2012NoIso_.CutRecord(*myMuo);
 
-	  int separatedFromJet = 0;
-	  for(unsigned int ijet=0; ijet < 2; ijet++){	 
-	    const pat::Jet* tempJet=
-	      dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
-					     masterClone().get());
+	  // std::map<std::string, bool> PassNoIso = mu2012NoIso_.CutRecord(*myMuo);
 
-	    if(deltaR(myMuo->eta(), myMuo->phi(),
-		      tempJet->eta(), tempJet->phi()) < MIN_DR_JETLEP)continue;
+	  // lepIndex_.push_back(imuo+2);
+	  // lepE_.push_back(myLepton[imuo]->energy());
+	  // lepPt_.push_back(myLepton[imuo]->pt());
+	  // lepEta_.push_back(myLepton[imuo]->eta());
+	  // lepPhi_.push_back(myLepton[imuo]->phi());
 
-	    separatedFromJet++;
-	  }
+	  // TLorentzVector genLep(0,0,0,0);
+	  // matchedLep(iEvent, myLepton[imuo], genLep);
 
-	  if(separatedFromJet<2)continue;
+	  // if(genLep.E()<1e-6){
+	  //   lepGenE_.push_back(DUMMY);
+	  //   lepGenPt_.push_back(DUMMY);
+	  //   lepGenEta_.push_back(DUMMY);
+	  //   lepGenPhi_.push_back(DUMMY);
+	  // }
+	  // else {
+	  //   lepGenE_.push_back(genLep.E());
+	  //   lepGenPt_.push_back(genLep.Pt());
+	  //   lepGenEta_.push_back(genLep.Eta());
+	  //   lepGenPhi_.push_back(genLep.Phi());
+	  // }
 
-	  lepIndex_.push_back(imuo+2);
-	  lepE_.push_back(myLepton[imuo]->energy());
-	  lepPt_.push_back(myLepton[imuo]->pt());
-	  lepEta_.push_back(myLepton[imuo]->eta());
-	  lepPhi_.push_back(myLepton[imuo]->phi());
+	  int passOrNot = PassAll(Pass);
+	  // int passOrNot = PassAll(PassNoIso);
+	  // if(PassAll(Pass)) passOrNot += 4;
 
-	  TLorentzVector genLep(0,0,0,0);
-	  matchedLep(iEvent, myLepton[imuo], genLep);
+	  // lepPassId_.push_back(passOrNot);
 
-	  if(genLep.E()<1e-6){
-	    lepGenE_.push_back(DUMMY);
-	    lepGenPt_.push_back(DUMMY);
-	    lepGenEta_.push_back(DUMMY);
-	    lepGenPhi_.push_back(DUMMY);
-	  }
-	  else {
-	    lepGenE_.push_back(genLep.E());
-	    lepGenPt_.push_back(genLep.Pt());
-	    lepGenEta_.push_back(genLep.Eta());
-	    lepGenPhi_.push_back(genLep.Phi());
-	  }
-	  // int passOrNot = PassAll(Pass);
-	  int passOrNot = PassAll(PassNoIso);
-	  if(PassAll(Pass)) passOrNot += 4;
-
-	  lepPassId_.push_back(passOrNot);
-
-   	  if(passOrNot==0)continue; // 2012 tight muon ID	  
+	  if(passOrNot==0)continue; // 2012 tight muon ID	  
 
 	  nPassID++;
 	  	  
-
+	  
 	} // end of loop over muon
       } // if is a muon type
      
@@ -340,28 +333,22 @@ void ZZTree::Fill(const edm::Event& iEvent)
 
 
       // LOOK FOR 2 JETS PASSING BETA CUTS
-      // STILL NEED TO ADD LOOSE JET ID CUTS
 
       int nGoodJets=0;
       int nLooseBTags=0;
       int nMediumBTags=0;
-      const pat::Jet * myJet[2];
 
       for(unsigned int ijet=0; ijet < 2; ijet++){	 
 	
-	myJet[ijet] =
-	  dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
-					 masterClone().get());
-
 	double pt  = myJet[ijet]->pt();
- 	if(pt < MIN_JETPT)continue;
+	if(pt < MIN_JETPT)continue;
 	
 	double eta = myJet[ijet]->eta();
 	if(fabs(eta)> MAX_JETETA)continue;
 	
 	// to suppress jets from pileups
 	double puBeta = myJet[ijet]->userFloat("puBeta");
- 	if(puBeta < MIN_JETBETA)continue;
+	if(puBeta < MIN_JETBETA)continue;
 
 	
 	if(deltaR(myLepton[0]->eta(), myLepton[0]->phi(),
@@ -370,6 +357,9 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	if(deltaR(myLepton[1]->eta(), myLepton[1]->phi(),
 		  myJet[ijet]->eta(), myJet[ijet]->phi()) < MIN_DR_JETLEP)continue;
 	  
+	
+	if( !passLooseJetID(myJet[ijet]) )continue;
+
 
 	bool isLoose  = false;
 	bool isMedium = false;
@@ -515,8 +505,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	    jetPartonPhi_.push_back(tempParton.Phi());
 	  }
 
-	  int passLoose = passLooseJetID(myJet[isjet])? 1:0;
-	  jetPassId_.push_back(passLoose);
 
 	  
 	}
@@ -672,18 +660,16 @@ ZZTree::SetBranches(){
   AddBranch(&jetPartonEta_,"jetPartonEta");
   AddBranch(&jetPartonPhi_,"jetPartonPhi");
  
-  AddBranch(&jetPassId_,"jetPassId");
-
-  AddBranch(&lepIndex_,"lepIndex");
-  AddBranch(&lepE_,"lepE");
-  AddBranch(&lepPt_,"lepPt");
-  AddBranch(&lepEta_,"lepEta");
-  AddBranch(&lepPhi_,"lepPhi");
-  AddBranch(&lepGenE_,"lepGenE");
-  AddBranch(&lepGenPt_,"lepGenPt");
-  AddBranch(&lepGenEta_,"lepGenEta");
-  AddBranch(&lepGenPhi_,"lepGenPhi");
-  AddBranch(&lepPassId_,"lepPassId");
+  // AddBranch(&lepIndex_,"lepIndex");
+  // AddBranch(&lepE_,"lepE");
+  // AddBranch(&lepPt_,"lepPt");
+  // AddBranch(&lepEta_,"lepEta");
+  // AddBranch(&lepPhi_,"lepPhi");
+  // AddBranch(&lepGenE_,"lepGenE");
+  // AddBranch(&lepGenPt_,"lepGenPt");
+  // AddBranch(&lepGenEta_,"lepGenEta");
+  // AddBranch(&lepGenPhi_,"lepGenPhi");
+  // AddBranch(&lepPassId_,"lepPassId");
 
 
   AddBranch(&heliLD_,"heliLD");
@@ -783,18 +769,17 @@ ZZTree::Clear(){
   jetPartonEta_.clear();
   jetPartonPhi_.clear();
 
-  jetPassId_.clear();
 
-  lepIndex_.clear();
-  lepE_.clear();
-  lepPt_.clear();
-  lepEta_.clear();
-  lepPhi_.clear();
-  lepGenE_.clear();
-  lepGenPt_.clear();
-  lepGenEta_.clear();
-  lepGenPhi_.clear();
-  lepPassId_.clear();
+  // lepIndex_.clear();
+  // lepE_.clear();
+  // lepPt_.clear();
+  // lepEta_.clear();
+  // lepPhi_.clear();
+  // lepGenE_.clear();
+  // lepGenPt_.clear();
+  // lepGenEta_.clear();
+  // lepGenPhi_.clear();
+  // lepPassId_.clear();
 
 
   heliLD_.clear();
