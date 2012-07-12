@@ -3,7 +3,7 @@
 if [ -z $7 ] ; then
     echo "Usage: $0 [PROC] [STRING] [NITER] [PDFGROUP] [PDFSET] [CM] [MMIN]"
     echo "If PDFSET is -1, will do PDF error evalulation."
-    echo "PROC 71: W+, PROC 76: W-"
+    echo "PROC 81: with gamma*, PROC 86: no gamma*"
     exit 1
 fi
 
@@ -81,7 +81,7 @@ ${PDFGROUP}.LHgrid      [LHAPDF group]
 ${PDFSET}  	        [LHAPDF set]
 
 [Jet definition and event cuts]
-12.0d0	        [m34min]
+${MMIN}d0	[m34min]
 14000d0 	[m34max]
 ${MMIN}d0	[m56min]
 14000d0		[m56max]
@@ -91,12 +91,12 @@ ${MMIN}d0	[m56min]
 0d0		[|etajet|_min]
 20d0		[|etajet|_max]
 0.5d0		[Rcut_jet]  
-.false.		[makecuts]
-0d0		[ptlepton_min]
-20d0     	[|etalepton|_max]
+.true.		[makecuts]
+20d0		[ptlepton_min]
+2.5d0     	[|etalepton|_max]
 0d0		[ptmin_missing]
-0d0		[ptlepton(2nd+)_min]
-20d0	        [|etalepton(2nd+)|_max]
+5d0		[ptlepton(2nd+)_min]
+2.5d0	        [|etalepton(2nd+)|_max]
 0.0d0		[minimum (3,4) transverse mass] 
 0.0d0	        [R(jet,lept)_min]
 0.0d0		[R(lept,lept)_min]
