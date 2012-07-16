@@ -47,7 +47,12 @@ const double MIN_MH_RATIO = 0.94;
 const double MAX_MH_RATIO = 1.10;
 
 // met cut
-const double MAX_MET_SIG = 10.0;
+const double MAX_MET_SIG[3] = 
+  {
+    99999999.0,
+    99999999.0,
+    10.0
+  };
 
 // angular variables
 const double MIN_HELD_CONSTANT[3]= 

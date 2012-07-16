@@ -349,7 +349,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	// to suppress jets from pileups
 	double puBeta = myJet[ijet]->userFloat("puBeta");
 	if(puBeta < MIN_JETBETA)continue;
-
 	
 	if(deltaR(myLepton[0]->eta(), myLepton[0]->phi(),
 		  myJet[ijet]->eta(), myJet[ijet]->phi()) < MIN_DR_JETLEP)continue;
@@ -525,7 +524,7 @@ void ZZTree::Fill(const edm::Event& iEvent)
       else
 	thisBit |= MZJJ_SIDEBAND;
 
-      if(metSig_ < MAX_MET_SIG)
+      if(metSig_ < MAX_MET_SIG[nBTags])
 	thisBit |= PFMET_SIG;
 
       double heliLD_cutValue = -9999;
@@ -828,7 +827,7 @@ void ZZTree::matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet,
 
     double relPt = fabs(thisGenJetPt- recJetPt)/thisGenJetPt;
 
-    if(dR<0.4 //&& relPt < 3.0
+    if(dR<0.4 && relPt < 3.0
        && thisGenJetPt > maxGenJetPt
        )
       {
@@ -853,6 +852,7 @@ void ZZTree::matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet,
 void ZZTree::matchedParton(const edm::Event& iEvent, const pat::Jet* recJet,
 			   TLorentzVector& parton)
 {
+  double recJetPt  = recJet->pt();
   double recJetEta = recJet->eta();
   double recJetPhi = recJet->phi();
   
@@ -892,8 +892,10 @@ void ZZTree::matchedParton(const edm::Event& iEvent, const pat::Jet* recJet,
 
     double dR = deltaR(gen.eta(), gen.phi(),
 		       recJetEta, recJetPhi);
+
+    double relPt = fabs(thispt- recJetPt)/thispt;
     
-    if(dR<0.4)
+    if(dR<0.4 && relPt < 3.0)
       {
 	parton.SetPtEtaPhiE(
 			    gen.pt(),
@@ -915,6 +917,7 @@ void ZZTree::matchedParton(const edm::Event& iEvent, const pat::Jet* recJet,
 void ZZTree::matchedLep(const edm::Event& iEvent, const reco::Candidate* recLep,
 			TLorentzVector& genLep)
 {
+  double recPt  = recLep->pt();
   double recEta = recLep->eta();
   double recPhi = recLep->phi();
   
@@ -958,7 +961,9 @@ void ZZTree::matchedLep(const edm::Event& iEvent, const reco::Candidate* recLep,
     double dR = deltaR(gen.eta(), gen.phi(),
 		       recEta, recPhi);
     
-    if(dR<0.4)
+    double relPt = fabs(thispt- recPt)/thispt;
+
+    if(dR<0.4 && relPt < 3.0)
       {
 	genLep.SetPtEtaPhiE(
 			    gen.pt(),
