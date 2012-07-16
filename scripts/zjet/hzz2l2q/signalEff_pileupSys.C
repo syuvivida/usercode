@@ -19,12 +19,11 @@ void signalEff_pileupSys::Loop(int lepCode)
   standalone_LumiReWeighting LumiWeights_down(2012,-1);
 
   Long64_t nbytes = 0, nb = 0;
-
+  
+  double nPassEvts[3]={0};
   double nPassEvts_central[3]={0};
   double nPassEvts_up[3]={0};
   double nPassEvts_down[3]={0};
-  double nPassEvts_upInt[3]={0};
-  double nPassEvts_downInt[3]={0};
 
   TH1D* hsys[3];
   TH1D* hpass[3];
@@ -51,11 +50,11 @@ void signalEff_pileupSys::Loop(int lepCode)
     h_input_nint_mc  ->SetBinContent(i+1,Summer2012[i]);
   }
 
-  const int nPUs= 5;
+  const int nPUs= 3;
 
   TH1D* h_output_nint_mc[nPUs];
 
-  std::string titleName[nPUs]={"central", "+5%", "-5%", "+1 int", "-1 int"};
+  std::string titleName[nPUs]={"central", "+5%", "-5%"};
 
   for(int i=0; i < nPUs; i++)
     {
@@ -77,17 +76,12 @@ void signalEff_pileupSys::Loop(int lepCode)
     double PU_weight_up      =  LumiWeights_up.weight(PU_nTrueInt);
     double PU_weight_down    =  LumiWeights_down.weight(PU_nTrueInt);
 
-    double PU_weight_up1     =  LumiWeights_central.weight(PU_nTrueInt+1.0);
-    double PU_weight_down1   =  LumiWeights_central.weight(PU_nTrueInt-1.0);
-    
     int myBest = -1;
     double best_mZjj = 9999999.0;
 
     h_output_nint_mc[0]->Fill(PU_nTrueInt, PU_weight_central); 
     h_output_nint_mc[1]->Fill(PU_nTrueInt, PU_weight_up); 
     h_output_nint_mc[2]->Fill(PU_nTrueInt, PU_weight_down); 
-    h_output_nint_mc[3]->Fill(PU_nTrueInt, PU_weight_up1); 
-    h_output_nint_mc[4]->Fill(PU_nTrueInt, PU_weight_down1); 
 
 //     cout << "Looking for best candidate" << endl;
 
@@ -102,24 +96,6 @@ void signalEff_pileupSys::Loop(int lepCode)
       if(bitmap & ALL_SIGNAL)Pass=true;
       if(!Pass)continue;
 
-      int nMatch=0;
-      for(int ij=0; ij < jetGenPt->size(); ij++){
-	int jet_index = jetIndex->at(ij);
-
-// 	cout << "jetPartonPt = " << jetPartonPt->at(ij) << endl;
-// 	cout << "jetIndex = " << jet_index << endl;
-	
-	if(jet_index < 0 ) continue;
-	if(jet_index > 1 ) continue;
-
-
-	if(jetHiggsIndex->at(ij) != ih)continue;
-	if(jetPartonPt->at(ij)<=1e-6)continue; 
-
-	nMatch++;
-      }
-
-      if(nMatch!=2)continue;
       double zjjMass = zjjM->at(ih);
       if(fabs(zjjMass - MZ_PDG) < fabs(best_mZjj - MZ_PDG))
 	{
@@ -136,21 +112,20 @@ void signalEff_pileupSys::Loop(int lepCode)
     int nbtag=nBTags->at(myBest);
       
     if(nbtag>=0){
+      nPassEvts[nbtag] += 1.0;
       nPassEvts_central[nbtag]+= PU_weight_central;
       nPassEvts_up[nbtag]+= PU_weight_up;
       nPassEvts_down[nbtag]+= PU_weight_down;
 
-      nPassEvts_upInt[nbtag]+= PU_weight_up1;
-      nPassEvts_downInt[nbtag]+= PU_weight_down1;
     }
 
   } // loop over entries
     
   for(int ib=0; ib<3; ib++)
     {
+      cout << "npass raw with " << ib << " btag = " << nPassEvts[ib] << endl;
       cout << "npass with " << ib << " btag = " << nPassEvts_central[ib] << 
-	"\t" << nPassEvts_up[ib] << "\t" << nPassEvts_down[ib] << 
-	"\t" << nPassEvts_upInt[ib] << "\t" << nPassEvts_downInt[ib] << endl;
+	"\t" << nPassEvts_up[ib] << "\t" << nPassEvts_down[ib] << endl;
 
       hpass[ib]->SetBinContent(1, nPassEvts_down[ib]);
       hpass[ib]->SetBinContent(2, nPassEvts_central[ib]);
@@ -165,17 +140,6 @@ void signalEff_pileupSys::Loop(int lepCode)
 	nPassEvts_central[ib];
 
       hsys[ib]->SetBinContent(2, changeDown);
-
-      double changeUpInt = (nPassEvts_upInt[ib] - nPassEvts_central[ib])/
-	nPassEvts_central[ib];
-
-      hsys[ib]->SetBinContent(3, changeUpInt);
-
-      double changeDownInt = (nPassEvts_downInt[ib] - nPassEvts_central[ib])/
-	nPassEvts_central[ib];
-
-      hsys[ib]->SetBinContent(4, changeDownInt);
-
 
       cout << "Relative systematic = " << changeUp << "\t" << changeDown << endl;
 //       cout << "7 TeV style Relative systematic = " << changeUpInt << "\t" << 
