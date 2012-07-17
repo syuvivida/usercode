@@ -111,9 +111,8 @@ std::map<std::string, bool>  muSelector::CutRecord(const pat::Muon& mu){
   else  // do the rho correction
     {
       MuonEffectiveArea::MuonEffectiveAreaTarget effAreaTarget_ = 
-	isData_? MuonEffectiveArea::kMuEAData2012:
- 	MuonEffectiveArea::kMuEAData2012;
-      // 	MuonEffectiveArea::kMuEAFall11MC;
+	MuonEffectiveArea::kMuEAData2012;
+
       MuonEffectiveArea::MuonEffectiveAreaType effAreaType_= 
 	MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
       double Area = MuonEffectiveArea::GetMuonEffectiveArea
