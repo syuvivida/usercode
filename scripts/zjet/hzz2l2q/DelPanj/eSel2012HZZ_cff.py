@@ -48,7 +48,7 @@ eIsoBase2012Ecp.iso4 = cms.double(0.10)##hcIso
 #Total Loose ID
 eSel2012HZZ  = eSelBase.clone()
 eSel2012HZZ.ptx = 20.
-eSel2012HZZ.etax = 2.4 
+eSel2012HZZ.etax = 2.5
 eSel2012HZZ.idBrl = eIdBase2012Brl
 eSel2012HZZ.isoBrl = eIsoBase2012Brl
 eSel2012HZZ.idEcp = eIdBase2012Ecp
