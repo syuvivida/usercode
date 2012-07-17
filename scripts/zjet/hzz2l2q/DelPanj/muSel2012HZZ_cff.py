@@ -35,7 +35,8 @@ muSel2012HZZ.usePfIso  = cms.bool(True)
 muSel2012HZZ.useRelIso = cms.bool(True)
 muSel2012HZZ.useCombIso= cms.bool(True)
 muSel2012HZZ.coneRad   = cms.double(0.4)#this parameter is not used anymore.
-muSel2012HZZ.delBCorr  = cms.bool(True) #True for deltaBeta correction
+#muSel2012HZZ.delBCorr  = cms.bool(True) #True for deltaBeta correction
+muSel2012HZZ.delBCorr  = cms.bool(False) #True for deltaBeta correction
                                         #False for rho correction
 
 
