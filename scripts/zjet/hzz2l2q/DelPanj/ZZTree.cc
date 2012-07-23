@@ -349,6 +349,7 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	// to suppress jets from pileups
 	double puBeta = myJet[ijet]->userFloat("puBeta");
 	if(puBeta < MIN_JETBETA)continue;
+
 	
 	if(deltaR(myLepton[0]->eta(), myLepton[0]->phi(),
 		  myJet[ijet]->eta(), myJet[ijet]->phi()) < MIN_DR_JETLEP)continue;
