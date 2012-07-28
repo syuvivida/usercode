@@ -63,9 +63,11 @@ std::map<std::string, bool>  muSelector::CutRecord(const pat::Muon& mu){
   else // userfloat exists
     cuts["dz"]        = fabs(mu.userFloat("dzVtx")) < dzX_;
 
+  bool isPFMuon      = mu.isPFMuon();
   bool isTrackMuon   = mu.isTrackerMuon();
   bool isGlobalMuon  = mu.isGlobalMuon();
-  if(isTrackMuon && isGlobalMuon){//If global as well as tracker muon...
+
+  if(isTrackMuon && isGlobalMuon && isPFMuon){//If global as well as tracker muon...
     cuts["trkLayers"]     = mu.innerTrack()->hitPattern().trackerLayersWithMeasurement()>trackerHitsX_;
     cuts["pixelHits"]     = mu.innerTrack()->hitPattern().numberOfValidPixelHits()>pixelHitsX_;
     cuts["muonHits"]      = mu.globalTrack()->hitPattern().numberOfValidMuonHits()>muonHitsX_;
