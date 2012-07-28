@@ -115,18 +115,6 @@ class ZZTree{
   std::vector<double> jetPartonEta_;
   std::vector<double> jetPartonPhi_;
 
-
-  // std::vector<int>    lepIndex_;
-  // std::vector<double> lepE_;
-  // std::vector<double> lepPt_;
-  // std::vector<double> lepEta_;
-  // std::vector<double> lepPhi_;
-  // std::vector<double> lepGenE_;
-  // std::vector<double> lepGenPt_;
-  // std::vector<double> lepGenEta_;
-  // std::vector<double> lepGenPhi_;
-  // std::vector<int>    lepPassId_;
-
   std::vector<double> heliLD_;
   std::vector<double> heliLDRefit_;
 

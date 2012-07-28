@@ -98,7 +98,7 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   hzzmmjj_ (iConfig.getParameter<edm::InputTag>("hzzmmjjTag")),
   eleRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("eleRhoIso")),
   muoRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("muoRhoIso"))//,
-  //   primaryVertexInputTag_(iConfig.getParameter<edm::InputTag>("primaryVertex")),
+	      //   primaryVertexInputTag_(iConfig.getParameter<edm::InputTag>("primaryVertex")),
 
 {
   tree_=tree; 
@@ -248,34 +248,7 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	    = dynamic_cast<const pat::Electron*>(h.daughter(LEPZ)->daughter(iele)->masterClone().get());
 
 	  std::map<std::string, bool> Pass    = e2012ID_.CutRecord(*myEle); 
-	  // std::map<std::string, bool> PassTag = e2012Tag_.CutRecord(*myEle); 
-	  // lepIndex_.push_back(iele);
-	  // lepE_.push_back(myLepton[iele]->energy());
-	  // lepPt_.push_back(myLepton[iele]->pt());
-	  // lepEta_.push_back(myLepton[iele]->eta());
-	  // lepPhi_.push_back(myLepton[iele]->phi());
-
-	  // TLorentzVector genLep(0,0,0,0);
-	  // matchedLep(iEvent, myLepton[iele], genLep);
-
-	  // if(genLep.E()<1e-6){
-	  //   lepGenE_.push_back(DUMMY);
-	  //   lepGenPt_.push_back(DUMMY);
-	  //   lepGenEta_.push_back(DUMMY);
-	  //   lepGenPhi_.push_back(DUMMY);
-	  // }
-	  // else {
-	  //   lepGenE_.push_back(genLep.E());
-	  //   lepGenPt_.push_back(genLep.Pt());
-	  //   lepGenEta_.push_back(genLep.Eta());
-	  //   lepGenPhi_.push_back(genLep.Phi());
-	  // }
-
 	  int passOrNot = PassAll(Pass);
-	  // if(PassAll(PassTag))passOrNot += 4;
-
-	  // lepPassId_.push_back(passOrNot);
-
 	  if(passOrNot==0)continue; // 2012 loose electron ID	  
 	  nPassID++;
 	}
@@ -289,42 +262,9 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	  const pat::Muon* myMuo
 	    = dynamic_cast<const pat::Muon*>(h.daughter(LEPZ)->daughter(imuo)->masterClone().get());
 	  std::map<std::string, bool> Pass = mu2012ID_.CutRecord(*myMuo);
-
-	  // std::map<std::string, bool> PassNoIso = mu2012NoIso_.CutRecord(*myMuo);
-
-	  // lepIndex_.push_back(imuo+2);
-	  // lepE_.push_back(myLepton[imuo]->energy());
-	  // lepPt_.push_back(myLepton[imuo]->pt());
-	  // lepEta_.push_back(myLepton[imuo]->eta());
-	  // lepPhi_.push_back(myLepton[imuo]->phi());
-
-	  // TLorentzVector genLep(0,0,0,0);
-	  // matchedLep(iEvent, myLepton[imuo], genLep);
-
-	  // if(genLep.E()<1e-6){
-	  //   lepGenE_.push_back(DUMMY);
-	  //   lepGenPt_.push_back(DUMMY);
-	  //   lepGenEta_.push_back(DUMMY);
-	  //   lepGenPhi_.push_back(DUMMY);
-	  // }
-	  // else {
-	  //   lepGenE_.push_back(genLep.E());
-	  //   lepGenPt_.push_back(genLep.Pt());
-	  //   lepGenEta_.push_back(genLep.Eta());
-	  //   lepGenPhi_.push_back(genLep.Phi());
-	  // }
-
 	  int passOrNot = PassAll(Pass);
-	  // int passOrNot = PassAll(PassNoIso);
-	  // if(PassAll(Pass)) passOrNot += 4;
-
-	  // lepPassId_.push_back(passOrNot);
-
 	  if(passOrNot==0)continue; // 2012 tight muon ID	  
-
-	  nPassID++;
-	  	  
-	  
+	  nPassID++;	  	  
 	} // end of loop over muon
       } // if is a muon type
      
@@ -384,7 +324,7 @@ void ZZTree::Fill(const edm::Event& iEvent)
       // number of btags
       int nBTags = 0;
       if(nMediumBTags >= 1 && nLooseBTags == 2)nBTags=2;
-      else if(nMediumBTags ==0 && nLooseBTags >=1)nBTags=1;
+      else if(nLooseBTags >=1)nBTags=1;
       else nBTags=0;
 
       hcand = i;
@@ -569,45 +509,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	nGoodHCand_++;
 
 
-      /*
-
-
-	for(unsigned int ijet=0; ijet < 2; ijet++){	 
-	const pat::Jet * thisJet = 
-	dynamic_cast<const pat::Jet *>(goodH.daughter(HADZ)->daughter(ijet)->
-	masterClone().get());
-
-	jetPt_[ijet]  = thisJet->pt();
-	jetEta_[ijet] = thisJet->eta();
-	jetPhi_[ijet] = thisJet->phi();
-	jetE_[ijet]   = thisJet->energy();
-
-	jetRefitPt_[ijet]  = goodH.userFloat(Form("j%dRefitPt",ijet+1));
-	jetRefitEta_[ijet] = goodH.userFloat(Form("j%dRefitEta",ijet+1));
-	jetRefitPhi_[ijet] = goodH.userFloat(Form("j%dRefitPhi",ijet+1));
-	jetRefitE_[ijet]   = goodH.userFloat(Form("j%dRefitE",ijet+1));
-
-
-	} // end of loop over jets
-
-
-
-	lepType_ = ilep;
-    
-	for(unsigned int il=0; il < 2; il++){	 
-
-	const reco::Candidate* thisLep = 
-	(goodH.daughter(LEPZ)->daughter(il)->
-	masterClone().get());
-      
-	lepPt_[il]  = thisLep->pt();
-	lepEta_[il] = thisLep->eta();
-	lepPhi_[il] = thisLep->phi();
-	lepE_[il]   = thisLep->energy();
-
-	} // end of loop over jets
-      */
-
     } // end of loop over Higgs candidates  
     
   } // end of looping over lepton types
@@ -660,18 +561,6 @@ ZZTree::SetBranches(){
   AddBranch(&jetPartonEta_,"jetPartonEta");
   AddBranch(&jetPartonPhi_,"jetPartonPhi");
  
-  // AddBranch(&lepIndex_,"lepIndex");
-  // AddBranch(&lepE_,"lepE");
-  // AddBranch(&lepPt_,"lepPt");
-  // AddBranch(&lepEta_,"lepEta");
-  // AddBranch(&lepPhi_,"lepPhi");
-  // AddBranch(&lepGenE_,"lepGenE");
-  // AddBranch(&lepGenPt_,"lepGenPt");
-  // AddBranch(&lepGenEta_,"lepGenEta");
-  // AddBranch(&lepGenPhi_,"lepGenPhi");
-  // AddBranch(&lepPassId_,"lepPassId");
-
-
   AddBranch(&heliLD_,"heliLD");
   AddBranch(&heliLDRefit_,"heliLDRefit");
 
@@ -682,39 +571,39 @@ ZZTree::SetBranches(){
 
   /*
 
-    AddBranch(&higgsPt_,  "higgsPt");
-    AddBranch(&higgsEta_, "higgsEta");
-    AddBranch(&higgsPhi_, "higgsPhi");
-    AddBranch(&higgsM_,   "higgsM");
+  AddBranch(&higgsPt_,  "higgsPt");
+  AddBranch(&higgsEta_, "higgsEta");
+  AddBranch(&higgsPhi_, "higgsPhi");
+  AddBranch(&higgsM_,   "higgsM");
 
-    AddBranch(&zllPt_,  "zllPt");
-    AddBranch(&zllEta_, "zllEta");
-    AddBranch(&zllPhi_, "zllPhi");
-    AddBranch(&zllM_,   "zllM");
+  AddBranch(&zllPt_,  "zllPt");
+  AddBranch(&zllEta_, "zllEta");
+  AddBranch(&zllPhi_, "zllPhi");
+  AddBranch(&zllM_,   "zllM");
 
-    AddBranch(&zjjPt_,  "zjjPt");
-    AddBranch(&zjjEta_, "zjjEta");
-    AddBranch(&zjjPhi_, "zjjPhi");
-    AddBranch(&zjjM_,   "zjjM");
+  AddBranch(&zjjPt_,  "zjjPt");
+  AddBranch(&zjjEta_, "zjjEta");
+  AddBranch(&zjjPhi_, "zjjPhi");
+  AddBranch(&zjjM_,   "zjjM");
 
-    int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
-    AddBranchArray(arraySize, jetPt_,  "jetPt");
-    AddBranchArray(arraySize, jetEta_, "jetEta");
-    AddBranchArray(arraySize, jetPhi_, "jetPhi");
-    AddBranchArray(arraySize, jetE_,   "jetE");
-    AddBranchArray(arraySize, jetRefitPt_,  "jetRefitPt");
-    AddBranchArray(arraySize, jetRefitEta_, "jetRefitEta");
-    AddBranchArray(arraySize, jetRefitPhi_, "jetRefitPhi");
-    AddBranchArray(arraySize, jetRefitE_, "jetRefitE");
+  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
+  AddBranchArray(arraySize, jetPt_,  "jetPt");
+  AddBranchArray(arraySize, jetEta_, "jetEta");
+  AddBranchArray(arraySize, jetPhi_, "jetPhi");
+  AddBranchArray(arraySize, jetE_,   "jetE");
+  AddBranchArray(arraySize, jetRefitPt_,  "jetRefitPt");
+  AddBranchArray(arraySize, jetRefitEta_, "jetRefitEta");
+  AddBranchArray(arraySize, jetRefitPhi_, "jetRefitPhi");
+  AddBranchArray(arraySize, jetRefitE_, "jetRefitE");
 
   
-    AddBranch(&lepType_,   "lepType");
+  AddBranch(&lepType_,   "lepType");
 
-    arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
-    AddBranchArray(arraySize, lepPt_,  "lepPt");
-    AddBranchArray(arraySize, lepEta_, "lepEta");
-    AddBranchArray(arraySize, lepPhi_, "lepPhi");
-    AddBranchArray(arraySize, lepE_,   "lepE");
+  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
+  AddBranchArray(arraySize, lepPt_,  "lepPt");
+  AddBranchArray(arraySize, lepEta_, "lepEta");
+  AddBranchArray(arraySize, lepPhi_, "lepPhi");
+  AddBranchArray(arraySize, lepE_,   "lepE");
 
 
 
@@ -768,19 +657,6 @@ ZZTree::Clear(){
   jetPartonPt_.clear();
   jetPartonEta_.clear();
   jetPartonPhi_.clear();
-
-
-  // lepIndex_.clear();
-  // lepE_.clear();
-  // lepPt_.clear();
-  // lepEta_.clear();
-  // lepPhi_.clear();
-  // lepGenE_.clear();
-  // lepGenPt_.clear();
-  // lepGenEta_.clear();
-  // lepGenPhi_.clear();
-  // lepPassId_.clear();
-
 
   heliLD_.clear();
   heliLDRefit_.clear();
@@ -1081,116 +957,116 @@ bool ZZTree::passLooseJetID(const pat::Jet* recjet)
 
 /*
 
-  higgsPt_  = DUMMY;
-  higgsEta_ = DUMMY;
-  higgsPhi_ = DUMMY;
-  higgsM_   = DUMMY;
+higgsPt_  = DUMMY;
+higgsEta_ = DUMMY;
+higgsPhi_ = DUMMY;
+higgsM_   = DUMMY;
 
-  zllPt_  = DUMMY;
-  zllEta_ = DUMMY;
-  zllPhi_ = DUMMY;
-  zllM_   = DUMMY;
+zllPt_  = DUMMY;
+zllEta_ = DUMMY;
+zllPhi_ = DUMMY;
+zllM_   = DUMMY;
 
-  zjjPt_  = DUMMY;
-  zjjEta_ = DUMMY;
-  zjjPhi_ = DUMMY;
-  zjjM_   = DUMMY;
+zjjPt_  = DUMMY;
+zjjEta_ = DUMMY;
+zjjPhi_ = DUMMY;
+zjjM_   = DUMMY;
 
 
-  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
+int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
 
-  for(int i=0; i<arraySize;i++)
-  {
-  jetPt_[i] =DUMMY;
-  jetEta_[i]=DUMMY;
-  jetPhi_[i]=DUMMY;
-  jetE_[i]  =DUMMY;
-  jetRefitPt_[i] =DUMMY;
-  jetRefitEta_[i]=DUMMY;
-  jetRefitPhi_[i]=DUMMY;
-  jetRefitE_[i]=DUMMY;
+for(int i=0; i<arraySize;i++)
+{
+jetPt_[i] =DUMMY;
+jetEta_[i]=DUMMY;
+jetPhi_[i]=DUMMY;
+jetE_[i]  =DUMMY;
+jetRefitPt_[i] =DUMMY;
+jetRefitEta_[i]=DUMMY;
+jetRefitPhi_[i]=DUMMY;
+jetRefitE_[i]=DUMMY;
 
-  }
-  lepType_ = -1;
+}
+lepType_ = -1;
   
-  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
+arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
 
-  for(int i=0; i<arraySize;i++)
-  {
-  lepPt_[i] =DUMMY;
-  lepEta_[i]=DUMMY;
-  lepPhi_[i]=DUMMY;
-  lepE_[i]  =DUMMY;
+for(int i=0; i<arraySize;i++)
+{
+lepPt_[i] =DUMMY;
+lepEta_[i]=DUMMY;
+lepPhi_[i]=DUMMY;
+lepE_[i]  =DUMMY;
 
-  }
+}
 
-  AddBranch(&eID01, "eID01");
-  AddBranch(&eID02, "eID02");
-  AddBranch(&eID03, "eID03");
-  AddBranch(&eID04, "eID04");
-  AddBranch(&eID05, "eID05");
-  AddBranch(&eID06, "eID06");
-  AddBranch(&eID07, "eID07");
-  AddBranch(&eID08, "eID08");
-  AddBranch(&eID09, "eID09");
-  AddBranch(&eID10, "eID10");
-  AddBranch(&eID11, "eID11");
-  AddBranch(&eID12, "eID12");
-  AddBranch(&eID13, "eID13");
-  AddBranch(&eID14, "eID14");
-  AddBranch(&eID15, "eID15");
-  AddBranch(&eID16, "eID16");
-  AddBranch(&eID17, "eID17");
+AddBranch(&eID01, "eID01");
+AddBranch(&eID02, "eID02");
+AddBranch(&eID03, "eID03");
+AddBranch(&eID04, "eID04");
+AddBranch(&eID05, "eID05");
+AddBranch(&eID06, "eID06");
+AddBranch(&eID07, "eID07");
+AddBranch(&eID08, "eID08");
+AddBranch(&eID09, "eID09");
+AddBranch(&eID10, "eID10");
+AddBranch(&eID11, "eID11");
+AddBranch(&eID12, "eID12");
+AddBranch(&eID13, "eID13");
+AddBranch(&eID14, "eID14");
+AddBranch(&eID15, "eID15");
+AddBranch(&eID16, "eID16");
+AddBranch(&eID17, "eID17");
 
-  eID01.clear();
-  eID02.clear();
-  eID03.clear();
-  eID04.clear();
-  eID05.clear();
-  eID06.clear();
-  eID07.clear();
-  eID08.clear();
-  eID09.clear();
-  eID10.clear();
-  eID11.clear();
-  eID12.clear();
-  eID13.clear();
-  eID14.clear();
-  eID15.clear();
-  eID16.clear();
-  eID17.clear();
+eID01.clear();
+eID02.clear();
+eID03.clear();
+eID04.clear();
+eID05.clear();
+eID06.clear();
+eID07.clear();
+eID08.clear();
+eID09.clear();
+eID10.clear();
+eID11.clear();
+eID12.clear();
+eID13.clear();
+eID14.clear();
+eID15.clear();
+eID16.clear();
+eID17.clear();
 
-  AddBranch(&muID01, "muID01");
-  AddBranch(&muID02, "muID02");
-  AddBranch(&muID03, "muID03");
-  AddBranch(&muID04, "muID04");
-  AddBranch(&muID05, "muID05");
-  AddBranch(&muID06, "muID06");
-  AddBranch(&muID07, "muID07");
-  AddBranch(&muID08, "muID08");
-  AddBranch(&muID09, "muID09");
-  AddBranch(&muID10, "muID10");
-  AddBranch(&muID11, "muID11");
-  AddBranch(&muID12, "muID12");
-  AddBranch(&muID13, "muID13");
-  AddBranch(&muID14, "muID14");
-  AddBranch(&muID15, "muID15");
+AddBranch(&muID01, "muID01");
+AddBranch(&muID02, "muID02");
+AddBranch(&muID03, "muID03");
+AddBranch(&muID04, "muID04");
+AddBranch(&muID05, "muID05");
+AddBranch(&muID06, "muID06");
+AddBranch(&muID07, "muID07");
+AddBranch(&muID08, "muID08");
+AddBranch(&muID09, "muID09");
+AddBranch(&muID10, "muID10");
+AddBranch(&muID11, "muID11");
+AddBranch(&muID12, "muID12");
+AddBranch(&muID13, "muID13");
+AddBranch(&muID14, "muID14");
+AddBranch(&muID15, "muID15");
 
-  muID01.clear();
-  muID02.clear();
-  muID03.clear();
-  muID04.clear();
-  muID05.clear();
-  muID06.clear();
-  muID07.clear();
-  muID08.clear();
-  muID09.clear();
-  muID10.clear();
-  muID11.clear();
-  muID12.clear();
-  muID13.clear();
-  muID14.clear();
-  muID15.clear();
+muID01.clear();
+muID02.clear();
+muID03.clear();
+muID04.clear();
+muID05.clear();
+muID06.clear();
+muID07.clear();
+muID08.clear();
+muID09.clear();
+muID10.clear();
+muID11.clear();
+muID12.clear();
+muID13.clear();
+muID14.clear();
+muID15.clear();
 
 
 */
