@@ -43,7 +43,7 @@ eIsoBase2012Ecp = eIsoBase.clone()
 eIsoBase2012Ecp.iso1 = cms.double(999.99)     
 eIsoBase2012Ecp.iso2 = cms.double(999.99)     
 eIsoBase2012Ecp.iso3 = cms.double(999.99)      
-eIsoBase2012Ecp.iso4 = cms.double(0.10)##hcIso
+eIsoBase2012Ecp.iso4 = cms.double(0.15)##hcIso for pt > 20 GeV
 
 #Total Loose ID
 eSel2012HZZ  = eSelBase.clone()
