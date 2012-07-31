@@ -7,10 +7,13 @@
 #include <cutvalues.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
+#include <fstream>
 
 void signalEff_pileupSys::Loop(int lepCode)
 {
   if (fChain == 0) return;
+
+  std::string leptonName = lepCode==0? "electron":"muon";
 
   Long64_t nentries = fChain->GetEntriesFast();
   cout << "nentries = " << nentries << endl;
@@ -24,6 +27,9 @@ void signalEff_pileupSys::Loop(int lepCode)
   double nPassEvts_central[3]={0};
   double nPassEvts_up[3]={0};
   double nPassEvts_down[3]={0};
+
+  Long64_t nPassTotal = 0;
+  Long64_t nPassB[3]  ={0};
 
   TH1D* hsys[3];
   TH1D* hpass[3];
@@ -64,7 +70,8 @@ void signalEff_pileupSys::Loop(int lepCode)
 	-> SetTitle(titleName[i].data());
     }
 
-
+  ofstream fout;
+  fout.open(Form("%s.dat",leptonName.data()));
 
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
@@ -83,8 +90,8 @@ void signalEff_pileupSys::Loop(int lepCode)
     h_output_nint_mc[1]->Fill(PU_nTrueInt, PU_weight_up); 
     h_output_nint_mc[2]->Fill(PU_nTrueInt, PU_weight_down); 
 
-//     cout << "Looking for best candidate" << endl;
 
+    int NBTAGMAX = -1;
     for(int ih=0; ih < lepType->size(); ih++){
 
       int lepton = lepType->at(ih);
@@ -93,39 +100,59 @@ void signalEff_pileupSys::Loop(int lepCode)
       int bitmap = passBit->at(ih);
 
       bool Pass=false;
-      if(bitmap & ALL_SIGNAL)Pass=true;
+      if((bitmap & MZJJ_SIGNAL)) Pass=true;
       if(!Pass)continue;
 
       double zjjMass = zjjM->at(ih);
-      if(fabs(zjjMass - MZ_PDG) < fabs(best_mZjj - MZ_PDG))
+      
+      double zllMass = zllM->at(ih);
+
+      int nbtag = nBTags->at(ih);
+
+      if(nbtag > NBTAGMAX)
 	{
-	  best_mZjj = zjjMass;
 	  myBest    = ih;
-// 	  cout << "myBest = " << myBest << "\t zjjM = " << best_mZjj << 
-// 	    "\t bestHCand = " << bestHCand << endl; 
+	  best_mZjj = zjjMass;
+	  NBTAGMAX  = nbtag;
+	}
+      else if(nbtag == NBTAGMAX)
+	{
+	  if(fabs(zjjMass - MZ_PDG) < fabs(best_mZjj - MZ_PDG))
+ 	    {
+	      myBest    = ih;
+	      best_mZjj = zjjMass;
+	      NBTAGMAX  = nbtag;
+	      
+	    }
+
 	}
       
-    }
+    } // loop over candidates
 
     if(myBest<0)continue;
+    if(NBTAGMAX<0)continue;
 
-    int nbtag=nBTags->at(myBest);
+    int bitBest = passBit->at(myBest);
+    if(! ( ( bitBest & PFMET_SIG) && 
+  	   ( bitBest & HELI_LD )
+  	   ))continue;
+    
+    nPassTotal ++;
+    nPassB[NBTAGMAX] ++;
+//     if(NBTAGMAX==1)
+    fout << EvtInfo_EventNum << endl;
       
-    if(nbtag>=0){
-      nPassEvts[nbtag] += 1.0;
-      nPassEvts_central[nbtag]+= PU_weight_central;
-      nPassEvts_up[nbtag]+= PU_weight_up;
-      nPassEvts_down[nbtag]+= PU_weight_down;
-
-    }
-
+    nPassEvts[NBTAGMAX] += 1.0;
+    nPassEvts_central[NBTAGMAX]+= PU_weight_central;
+    nPassEvts_up[NBTAGMAX]+= PU_weight_up;
+    nPassEvts_down[NBTAGMAX]+= PU_weight_down;
+    
   } // loop over entries
     
+  fout.close();
   for(int ib=0; ib<3; ib++)
     {
       cout << "npass raw with " << ib << " btag = " << nPassEvts[ib] << endl;
-      cout << "npass with " << ib << " btag = " << nPassEvts_central[ib] << 
-	"\t" << nPassEvts_up[ib] << "\t" << nPassEvts_down[ib] << endl;
 
       hpass[ib]->SetBinContent(1, nPassEvts_down[ib]);
       hpass[ib]->SetBinContent(2, nPassEvts_central[ib]);
@@ -141,7 +168,7 @@ void signalEff_pileupSys::Loop(int lepCode)
 
       hsys[ib]->SetBinContent(2, changeDown);
 
-      cout << "Relative systematic = " << changeUp << "\t" << changeDown << endl;
+//       cout << "Relative systematic = " << changeUp << "\t" << changeDown << endl;
 //       cout << "7 TeV style Relative systematic = " << changeUpInt << "\t" << 
 // 	changeDownInt << endl;
 
@@ -157,7 +184,7 @@ void signalEff_pileupSys::Loop(int lepCode)
   else
     _inputFile = "test.root";
 
-  std::string leptonName = lepCode==0? "electron":"muon";
+
   TFile* outFile = new TFile(Form("pusys_%s_%s",leptonName.data(),
 				  _inputFile.data()),"recreate");   
 
@@ -175,7 +202,13 @@ void signalEff_pileupSys::Loop(int lepCode)
 
   outFile->Close();     
 
+  cout << "Total number of events = " << nPassTotal << endl;
 
+  cout << "Separated into different number of btags" << endl;
+  for(int ib=0; ib<3; ib++)
+    {
+      cout << ib << " btag: " << nPassB[ib] << endl;
+    }
 
 }
 
