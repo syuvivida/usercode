@@ -92,14 +92,10 @@ ZZTree::AddBranchArray(const int arraySize, double* x, std::string name){
 ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   e2012ID_ ( iConfig.getParameter<edm::ParameterSet>("e2012IDSet")),
   mu2012ID_ ( iConfig.getParameter<edm::ParameterSet>("mu2012IDSet")),
-  // e2012Tag_ ( iConfig.getParameter<edm::ParameterSet>("e2012TagSet")),
-  // mu2012NoIso_ ( iConfig.getParameter<edm::ParameterSet>("mu2012NoIsoSet")),
   hzzeejj_(iConfig.getParameter<edm::InputTag>("hzzeejjTag")),
   hzzmmjj_ (iConfig.getParameter<edm::InputTag>("hzzmmjjTag")),
   eleRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("eleRhoIso")),
   muoRhoIsoInputTag_(iConfig.getParameter<edm::InputTag>("muoRhoIso"))//,
-	      //   primaryVertexInputTag_(iConfig.getParameter<edm::InputTag>("primaryVertex")),
-
 {
   tree_=tree; 
   SetBranches();
@@ -128,7 +124,8 @@ ZZTree::~ZZTree()
 void ZZTree::Fill(const edm::Event& iEvent)
 {
   Clear();
-
+  int eventNum = iEvent.id().event();
+  
   //============================================================================
   // 
   //       OBTAIN EVENT-LEVEL VARIABLES
@@ -136,11 +133,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
   //============================================================================
   
   bool isData = iEvent.isRealData();
-
-  // vertices
-  //   edm::Handle<reco::VertexCollection> vtx_h;
-  //   iEvent.getByLabel(primaryVertexInputTag_, vtx_h);
-  //   const reco::Vertex &pv = (*vtx_h)[0];
 
   // missing Et significance
   edm::Handle<pat::METCollection> met_H;
@@ -158,9 +150,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
   e2012ID_.SetData(isData);
   e2012ID_.SetRho(ele_rho);
 
-  // e2012Tag_.SetData(isData);
-  // e2012Tag_.SetRho(ele_rho);
-
   // rho for muon
   edm::Handle<double> muo_rho_event;
   iEvent.getByLabel(muoRhoIsoInputTag_,muo_rho_event);
@@ -169,8 +158,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
   mu2012ID_.SetData(isData);
   mu2012ID_.SetRho(muo_rho);
 
-  // mu2012NoIso_.SetData(isData);
-  // mu2012NoIso_.SetRho(muo_rho);
 
   //============================================================================
   // 
@@ -249,6 +236,13 @@ void ZZTree::Fill(const edm::Event& iEvent)
 
 	  std::map<std::string, bool> Pass    = e2012ID_.CutRecord(*myEle); 
 	  int passOrNot = PassAll(Pass);
+
+// 	      std::map<std::string, bool>::iterator iterCut= Pass.begin();
+// 	      for(;iterCut!=Pass.end();iterCut++)
+// 		std::cout<< myEle->eta() << "-->"<<iterCut->first<<"\t"
+// 			 <<iterCut->second<<std::endl;            
+
+
 	  if(passOrNot==0)continue; // 2012 loose electron ID	  
 	  nPassID++;
 	}
@@ -329,10 +323,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
 
       hcand = i;
 	
-      //     }// end of loop over H->ZZ candidates
-  
-      //     if(hcand <0)continue; // there is no higgs candidate for this lepton type
-  
       
       const pat::CompositeCandidate & goodH = (*hzzlljj)[hcand];
       const reco::Candidate * Zll = goodH.daughter(LEPZ);
