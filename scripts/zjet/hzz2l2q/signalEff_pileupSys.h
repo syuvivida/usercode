@@ -72,9 +72,6 @@ public :
    vector<double>  *genJetPt_;
    vector<double>  *genJetEta_;
    vector<double>  *genJetPhi_;
-   Int_t           nGoodHCand;
-   Int_t           nAllHCand;
-   Int_t           bestHCand;
    Double_t        metSig;
    Double_t        metSigNoPU;
    vector<double>  *higgsPt;
@@ -94,7 +91,6 @@ public :
    vector<double>  *zjjMRefit;
    vector<double>  *zjjdR;
    vector<int>     *jetIndex;
-   vector<int>     *jetHiggsIndex;
    vector<double>  *jetE;
    vector<double>  *jetPt;
    vector<double>  *jetEta;
@@ -140,9 +136,6 @@ public :
    TBranch        *b_genJetPt_;   //!
    TBranch        *b_genJetEta_;   //!
    TBranch        *b_genJetPhi_;   //!
-   TBranch        *b_nGoodHCand;   //!
-   TBranch        *b_nAllHCand;   //!
-   TBranch        *b_bestHCand;   //!
    TBranch        *b_metSig;   //!
    TBranch        *b_metSigNoPU;   //!
    TBranch        *b_higgsPt;   //!
@@ -162,7 +155,6 @@ public :
    TBranch        *b_zjjMRefit;   //!
    TBranch        *b_zjjdR;   //!
    TBranch        *b_jetIndex;   //!
-   TBranch        *b_jetHiggsIndex;   //!
    TBranch        *b_jetE;   //!
    TBranch        *b_jetPt;   //!
    TBranch        *b_jetEta;   //!
@@ -284,7 +276,6 @@ void signalEff_pileupSys::Init(TTree *tree)
    zjjMRefit = 0;
    zjjdR = 0;
    jetIndex = 0;
-   jetHiggsIndex = 0;
    jetE = 0;
    jetPt = 0;
    jetEta = 0;
@@ -334,9 +325,6 @@ void signalEff_pileupSys::Init(TTree *tree)
    fChain->SetBranchAddress("genJetPt_", &genJetPt_, &b_genJetPt_);
    fChain->SetBranchAddress("genJetEta_", &genJetEta_, &b_genJetEta_);
    fChain->SetBranchAddress("genJetPhi_", &genJetPhi_, &b_genJetPhi_);
-   fChain->SetBranchAddress("nGoodHCand", &nGoodHCand, &b_nGoodHCand);
-   fChain->SetBranchAddress("nAllHCand", &nAllHCand, &b_nAllHCand);
-   fChain->SetBranchAddress("bestHCand", &bestHCand, &b_bestHCand);
    fChain->SetBranchAddress("metSig", &metSig, &b_metSig);
    fChain->SetBranchAddress("metSigNoPU", &metSigNoPU, &b_metSigNoPU);
    fChain->SetBranchAddress("higgsPt", &higgsPt, &b_higgsPt);
@@ -356,7 +344,6 @@ void signalEff_pileupSys::Init(TTree *tree)
    fChain->SetBranchAddress("zjjMRefit", &zjjMRefit, &b_zjjMRefit);
    fChain->SetBranchAddress("zjjdR", &zjjdR, &b_zjjdR);
    fChain->SetBranchAddress("jetIndex", &jetIndex, &b_jetIndex);
-   fChain->SetBranchAddress("jetHiggsIndex", &jetHiggsIndex, &b_jetHiggsIndex);
    fChain->SetBranchAddress("jetE", &jetE, &b_jetE);
    fChain->SetBranchAddress("jetPt", &jetPt, &b_jetPt);
    fChain->SetBranchAddress("jetEta", &jetEta, &b_jetEta);

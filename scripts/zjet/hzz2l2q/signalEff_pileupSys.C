@@ -100,7 +100,8 @@ void signalEff_pileupSys::Loop(int lepCode)
       int bitmap = passBit->at(ih);
 
       bool Pass=false;
-      if((bitmap & MZJJ_SIGNAL)) Pass=true;
+      if((bitmap & MZJJ_SIGNAL)) 
+	Pass=true;
       if(!Pass)continue;
 
       double zjjMass = zjjM->at(ih);
@@ -132,14 +133,15 @@ void signalEff_pileupSys::Loop(int lepCode)
     if(myBest<0)continue;
     if(NBTAGMAX<0)continue;
 
+//     if(zllM->at(myBest)>MAX_MZ_LL || zllM->at(myBest)<MIN_MZ_LL)continue;
+
     int bitBest = passBit->at(myBest);
     if(! ( ( bitBest & PFMET_SIG) && 
-  	   ( bitBest & HELI_LD )
-  	   ))continue;
+	   ( bitBest & HELI_LD )
+	   ))continue;
     
     nPassTotal ++;
     nPassB[NBTAGMAX] ++;
-//     if(NBTAGMAX==1)
     fout << EvtInfo_EventNum << endl;
       
     nPassEvts[NBTAGMAX] += 1.0;
