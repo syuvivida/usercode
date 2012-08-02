@@ -9,12 +9,9 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
 process.source = cms.Source("PoolSource",
      fileNames = cms.untracked.vstring(
-    'file:/data4/syu/patsample/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/SkimData/h2l2qSkimData_9_1_DoO.root',
-    'file:/data4/syu/patsample/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/SkimData/h2l2qSkimData_2_1_Taz.root',
-    'file:/data4/syu/patsample/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/SkimData/h2l2qSkimData_7_1_J7Y.root'
-#    'file:/data4/syu/patsample/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_h2l2qSkimData_998_2_lBs.root',
-#    'file:/data4/syu/patsample/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball.root'
-    
+    'file:/afs/cern.ch/work/s/syu/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/h2l2qSkimData_2_1_Taz.root',
+    'file:/afs/cern.ch/work/s/syu/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/h2l2qSkimData_4_1_1I2.root',
+    'file:/afs/cern.ch/work/s/syu/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/h2l2qSkimData_20_1_h3C.root'   
     )
  )
 
@@ -24,6 +21,10 @@ process.maxEvents = cms.untracked.PSet(  input = cms.untracked.int32(-1))
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
+
+process.load("RecoBTag.PerformanceDB.PoolBTagPerformanceDB062012")
+process.load("RecoBTag.PerformanceDB.BTagPerformanceDB062012")
+
 process.GlobalTag.globaltag = cms.string('START50_V15::All')
 
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
@@ -67,8 +68,8 @@ process.tree = cms.EDAnalyzer(
         e2012IDSet  =  eSel2012HZZ,
         mu2012IDSet = muSel2012HZZ,
 ##### debug
-        e2012TagSet = eSel2012Tight,
-        mu2012NoIsoSet = muSel2012NoIso,
+#        e2012TagSet = eSel2012Tight,
+#        mu2012NoIsoSet = muSel2012NoIso,
 #####
         eleRhoIso = cms.InputTag("kt6PFJetsForIso","rho"),
         muoRhoIso = cms.InputTag("kt6PFJetsCentralNeutral", "rho"),
@@ -86,7 +87,7 @@ process.counter_original = cms.EDAnalyzer('EventCounter',
 
 
 process.TFileService = cms.Service("TFileService",
-      fileName = cms.string("zz_mc_cut.root"),
+      fileName = cms.string("hzz2l2q_M300.root"),
       closeFileFast = cms.untracked.bool(True)
   )
 
