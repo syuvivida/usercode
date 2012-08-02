@@ -24,7 +24,6 @@
 
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 
-// #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
@@ -45,6 +44,13 @@
 #include <Math/VectorUtil.h>
 #include <TLegend.h>
 #include <TCanvas.h>
+
+
+// for Btagging scale factors
+#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
+#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
+#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
+
 
 typedef std::vector< edm::Handle< edm::ValueMap<double> > >             
 IsoDepositVals;
@@ -121,7 +127,7 @@ ZZTree::~ZZTree()
 
 
 // ------------ method called to for each event  ------------
-void ZZTree::Fill(const edm::Event& iEvent)
+void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 {
   Clear();
   int eventNum = iEvent.id().event();
@@ -161,6 +167,71 @@ void ZZTree::Fill(const edm::Event& iEvent)
 
   //============================================================================
   // 
+  //   B-TAGGING Scale Factors for DB setup
+  //  
+  //============================================================================
+
+
+  ///////////////////////////////
+  ///   Begin DB setup
+  ///////////////////////////////
+
+  //// This is needed for the DB
+
+  std::map<std::string,PerformanceResult::ResultType> measureMap;
+  measureMap["BTAGBEFF"]=PerformanceResult::BTAGBEFF;
+  measureMap["BTAGBERR"]=PerformanceResult::BTAGBERR;
+  measureMap["BTAGCEFF"]=PerformanceResult::BTAGCEFF;
+  measureMap["BTAGCERR"]=PerformanceResult::BTAGCERR;
+  measureMap["BTAGLEFF"]=PerformanceResult::BTAGLEFF;
+  measureMap["BTAGLERR"]=PerformanceResult::BTAGLERR;
+  measureMap["BTAGNBEFF"]=PerformanceResult::BTAGNBEFF;
+  measureMap["BTAGNBERR"]=PerformanceResult::BTAGNBERR;
+  measureMap["BTAGBEFFCORR"]=PerformanceResult::BTAGBEFFCORR;
+  measureMap["BTAGBERRCORR"]=PerformanceResult::BTAGBERRCORR;
+  measureMap["BTAGCEFFCORR"]=PerformanceResult::BTAGCEFFCORR;
+  measureMap["BTAGCERRCORR"]=PerformanceResult::BTAGCERRCORR;
+  measureMap["BTAGLEFFCORR"]=PerformanceResult::BTAGLEFFCORR;
+  measureMap["BTAGLERRCORR"]=PerformanceResult::BTAGLERRCORR;
+  measureMap["BTAGNBEFFCORR"]=PerformanceResult::BTAGNBEFFCORR;
+  measureMap["BTAGNBERRCORR"]=PerformanceResult::BTAGNBERRCORR;
+  measureMap["BTAGNBERRCORR"]=PerformanceResult::BTAGNBERRCORR;
+  measureMap["MUEFF"]=PerformanceResult::MUEFF;
+  measureMap["MUERR"]=PerformanceResult::MUERR;
+  measureMap["MUFAKE"]=PerformanceResult::MUFAKE;
+  measureMap["MUEFAKE"]=PerformanceResult::MUEFAKE;
+
+  edm::ESHandle<BtagPerformance> perfH;
+  std::vector<std::string> measureName;
+  std::vector<std::string> measureType;
+
+  // Define which Btag and Mistag algorithm you want to use. These are not user defined and need to be exact
+  measureName.push_back("MISTAGJPM");
+  measureName.push_back("MUJETSWPBTAGJPM");
+  measureName.push_back("MISTAGJPL");
+  measureName.push_back("MUJETSWPBTAGJPL");
+  measureName.push_back("MISTAGJPM");
+  measureName.push_back("MISTAGJPL");
+
+  // Tell DB you want the SF. These are not user defined and need to be exact
+  measureType.push_back("BTAGLEFFCORR");
+  measureType.push_back("BTAGBEFFCORR");
+  measureType.push_back("BTAGLEFFCORR");
+  measureType.push_back("BTAGBEFFCORR");
+  measureType.push_back("BTAGLEFF");
+  measureType.push_back("BTAGLEFF");
+
+  // These are user defined maps that we will use to store the SF
+  std::map<std::string,float> ScaleFactors[2];   //store the Btag and Mistag SF for jet0 and jet 1
+  std::map<std::string,float> ScaleFactorsEff[2];   //store the Mistag eff for jet0 and jet 1
+
+  ///////////////////////////////
+  ///   End DB setup
+  ///////////////////////////////
+
+
+  //============================================================================
+  // 
   //    NOW WE START LOOKING FOR HIGGS CANDIDATES
   //  
   //============================================================================
@@ -168,8 +239,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
   //initialize variables
   int hcand = -1;
 
-  double best_mZjj = 9999999.0;
-  int bestHCandIndex = -1;
 
   //LOOP IN 2 KINDS OF LEPTONS: ELECTRONS AND MUONS 
   for (int ilep=0; ilep<2; ilep++) {
@@ -237,10 +306,10 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	  std::map<std::string, bool> Pass    = e2012ID_.CutRecord(*myEle); 
 	  int passOrNot = PassAll(Pass);
 
-// 	      std::map<std::string, bool>::iterator iterCut= Pass.begin();
-// 	      for(;iterCut!=Pass.end();iterCut++)
-// 		std::cout<< myEle->eta() << "-->"<<iterCut->first<<"\t"
-// 			 <<iterCut->second<<std::endl;            
+	  // 	      std::map<std::string, bool>::iterator iterCut= Pass.begin();
+	  // 	      for(;iterCut!=Pass.end();iterCut++)
+	  // 		std::cout<< myEle->eta() << "-->"<<iterCut->first<<"\t"
+	  // 			 <<iterCut->second<<std::endl;            
 
 
 	  if(passOrNot==0)continue; // 2012 loose electron ID	  
@@ -303,9 +372,68 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	if(jpBTag > MIN_BTAG_JP_LOOSE)isLoose=true;
 	if(jpBTag > MIN_BTAG_JP_MEDIUM)isMedium=true;
 	
-	if(!isData)
-	  btsfutiljp->modifyBTagsWithSF_fast(isLoose, isMedium, pt, eta, 
-					     flavor, "mean");
+ 	if(!isData)
+	  {
+	    // // 2011 way of getting btagging scale factors, from local files
+	    // 	    btsfutiljp->modifyBTagsWithSF_fast(isLoose, isMedium, pt, eta, 
+	    // 					       flavor, "mean");
+
+	    // now 2012 settings
+	
+	    float Btageff_SF_ = 1.0;
+
+	    for( size_t iMeasure = 0; iMeasure < measureName.size(); iMeasure++ ){
+	      //Setup our measurement
+	      iSetup.get<BTagPerformanceRecord>().get( measureName[ iMeasure ],perfH);
+	      const BtagPerformance & perf = *(perfH.product());
+	      BinningPointByMap measurePoint;
+	      measurePoint.reset();
+	      ///// pass in the et of the jet
+	      double jetEt = myJet[ijet]->et();
+	      measurePoint.insert(BinningVariables::JetEt, jetEt);  
+	      ///// pass in the absolute eta of the jet
+	      measurePoint.insert(BinningVariables::JetEta, fabs(eta));       
+	      //this is the correction for 2012
+	      float SFL_JPL_2012corr = 1.01744  + (0.000813491*jetEt)-
+ 		(6.01592e-07)*jetEt*jetEt;
+ 	      float SFL_JPM_2012corr = 0.964487 + (0.00134038*jetEt)-
+ 		(1.43995e-06)*jetEt*jetEt;
+
+	      // Extract the mistag eff value
+	      if ( measureType[ iMeasure ] == "BTAGLEFF") {
+		// add a suffix eff so we can distingiush it from other values
+		std::string suffix = "eff"; 
+		ScaleFactorsEff[ijet][ measureName[ iMeasure ] + suffix ] = perf.getResult( measureMap[ measureType[ iMeasure] ], measurePoint);
+	      }
+	      else{ 
+		// Extract the mistag and btag SF
+		// The factor Btageff_SF_ is used for Btagging systematics 
+		// and should be set to 1.0 as default
+		if(measureName[ iMeasure ] == "MISTAGJPM")
+		  ScaleFactors[ijet][ measureName[ iMeasure ] ] = 
+		    SFL_JPM_2012corr*Btageff_SF_*perf.getResult( measureMap[ measureType[ iMeasure] ],measurePoint);
+
+		else if(measureName[ iMeasure ] == "MISTAGJPL")
+		  ScaleFactors[ijet][ measureName[ iMeasure ] ] = 
+		    SFL_JPL_2012corr*Btageff_SF_*perf.getResult( measureMap[ measureType[ iMeasure] ],measurePoint);
+		else
+		  ScaleFactors[ijet][ measureName[ iMeasure ] ] = Btageff_SF_*perf.getResult( measureMap[ measureType[ iMeasure] ], measurePoint);
+	    
+	      }
+	    }
+	    
+	    btsfutiljp->modifyBTagsWithSF( 
+					  isLoose, isMedium, flavor, 
+					  ScaleFactors[ijet]["MUJETSWPBTAGJPL"],
+					  ScaleFactors[ijet]["MUJETSWPBTAGJPM"], 
+					  ScaleFactors[ijet]["MISTAGJPL"],
+					  ScaleFactors[ijet]["MISTAGJPM"],
+					  ScaleFactorsEff[ijet]["MISTAGJPLeff"],
+					  ScaleFactorsEff[ijet]["MISTAGJPMeff"]);
+
+
+	  } // if it's MC
+	
 	if(isLoose)  nLooseBTags++;
 	if(isMedium) nMediumBTags++;
 
@@ -364,15 +492,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
       if(zjjM_local < LOOSE_MIN_MZ_JJ)continue;
       if(zjjM_local > LOOSE_MAX_MZ_JJ)continue;
 
-      bestHCandIndex++;
-      nAllHCand_++;
-      
-      if(fabs(zjjM_local - MZ_PDG) < fabs(best_mZjj - MZ_PDG))
-	{
-	  best_mZjj = zjjM_local;
-	  bestHCand_ = bestHCandIndex;
-	}
-
     
       higgsPt_.push_back(higgsPt_local);
       higgsEta_.push_back(higgsEta_local);
@@ -397,7 +516,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
 	{
 
 	  jetIndex_.push_back(isjet);
-	  jetHiggsIndex_.push_back(bestHCandIndex);
 	  jetE_.push_back(myJet[isjet]->energy());
 	  jetPt_.push_back(myJet[isjet]->pt());
 	  jetEta_.push_back(myJet[isjet]->eta());
@@ -494,9 +612,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
       
       passBit_.push_back(thisBit);
 
-      if((thisBit & ALL_SIGNAL) ||
-	 (thisBit & ALL_SIDEBAND))
-	nGoodHCand_++;
 
 
     } // end of loop over Higgs candidates  
@@ -509,9 +624,6 @@ void ZZTree::Fill(const edm::Event& iEvent)
 void  
 ZZTree::SetBranches(){
 
-  AddBranch(&nGoodHCand_, "nGoodHCand");
-  AddBranch(&nAllHCand_, "nAllHCand");
-  AddBranch(&bestHCand_, "bestHCand");
   AddBranch(&metSig_, "metSig");
   AddBranch(&metSigNoPU_, "metSigNoPU");
 
@@ -535,7 +647,6 @@ ZZTree::SetBranches(){
   AddBranch(&zjjdR_,"zjjdR");
 
   AddBranch(&jetIndex_,"jetIndex");
-  AddBranch(&jetHiggsIndex_,"jetHiggsIndex");
   AddBranch(&jetE_,"jetE");
   AddBranch(&jetPt_,"jetPt");
   AddBranch(&jetEta_,"jetEta");
@@ -605,10 +716,6 @@ ZZTree::SetBranches(){
 void  
 ZZTree::Clear(){
 
-  nGoodHCand_ = 0;
-  nAllHCand_ = 0;
-  bestHCand_ = -1;
-
   metSig_ = DUMMY;
   metSigNoPU_= DUMMY;
 
@@ -632,7 +739,6 @@ ZZTree::Clear(){
   zjjdR_.clear();
 
   jetIndex_.clear();
-  jetHiggsIndex_.clear();
   jetE_.clear();
   jetPt_.clear();
   jetEta_.clear();

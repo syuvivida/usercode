@@ -12,6 +12,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -34,7 +35,7 @@ class ZZTree{
  public:
   ZZTree(std::string name, TTree* tree, const edm::ParameterSet& cfg);
   ~ZZTree();
-  void Fill(const edm::Event& iEvent);
+  void Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup);
   void SetBranches();
   void Clear();
 
@@ -61,20 +62,11 @@ class ZZTree{
   edm::InputTag hzzmmjj_;
   edm::InputTag eleRhoIsoInputTag_;
   edm::InputTag muoRhoIsoInputTag_;
-//   edm::InputTag primaryVertexInputTag_;
   eSelector e2012ID_;
   muSelector mu2012ID_;
 
-  // // for study
-  // eSelector e2012Tag_;
-  // muSelector mu2012NoIso_;
-
   TTree* tree_;
 
-  int    nGoodHCand_;
-  int    nAllHCand_;
-
-  int    bestHCand_;
 
   double metSig_;
   double metSigNoPU_;
@@ -99,7 +91,6 @@ class ZZTree{
   std::vector<double> zjjdR_; // deltaR between two jets   
 
   std::vector<int>    jetIndex_;
-  std::vector<int>    jetHiggsIndex_;
   std::vector<double> jetE_;
   std::vector<double> jetPt_;
   std::vector<double> jetEta_;

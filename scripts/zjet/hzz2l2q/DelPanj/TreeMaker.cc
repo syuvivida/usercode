@@ -91,7 +91,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   if( fillTrigInfo_)  patHltTree_  ->Fill(iEvent);
   if( fillPhotInfo_)  photonTree_  ->Fill(iEvent);
   if( fillZJetPlant_) patZJetPlant_->Fill(iEvent, iSetup);
-  if( fillZZInfo_)    ZZTree_->Fill(iEvent);
+  if( fillZZInfo_)    ZZTree_->Fill(iEvent, iSetup);
   tree_->Fill();
 }
 
