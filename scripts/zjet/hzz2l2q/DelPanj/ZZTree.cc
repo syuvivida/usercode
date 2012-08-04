@@ -110,9 +110,7 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   // the second argument is the random seed, any reason to set it 
   // differently or the same for the 3 taggers
 
-  btsfutiltch = new BTagSFUtil("TCHE", 13); 
-  btsfutilcsv = new BTagSFUtil("CSV", 13);
-  btsfutiljp = new BTagSFUtil("JP", 13);
+//   btsfutiljp = new BTagSFUtil("JP", 13);
 
 }
 
@@ -120,9 +118,7 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
 ZZTree::~ZZTree()
 {
   delete tree_;
-  delete btsfutiltch;
-  delete btsfutilcsv;
-  delete btsfutiljp;
+//   delete btsfutiljp;
 }
 
 
@@ -374,11 +370,11 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	
  	if(!isData)
 	  {
-	    // // 2011 way of getting btagging scale factors, from local files
-	    // 	    btsfutiljp->modifyBTagsWithSF_fast(isLoose, isMedium, pt, eta, 
-	    // 					       flavor, "mean");
-
-	    // now 2012 settings
+	    double phi = myJet[ijet]->phi();
+	    double sin_phi = sin(phi*1000000);
+	    int seed = abs(static_cast<int>(sin_phi*100000));
+	    
+	    BTagSFUtil* btsfutiljp = new BTagSFUtil("JP", seed);
 	
 	    float Btageff_SF_ = 1.0;
 
@@ -394,10 +390,14 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	      ///// pass in the absolute eta of the jet
 	      measurePoint.insert(BinningVariables::JetEta, fabs(eta));       
 	      //this is the correction for 2012
-	      float SFL_JPL_2012corr = 1.01744  + (0.000813491*jetEt)-
- 		(6.01592e-07)*jetEt*jetEt;
- 	      float SFL_JPM_2012corr = 0.964487 + (0.00134038*jetEt)-
- 		(1.43995e-06)*jetEt*jetEt;
+ 	      float SFL_JPL_2012corr = 1.01744  + (0.000813491*jetEt)-
+  		(6.01592e-07)*jetEt*jetEt;
+  	      float SFL_JPM_2012corr = 0.964487 + (0.00134038*jetEt)-
+  		(1.43995e-06)*jetEt*jetEt;
+
+	      // 2011
+// 	      float SFL_JPL_2012corr = 1.00;
+//  	      float SFL_JPM_2012corr = 1.00;
 
 	      // Extract the mistag eff value
 	      if ( measureType[ iMeasure ] == "BTAGLEFF") {
@@ -422,16 +422,16 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	      }
 	    }
 	    
-	    btsfutiljp->modifyBTagsWithSF( 
-					  isLoose, isMedium, flavor, 
-					  ScaleFactors[ijet]["MUJETSWPBTAGJPL"],
-					  ScaleFactors[ijet]["MUJETSWPBTAGJPM"], 
-					  ScaleFactors[ijet]["MISTAGJPL"],
-					  ScaleFactors[ijet]["MISTAGJPM"],
-					  ScaleFactorsEff[ijet]["MISTAGJPLeff"],
-					  ScaleFactorsEff[ijet]["MISTAGJPMeff"]);
-
-
+ 	    btsfutiljp->modifyBTagsWithSF( 
+ 					  isLoose, isMedium, flavor, 
+ 					  ScaleFactors[ijet]["MUJETSWPBTAGJPL"],
+ 					  ScaleFactors[ijet]["MUJETSWPBTAGJPM"], 
+ 					  ScaleFactors[ijet]["MISTAGJPL"],
+ 					  ScaleFactors[ijet]["MISTAGJPM"],
+ 					  ScaleFactorsEff[ijet]["MISTAGJPLeff"],
+ 					  ScaleFactorsEff[ijet]["MISTAGJPMeff"]);
+	    
+	    delete btsfutiljp;
 	  } // if it's MC
 	
 	if(isLoose)  nLooseBTags++;

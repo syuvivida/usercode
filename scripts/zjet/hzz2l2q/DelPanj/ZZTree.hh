@@ -41,11 +41,6 @@ class ZZTree{
 
  private:
   ZZTree();
-  
-  BTagSFUtil* btsfutiltch;
-  BTagSFUtil* btsfutilcsv;
-  BTagSFUtil* btsfutiljp;
-
   void AddBranch(double* x, std::string name);
   void AddBranch(int* x, std::string name);
   void AddBranch(std::vector<double>*, std::string name);
