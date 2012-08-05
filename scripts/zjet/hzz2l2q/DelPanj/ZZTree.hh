@@ -62,7 +62,8 @@ class ZZTree{
 
   TTree* tree_;
 
-
+  double eleRho_;
+  double muoRho_;
   double metSig_;
   double metSigNoPU_;
  

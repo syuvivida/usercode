@@ -148,17 +148,17 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
   // rho for electron
   edm::Handle<double> ele_rho_event;
   iEvent.getByLabel(eleRhoIsoInputTag_,ele_rho_event);
-  double ele_rho= *(ele_rho_event.product());
+  eleRho_ = *(ele_rho_event.product());
   e2012ID_.SetData(isData);
-  e2012ID_.SetRho(ele_rho);
+  e2012ID_.SetRho(eleRho_);
 
   // rho for muon
   edm::Handle<double> muo_rho_event;
   iEvent.getByLabel(muoRhoIsoInputTag_,muo_rho_event);
-  double muo_rho= *(muo_rho_event.product());
+  muoRho_ = *(muo_rho_event.product());
 
   mu2012ID_.SetData(isData);
-  mu2012ID_.SetRho(muo_rho);
+  mu2012ID_.SetRho(muoRho_);
 
 
   //============================================================================
@@ -624,6 +624,8 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 void  
 ZZTree::SetBranches(){
 
+  AddBranch(&eleRho_, "eleRho");
+  AddBranch(&muoRho_, "muoRho");
   AddBranch(&metSig_, "metSig");
   AddBranch(&metSigNoPU_, "metSigNoPU");
 
@@ -715,6 +717,9 @@ ZZTree::SetBranches(){
 
 void  
 ZZTree::Clear(){
+
+  eleRho_ = DUMMY;
+  muoRho_ = DUMMY;
 
   metSig_ = DUMMY;
   metSigNoPU_= DUMMY;
