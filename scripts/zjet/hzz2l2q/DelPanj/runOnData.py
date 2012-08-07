@@ -9,9 +9,7 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
 process.source = cms.Source("PoolSource",
      fileNames = cms.untracked.vstring(
-    'file:/afs/cern.ch/work/s/syu/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/h2l2qSkimData_2_1_Taz.root',
-    'file:/afs/cern.ch/work/s/syu/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/h2l2qSkimData_4_1_1I2.root',
-    'file:/afs/cern.ch/work/s/syu/GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6/h2l2qSkimData_20_1_h3C.root'   
+    'file:/data2/syu/testsample/DoubleMu_Run2012B-PromptReco-v1.root'   
     )
  )
 
@@ -22,10 +20,11 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.load("RecoBTag.PerformanceDB.PoolBTagPerformanceDB062012")
-process.load("RecoBTag.PerformanceDB.BTagPerformanceDB062012")
+## Only needed for MC
+#process.load("RecoBTag.PerformanceDB.PoolBTagPerformanceDB062012")
+#process.load("RecoBTag.PerformanceDB.BTagPerformanceDB062012")
 
-process.GlobalTag.globaltag = cms.string('START50_V15::All')
+process.GlobalTag.globaltag = cms.string('GR_R_52_V9D::All')
 
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
 
@@ -41,17 +40,18 @@ from DelPanj.TreeMaker.muSelLvdp2011_cff import *
 from DelPanj.TreeMaker.eSel2012HZZ_cff import *
 from DelPanj.TreeMaker.muSel2012HZZ_cff import *
 
+
 process.tree = cms.EDAnalyzer(
 	'TreeMaker',
 	fillPUweightInfo_ = cms.bool(True),
 	fillEventInfo_ = cms.bool(True),
-	fillGenInfo_   = cms.bool(True),
+	fillGenInfo_   = cms.bool(False),
 	fillMuonInfo_  = cms.bool(False),
 	fillElecInfo_  = cms.bool(False),
 	fillElecIsoInfo_ = cms.bool(False),
 	fillJetInfo_   = cms.bool(False),
 	fillMetInfo_   = cms.bool(False),
-	fillTrigInfo_  = cms.bool(False),
+	fillTrigInfo_  = cms.bool(True),
 	fillPhotInfo_  = cms.bool(False),
 	fillZJetPlant_ = cms.bool(False),
 	fillZZInfo_    = cms.bool(True),

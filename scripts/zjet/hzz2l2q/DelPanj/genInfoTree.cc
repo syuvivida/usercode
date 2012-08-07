@@ -57,6 +57,8 @@ void
 genInfoTree::Fill(const edm::Event& iEvent)
 {
   Clear();
+  if(iEvent.isRealData())return;
+
   using namespace edm;
   edm::Handle<reco::GenParticleCollection> genParticleHandle;
   if(not iEvent.getByLabel(genPartLabel_, genParticleHandle))

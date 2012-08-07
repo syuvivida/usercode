@@ -778,6 +778,8 @@ void ZZTree::matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet,
   
   genJet.SetPtEtaPhiE(0,0,0,0);
 
+  if(iEvent.isRealData())return;
+
   double maxGenJetPt= DUMMY;
 
   edm::Handle<reco::GenJetCollection> genJetsHandle;
@@ -835,6 +837,8 @@ void ZZTree::matchedParton(const edm::Event& iEvent, const pat::Jet* recJet,
   double recJetPhi = recJet->phi();
   
   parton.SetPtEtaPhiE(0,0,0,0);
+
+  if(iEvent.isRealData())return;
 
   edm::Handle<reco::GenParticleCollection> genParticleHandle;
   if(not iEvent.getByLabel("genParticles", genParticleHandle))
