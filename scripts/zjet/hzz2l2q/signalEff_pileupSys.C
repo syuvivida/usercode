@@ -8,11 +8,11 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 #include <fstream>
+#include <iomanip>
 
 void signalEff_pileupSys::Loop(int lepCode)
 {
   if (fChain == 0) return;
-
   std::string leptonName = lepCode==0? "electron":"muon";
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -29,14 +29,6 @@ void signalEff_pileupSys::Loop(int lepCode)
   double nPassEvts_down[3]={0};
 
   Long64_t nPassTotal = 0;
-
-  TH1D* hsys[3];
-  TH1D* hpass[3];
-  for(int i=0; i<3; i++)
-    {
-      hsys[i] = new TH1D(Form("hsys%d",i),Form("nbtag=%d",i),4,0.5,4.5);
-      hpass[i] = new TH1D(Form("hpass%d",i),Form("nbtag=%d",i),3,-1.5,1.5);
-    }
 
   const int nPUBin = 60;
   TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,
@@ -145,26 +137,30 @@ void signalEff_pileupSys::Loop(int lepCode)
   } // loop over entries
     
   fout.close();
+
+
+  double sysP[3]={0};
+  double sysM[3]={0};
   for(int ib=0; ib<3; ib++)
     {
-
-      hpass[ib]->SetBinContent(1, nPassEvts_down[ib]);
-      hpass[ib]->SetBinContent(2, nPassEvts_central[ib]);
-      hpass[ib]->SetBinContent(3, nPassEvts_up[ib]);
 
       double changeUp = (nPassEvts_up[ib] - nPassEvts_central[ib])/
 	nPassEvts_central[ib];
 
-      hsys[ib]->SetBinContent(1, changeUp);
-
       double changeDown = (nPassEvts_down[ib] - nPassEvts_central[ib])/
 	nPassEvts_central[ib];
 
-      hsys[ib]->SetBinContent(2, changeDown);
-
       cout << "Relative systematic = " << changeUp << "\t" << changeDown << endl;
-
-	
+      if(changeUp>0)
+	{
+	  sysP[ib] = changeUp*100;
+	  sysM[ib] = changeDown*100;
+	}
+      else
+	{
+	  sysP[ib] = changeDown*100;
+	  sysM[ib] = changeUp*100;
+	}
     }
 
 //   std::string remword  ="/home/syu/HZZ/CMSSW_5_2_3_patch2/src/runJob/2012BTag_Sychronized/";
@@ -180,11 +176,6 @@ void signalEff_pileupSys::Loop(int lepCode)
 //   TFile* outFile = new TFile(Form("pusys_%s_%s",leptonName.data(),
 // 				  _inputFile.data()),"recreate");   
 
-//   for(int ib=0; ib<3; ib++)
-//     {
-//       hsys[ib]->Write();
-//       hpass[ib]->Write();
-//     }
  
 //   h_input_nint_data->Write();
 //   h_input_nint_mc  ->Write();
@@ -201,7 +192,31 @@ void signalEff_pileupSys::Loop(int lepCode)
     {
       cout << ib << " btag: " << nPassEvts[ib] << endl;
     }
+  cout << endl;
+  cout << endl;
 
+  for(int ib=0; ib<3; ib++)
+    {
+
+      cout << " & ";
+      cout << nPassEvts[ib];
+    }
+  cout << " \\\\" << endl;
+  cout << endl;
+
+
+  for(int ib=0; ib<3; ib++)
+    {
+      cout << " & ";
+      cout << fixed;
+      cout << "{+ " << setprecision(2) << sysP[ib] << " \\atop " << 
+	sysM[ib] << "}";     
+    }
+
+  cout << " \\\\" << endl;
+  cout.unsetf(ios_base::fixed);
+  cout.precision(6);
+    
 }
 
   
