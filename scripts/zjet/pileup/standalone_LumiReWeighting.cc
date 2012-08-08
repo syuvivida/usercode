@@ -587,6 +587,9 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
     case -1:
       std::cout << "Using -1 sigma 5% value " << std::endl;
       break;
+    case 2:
+      std::cout << "Using 73.5 mb value" << std::endl;
+      break;
     default:
       std::cout << "Using central value " << std::endl;
       break;
@@ -629,6 +632,7 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
 	  break;
 	case 2:
 	  Lumi_distr.push_back(Data2012Inflat[i]);
+	  break;
 	default:
 	  Lumi_distr.push_back(Data2012[i]);
 	  break;
