@@ -40,10 +40,10 @@ void pileup::Loop(int lepCode)
   TH1D* h_nvtx_template = new TH1D("h_nvtx_template","",50,0.5,50.5);
   h_nvtx_template->SetXTitle("Number of reconstructed good vertices");
 
-  TH1D* h_eleRho_template = new TH1D("h_eleRho_template","",500,0,100);
+  TH1D* h_eleRho_template = new TH1D("h_eleRho_template","",50,0,60);
   h_eleRho_template->SetXTitle("#rho from kt6PFJetsForIso");
 
-  TH1D* h_muoRho_template = new TH1D("h_muoRho_template","",100,0,20);
+  TH1D* h_muoRho_template = new TH1D("h_muoRho_template","",50,0,10);
   h_muoRho_template->SetXTitle("#rho from kt6PFJetsCentralNeutral");
 
   const int nPUBin = 60;
@@ -163,8 +163,8 @@ void pileup::Loop(int lepCode)
       bool Pass=false;
     
       if((bitmap & MZJJ_SIGNAL) 
- 	 && (bitmap & PFMET_SIG) 
- 	 && (bitmap & HELI_LD)
+//  	 && (bitmap & PFMET_SIG) 
+//  	 && (bitmap & HELI_LD)
 	 )
 	Pass=true;
       if(!Pass)continue;
@@ -252,7 +252,7 @@ void pileup::Loop(int lepCode)
     _inputFile = "test.root";
 
 
-  TFile* outFile = new TFile(Form("pusys_%s_%s",leptonName.data(),
+  TFile* outFile = new TFile(Form("pretag_pileup_%s_%s",leptonName.data(),
 				  _inputFile.data()),"recreate");   
 
   h_input_nint_data->Write();
