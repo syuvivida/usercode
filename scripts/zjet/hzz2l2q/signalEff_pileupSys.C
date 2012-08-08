@@ -209,8 +209,8 @@ void signalEff_pileupSys::Loop(int lepCode)
     {
       cout << " & ";
       cout << fixed;
-      cout << "{+ " << setprecision(2) << sysP[ib] << " \\atop " << 
-	sysM[ib] << "}";     
+      cout << "${+ " << setprecision(2) << sysP[ib] << " \\atop " << 
+	sysM[ib] << "}$";     
     }
 
   cout << " \\\\" << endl;
