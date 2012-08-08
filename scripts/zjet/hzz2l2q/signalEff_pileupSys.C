@@ -29,7 +29,6 @@ void signalEff_pileupSys::Loop(int lepCode)
   double nPassEvts_down[3]={0};
 
   Long64_t nPassTotal = 0;
-  Long64_t nPassB[3]  ={0};
 
   TH1D* hsys[3];
   TH1D* hpass[3];
@@ -100,12 +99,15 @@ void signalEff_pileupSys::Loop(int lepCode)
       int bitmap = passBit->at(ih);
 
       bool Pass=false;
-      if((bitmap & MZJJ_SIGNAL)) 
+    
+      if((bitmap & MZJJ_SIGNAL) &&
+	 (bitmap & PFMET_SIG) &&
+	 (bitmap & HELI_LD)
+	 )
 	Pass=true;
       if(!Pass)continue;
-
+	 
       double zjjMass = zjjM->at(ih);
-      
       double zllMass = zllM->at(ih);
 
       int nbtag = nBTags->at(ih);
@@ -122,27 +124,18 @@ void signalEff_pileupSys::Loop(int lepCode)
  	    {
 	      myBest    = ih;
 	      best_mZjj = zjjMass;
-	      NBTAGMAX  = nbtag;
-	      
+	      NBTAGMAX  = nbtag;	      
 	    }
-
-	}
-      
+	}      
     } // loop over candidates
 
     if(myBest<0)continue;
     if(NBTAGMAX<0)continue;
 
-//     if(zllM->at(myBest)>MAX_MZ_LL || zllM->at(myBest)<MIN_MZ_LL)continue;
-
-    int bitBest = passBit->at(myBest);
-    if(! ( ( bitBest & PFMET_SIG) && 
-	   ( bitBest & HELI_LD )
-	   ))continue;
-    
     nPassTotal ++;
-    nPassB[NBTAGMAX] ++;
+
     fout << EvtInfo_EventNum << endl;
+
       
     nPassEvts[NBTAGMAX] += 1.0;
     nPassEvts_central[NBTAGMAX]+= PU_weight_central;
@@ -154,7 +147,6 @@ void signalEff_pileupSys::Loop(int lepCode)
   fout.close();
   for(int ib=0; ib<3; ib++)
     {
-      cout << "npass raw with " << ib << " btag = " << nPassEvts[ib] << endl;
 
       hpass[ib]->SetBinContent(1, nPassEvts_down[ib]);
       hpass[ib]->SetBinContent(2, nPassEvts_central[ib]);
@@ -170,46 +162,44 @@ void signalEff_pileupSys::Loop(int lepCode)
 
       hsys[ib]->SetBinContent(2, changeDown);
 
-//       cout << "Relative systematic = " << changeUp << "\t" << changeDown << endl;
-//       cout << "7 TeV style Relative systematic = " << changeUpInt << "\t" << 
-// 	changeDownInt << endl;
+      cout << "Relative systematic = " << changeUp << "\t" << changeDown << endl;
 
 	
     }
 
-  std::string remword  ="/home/syu/HZZ/CMSSW_5_2_3_patch2/src/runJob/match_dRrelPt/";
+//   std::string remword  ="/home/syu/HZZ/CMSSW_5_2_3_patch2/src/runJob/2012BTag_Sychronized/";
 
-  size_t pos  = _inputFile.find(remword);
+//   size_t pos  = _inputFile.find(remword);
 
-  if(pos!= std::string::npos)
-    _inputFile.swap(_inputFile.erase(pos,remword.length()));
-  else
-    _inputFile = "test.root";
+//   if(pos!= std::string::npos)
+//     _inputFile.swap(_inputFile.erase(pos,remword.length()));
+//   else
+//     _inputFile = "test.root";
 
 
-  TFile* outFile = new TFile(Form("pusys_%s_%s",leptonName.data(),
-				  _inputFile.data()),"recreate");   
+//   TFile* outFile = new TFile(Form("pusys_%s_%s",leptonName.data(),
+// 				  _inputFile.data()),"recreate");   
 
-  for(int ib=0; ib<3; ib++)
-    {
-      hsys[ib]->Write();
-      hpass[ib]->Write();
-    }
+//   for(int ib=0; ib<3; ib++)
+//     {
+//       hsys[ib]->Write();
+//       hpass[ib]->Write();
+//     }
  
-  h_input_nint_data->Write();
-  h_input_nint_mc  ->Write();
+//   h_input_nint_data->Write();
+//   h_input_nint_mc  ->Write();
 
-  for(int i=0; i< nPUs; i++)
-    h_output_nint_mc[i]->Write();
+//   for(int i=0; i< nPUs; i++)
+//     h_output_nint_mc[i]->Write();
 
-  outFile->Close();     
+//   outFile->Close();     
 
   cout << "Total number of events = " << nPassTotal << endl;
 
   cout << "Separated into different number of btags" << endl;
   for(int ib=0; ib<3; ib++)
     {
-      cout << ib << " btag: " << nPassB[ib] << endl;
+      cout << ib << " btag: " << nPassEvts[ib] << endl;
     }
 
 }
