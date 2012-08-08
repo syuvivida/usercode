@@ -39,12 +39,15 @@ void pileup::Loop(int lepCode)
 
   TH1D* h_nvtx_template = new TH1D("h_nvtx_template","",50,0.5,50.5);
   h_nvtx_template->SetXTitle("Number of reconstructed good vertices");
+  h_nvtx_template->Sumw2();
 
   TH1D* h_eleRho_template = new TH1D("h_eleRho_template","",50,0,60);
   h_eleRho_template->SetXTitle("#rho from kt6PFJetsForIso");
+  h_eleRho_template->Sumw2();
 
   TH1D* h_muoRho_template = new TH1D("h_muoRho_template","",50,0,10);
   h_muoRho_template->SetXTitle("#rho from kt6PFJetsCentralNeutral");
+  h_muoRho_template->Sumw2();
 
   const int nPUBin = 60;
   TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,
