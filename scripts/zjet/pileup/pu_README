@@ -1,16 +1,5 @@
-./pileupCalc.py -i excludedBadRun_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/pileup_2011_JSON_pixelLumi.txt --calcMode true --minBiasXsec 68000 --maxPileupBin 50 --numPileupBins 50 MyDataPileupHistogram_central.root
 
-./pileupCalc.py -i excludedBadRun_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/pileup_2011_JSON_pixelLumi.txt --calcMode true --minBiasXsec 71400 --maxPileupBin 50 --numPileupBins 50 MyDataPileupHistogram_up.root
-
-./pileupCalc.py -i excludedBadRun_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/pileup_2011_JSON_pixelLumi.txt --calcMode true --minBiasXsec 64600 --maxPileupBin 50 --numPileupBins 50 MyDataPileupHistogram_down.root
-
-./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196509_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON  /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-196531_patch2.txt --calcMode true --minBiasXsec 69400 --maxPileupBin 60 --numPileupBins 60 8TeVDataPileup_190456-196509_central.root
-
-./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196509_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON  /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-196531_patch2.txt --calcMode true --minBiasXsec 72870 --maxPileupBin 60 --numPileupBins 60 8TeVDataPileup_190456-196509_up.root
-
-./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196509_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON  /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-196531_patch2.txt --calcMode true --minBiasXsec 65930 --maxPileupBin 60 --numPileupBins 60 8TeVDataPileup_190456-196509_down.root
-
-
+ ./compareJSON.py --sub /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-195947_8TeV_Collisions12_LowPileUpRun_JSON.txt > & ! ~/www/public/zz2l2q/pileup/noLowLumi_Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 ./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196509_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 69400 --maxPileupBin 60 --numPileupBins 60 corr_190456-196509_central.root
 
@@ -21,8 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 69400 --maxPileupBin 60 --numPileupBins 60 corr_190456-196531_central.root
+./pileupCalc.py -i /afs/cern.ch/user/s/syu/www/public/zz2l2q/pileup/noLowLumi_Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 69400 --maxPileupBin 60 --numPileupBins 60 corr_190456-196531_central.root
 
-./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 72870 --maxPileupBin 60 --numPileupBins 60 corr_190456-196531_up.root
+./pileupCalc.py -i /afs/cern.ch/user/s/syu/www/public/zz2l2q/pileup/noLowLumi_Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 72870 --maxPileupBin 60 --numPileupBins 60 corr_190456-196531_up.root
 
-./pileupCalc.py -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 65930 --maxPileupBin 60 --numPileupBins 60 corr_190456-196531_down.root
+./pileupCalc.py -i /afs/cern.ch/user/s/syu/www/public/zz2l2q/pileup/noLowLumi_Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt --calcMode true --minBiasXsec 65930 --maxPileupBin 60 --numPileupBins 60 corr_190456-196531_down.root
