@@ -118,14 +118,22 @@ void pileup::Loop(int lepCode)
 	{
 	  std::string thisTrig= trigName->at(it);
 	  int results = trigResults->at(it);
-// 	  cout << thisTrig << "\t" << results << endl;
-	  if(thisTrig.find("HLT_Mu17_Mu8")!= std::string::npos && results==1)
+//  	  cout << thisTrig << "\t" << results << endl;
+
+	  if(lepCode==0 && thisTrig.find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")
+	     != std::string::npos && results==1)
+	    {
+	      passTrigger=true;
+	      break;
+	    }	  
+
+	  if(lepCode==1 && thisTrig.find("HLT_Mu17_Mu8")!= std::string::npos && results==1)
 	    {
 	      passTrigger=true;
 	      break;
 	    }
 
-	  if(thisTrig.find("HLT_Mu17_TkMu8")!= std::string::npos && results==1)
+	  if(lepCode==1 && thisTrig.find("HLT_Mu17_TkMu8")!= std::string::npos && results==1)
 	    {
 	      passTrigger=true;
 	      break;
@@ -255,7 +263,7 @@ void pileup::Loop(int lepCode)
     _inputFile = "test.root";
 
 
-  TFile* outFile = new TFile(Form("pretag_pileup_%s_%s",leptonName.data(),
+  TFile* outFile = new TFile(Form("fixed_pileup_%s_%s",leptonName.data(),
 				  _inputFile.data()),"recreate");   
 
   h_input_nint_data->Write();
