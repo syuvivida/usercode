@@ -5,6 +5,7 @@
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <map>
+#include <fstream>
 
 const double minZPt  =40.0;
 
@@ -31,24 +32,29 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 			 int DEBUG)
 {
 
-  //=============================================================================
+  //============================================================================
   //   Print out information
-  //=============================================================================
+  //============================================================================
 
   if (fChain == 0) return;
   cout << "=========================================================" << endl;
+  std::string leptonName;
+  if(abs(lepID)==13)leptonName = "muon";
+  else if(abs(lepID)==11)leptonName = "electron";
+
+  std::string mcName;  
 
   bool isSherpa=false;
   size_t pos_sherpa  = _inputFileName.find("sherpa");
   if(pos_sherpa!= std::string::npos)
     isSherpa=true;
-  if(isSherpa)cout << "This is a sherpa MC sample" << endl;
+  if(isSherpa){mcName = "sherpa"; cout << "This is a sherpa MC sample" << endl;}
 
   bool isMadgraph=false;
   size_t pos_madgraph  = _inputFileName.find("madgraph");
   if(pos_madgraph!= std::string::npos)
     isMadgraph=true;
-  if(isMadgraph)cout << "This is a madgraph MC sample" << endl;
+  if(isMadgraph){mcName = "madgraph"; cout << "This is a madgraph MC sample" << endl;}
 
   bool isPythia=false;
   size_t pos_pythia  = _inputFileName.find("pythia");
@@ -81,9 +87,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   Long64_t nentries = fChain->GetEntriesFast();
 
   cout << _inputFileName << " has " << nentries << " entries." << endl;
-  std::string leptonName;
-  if(abs(lepID)==13)leptonName = "muon";
-  else if(abs(lepID)==11)leptonName = "electron";
 
   cout << "Running mode: " << endl;
   cout << "exclusive=" << exclusive 
@@ -122,7 +125,7 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   //=============================================================================
 
   TH1D* h_mZ   = new TH1D("h_mZ","",200,20.0,220.0);
-  h_mZ->SetXTitle("M_{ll} [GeV/c^{2}");
+  h_mZ->SetXTitle("M_{ll} [GeV/c^{2}]");
   h_mZ->Sumw2();
 
   TH1D* h_nvtx = new TH1D("h_nvtx","",41.5,-0.5,40.5);
@@ -138,12 +141,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   h2_ystarpstar->SetYTitle("p_{T}cosh[0.5(Y_{Z}-Y_{jet})]");
 
   const int nMAXJETS=4;
-
-  TH1D* h_jetpt_power_template = new TH1D("h_jetpt_power_template","",500,30,530);
-  h_jetpt_power_template->SetXTitle("p_{T}(jet)^{gen} [GeV]");
-  h_jetpt_power_template->Sumw2();
-  TH1D* h_jetpt_power[nMAXJETS+1];
-  TH1D* h_jetp_power[nMAXJETS+1];
    
   TH1D* h_mc_jetpt[nMAXJETS];
   TH1D* h_mc_jety[nMAXJETS];
@@ -165,10 +162,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
   for(int ij=0; ij<nMAXJETS; ij++){
 
-    h_jetpt_power[ij] = (TH1D*)h_jetpt_power_template->Clone(Form("h_jetpt_power%02i",ij+1));
-    h_jetp_power[ij]  = (TH1D*)h_jetpt_power_template->Clone(Form("h_jetp_power%02i",ij+1));
-    h_jetp_power[ij]  -> SetXTitle("p(jet) [GeV]");
-
     h_mc_jetpt[ij]->SetXTitle("p_{T}(jet) [GeV]");
     h_mc_jetpt[ij]->Sumw2();
 
@@ -177,10 +170,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
   }
 
-  h_jetpt_power[4] = (TH1D*)h_jetpt_power_template->Clone("h_jetpt_power_inclusive");
-
-  h_jetp_power[4] = (TH1D*)h_jetpt_power_template->Clone("h_jetp_power_inclusive");
-  h_jetp_power[4]->SetXTitle("p(jet) [GeV]");
 
   TH1D* h_zpt_template = new TH1D("h_zpt_template","",40,0,400);
   h_zpt_template->Sumw2();
@@ -213,7 +202,8 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   h_ystar->SetXTitle("0.5|y_{Z}-y_{jet}|");
 
 
-
+  ofstream fout;
+  fout.open(Form("dressed_%s_%s.dat",leptonName.data(),mcName.data()));
   int nPass[30];
    
   typedef map<double, int,  std::greater<double> > myMap;
@@ -384,8 +374,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 	  maxGenJetIndex = ij;
 	}
 
-      h_jetpt_power[4]->Fill(thisGenJetPt,eventWeight);
-      h_jetp_power[4]->Fill(thisGenJet_l4.P(),eventWeight);
 	
     } // end of loop over jets
       
@@ -458,9 +446,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
         h_mc_jetpt[countGenJet]->Fill(pt_mapthis,eventWeight);
         h_mc_jety[countGenJet]->Fill(fabs(y_mapthis),eventWeight);
 
-	h_jetpt_power[countGenJet]->Fill(pt_mapthis,eventWeight);	
-	h_jetp_power[countGenJet] ->Fill(l4_jthis.P(),eventWeight);
-
         countGenJet++;
       }
 
@@ -476,7 +461,7 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
     h2_ystarpstar->Fill(ystar,ptjet*TMath::CosH(ystar),eventWeight);
  
-
+    fout << EvtInfo_EventNum << endl;
 
     if(DEBUG==1){
       double dR1 = l4_lep[0].DeltaR(l4_j);
@@ -484,6 +469,8 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
       cout << "dR1 = " << dR1 << "\t dR2=" << dR2 << endl;
     }
   } // end of loop over entries
+
+  fout.close();
 
   std::string prefix = "dressed";
   if(!applyWeight)prefix = "raw";
@@ -523,10 +510,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
     h_mc_jety[ij]->Write();
   }
 
-  for(int ij=0; ij < nMAXJETS+1; ij++){
-    h_jetpt_power[ij]->Write();
-    h_jetp_power[ij]->Write();
-  }
   outFile->Close();
 
 }
