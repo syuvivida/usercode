@@ -1,0 +1,5 @@
+fixed_pileup_electron_DoubleElectron_Run2012.root -1 -1
+fixed_pileup_electron_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph.root 3503.71 30461028
+fixed_pileup_electron_TTJets_TuneZ2star_8TeV-madgraph-tauola.root 225.197 6736135
+fixed_pileup_electron_WW_TuneZ2star_8TeV_pythia6_tauola.root 57.1097 10000431
+fixed_pileup_electron_WZ_TuneZ2star_8TeV_pythia6_tauola.root 22.88 10000283
