@@ -5,30 +5,25 @@
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <map>
-#include <fstream>
 
 const double minZPt  =40.0;
+const double minMll = 76.0;
+const double maxMll =106.0;
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
 const double mindR=0.5;
+const double minLepPt = 20.0;
 
-const double minElePt = 20.0;
 const double minEleBarrelEta = 0.0;
 const double maxEleBarrelEta = 2.1;
-
 const double minEleEndcapEta = 0.0;
 const double maxEleEndcapEta = 2.1;
-const double minMee = 76.0;
-const double maxMee =106.0;
 
-const double minMuoPt = 20.0;
 const double maxMuoEta = 2.1;
-const double minMmm = 76.0;
-const double maxMmm =106.0;
 
 
-void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight, 
+void dressedLepton::Loop(int lepID, int mode, bool exclusive, 
 			 int DEBUG)
 {
 
@@ -38,6 +33,14 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
   if (fChain == 0) return;
   cout << "=========================================================" << endl;
+
+  if(mode==0)
+    cout << "bare leptons" << endl;
+  else if(mode==1)
+    cout << "dressed leptons" << endl;
+  else if(mode==2)
+    cout << "both bare and dressed leptons" << endl;
+
   std::string leptonName;
   if(abs(lepID)==13)leptonName = "muon";
   else if(abs(lepID)==11)leptonName = "electron";
@@ -90,7 +93,7 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
   cout << "Running mode: " << endl;
   cout << "exclusive=" << exclusive 
-       << "\t applyWeight=" <<  applyWeight << "\t DEBUG=" << DEBUG << endl;
+       << "\t DEBUG=" << DEBUG << endl;
   cout << endl;
   cout << "The cuts applied: " << endl;
   
@@ -98,22 +101,20 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   cout << " minJetPt= " << minJetPt << endl;
   cout << " maxJetEta= " << maxJetEta << endl;
   cout << " mindR= " << mindR << endl;
+  cout << " minMll = " << minMll << endl;
+  cout << " maxMll = " << maxMll << endl;
 
   cout << "studying " << leptonName << endl;
   if(abs(lepID)==11){
-    cout << " minElePt= " << minElePt << endl;
+    cout << " minLepPt= " << minLepPt << endl;
     cout << " minEleBarrelEta = " << minEleBarrelEta << endl;
     cout << " maxEleBarrelEta = " << maxEleBarrelEta << endl;
     cout << " minEleEndcapEta = " << minEleEndcapEta << endl;
     cout << " maxEleEndcapEta = " << maxEleEndcapEta << endl;
-    cout << " minMee = " << minMee << endl;
-    cout << " maxMee = " << maxMee << endl;
   }
   else if(abs(lepID)==13){
-    cout << " minMuoPt = " << minMuoPt << endl;
+    cout << " minLepPt = " << minLepPt << endl;
     cout << " maxMuoEta = " << maxMuoEta << endl;
-    cout << " minMmm = " << minMmm << endl;
-    cout << " maxMmm = " << maxMmm << endl;
   }
   cout << "=========================================================" << endl;
 
@@ -147,7 +148,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
   TH1D* h_predict_jetpt_template = new TH1D("h_predict_jetpt_template","",nPtBins01,fBinsPt01);
   h_predict_jetpt_template->Sumw2();
-  TH1D* h_leadingjet_pt = (TH1D*)h_predict_jetpt_template->Clone("h_leadingjet_pt");
    
 
   h_mc_jetpt[0] = new TH1D(Form("h_mc_jetpt%02i",1),"1st leading jet",nPtBins01,fBinsPt01);
@@ -158,7 +158,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   TH1D* h_predict_jety_template = new TH1D("h_predict_jety_template","",nYBins,fBinsY);
   h_predict_jety_template->Sumw2();
 
-  TH1D* h_leadingjet_y = (TH1D*)h_predict_jety_template->Clone("h_leadingjet_y");
 
   for(int ij=0; ij<nMAXJETS; ij++){
 
@@ -202,8 +201,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   h_ystar->SetXTitle("0.5|y_{Z}-y_{jet}|");
 
 
-  ofstream fout;
-  fout.open(Form("dressed_%s_%s.dat",leptonName.data(),mcName.data()));
   int nPass[30];
    
   typedef map<double, int,  std::greater<double> > myMap;
@@ -222,8 +219,8 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
     double eventWeight = 1;
 
-    if(applyWeight && PU_weight >= 0.0)eventWeight *= PU_weight;
-    if(applyWeight && mcWeight_>0)eventWeight *= mcWeight_;
+    if(PU_weight >= 0.0)eventWeight *= PU_weight;
+    if(mcWeight_>0)eventWeight *= mcWeight_;
       
     if(DEBUG==1){
       cout << "PU_weight = " << PU_weight << "\t nvertex = " << EvtInfo_NumVtx << endl;
@@ -259,7 +256,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
     
     // do not find m+ or lep-
     if(lepPlusIndex < 0 || lepMinusIndex < 0)continue;
-
     nPass[1]++;
 
     if(DEBUG==1){
@@ -272,10 +268,11 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
     }
 
     int nPt20=0;
-
+    int nPt20Bare=0;
     int indexNumbers[2] = {lepPlusIndex, lepMinusIndex};
 
     TLorentzVector l4_lep[2]; 
+    TLorentzVector l4_lepBare[2]; 
     
 
     for(int ip=0; ip < 2; ip++){
@@ -286,7 +283,22 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 			      genLepE_->at(indexNumbers[ip])
 			      );
 
+
+      l4_lepBare[ip] = l4_lep[ip];
       
+      double ptBare = l4_lepBare[ip].Pt();
+      double etaBare = l4_lepBare[ip].Eta();
+      if(leptonPID==13 && ptBare > minLepPt && fabs(etaBare) < maxMuoEta)nPt20Bare++;
+      if(leptonPID==11 && ptBare > minLepPt && ( 
+					    (fabs(etaBare) > minEleEndcapEta && 
+					     fabs(etaBare) < maxEleEndcapEta) ||
+
+					    (fabs(etaBare) > minEleBarrelEta && 
+					     fabs(etaBare) < maxEleBarrelEta
+					     )
+					    ))nPt20Bare++;
+
+
       TLorentzVector l4_pho(0,0,0,0);
       
       if( genLepPhoE_->at(indexNumbers[ip]) > 1e-5)
@@ -296,13 +308,15 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 			    genLepPhoE_->at(indexNumbers[ip])
 			    );
 
-      l4_lep[ip] += l4_pho;
+
+      if(mode>0)
+	l4_lep[ip] += l4_pho;
       double pt = l4_lep[ip].Pt();
       double eta = l4_lep[ip].Eta();
 
       // muon
-      if(leptonPID==13 && pt > minMuoPt && fabs(eta) < maxMuoEta)nPt20++;
-      if(leptonPID==11 && pt > minElePt && ( 
+      if(leptonPID==13 && pt > minLepPt && fabs(eta) < maxMuoEta)nPt20++;
+      if(leptonPID==11 && pt > minLepPt && ( 
 					    (fabs(eta) > minEleEndcapEta && 
 					     fabs(eta) < maxEleEndcapEta) ||
 
@@ -317,27 +331,46 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
     if(DEBUG==1)
       cout << "nPt20 = " << nPt20 << endl;
 
-    if(leptonPID==13 && (nPt20 < 2))continue;
-    if(leptonPID==11 && (nPt20 < 2))continue;
-
+    if(nPt20 < 2)continue;
     nPass[2]++;
+    
 
-
+    if(mode==2 && nPt20Bare < 2)continue;
+    nPass[3]++;
 
     TLorentzVector l4_z = l4_lep[0]+l4_lep[1];
-
-
     double mll = l4_z.M();
 
-    h_mZ->Fill(mll,eventWeight);
+    TLorentzVector l4_zBare = l4_lepBare[0]+l4_lepBare[1];
+    double mllBare = l4_zBare.M();
+    
+    if(mode<2)
+      h_mZ->Fill(mll,eventWeight);
+    else
+      {
+	int binIndex0 = h_mZ->FindBin(mll);
+	int binIndex1 = h_mZ->FindBin(mllBare);
+	if(binIndex0 == binIndex1)
+	  h_mZ->Fill(mll,eventWeight);
 
-    if(leptonPID==13 && (mll < minMmm || mll > maxMmm))continue;
-    if(leptonPID==11 && (mll < minMee || mll > maxMee))continue;
+      }
+
+    if(mll < minMll || mll > maxMll)continue;
+    nPass[4]++;
+
+    if(mode==2 && (mllBare < minMll || mllBare > maxMll))continue;
+    nPass[5]++;
 
     if(DEBUG==1)
       cout << "dilepton mass = " << mll << endl;
       
-    nPass[3]++;
+    double ptz = l4_z.Pt();
+    if(ptz < minZPt)continue;
+    nPass[6]++;
+
+    double ptzBare = l4_zBare.Pt();
+    if(mode==2 && ptzBare < minZPt)continue;
+    nPass[6]++;
 
     // now look for jets
     double maxGenJetPt = -9999;
@@ -365,6 +398,13 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
       if(dr_ep < mindR)continue;
       if(dr_em < mindR)continue;
+
+      double dr_epBare = l4_lepBare[0].DeltaR(thisGenJet_l4);
+      double dr_emBare = l4_lepBare[1].DeltaR(thisGenJet_l4);
+
+      if(mode==2 && dr_epBare < mindR)continue;
+      if(mode==2 && dr_emBare < mindR)continue;
+
       nGenJets++; 
       sorted_genJetEtMap.insert(std::pair<double, int>(thisGenJetPt,ij));  
 
@@ -392,16 +432,11 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
     if(maxGenJetIndex < 0)continue;
 
-    nPass[4]++;
+    nPass[7]++;
 
     if(exclusive && nGenJets!=1)continue;
      
-    nPass[5]++;
-
-
-    double ptz = l4_z.Pt();
-
-    if(ptz < minZPt)continue;
+    nPass[8]++;
 
  
     TLorentzVector l4_j(0,0,0,0);
@@ -414,12 +449,13 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
     double yz = l4_z.Rapidity();
     double yj = l4_j.Rapidity();
-
     double yB = 0.5*(yz + yj);
     double ystar = 0.5*(yz-yj);
 
-    h_leadingjet_pt->Fill(ptjet,eventWeight);
-    h_leadingjet_y->Fill(fabs(yj),eventWeight);
+    double yzBare = l4_zBare.Rapidity();
+    double yBBare = 0.5*(yzBare + yj);
+    double ystarBare = 0.5*(yzBare-yj);
+
      
       
     if(DEBUG==1)
@@ -451,17 +487,45 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
 
     if(DEBUG==1)cout << "nGenJets = " << sorted_genJetEtMap.size() 
 		     << "\t countGenJet = " << countGenJet << endl;
+    if(mode<2){
+      h_zpt->Fill(ptz,eventWeight);
+      h_zy->Fill(fabs(yz),eventWeight);
+      h_yB->Fill(fabs(yB),eventWeight);
+      h_ystar->Fill(fabs(ystar),eventWeight);
+    }
 
-    h_zpt->Fill(ptz,eventWeight);
+    else
+      {
+	int binIndex0 = h_zpt->FindBin(ptz);
+	int binIndex1 = h_zpt->FindBin(ptzBare);
+	if(binIndex0 == binIndex1)
+	  h_zpt->Fill(ptz,eventWeight);
+
+	binIndex0 = h_zy->FindBin(fabs(yz));
+	binIndex1 = h_zy->FindBin(fabs(yzBare));
+	if(binIndex0 == binIndex1)
+	  h_zy->Fill(fabs(yz),eventWeight);
+
+	binIndex0 = h_yB->FindBin(fabs(yB));
+	binIndex1 = h_yB->FindBin(fabs(yBBare));
+	if(binIndex0 == binIndex1)
+	  h_yB->Fill(fabs(yB),eventWeight);
+
+
+	binIndex0 = h_ystar->FindBin(fabs(ystar));
+	binIndex1 = h_ystar->FindBin(fabs(ystarBare));
+	if(binIndex0 == binIndex1)
+	  h_ystar->Fill(fabs(ystar),eventWeight);
+
+      }
+
+
+    
     h_jetpt->Fill(ptjet,eventWeight); 
-    h_zy->Fill(fabs(yz),eventWeight);
     h_jety->Fill(fabs(yj),eventWeight);
-    h_yB->Fill(fabs(yB),eventWeight);
-    h_ystar->Fill(fabs(ystar),eventWeight);
 
     h2_ystarpstar->Fill(ystar,ptjet*TMath::CosH(ystar),eventWeight);
  
-    fout << EvtInfo_EventNum << endl;
 
     if(DEBUG==1){
       double dR1 = l4_lep[0].DeltaR(l4_j);
@@ -470,10 +534,24 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
     }
   } // end of loop over entries
 
-  fout.close();
 
-  std::string prefix = "dressed";
-  if(!applyWeight)prefix = "raw";
+  std::string prefix;
+  switch (mode)
+    {
+    case 0:
+      prefix = "bare";
+      break;
+    case 1:
+      prefix = "dressed";
+      break;
+    case 2:
+      prefix = "both";
+      break;
+    default:
+      prefix = "test";
+      break;
+    } // end of switch
+
   if(exclusive)prefix += "_exclusive1Jet";
   if(minZPt>1e-6)prefix += Form("_zPt%d",(int)minZPt);
 
@@ -494,8 +572,6 @@ void dressedLepton::Loop(int lepID, bool exclusive, bool applyWeight,
   h_nvtx->Write();
   h_njet->Write();
         
-  h_leadingjet_pt->Write();
-  h_leadingjet_y->Write();
   h_yB->Write();
   h_ystar->Write();
   
