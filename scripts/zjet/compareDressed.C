@@ -208,7 +208,7 @@ void compareDressed(std::string mcfilePostfix,
   fline->SetLineColor(kMagenta);
   fline->SetNpx(2500);
   if(var1.find("mZ")== std::string::npos)
-    hratio->Fit("fline","","");
+    hratio->Fit("fline","","",0.0,2.0);
   else
     hratio->SetXTitle("M_{ll} [GeV/c^{2}]");
   l2->Draw("same");
