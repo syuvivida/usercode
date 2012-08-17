@@ -7,10 +7,10 @@ using namespace std;
 void compareDressed(std::string mcfilePostfix, 
 		    std::string var1="h_ystar", 
 		    float xmin=-9999, float xmax=-9999,
-		    float ymin=0.9, float ymax=1.2,
+		    float ymin=0.8, float ymax=1.1,
 		    std::string var2="",
-		    std::string mcName1="Dressed",
-		    std::string mcName2="Bare",
+		    std::string mcName1="Bare",
+		    std::string mcName2="Dressed",
 		    bool logScale=false
 		    )
 {
@@ -24,8 +24,8 @@ void compareDressed(std::string mcfilePostfix,
   char tempName[300];
   if(var2 ==  "" )var2=var1;
  
-  std::string mcfile1 = "dressed_exclusive1Jet_zPt40_" + mcfilePostfix;
-  std::string mcfile2 = "weighted_exclusive1Jet_zPt40_" + mcfilePostfix;
+  std::string mcfile1 = "bare_exclusive1Jet_zPt40_" + mcfilePostfix;
+  std::string mcfile2 = "dressed_exclusive1Jet_zPt40_" + mcfilePostfix;
 
   std::string header;
   std::string output;
@@ -66,8 +66,9 @@ void compareDressed(std::string mcfilePostfix,
 
   TH1D* hratio =(TH1D*) h1->Clone("hratio");
   hratio->SetYTitle(Form("%s/%s",mcName1.data(),mcName2.data()));
-  hratio->SetLineColor(2);
-  hratio->SetMarkerColor(2);
+  hratio->SetLineColor(1);
+  hratio->SetMarkerColor(1);
+  hratio->Reset();
 
   h1->GetXaxis()->SetNdivisions(5);
   h1->GetYaxis()->SetDecimals();
@@ -118,6 +119,15 @@ void compareDressed(std::string mcfilePostfix,
 
   cout << "h1 integral = "   << h1->Integral() << endl;;
   cout << "h2 integral = " << h2->Integral() << endl;
+
+  float area_h2 = h2->Integral(binLo, binHi);
+
+  h1->Sumw2();
+  h1->Scale(1.0/area_h2);
+
+  h2->Sumw2();
+  h2->Scale(1.0/area_h2);
+  
 
   hratio->Divide(h1, h2, 1,1,"B");
 
@@ -190,14 +200,17 @@ void compareDressed(std::string mcfilePostfix,
   hratio->SetMinimum(ymin);
   hratio->SetTitleOffset(1.2,"Y");
   hratio->Draw("e1");
-  TF1* fline = new TF1("fline","pol1");
+  TF1* fline = new TF1("fline","pol0");
   TLine* l2 = new TLine(xmin,1.,xmax,1.);
   l2->SetLineColor(4);
   l2->SetLineStyle(3);
   fline->SetLineWidth(3);
-  fline->SetLineColor(6);
+  fline->SetLineColor(kMagenta);
   fline->SetNpx(2500);
-  //   hratio->Fit("fline","","");
+  if(var1.find("mZ")== std::string::npos)
+    hratio->Fit("fline","","");
+  else
+    hratio->SetXTitle("M_{ll} [GeV/c^{2}]");
   l2->Draw("same");
 
 
