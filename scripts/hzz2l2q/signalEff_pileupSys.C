@@ -64,6 +64,15 @@ void signalEff_pileupSys::Loop(int lepCode)
   ofstream fout;
   fout.open(Form("%s.dat",leptonName.data()));
 
+  ofstream fout0;
+  fout0.open(Form("%s_0btag.dat",leptonName.data()));
+
+  ofstream fout1;
+  fout1.open(Form("%s_1btag.dat",leptonName.data()));
+
+  ofstream fout2;
+  fout2.open(Form("%s_2btag.dat",leptonName.data()));
+
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
@@ -128,6 +137,13 @@ void signalEff_pileupSys::Loop(int lepCode)
 
     fout << EvtInfo_EventNum << endl;
 
+    if(NBTAGMAX==0)
+      fout0 << EvtInfo_EventNum << endl;
+    else if(NBTAGMAX==1)
+      fout1 << EvtInfo_EventNum << endl;
+    else if(NBTAGMAX==2)
+      fout2 << EvtInfo_EventNum << endl;
+
       
     nPassEvts[NBTAGMAX] += 1.0;
     nPassEvts_central[NBTAGMAX]+= PU_weight_central;
@@ -137,6 +153,10 @@ void signalEff_pileupSys::Loop(int lepCode)
   } // loop over entries
     
   fout.close();
+
+  fout0.close();
+  fout1.close();
+  fout2.close();
 
 
   double sysP[3]={0};
