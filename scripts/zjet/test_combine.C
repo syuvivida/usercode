@@ -1,5 +1,15 @@
+#include <TH1.h>
+#include <TCanvas.h>
+#include <TSystem.h>
+#include <TLegend.h>
+#include <TFile.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
 void test_combine(std::string eikoName="h_jety",double correlation=1.0, 
-		  bool logScale)
+		  bool logScale=false)
 {
   TH1F* h_mu;
   TH1F* h_mujesup;
@@ -133,12 +143,13 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
    
     double rel_sys = rel_sys_up > rel_sys_dn?
       rel_sys_up: rel_sys_dn;
-    cout << "Bin " << i << ": rel_sys = " << rel_sys << "\t" 
- 	 << "rel_state = " << stat_e/value_e << "\t rel_statmu = " <<
-      stat_m/value_m << endl;
+//     cout << "Bin " << i << ": rel_sys = " << rel_sys << "\t" 
+//  	 << "rel_state = " << stat_e/value_e << "\t rel_statmu = " <<
+//       stat_m/value_m << endl;
 
     double sys_e = value_e*rel_sys;
     double sys_m = value_m*rel_sys;
+    
     double total_e_2 = stat_e*stat_e+ sys_e*sys_e;
     double total_m_2 = stat_m*stat_m+ sys_m*sys_m;
 
@@ -146,8 +157,6 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
       (total_e_2 + total_m_2 - 2*correlation*sys_e*sys_m);
 
     cout << "Bin " << i << " alpha = " << alpha << endl;
-//     cout << "Bin " << i << " denominator = " << 
-//       (total_e_2 + total_m_2 - 2*correlation*sys_e*sys_m) << endl;
 
     double combined_value = alpha * value_e + 
       (1-alpha)*value_m;
