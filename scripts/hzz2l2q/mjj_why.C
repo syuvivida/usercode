@@ -19,7 +19,7 @@ double deltaR(double eta1, double phi1, double eta2, double phi2)
 
 }
 
-void mjj_why::Loop(bool applyCut, int DEBUG)
+void mjj_why::Loop(int DEBUG)
 {
   if (fChain == 0) return;
 
@@ -27,23 +27,23 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
   //                    Template histograms
   //================================================================
 
-  TH1D* h_mh_template = new TH1D("h_mh_template","",280,100,1500);
+  TH1D* h_mh_template = new TH1D("h_mh_template","",300,0.0,1500);
   h_mh_template->Sumw2();
   h_mh_template->SetXTitle("M_{lljj} [GeV/c^{2}]");
-  h_mh_template->SetYTitle(Form("Candidates per %d GeV/c^{2}",
+  h_mh_template->SetYTitle(Form("Events per %d GeV/c^{2}",
 				(int)h_mh_template->GetBinWidth(1)));
 
 
   TH1D* h_mll_template = new TH1D("h_mll_template","",100,0.0,200.0);
   h_mll_template->Sumw2();
   h_mll_template->SetXTitle("M_{ll} [GeV/c^{2}]");
-  h_mll_template->SetYTitle(Form("Candidates per %d GeV/c^{2}",
+  h_mll_template->SetYTitle(Form("Events per %d GeV/c^{2}",
 				 (int)h_mll_template->GetBinWidth(1)));
 
   TH1D* h_mjj_template = new TH1D("h_mjj_template","",100,0.0,200.0);
   h_mjj_template->Sumw2();
   h_mjj_template->SetXTitle("M_{jj} [GeV/c^{2}]");
-  h_mjj_template->SetYTitle(Form("Candidates per %d GeV/c^{2}",
+  h_mjj_template->SetYTitle(Form("Events per %d GeV/c^{2}",
 				 (int)h_mjj_template->GetBinWidth(1)));
 
   //================================================================
@@ -53,11 +53,12 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
   TH1D* h_mh_parton_mother = 
     (TH1D*)h_mh_template->Clone("h_mh_parton_mother");
   h_mh_parton_mother->SetTitle("status==3, PID==25");
-
+  h_mh_parton_mother->SetXTitle("M_{H} [GeV/c^{2}]");
 
   TH1D* h_mh_parton_daughter = 
     (TH1D*)h_mh_template->Clone("h_mh_parton_daughter");
   h_mh_parton_daughter->SetTitle("status==3");
+  h_mh_parton_daughter->SetXTitle("M_{llqq} [GeV/c^{2}]");
 
   TH1D* h_mll_parton_daughter = 
     (TH1D*)h_mll_template->Clone("h_mll_parton_daughter");
@@ -66,60 +67,104 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
   TH1D* h_mjj_parton_daughter = 
     (TH1D*)h_mjj_template->Clone("h_mjj_parton_daughter");
   h_mjj_parton_daughter->SetTitle("status==3");
+  h_mjj_parton_daughter->SetXTitle("M_{qq} [GeV/c^{2}]");
 
 
   //================================================================
   //                    status=1 histograms
   //================================================================
-  const int NCASES=4;
+  const int NCASES=6;
   std::string title[NCASES]={
-    "status==1, matched and separated",
-    "status==1, matched and merged",
-    "status==1, both matched and merged",
-    "status==1, only one quark matched"
+    "matched and separated (#geq 2 jets)",  //0 
+    "matched and merged (==1 jet)",         //1
+    "matched and merged (#geq 2 jets)",     //2
+    "only one quark matched (==1 jet)",     //3
+    "only one quark matched (#geq 2 jets)", //4
+    "no match (#geq 2 jets)"                //5
   };
 
+  
+  TH1D* h_mh_parton_event[NCASES];
+  TH1D* h_mll_parton_event[NCASES];
+  TH1D* h_mjj_parton_event[NCASES]; 
 
-  TH1D* h_mh_parton[NCASES];
-  TH1D* h_mll_parton[NCASES];
-  TH1D* h_mjj_parton[NCASES]; 
+  TH1D* h_mh_stable_event[NCASES];
+  TH1D* h_mll_stable_event[NCASES];
+  TH1D* h_mjj_stable_event[NCASES];
 
-  TH1D* h_mh_stable[NCASES];
-  TH1D* h_mll_stable[NCASES];
-  TH1D* h_mjj_stable[NCASES];
+  TH1D* h_mh_parton_random[NCASES];
+  TH1D* h_mll_parton_random[NCASES];
+  TH1D* h_mjj_parton_random[NCASES]; 
 
-  TH1D* h_mh_random[NCASES];
-  TH1D* h_mll_random[NCASES];
-  TH1D* h_mjj_random[NCASES];
+  TH1D* h_mh_stable_random[NCASES];
+  TH1D* h_mll_stable_random[NCASES];
+  TH1D* h_mjj_stable_random[NCASES];
 
   for(int i=0; i< NCASES; i++){
 
-    h_mh_parton[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_parton%d",i));
-    h_mh_parton[i]->SetTitle(title[i].data());
+    //================================================================
+    //                    event-level histograms
+    //================================================================
 
-    h_mll_parton[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_parton%d",i));
-    h_mll_parton[i]->SetTitle(title[i].data());
+    h_mh_parton_event[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_parton_event%d",i));
+    h_mh_parton_event[i]->SetTitle(title[i].data());
+    h_mh_parton_event[i]->SetXTitle("M_{llqq} [GeV/c^{2}]");
 
-    h_mjj_parton[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_parton%d",i));
-    h_mjj_parton[i]->SetTitle(title[i].data());
+    h_mh_stable_event[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_stable_event%d",i));
+    h_mh_stable_event[i]->SetTitle(title[i].data());
 
-    h_mh_stable[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_stable%d",i));
-    h_mh_stable[i]->SetTitle(title[i].data());
+    h_mll_parton_event[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_parton_event%d",i));
+    h_mll_parton_event[i]->SetTitle(title[i].data());
 
-    h_mll_stable[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_stable%d",i));
-    h_mll_stable[i]->SetTitle(title[i].data());
+    h_mll_stable_event[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_stable_event%d",i));
+    h_mll_stable_event[i]->SetTitle(title[i].data());
 
-    h_mjj_stable[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_stable%d",i));
-    h_mjj_stable[i]->SetTitle(title[i].data());
+    h_mjj_parton_event[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_parton_event%d",i));
+    h_mjj_parton_event[i]->SetTitle(title[i].data());
+    h_mjj_parton_event[i]->SetXTitle("M_{qq} [GeV/c^{2}]");
 
-    h_mh_random[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_random%d",i));
-    h_mh_random[i]->SetTitle(title[i].data());
+    h_mjj_stable_event[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_stable_event%d",i));
+    h_mjj_stable_event[i]->SetTitle(title[i].data());
 
-    h_mll_random[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_random%d",i));
-    h_mll_random[i]->SetTitle(title[i].data());
 
-    h_mjj_random[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_random%d",i));
-    h_mjj_random[i]->SetTitle(title[i].data());
+    //================================================================
+    //                    candidate-level histograms
+    //================================================================
+
+    std::string ytitle = Form("Candidates per %d GeV/c^{2}",
+			      (int)h_mh_template->GetBinWidth(1));
+
+    h_mh_parton_random[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_parton_random%d",i));
+    h_mh_parton_random[i]->SetTitle(title[i].data());
+    h_mh_parton_random[i]->SetXTitle("M_{llqq} [GeV/c^{2}]");
+    h_mh_parton_random[i]->SetYTitle(ytitle.data());
+
+    h_mh_stable_random[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_stable_random%d",i));
+    h_mh_stable_random[i]->SetTitle(title[i].data());
+    h_mh_stable_random[i]->SetYTitle(ytitle.data());
+
+
+    ytitle = Form("Candidates per %d GeV/c^{2}",
+		  (int)h_mll_template->GetBinWidth(1));
+    h_mll_parton_random[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_parton_random%d",i));
+    h_mll_parton_random[i]->SetTitle(title[i].data());
+    h_mll_parton_random[i]->SetYTitle(ytitle.data());   
+
+    h_mll_stable_random[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_stable_random%d",i));
+    h_mll_stable_random[i]->SetTitle(title[i].data());
+    h_mll_stable_random[i]->SetYTitle(ytitle.data());   
+
+
+    ytitle = Form("Candidates per %d GeV/c^{2}",
+		  (int)h_mjj_template->GetBinWidth(1));
+    h_mjj_parton_random[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_parton_random%d",i));
+    h_mjj_parton_random[i]->SetTitle(title[i].data());
+    h_mjj_parton_random[i]->SetXTitle("M_{qq} [GeV/c^{2}]");
+    h_mjj_parton_random[i]->SetYTitle(ytitle.data()); 
+ 
+    h_mjj_stable_random[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_stable_random%d",i));
+    h_mjj_stable_random[i]->SetTitle(title[i].data());
+    h_mjj_stable_random[i]->SetYTitle(ytitle.data()); 
 
   }
 
@@ -307,11 +352,6 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
     h_mjj_parton_daughter->Fill(mZjj_parton);
 
 
-    if(applyCut && q1.Pt() < 30.0)continue;
-    if(applyCut && q2.Pt() < 30.0)continue;
-    if(applyCut && fabs(q1.Eta()) >2.4)continue;
-    if(applyCut && fabs(q2.Eta()) >2.4)continue;
-
     nPass[2]++;
 
 
@@ -328,7 +368,7 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
     double lep2postphi = lep2_post.Phi();
 
     //================================================================
-    // For random combination, more like real data
+    // Starting from genJets, more like real data
     //================================================================
 
     for(unsigned int ijet =0; ijet < genJetPt_->size(); ijet++)
@@ -350,7 +390,7 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
 
 	for(unsigned int kjet =0; kjet < ijet; kjet++)
 	  {
-
+	    
 	    double etak = genJetEta_->at(kjet);
 	    double phik = genJetPhi_->at(kjet);
 	    double ptk  = genJetPt_->at(kjet);
@@ -387,71 +427,94 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
 
 	    // both matched to different quarks
 	    if(  (  iMatchedToQ1 &&  kMatchedToQ2 &&
-		   !iMatchedToQ2 && !kMatchedToQ1) || 
+		    !iMatchedToQ2 && !kMatchedToQ1) || 
 		 (  iMatchedToQ2 &&  kMatchedToQ1 &&
-		   !iMatchedToQ1 && !kMatchedToQ2)
+		    !iMatchedToQ1 && !kMatchedToQ2)
 		 )
 	      {
-		h_mh_random[0]->Fill(mH_random);
-		h_mll_random[0]->Fill(mZll_random);
-		h_mjj_random[0]->Fill(mZjj_random);
-	      }
+		if(DEBUG==1)
+		  {
+		    cout << "random index = " << ijet << ", \t" << kjet << endl;
+		    cout << "ijet pt = " << l4_ijet.Pt() << ", \t kjet pt = " << l4_kjet.Pt() << endl;
+		  }
+		h_mh_parton_random[0]->Fill(mH_parton);
+		h_mll_parton_random[0]->Fill(mZll_parton);
+		h_mjj_parton_random[0]->Fill(mZjj_parton);
 
-	    else if(  iMatchedToQ1 && iMatchedToQ2 &&
-		      kMatchedToQ1 && kMatchedToQ2)
-	      {
-		h_mh_random[2]->Fill(mH_random);
-		h_mll_random[2]->Fill(mZll_random);
-		h_mjj_random[2]->Fill(mZjj_random);
+		h_mh_stable_random[0]->Fill(mH_random);
+		h_mll_stable_random[0]->Fill(mZll_random);
+		h_mjj_stable_random[0]->Fill(mZjj_random);
 	      }
 
 	    else if(  ( iMatchedToQ1 &&  iMatchedToQ2 &&
-		       !kMatchedToQ1 && !kMatchedToQ2) || 
+			!kMatchedToQ1 && !kMatchedToQ2) || 
 		      ( kMatchedToQ1 &&  kMatchedToQ2 &&
-		       !iMatchedToQ1 && !iMatchedToQ2)
+			!iMatchedToQ1 && !iMatchedToQ2)
 		      )
 	      {
-		h_mh_random[1]->Fill(mH_random);
-		h_mll_random[1]->Fill(mZll_random);
-		h_mjj_random[1]->Fill(mZjj_random);
+		h_mh_parton_random[2]->Fill(mH_parton);
+		h_mll_parton_random[2]->Fill(mZll_parton);
+		h_mjj_parton_random[2]->Fill(mZjj_parton);
+
+		h_mh_stable_random[2]->Fill(mH_random);
+		h_mll_stable_random[2]->Fill(mZll_random);
+		h_mjj_stable_random[2]->Fill(mZjj_random);
 	      }
 
 	    else if(  ( iMatchedToQ1 && !iMatchedToQ2 &&
-		       !kMatchedToQ1 && !kMatchedToQ2) || 
+			!kMatchedToQ1 && !kMatchedToQ2) || 
 
 		      (!iMatchedToQ1 &&  iMatchedToQ2 &&
 		       !kMatchedToQ1 && !kMatchedToQ2) || 
 
 		      (!iMatchedToQ1 && !iMatchedToQ2 &&
-		        kMatchedToQ1 && !kMatchedToQ2) || 
+		       kMatchedToQ1 && !kMatchedToQ2) || 
 
 		      (!iMatchedToQ1 && !iMatchedToQ2 &&
 		       !kMatchedToQ1 &&  kMatchedToQ2) 
 		      )
 	      {
-		h_mh_random[3]->Fill(mH_random);
-		h_mll_random[3]->Fill(mZll_random);
-		h_mjj_random[3]->Fill(mZjj_random);
+
+		h_mh_parton_random[4]->Fill(mH_parton);
+		h_mll_parton_random[4]->Fill(mZll_parton);
+		h_mjj_parton_random[4]->Fill(mZjj_parton);
+
+		h_mh_stable_random[4]->Fill(mH_random);
+		h_mll_stable_random[4]->Fill(mZll_random);
+		h_mjj_stable_random[4]->Fill(mZjj_random);
 	      }
+
+	    else if(  !iMatchedToQ1 && !iMatchedToQ2 &&
+		      !kMatchedToQ1 && !kMatchedToQ2
+		     )
+	      {
+		h_mh_parton_random[5]->Fill(mH_parton);
+		h_mll_parton_random[5]->Fill(mZll_parton);
+		h_mjj_parton_random[5]->Fill(mZjj_parton);
+
+		h_mh_stable_random[5]->Fill(mH_random);
+		h_mll_stable_random[5]->Fill(mZll_random);
+		h_mjj_stable_random[5]->Fill(mZjj_random);
+	      }
+
+
 
 	  } // end of loop over kjet
 
       }// end of loop over ijet
 
+    
+    //================================================================
+    //    Starting from quarks
+    //================================================================
 
-
-  // Only pick up the jets that matched and construct them in the dijetmass
+    // Only pick up the jets that matched and construct them in the dijetmass
 
     TLorentzVector jet1(0,0,0,0);
     TLorentzVector jet2(0,0,0,0);
     int jet1Index=-1, jet2Index=-1;
 
-
-
-    // for peculiar case
-    TLorentzVector jet3(0,0,0,0);
-    TLorentzVector jet4(0,0,0,0);
-    int jet3Index=-1, jet4Index=-1;
+    int nGoodJets=0;
 
     for(unsigned int ijet =0; ijet < genJetPt_->size(); ijet++)
       {
@@ -463,9 +526,11 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
 	if(deltaR(eta,phi, lep1posteta, lep1postphi)<0.5)continue;
 	if(deltaR(eta,phi, lep2posteta, lep2postphi)<0.5)continue;
 
-	if(applyCut && fabs(eta) > 2.4)continue;
- 	if(applyCut && pt < 30.0)continue;
+	if(fabs(eta) > 2.4)continue;
+ 	if(pt < 30.0)continue;
 	
+	nGoodJets++;
+
 	if(matchGenToParton(q1Index,ijet) && jet1.E()<1e-6)
 	  {
 	    jet1.SetPtEtaPhiE(
@@ -474,15 +539,6 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
 			      genJetPhi_->at(ijet),
 			      genJetE_->at(ijet));
 	    jet1Index = ijet;
-	  }
-	else if(matchGenToParton(q1Index,ijet) && jet3.E()<1e-6)
-	  {
-	    jet3.SetPtEtaPhiE(
-			      genJetPt_->at(ijet),
-			      genJetEta_->at(ijet),
-			      genJetPhi_->at(ijet),
-			      genJetE_->at(ijet));
-	    jet3Index = ijet;
 	  }
 
 	if(matchGenToParton(q2Index,ijet) && jet2.E()<1e-6)
@@ -495,112 +551,132 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
 			      genJetE_->at(ijet));
 	    jet2Index = ijet;
 	  }
-	else if(matchGenToParton(q2Index,ijet) && jet4.E()<1e-6)
-	  {
-
-	    jet4.SetPtEtaPhiE(
-			      genJetPt_->at(ijet),
-			      genJetEta_->at(ijet),
-			      genJetPhi_->at(ijet),
-			      genJetE_->at(ijet));
-	    jet4Index = ijet;
-	  }
-
 
       }
-
+    
 
     if(DEBUG==1)
-      cout << "jet1Index = " << jet1Index << "\t jet2Index = " << jet2Index
-	   << "\t jet3Index = " << jet3Index << "\t jet4Index = " << jet4Index 
-	   << endl;
+      {
+	cout << "jet1Index = " << jet1Index << "\t jet2Index = " << jet2Index
+	     << endl;
+	cout << "jet1 pt = " << jet1.Pt() << "\t jet2 pt = " << jet2.Pt() << endl;
+	cout << "q1 pt = " << q1.Pt() << "\t q2 pt = " << q2.Pt() << endl;
+      }
     
     
     if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){
 
-      h_mh_parton[0]->Fill(mH_parton);
-      h_mll_parton[0]->Fill(mZll_parton);
-      h_mjj_parton[0]->Fill(mZjj_parton);
+      h_mh_parton_event[0]->Fill(mH_parton);
+      h_mll_parton_event[0]->Fill(mZll_parton);
+      h_mjj_parton_event[0]->Fill(mZjj_parton);
 
       double mH_particle = (jet1+jet2+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = (jet1+jet2).M();
 
-      h_mh_stable[0]->Fill(mH_particle);
-      h_mll_stable[0]->Fill(mZll_particle);
-      h_mjj_stable[0]->Fill(mZjj_particle);
+      h_mh_stable_event[0]->Fill(mH_particle);
+      h_mll_stable_event[0]->Fill(mZll_particle);
+      h_mjj_stable_event[0]->Fill(mZjj_particle);
 
     }
       
-    else if(jet1Index>=0 && jet2Index>=0 && jet1Index==jet2Index && 
-	    (jet3Index<0 || jet4Index<0)){
+    else if(jet1Index>=0 && jet2Index>=0 && jet1Index==jet2Index && nGoodJets==1){
 
-      h_mh_parton[1]->Fill(mH_parton);
-      h_mll_parton[1]->Fill(mZll_parton);
-      h_mjj_parton[1]->Fill(mZjj_parton);
+      h_mh_parton_event[1]->Fill(mH_parton);
+      h_mll_parton_event[1]->Fill(mZll_parton);
+      h_mjj_parton_event[1]->Fill(mZjj_parton);
 
 
       double mH_particle = (jet1+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet1.M();
 
-      h_mh_stable[1]->Fill(mH_particle);
-      h_mll_stable[1]->Fill(mZll_particle);
-      h_mjj_stable[1]->Fill(mZjj_particle);
+      h_mh_stable_event[1]->Fill(mH_particle);
+      h_mll_stable_event[1]->Fill(mZll_particle);
+      h_mjj_stable_event[1]->Fill(mZjj_particle);
 
     }
 
-    else if(jet1Index>=0 && jet2Index>=0 && jet1Index==jet2Index && 
-	    jet3Index>=0 && jet4Index>=0 && jet3Index==jet4Index)
-      {
-	h_mh_parton[2]->Fill(mH_parton);
-	h_mll_parton[2]->Fill(mZll_parton);
-	h_mjj_parton[2]->Fill(mZjj_parton);
+    else if(jet1Index>=0 && jet2Index>=0 && jet1Index==jet2Index && nGoodJets>1){
 
+      h_mh_parton_event[2]->Fill(mH_parton);
+      h_mll_parton_event[2]->Fill(mZll_parton);
+      h_mjj_parton_event[2]->Fill(mZjj_parton);
 
-	double mH_particle = (jet1+jet3+lep1_post+lep2_post).M();
-	double mZll_particle = (lep1_post + lep2_post).M();
-	double mZjj_particle = (jet1+jet3).M();
-
-	h_mh_stable[2]->Fill(mH_particle);
-	h_mll_stable[2]->Fill(mZll_particle);
-	h_mjj_stable[2]->Fill(mZjj_particle);	
-
-      }
-	    
-      
-    else if(jet1Index>=0 && jet2Index <0){
-
-      h_mh_parton[3]->Fill(mH_parton);
-      h_mll_parton[3]->Fill(mZll_parton);
-      h_mjj_parton[3]->Fill(mZjj_parton);
 
       double mH_particle = (jet1+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet1.M();
 
-      h_mh_stable[3]->Fill(mH_particle);
-      h_mll_stable[3]->Fill(mZll_particle);
-      h_mjj_stable[3]->Fill(mZjj_particle);
+      h_mh_stable_event[2]->Fill(mH_particle);
+      h_mll_stable_event[2]->Fill(mZll_particle);
+      h_mjj_stable_event[2]->Fill(mZjj_particle);
 
     }
       
-    else if(jet2Index>=0 && jet1Index <0){
+    else if(jet1Index>=0 && jet2Index <0 && nGoodJets==1){
 
-      h_mh_parton[3]->Fill(mH_parton);
-      h_mll_parton[3]->Fill(mZll_parton);
-      h_mjj_parton[3]->Fill(mZjj_parton);
+      h_mh_parton_event[3]->Fill(mH_parton);
+      h_mll_parton_event[3]->Fill(mZll_parton);
+      h_mjj_parton_event[3]->Fill(mZjj_parton);
+
+      double mH_particle = (jet1+lep1_post+lep2_post).M();
+      double mZll_particle = (lep1_post + lep2_post).M();
+      double mZjj_particle = jet1.M();
+
+      h_mh_stable_event[3]->Fill(mH_particle);
+      h_mll_stable_event[3]->Fill(mZll_particle);
+      h_mjj_stable_event[3]->Fill(mZjj_particle);
+
+    }
+      
+    else if(jet2Index>=0 && jet1Index <0 && nGoodJets==1){
+
+      h_mh_parton_event[3]->Fill(mH_parton);
+      h_mll_parton_event[3]->Fill(mZll_parton);
+      h_mjj_parton_event[3]->Fill(mZjj_parton);
 
       double mH_particle = (jet2+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet2.M();
 
-      h_mh_stable[3]->Fill(mH_particle);
-      h_mll_stable[3]->Fill(mZll_particle);
-      h_mjj_stable[3]->Fill(mZjj_particle);
+      h_mh_stable_event[3]->Fill(mH_particle);
+      h_mll_stable_event[3]->Fill(mZll_particle);
+      h_mjj_stable_event[3]->Fill(mZjj_particle);
+
+    }
+    else if(jet1Index>=0 && jet2Index <0 && nGoodJets >1){
+
+      h_mh_parton_event[4]->Fill(mH_parton);
+      h_mll_parton_event[4]->Fill(mZll_parton);
+      h_mjj_parton_event[4]->Fill(mZjj_parton);
+
+      double mH_particle = (jet1+lep1_post+lep2_post).M();
+      double mZll_particle = (lep1_post + lep2_post).M();
+      double mZjj_particle = jet1.M();
+
+      h_mh_stable_event[4]->Fill(mH_particle);
+      h_mll_stable_event[4]->Fill(mZll_particle);
+      h_mjj_stable_event[4]->Fill(mZjj_particle);
 
     }
       
+    else if(jet2Index>=0 && jet1Index <0 && nGoodJets >1){
+
+      h_mh_parton_event[4]->Fill(mH_parton);
+      h_mll_parton_event[4]->Fill(mZll_parton);
+      h_mjj_parton_event[4]->Fill(mZjj_parton);
+
+      double mH_particle = (jet2+lep1_post+lep2_post).M();
+      double mZll_particle = (lep1_post + lep2_post).M();
+      double mZjj_particle = jet2.M();
+
+      h_mh_stable_event[4]->Fill(mH_particle);
+      h_mll_stable_event[4]->Fill(mZll_particle);
+      h_mjj_stable_event[4]->Fill(mZjj_particle);
+
+    }
+         
       
     else continue;
 
@@ -613,8 +689,7 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
     if(nPass[i]>0)
       cout << "nPass[" << i << "] = " << nPass[i] << endl;
 
-  std::string prefix = applyCut? "cut": "nocut";
-  TFile* outFile = new TFile(Form("%s_mjj_%s", prefix.data(),
+  TFile* outFile = new TFile(Form("studymjj_%s",
 				  _inputFileName.data()),
 			     "recreate");            
 
@@ -625,17 +700,21 @@ void mjj_why::Loop(bool applyCut, int DEBUG)
 
   for(int i=0; i<NCASES; i++){
     
-    h_mh_parton[i]->Write();
-    h_mll_parton[i]->Write();
-    h_mjj_parton[i]->Write();
+    h_mh_parton_event[i]->Write();
+    h_mll_parton_event[i]->Write();
+    h_mjj_parton_event[i]->Write();
 
-    h_mh_stable[i]->Write();
-    h_mll_stable[i]->Write();
-    h_mjj_stable[i]->Write();
+    h_mh_stable_event[i]->Write();
+    h_mll_stable_event[i]->Write();
+    h_mjj_stable_event[i]->Write();
 
-    h_mh_random[i]->Write();
-    h_mll_random[i]->Write();
-    h_mjj_random[i]->Write();
+    h_mh_parton_random[i]->Write();
+    h_mll_parton_random[i]->Write();
+    h_mjj_parton_random[i]->Write();
+
+    h_mh_stable_random[i]->Write();
+    h_mll_stable_random[i]->Write();
+    h_mjj_stable_random[i]->Write();
   }
 
   outFile->Close();  
@@ -652,8 +731,8 @@ Bool_t mjj_why::matchGenToParton(Int_t igen, Int_t ijet){
 
   if(dR<0.5)
     matched = true;
-//   else 
-//     cout << "dR = " << dR << endl;
+  //   else 
+  //     cout << "dR = " << dR << endl;
   
   return matched;  
 
