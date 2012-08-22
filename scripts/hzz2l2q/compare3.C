@@ -13,7 +13,7 @@ void compare3(
   gStyle->SetOptStat(0);
 
   const int NHISTOS=3;
-  TH1F* h[NHISTOS];
+  TH1D* h[NHISTOS];
 
   char tempName[300];
   TFile *fmc[NHISTOS];
@@ -35,7 +35,7 @@ void compare3(
   for(int i=0; i<NHISTOS; i++){
 
     fmc[i] = TFile::Open(mcfile[i].data());
-    h[i]   = (TH1F*)(fmc[i]->Get(var.data()));
+    h[i]   = (TH1D*)(fmc[i]->Get(var.data()));
 
   }
 
