@@ -82,6 +82,15 @@ void mjj_why::Loop(int DEBUG)
     "only one quark matched (#geq 2 jets)", //4
     "no match (#geq 2 jets)"                //5
   };
+ 
+  std::string rectitle[NCASES]={
+    "matched and separated (#geq 2 jets)",  //0 
+    "matched and separated (#geq 2 jets)",  //1
+    "matched and merged (#geq 2 jets)",     //2
+    "only one quark matched (#geq 2 jets)", //3
+    "only one quark matched (#geq 2 jets)", //4
+    "no match (#geq 2 jets)"                //5
+  };
 
   
   TH1D* h_mh_parton_event[NCASES];
@@ -91,7 +100,7 @@ void mjj_why::Loop(int DEBUG)
   TH1D* h_mh_stable_event[NCASES];
   TH1D* h_mll_stable_event[NCASES];
   TH1D* h_mjj_stable_event[NCASES];
-
+ 
   TH1D* h_mh_parton_random[NCASES];
   TH1D* h_mll_parton_random[NCASES];
   TH1D* h_mjj_parton_random[NCASES]; 
@@ -99,6 +108,10 @@ void mjj_why::Loop(int DEBUG)
   TH1D* h_mh_stable_random[NCASES];
   TH1D* h_mll_stable_random[NCASES];
   TH1D* h_mjj_stable_random[NCASES];
+
+  TH1D* h_mh_rec_random[NCASES];
+  TH1D* h_mll_rec_random[NCASES];
+  TH1D* h_mjj_rec_random[NCASES];
 
   for(int i=0; i< NCASES; i++){
 
@@ -126,7 +139,6 @@ void mjj_why::Loop(int DEBUG)
     h_mjj_stable_event[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_stable_event%d",i));
     h_mjj_stable_event[i]->SetTitle(title[i].data());
 
-
     //================================================================
     //                    candidate-level histograms
     //================================================================
@@ -143,6 +155,10 @@ void mjj_why::Loop(int DEBUG)
     h_mh_stable_random[i]->SetTitle(title[i].data());
     h_mh_stable_random[i]->SetYTitle(ytitle.data());
 
+    h_mh_rec_random[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_rec_random%d",i));
+    h_mh_rec_random[i]->SetTitle(rectitle[i].data());
+    h_mh_rec_random[i]->SetYTitle(ytitle.data());
+
 
     ytitle = Form("Candidates per %d GeV/c^{2}",
 		  (int)h_mll_template->GetBinWidth(1));
@@ -153,6 +169,10 @@ void mjj_why::Loop(int DEBUG)
     h_mll_stable_random[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_stable_random%d",i));
     h_mll_stable_random[i]->SetTitle(title[i].data());
     h_mll_stable_random[i]->SetYTitle(ytitle.data());   
+
+    h_mll_rec_random[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_rec_random%d",i));
+    h_mll_rec_random[i]->SetTitle(rectitle[i].data());
+    h_mll_rec_random[i]->SetYTitle(ytitle.data());   
 
 
     ytitle = Form("Candidates per %d GeV/c^{2}",
@@ -165,6 +185,10 @@ void mjj_why::Loop(int DEBUG)
     h_mjj_stable_random[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_stable_random%d",i));
     h_mjj_stable_random[i]->SetTitle(title[i].data());
     h_mjj_stable_random[i]->SetYTitle(ytitle.data()); 
+
+    h_mjj_rec_random[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_rec_random%d",i));
+    h_mjj_rec_random[i]->SetTitle(rectitle[i].data());
+    h_mjj_rec_random[i]->SetYTitle(ytitle.data()); 
 
   }
 
@@ -563,7 +587,79 @@ void mjj_why::Loop(int DEBUG)
 	cout << "q1 pt = " << q1.Pt() << "\t q2 pt = " << q2.Pt() << endl;
       }
     
-    
+
+    // check for MC Truth
+    for(int ih=0; ih<higgsM->size(); ih++){
+
+      bool matchedToQ1=false;
+      bool matchedToQ2=false;
+      
+      int nMatch=0;
+      
+      for(int ijet=0; ijet<jetPt->size(); ijet++){
+
+	if(jetHiggsIndex->at(ijet)!=ih)continue;
+	if(jetPt->at(ijet)<30.0)continue;
+	if(fabs(jetEta->at(ijet))>2.4)continue;
+
+	int jet_index = jetIndex->at(ijet);
+	if(jet_index<0)continue;
+	if(jet_index>1)continue;
+	
+	matchedToQ1=matchGenToPFJet(q1Index, ijet);
+	matchedToQ2=matchGenToPFJet(q2Index, ijet);
+
+	if(matchedToQ1 && matchedToQ2)
+	  nMatch=100;
+	else if(matchedToQ1 && !matchedToQ2)
+	  nMatch++;
+	else if(matchedToQ2 && !matchedToQ1)
+	  nMatch++;
+	
+      } // end of loop over jets
+
+      double mH_rec  = higgsM->at(ih);
+      double mll_rec = zllM->at(ih);
+      double mjj_rec = zjjM->at(ih);
+
+      if(nMatch==2){
+	h_mh_rec_random[0]->Fill(mH_rec);
+	h_mll_rec_random[0]->Fill(mll_rec);
+	h_mjj_rec_random[0]->Fill(mjj_rec);
+	
+	if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){       
+	  h_mh_rec_random[1]->Fill(mH_rec);
+	  h_mll_rec_random[1]->Fill(mll_rec);
+	  h_mjj_rec_random[1]->Fill(mjj_rec);
+	}              
+      }
+
+      else if(nMatch==100){
+	h_mh_rec_random[2]->Fill(mH_rec);
+	h_mll_rec_random[2]->Fill(mll_rec);
+	h_mjj_rec_random[2]->Fill(mjj_rec);
+      }
+
+      else if(nMatch==1){
+	h_mh_rec_random[4]->Fill(mH_rec);
+	h_mll_rec_random[4]->Fill(mll_rec);
+	h_mjj_rec_random[4]->Fill(mjj_rec);
+      }
+      else if(nMatch==0){
+	h_mh_rec_random[5]->Fill(mH_rec);
+	h_mll_rec_random[5]->Fill(mll_rec);
+	h_mjj_rec_random[5]->Fill(mjj_rec);
+      }
+      
+    } // end of loop over higgs candidate
+
+
+
+    //================================================================
+    //    Event-level histograms
+    //================================================================
+
+
     if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){
 
       h_mh_parton_event[0]->Fill(mH_parton);
@@ -577,6 +673,8 @@ void mjj_why::Loop(int DEBUG)
       h_mh_stable_event[0]->Fill(mH_particle);
       h_mll_stable_event[0]->Fill(mZll_particle);
       h_mjj_stable_event[0]->Fill(mZjj_particle);
+
+      if(higgsM->size()>0)nPass[4]++;
 
     }
       
@@ -708,6 +806,10 @@ void mjj_why::Loop(int DEBUG)
     h_mll_stable_event[i]->Write();
     h_mjj_stable_event[i]->Write();
 
+    h_mh_rec_random[i]->Write();
+    h_mll_rec_random[i]->Write();
+    h_mjj_rec_random[i]->Write();
+
     h_mh_parton_random[i]->Write();
     h_mll_parton_random[i]->Write();
     h_mjj_parton_random[i]->Write();
@@ -731,8 +833,21 @@ Bool_t mjj_why::matchGenToParton(Int_t igen, Int_t ijet){
 
   if(dR<0.5)
     matched = true;
-  //   else 
-  //     cout << "dR = " << dR << endl;
+  
+  return matched;  
+
+
+}
+
+Bool_t mjj_why::matchGenToPFJet(Int_t igen, Int_t ijet){
+
+  Bool_t matched = false;
+  double dR = deltaR(genParEta_->at(igen), genParPhi_->at(igen),
+		     jetEta->at(ijet), jetPhi->at(ijet)
+		     ); 
+
+  if(dR<0.5)
+    matched = true;
   
   return matched;  
 

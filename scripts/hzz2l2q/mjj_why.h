@@ -191,6 +191,7 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual Bool_t   matchGenToParton(Int_t igen, Int_t ijet);
+   virtual Bool_t   matchGenToPFJet(Int_t igen, Int_t ijet);
 
    string _inputFileName;
 };

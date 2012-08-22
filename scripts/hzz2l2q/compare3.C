@@ -1,4 +1,5 @@
 #include "setTDRStyle.C"
+#include "cutvalues.h"
 
 void compare3(
 		    std::string var="h_mh_parton", 
@@ -18,15 +19,15 @@ void compare3(
   TFile *fmc[NHISTOS];
   
   std::string mcfile[NHISTOS]={
-    "biggerBin_best/mjj_hzz2l2q_M300.root",
-    "biggerBin_best/mjj_hzz2l2q_M600.root",
-    "biggerBin_best/mjj_hzz2l2q_M900.root"
+    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
+    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
+    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
   };
 
   std::string mcName[NHISTOS]={
-    "M_{H}=300 GeV/c^{2}",
-    "M_{H}=600 GeV/c^{2}",
-    "M_{H}=900 GeV/c^{2}"
+    "M_{H}=300 GeV",
+    "M_{H}=600 GeV",
+    "M_{H}=900 GeV"
 
   };
 
@@ -121,20 +122,28 @@ void compare3(
   }
 
   cout << "here" << endl;
-  TCanvas* c1 = new TCanvas("c1","",500,500);  
+  TCanvas* c1 = new TCanvas("c1","",600,500);  
   if(logScale)
     gPad->SetLogy(1);
-
+  gStyle->SetTitleX(0.1);
   h[0]->Draw("e");
   for(int ih=0; ih < NHISTOS-1; ih++)
     h[ih]->Draw("esame");
 
   h[NHISTOS-1]->Draw("hesame");
 
-  float x1NDC = 0.620806;
-  float y1NDC = 0.75136;
-  float x2NDC = 0.840565;
-  float y2NDC = 0.917373;
+  TLine mLocation(MZ_PDG,0.0,MZ_PDG,h[0]->GetMaximum());
+  mLocation.SetLineStyle(2);
+  mLocation.SetLineColor(kMagenta-6);
+  mLocation.SetLineWidth(3);
+
+  if(var.find("mjj")!=std::string::npos || var.find("mll")!=std::string::npos)
+    mLocation.Draw("same");
+  
+  float x1NDC = 0.669355;
+  float y1NDC = 0.758475;
+  float x2NDC = 0.889113;
+  float y2NDC = 0.925847;
 
   std::string headertitle = "H^{0}#rightarrow ZZ#rightarrow 2l2q";
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
@@ -148,7 +157,7 @@ void compare3(
   leg->Draw("same");
 
 
-  string dirName = "20120629_3histograms";
+  string dirName = "20120822_3histograms";
   gSystem->mkdir(dirName.data());
 
   std::string filename;
@@ -157,6 +166,10 @@ void compare3(
     psname = dirName+ "/" + output;
   else
     psname = dirName+ "/" + var;
+  
+  if(logScale)
+    psname += "_log";
+
   filename = psname + ".eps";
   c1->Print(filename.data());
   filename = psname + ".gif";
