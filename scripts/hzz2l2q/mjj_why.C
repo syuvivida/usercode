@@ -5,7 +5,7 @@
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
-
+#include <standalone_LumiReWeighting.cc>
 
 double deltaR(double eta1, double phi1, double eta2, double phi2)
 {
@@ -196,6 +196,7 @@ void mjj_why::Loop(int DEBUG)
   int nPass[50]={0};
   
   Long64_t nentries = fChain->GetEntriesFast();
+  standalone_LumiReWeighting LumiWeights_central(2012,0);
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -203,6 +204,7 @@ void mjj_why::Loop(int DEBUG)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
+    double PU_weight =  LumiWeights_central.weight(PU_nTrueInt);
 
     //     if(jentry > 1000)continue;
     nPass[0]++;
@@ -623,32 +625,32 @@ void mjj_why::Loop(int DEBUG)
       double mjj_rec = zjjM->at(ih);
 
       if(nMatch==2){
-	h_mh_rec_random[0]->Fill(mH_rec);
-	h_mll_rec_random[0]->Fill(mll_rec);
-	h_mjj_rec_random[0]->Fill(mjj_rec);
+	h_mh_rec_random[0]->Fill(mH_rec, PU_weight);
+	h_mll_rec_random[0]->Fill(mll_rec, PU_weight);
+	h_mjj_rec_random[0]->Fill(mjj_rec, PU_weight);
 	
 	if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){       
-	  h_mh_rec_random[1]->Fill(mH_rec);
-	  h_mll_rec_random[1]->Fill(mll_rec);
-	  h_mjj_rec_random[1]->Fill(mjj_rec);
+	  h_mh_rec_random[1]->Fill(mH_rec, PU_weight);
+	  h_mll_rec_random[1]->Fill(mll_rec, PU_weight);
+	  h_mjj_rec_random[1]->Fill(mjj_rec, PU_weight);
 	}              
       }
 
       else if(nMatch==100){
-	h_mh_rec_random[2]->Fill(mH_rec);
-	h_mll_rec_random[2]->Fill(mll_rec);
-	h_mjj_rec_random[2]->Fill(mjj_rec);
+	h_mh_rec_random[2]->Fill(mH_rec, PU_weight);
+	h_mll_rec_random[2]->Fill(mll_rec, PU_weight);
+	h_mjj_rec_random[2]->Fill(mjj_rec, PU_weight);
       }
 
       else if(nMatch==1){
-	h_mh_rec_random[4]->Fill(mH_rec);
-	h_mll_rec_random[4]->Fill(mll_rec);
-	h_mjj_rec_random[4]->Fill(mjj_rec);
+	h_mh_rec_random[4]->Fill(mH_rec, PU_weight);
+	h_mll_rec_random[4]->Fill(mll_rec, PU_weight);
+	h_mjj_rec_random[4]->Fill(mjj_rec, PU_weight);
       }
       else if(nMatch==0){
-	h_mh_rec_random[5]->Fill(mH_rec);
-	h_mll_rec_random[5]->Fill(mll_rec);
-	h_mjj_rec_random[5]->Fill(mjj_rec);
+	h_mh_rec_random[5]->Fill(mH_rec, PU_weight);
+	h_mll_rec_random[5]->Fill(mll_rec, PU_weight);
+	h_mjj_rec_random[5]->Fill(mjj_rec, PU_weight);
       }
       
     } // end of loop over higgs candidate
