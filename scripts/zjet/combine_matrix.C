@@ -71,7 +71,7 @@ void combine_matrix(std::string eikoName="h_jety",double correlation=1.0,
       kengName = "Z1jets_1jpt_BE";
       xtitle = "p_{T}(jet) [GeV/c]";
     }
-  else if(eikoName=="h_jeteta")
+  else if(eikoName=="h_jety")
     {
       kengName = "Z1jets_1jeta_BE";
       xtitle = "|Y(jet)|";
