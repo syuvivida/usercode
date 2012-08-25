@@ -85,6 +85,7 @@ void signalEff_pileupSys::Loop(int lepCode)
 
     int myBest = -1;
     double best_mZjj = 9999999.0;
+    double best_mZll = 9999999.0;
 
     h_output_nint_mc[0]->Fill(PU_nTrueInt, PU_weight_central); 
     h_output_nint_mc[1]->Fill(PU_nTrueInt, PU_weight_up); 
@@ -117,14 +118,18 @@ void signalEff_pileupSys::Loop(int lepCode)
 	{
 	  myBest    = ih;
 	  best_mZjj = zjjMass;
+	  best_mZll = zllMass;
 	  NBTAGMAX  = nbtag;
 	}
       else if(nbtag == NBTAGMAX)
 	{
-	  if(fabs(zjjMass - MZ_PDG) < fabs(best_mZjj - MZ_PDG))
+	  if( ( fabs(zjjMass - MZ_PDG) + fabs(zllMass-MZ_PDG) ) < 
+	      ( fabs(best_mZjj - MZ_PDG)+fabs(best_mZll-MZ_PDG))
+	      )
  	    {
 	      myBest    = ih;
 	      best_mZjj = zjjMass;
+	      best_mZll = zllMass;
 	      NBTAGMAX  = nbtag;	      
 	    }
 	}      
