@@ -1,10 +1,12 @@
 #define mjj_why_cxx
 #include "mjj_why.h"
 #include <TH2.h>
+#include <TProfile.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
+#include "cutvalues.h"
 #include <standalone_LumiReWeighting.cc>
 
 double deltaR(double eta1, double phi1, double eta2, double phi2)
@@ -45,6 +47,10 @@ void mjj_why::Loop(int DEBUG)
   h_mjj_template->SetXTitle("M_{jj} [GeV/c^{2}]");
   h_mjj_template->SetYTitle(Form("Events per %d GeV/c^{2}",
 				 (int)h_mjj_template->GetBinWidth(1)));
+
+  TProfile* pf_dR_template = new TProfile("pf_dR_template","",45,0.5,5.0,-1000, 1000);
+  pf_dR_template->Sumw2();
+  pf_dR_template->SetXTitle("#Delta R(q_{1},q_{2})");
 
   //================================================================
   //                    status=3 histograms
@@ -192,7 +198,30 @@ void mjj_why::Loop(int DEBUG)
 
   }
 
+  //================================================================
+  //                    status=1, 3 profiles 
+  //================================================================
+  
+  TProfile* pf_dR_dm_gen = (TProfile*)pf_dR_template->Clone("pf_dR_dm_gen");
+  pf_dR_dm_gen->SetYTitle("M_{Z}(genJet)-M_{Z}(q) [GeV]");
 
+  TProfile* pf_dR_dm_rec = (TProfile*)pf_dR_template->Clone("pf_dR_dm_rec");
+  pf_dR_dm_rec->SetYTitle("M_{Z}(PFJet)-M_{Z}(q) [GeV]");
+
+
+  TProfile* pf_dR_dpt_gen[2];
+  TProfile* pf_dR_dpt_rec[2];
+
+  for(int ip=0; ip<2; ip++){
+   
+    pf_dR_dpt_gen[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_dpt_gen%d",ip));
+    pf_dR_dpt_gen[ip]->SetYTitle(Form("p_{T}(genJet)-p_{T}(q_{%d}) [GeV]",ip+1));
+  
+    pf_dR_dpt_rec[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_dpt_rec%d",ip));
+    pf_dR_dpt_rec[ip]->SetYTitle(Form("p_{T}(PFJet)-p_{T}(q_{%d}) [GeV]",ip+1));
+
+  }
+ 
   int nPass[50]={0};
   
   Long64_t nentries = fChain->GetEntriesFast();
@@ -206,7 +235,7 @@ void mjj_why::Loop(int DEBUG)
     // if (Cut(ientry) < 0) continue;
     double PU_weight =  LumiWeights_central.weight(PU_nTrueInt);
 
-    //     if(jentry > 1000)continue;
+//     if(jentry > 50)break;
     nPass[0]++;
     //================================================================
     // STATUS=3 LEVEL
@@ -371,7 +400,7 @@ void mjj_why::Loop(int DEBUG)
     double mH_parton = (lep1+lep2+q1+q2).M();
     double mZll_parton = (lep1+lep2).M();
     double mZjj_parton = (q1+q2).M();
-
+    double dR_parton = q1.DeltaR(q2);
 
     h_mh_parton_daughter->Fill(mH_parton);
     h_mll_parton_daughter->Fill(mZll_parton);
@@ -381,6 +410,24 @@ void mjj_why::Loop(int DEBUG)
     nPass[2]++;
 
 
+    // do the pt ordering of quarks
+    if(DEBUG==1)
+      cout << "q1 pt = " << q1.Pt() << "\t q2 pt = " << q2.Pt() << endl;
+
+    TLorentzVector qTemp(0,0,0,0);
+    int qTempIndex = -1;
+    if(q2.Pt() > q1.Pt()){
+      qTemp = q1;       qTempIndex = q1Index;
+      q1    = q2;       q1Index    = q2Index;
+      q2    = qTemp;    q2Index    = qTempIndex;
+    }
+
+    if(DEBUG==1)
+      cout << "After sorting q1 pt = " << q1.Pt() << "\t q2 pt = " << q2.Pt() << endl << 
+	" q1 index = " << q1Index << "\t q2 index = " << q2Index << endl;
+
+    double QuarkPt[2]={q1.Pt(), q2.Pt()};
+    
   
     //================================================================
     // STATUS =1       LEVEL
@@ -470,6 +517,23 @@ void mjj_why::Loop(int DEBUG)
 		h_mh_stable_random[0]->Fill(mH_random);
 		h_mll_stable_random[0]->Fill(mZll_random);
 		h_mjj_stable_random[0]->Fill(mZjj_random);
+
+
+		pf_dR_dm_gen->Fill(dR_parton, mZjj_random-mZjj_parton);
+		
+
+		if(iMatchedToQ1)
+		  {
+		    pf_dR_dpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()-q1.Pt());	 
+		    pf_dR_dpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()-q2.Pt());	 
+		  }
+		else		
+		  {
+		    pf_dR_dpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()-q1.Pt());	 
+		    pf_dR_dpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()-q2.Pt());	 
+		  }
+
+
 	      }
 
 	    else if(  ( iMatchedToQ1 &&  iMatchedToQ2 &&
@@ -512,7 +576,7 @@ void mjj_why::Loop(int DEBUG)
 
 	    else if(  !iMatchedToQ1 && !iMatchedToQ2 &&
 		      !kMatchedToQ1 && !kMatchedToQ2
-		     )
+		      )
 	      {
 		h_mh_parton_random[5]->Fill(mH_parton);
 		h_mll_parton_random[5]->Fill(mZll_parton);
@@ -598,6 +662,8 @@ void mjj_why::Loop(int DEBUG)
       
       int nMatch=0;
       
+      double jetRecPt[2]={0};
+
       for(int ijet=0; ijet<jetPt->size(); ijet++){
 
 	if(jetHiggsIndex->at(ijet)!=ih)continue;
@@ -611,13 +677,19 @@ void mjj_why::Loop(int DEBUG)
 	matchedToQ1=matchGenToPFJet(q1Index, ijet);
 	matchedToQ2=matchGenToPFJet(q2Index, ijet);
 
+
 	if(matchedToQ1 && matchedToQ2)
 	  nMatch=100;
 	else if(matchedToQ1 && !matchedToQ2)
-	  nMatch++;
+	  {
+	    nMatch++;
+	    jetRecPt[0] = jetPt->at(ijet);
+	  }
 	else if(matchedToQ2 && !matchedToQ1)
-	  nMatch++;
-	
+	  {
+	    nMatch++;
+	    jetRecPt[1] = jetPt->at(ijet);
+	  }
       } // end of loop over jets
 
       double mH_rec  = higgsM->at(ih);
@@ -633,7 +705,14 @@ void mjj_why::Loop(int DEBUG)
 	  h_mh_rec_random[1]->Fill(mH_rec, PU_weight);
 	  h_mll_rec_random[1]->Fill(mll_rec, PU_weight);
 	  h_mjj_rec_random[1]->Fill(mjj_rec, PU_weight);
-	}              
+
+	  // Roberto-style profiles
+	  pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, PU_weight);
+
+	  for(int ieiko=0; ieiko<2; ieiko++)
+	    pf_dR_dpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]-QuarkPt[ieiko],PU_weight);
+	  
+	} // if for the same event, gen jets are also matched to quarks             
       }
 
       else if(nMatch==100){
@@ -797,6 +876,16 @@ void mjj_why::Loop(int DEBUG)
   h_mh_parton_daughter->Write();
   h_mll_parton_daughter->Write();
   h_mjj_parton_daughter->Write();
+
+  pf_dR_dm_gen->Write();
+  pf_dR_dm_rec->Write();
+
+  for(int ip=0; ip<2; ip++){
+
+    pf_dR_dpt_gen[ip]->Write();
+    pf_dR_dpt_rec[ip]->Write();
+    
+  }
 
   for(int i=0; i<NCASES; i++){
     
