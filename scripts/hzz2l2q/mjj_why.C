@@ -48,7 +48,7 @@ void mjj_why::Loop(int DEBUG)
   h_mjj_template->SetYTitle(Form("Events per %d GeV/c^{2}",
 				 (int)h_mjj_template->GetBinWidth(1)));
 
-  TProfile* pf_dR_template = new TProfile("pf_dR_template","",45,0.5,5.0,-1000, 1000);
+  TProfile* pf_dR_template = new TProfile("pf_dR_template","",50,0.0,5.0,-1000, 1000);
   pf_dR_template->Sumw2();
   pf_dR_template->SetXTitle("#Delta R(q_{1},q_{2})");
 
@@ -212,13 +212,23 @@ void mjj_why::Loop(int DEBUG)
   TProfile* pf_dR_dpt_gen[2];
   TProfile* pf_dR_dpt_rec[2];
 
+  TProfile* pf_dR_Rpt_gen[2];
+  TProfile* pf_dR_Rpt_rec[2];
+
   for(int ip=0; ip<2; ip++){
    
+    // difference
     pf_dR_dpt_gen[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_dpt_gen%d",ip));
     pf_dR_dpt_gen[ip]->SetYTitle(Form("p_{T}(genJet)-p_{T}(q_{%d}) [GeV]",ip+1));
   
     pf_dR_dpt_rec[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_dpt_rec%d",ip));
     pf_dR_dpt_rec[ip]->SetYTitle(Form("p_{T}(PFJet)-p_{T}(q_{%d}) [GeV]",ip+1));
+    // ratio
+    pf_dR_Rpt_gen[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_Rpt_gen%d",ip));
+    pf_dR_Rpt_gen[ip]->SetYTitle(Form("p_{T}(genJet)/p_{T}(q_{%d}) [GeV]",ip+1));
+  
+    pf_dR_Rpt_rec[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_Rpt_rec%d",ip));
+    pf_dR_Rpt_rec[ip]->SetYTitle(Form("p_{T}(PFJet)/p_{T}(q_{%d}) [GeV]",ip+1));
 
   }
  
@@ -526,11 +536,17 @@ void mjj_why::Loop(int DEBUG)
 		  {
 		    pf_dR_dpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()-q1.Pt());	 
 		    pf_dR_dpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()-q2.Pt());	 
+
+		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()/q1.Pt());	 
+		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()/q2.Pt());	 
 		  }
 		else		
 		  {
 		    pf_dR_dpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()-q1.Pt());	 
 		    pf_dR_dpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()-q2.Pt());	 
+
+		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()/q1.Pt());	 
+		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()/q2.Pt());	 
 		  }
 
 
@@ -710,7 +726,10 @@ void mjj_why::Loop(int DEBUG)
 	  pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, PU_weight);
 
 	  for(int ieiko=0; ieiko<2; ieiko++)
-	    pf_dR_dpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]-QuarkPt[ieiko],PU_weight);
+	    {
+	      pf_dR_dpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]-QuarkPt[ieiko],PU_weight);
+	      pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]/QuarkPt[ieiko],PU_weight);
+	    }
 	  
 	} // if for the same event, gen jets are also matched to quarks             
       }
@@ -884,6 +903,9 @@ void mjj_why::Loop(int DEBUG)
 
     pf_dR_dpt_gen[ip]->Write();
     pf_dR_dpt_rec[ip]->Write();
+
+    pf_dR_Rpt_gen[ip]->Write();
+    pf_dR_Rpt_rec[ip]->Write();
     
   }
 
