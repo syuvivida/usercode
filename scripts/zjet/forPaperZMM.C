@@ -3,13 +3,13 @@
 void forPaperZMM(
       		 std::string datavar="DEta_per2_Z1jets_BE",
 		 std::string var3="id6",
+		 float xmin=-9999.0, float xmax=-9999.0,
 		 bool logScale=false,
 		 std::string datafile="DoubleMu2011_EffCorr_ZpT40_absY_051412.root",
 		 std::string mcfile1="DYToLL-sherpa_GEN_ZpT40_absY_051412.root", 
 		 std::string mcfile2="DYJetsToLL_GEN_ZpT40_absY_051412.root", 
-		 std::string mcfile3="Z_1jet_tota_cteq66._1___1___40ZPT100.root",
+		 std::string mcfile3="Z_1jet_tota_cteq61._1___1___ex_m34.root",
 		 std::string var1="", std::string var2="", 
-		 float xmin=-9999.0, float xmax=-9999.0,
 		 std::string headertitle="Z(#rightarrow #mu#mu)+1 jet",
 		 std::string dataName="Data",
 		 std::string mcName1="Sherpa",
@@ -98,6 +98,9 @@ void forPaperZMM(
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
+//     hscale[i]->SetMaximum(2.05);
+//     hscale[i]->SetMinimum(0.0);
+
     hscale[i]->SetMaximum(1.45);
     hscale[i]->SetMinimum(0.4);
     hscale[i]->SetTitleOffset(1.2,"X");
