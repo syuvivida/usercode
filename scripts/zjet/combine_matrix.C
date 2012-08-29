@@ -13,17 +13,19 @@ using namespace std;
 void combine_matrix(std::string eikoName="h_jety",double correlation=1.0, 
 		    bool logScale=false)
 {
+  TH1D* h_e;
+  TH1D* h_ejesup;
+  TH1D* h_ejesdn;
+
   TH1F* h_mu;
   TH1F* h_mujesup;
   TH1F* h_mujesdn;
   TH1F* h_mujes;
 
-  TH1D* h_e;
-
   TH1D* h_combine;
 
   // electron channel
-  TFile* f_e = TFile::Open("cts_CorrectedPlotsZPt40_patJet.root");
+  TFile* f_e = TFile::Open("cts_CorrectedPlotsZCut_Jes0_NoBkgSub.root");
   h_e  = (TH1D*)(f_e->Get(eikoName.data()));
   h_e  -> SetName("h_e");
   h_e  -> SetTitle("");
@@ -38,8 +40,45 @@ void combine_matrix(std::string eikoName="h_jety",double correlation=1.0,
   h_e  -> SetMarkerSize(1);
   h_e  -> SetMarkerStyle(24);
 
-
   cout << "h_e integral = " << h_e->Integral() << endl;
+
+
+  TFile* f_ejesup = TFile::Open("cts_CorrectedPlotsZCut_JesUp_NoBkgSub.root");
+  h_ejesup  = (TH1D*)(f_ejesup->Get(eikoName.data()));
+  h_ejesup  -> SetName("h_ejesup");
+  h_ejesup  -> SetTitle("");
+  h_ejesup  -> Sumw2();
+  h_ejesup  -> Scale(1.0/h_ejesup->Integral());
+  h_ejesup  -> SetYTitle("Arbitrary Unit");
+  h_ejesup  -> SetTitleOffset(2.0,"Y");
+  h_ejesup  -> GetYaxis()->SetDecimals();
+  h_ejesup  -> GetXaxis()->SetDecimals();
+  h_ejesup  -> SetLineColor(kBlue-7);
+  h_ejesup  -> SetMarkerColor(kBlue-7);
+  h_ejesup  -> SetMarkerSize(1);
+  h_ejesup  -> SetMarkerStyle(24);
+
+
+  cout << "h_ejesup integral = " << h_ejesup->Integral() << endl;
+
+
+  TFile* f_ejesdn = TFile::Open("cts_CorrectedPlotsZCut_JesDn_NoBkgSub.root");
+  h_ejesdn  = (TH1D*)(f_ejesdn->Get(eikoName.data()));
+  h_ejesdn  -> SetName("h_ejesdn");
+  h_ejesdn  -> SetTitle("");
+  h_ejesdn  -> Sumw2();
+  h_ejesdn  -> Scale(1.0/h_ejesdn->Integral());
+  h_ejesdn  -> SetYTitle("Arbitrary Unit");
+  h_ejesdn  -> SetTitleOffset(2.0,"Y");
+  h_ejesdn  -> GetYaxis()->SetDecimals();
+  h_ejesdn  -> GetXaxis()->SetDecimals();
+  h_ejesdn  -> SetLineColor(kBlue-7);
+  h_ejesdn  -> SetMarkerColor(kBlue-7);
+  h_ejesdn  -> SetMarkerSize(1);
+  h_ejesdn  -> SetMarkerStyle(24);
+
+
+  cout << "h_ejesdn integral = " << h_ejesdn->Integral() << endl;
 
   h_combine= (TH1D*)h_e->Clone("h_combine");
   h_combine  -> Reset();
@@ -48,6 +87,7 @@ void combine_matrix(std::string eikoName="h_jety",double correlation=1.0,
   h_combine  -> SetMarkerColor(1);
   h_combine  -> SetMarkerSize(1);
   h_combine  -> SetMarkerStyle(8);
+
 
   // muon channel
   TFile* f_mu = TFile::Open("DoubleMu2011_EffCorr_ZpT40_absY_051412.root");
@@ -126,10 +166,20 @@ void combine_matrix(std::string eikoName="h_jety",double correlation=1.0,
   // now loop over bins to compute chi2
   for(int i=1; i<=nbin; i++){
 
+    // electron channel
     double value_e = h_e->GetBinContent(i);
     if(value_e < 1e-10)continue;
     double stat_e  = h_e->GetBinError(i);
 
+    double syse_up = fabs(h_ejesup->GetBinContent(i) - 
+			  h_e->GetBinContent(i));
+    double syse_dn = fabs(h_ejesdn->GetBinContent(i) - 
+			  h_e->GetBinContent(i));
+    double sys_e = syse_up > syse_dn? syse_up: syse_dn;
+
+    double total_e_2 = stat_e*stat_e+ sys_e*sys_e;
+
+    // muon channel
     double value_m = h_mu->GetBinContent(i);
     if(value_m < 1e-10)continue;
     double stat_m  = h_mu->GetBinError(i);
@@ -137,19 +187,17 @@ void combine_matrix(std::string eikoName="h_jety",double correlation=1.0,
     double value_m_jes = h_mujes->GetBinContent(i);
     if(value_m_jes <1e-10)continue;
 
-    double rel_sys_up = fabs(h_mujesup->GetBinContent(i) -
+    double rel_sysm_up = fabs(h_mujesup->GetBinContent(i) -
 			     value_m_jes)/value_m_jes;
     
-    double rel_sys_dn = fabs(h_mujesdn->GetBinContent(i) -
+    double rel_sysm_dn = fabs(h_mujesdn->GetBinContent(i) -
 			     value_m_jes)/value_m_jes;
    
-    double rel_sys = rel_sys_up > rel_sys_dn?
-      rel_sys_up: rel_sys_dn;
+    double rel_sysm = rel_sysm_up > rel_sysm_dn?
+      rel_sysm_up: rel_sysm_dn;
 
-    double sys_e = value_e*rel_sys;
-    double sys_m = value_m*rel_sys;
-    
-    double total_e_2 = stat_e*stat_e+ sys_e*sys_e;
+    double sys_m = value_m*rel_sysm;
+
     double total_m_2 = stat_m*stat_m+ sys_m*sys_m;
 
     const int NELE=2;
