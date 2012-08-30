@@ -48,7 +48,7 @@ void forPaperZMM(
     }
   else if(datavar=="Z1jets_1jeta_BE")
     {
-      xtitle = "|Y(jet)|";
+      xtitle = "|Y_{jet}|";
       output = "YJetMuo";
     }
   else if(datavar=="dimuonpt1jet_BE")
@@ -58,7 +58,7 @@ void forPaperZMM(
     }
   else if(datavar=="dimuoneta1jet_BE")
     {
-      xtitle = "|Y(Z)|";
+      xtitle = "|Y_{Z}|";
       output = "YZedMuo";
     }
 

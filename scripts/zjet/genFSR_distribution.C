@@ -252,12 +252,14 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
       int status    = genParSt_->at(igen);
       bool isFromZAfterFSR  = ((isMadgraph && motherPID == PID) ||
 			       (isPythia && motherPID == PID) ||
-			       (isSherpa && motherPID  < -9998)) 
+// 			       (isSherpa && motherPID  < -9998)) 
+ 			       (isSherpa && motherPID  ==10002)) 
 	&& (status == 1);
 
       bool isFromZBeforeFSR = ((isMadgraph && motherPID == 23) ||
 			       (isPythia && motherPID == 23) ||
-			       (isSherpa && motherPID  < -9998)) 
+// 			       (isSherpa && motherPID  < -9998)) 
+ 			       (isSherpa && motherPID == 10002)) 
 	&& (status == 3);   
 
       bool isLepPlus = (PID == (-leptonPID)) && 
@@ -352,7 +354,7 @@ void genFSR_distribution::Loop(int lepID, bool exclusive, bool applyWeight,
 
     double mll = l4_z.M();
 
-    h_mZ->Fill(mll);
+    h_mZ->Fill(mll,eventWeight);
 
     if(leptonPID==13 && (mll < minMmm || mll > maxMmm))continue;
     if(leptonPID==11 && (mll < minMee || mll > maxMee))continue;
