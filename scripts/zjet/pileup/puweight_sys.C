@@ -24,7 +24,7 @@ const double maxEleEndcapEta = 2.1;
 const double minMee = 76.0;
 const double maxMee =106.0;
 
-void puweight_sys::Loop(bool match)
+void puweight_sys::Loop(bool applyPUWeight, bool match)
 {
 
   if (fChain == 0) return;
@@ -215,7 +215,8 @@ void puweight_sys::Loop(bool match)
 	else if(ip==2)
 	  myPUWeight[ip] = LumiWeights_down.weight(mctrueInt);
 
-	if(myPUWeight[ip] >= 0.0)eventWeight[ip] *= myPUWeight[ip];
+	if(applyPUWeight && myPUWeight[ip] >= 0.0)
+	  eventWeight[ip] *= myPUWeight[ip];
 	if(mcWeight_>0)eventWeight[ip] *= mcWeight_;
 
 	h_puweight_standalone[ip]->Fill(myPUWeight[ip]);
@@ -410,9 +411,11 @@ void puweight_sys::Loop(bool match)
     _inputFile = "test.root";
 
 
-  TFile* outFile = new TFile(Form("/home/syu/ZJets/CMSSW_4_4_4/src/scripts/puweight_sys_ZPt%02i_%s_%s.root",
-				  (int)minZPt,suffix.data(),
-				  _inputFile.data()),"recreate");            
+  std::string prefix = applyPUWeight? "puweight": "raw";
+  std::string filename = "/home/syu/ZJets/CMSSW_4_4_4/src/scripts/" + prefix 
+    + Form("_sys_ZPt%02i_%s_%s.root", (int)minZPt,suffix.data(),_inputFile.data());
+
+  TFile* outFile = new TFile(filename.data(),"recreate");            
 
   h_input_nint_mc            -> Write();
   h_puweight_original        -> Write();
