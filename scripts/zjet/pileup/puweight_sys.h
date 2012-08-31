@@ -483,7 +483,6 @@ public :
 #ifdef puweight_sys_cxx
 puweight_sys::puweight_sys(std::string filename, TTree *tree)
 {
-  /*
   if (tree == 0) {
     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.data());
     if (!f) {
@@ -494,9 +493,9 @@ puweight_sys::puweight_sys(std::string filename, TTree *tree)
 
   }
   Init(tree);
-  */
 
-  if (tree == 0) {
+  /*
+    if (tree == 0) {
     TChain* pho = new TChain("tree/tree");
     TSystemDirectory *base = new TSystemDirectory("root","root");
     base->SetDirectory(filename.data());
@@ -521,7 +520,7 @@ puweight_sys::puweight_sys(std::string filename, TTree *tree)
 
   cout << "Number of entries are " << tree->GetEntries() << endl;
   Init(tree);
-   
+  */
   _inputFile = filename;
 }
 
