@@ -96,40 +96,71 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
   r_corr->Reset();
   r_corr->Divide(hcentral,hraw,1.0,1.0,"B");
 
-  double minSys =  99999.0;
-  double maxSys = -99999.0;
+  double minSysUp =  99999.0;
+  double maxSysUp = -99999.0;
+  double minSysDn =  99999.0;
+  double maxSysDn = -99999.0;
 
-  double firstSys = -1.0;
-  double lastSys = -1.0;
+  double firstSysUp = -99999.0;
+  double lastSysUp = -99999.0;
+
+  double firstSysDn = -99999.0;
+  double lastSysDn = -99999.0;
+
   for(int i=binLo; i <= binHi; i++){
     
     if(r_up->GetBinContent(i)<1e-6)continue;
     if(r_down->GetBinContent(i)<1e-6)continue;
 
-    double tempUp = fabs(r_up->GetBinContent(i)-1.0);
-    double tempDn = fabs(r_down->GetBinContent(i)-1.0);
+    double tempUp = r_up->GetBinContent(i)-1.0;
+    double tempDn = r_down->GetBinContent(i)-1.0;
     
-    if(tempUp < minSys)minSys=tempUp;
-    if(tempUp > maxSys)maxSys=tempUp;
+    if(tempUp < minSysUp)minSysUp=tempUp;
+    if(tempUp > maxSysUp)maxSysUp=tempUp;
 
-    if(tempDn < minSys)minSys=tempDn;
-    if(tempDn > maxSys)maxSys=tempDn;
+    if(tempDn < minSysDn)minSysDn=tempDn;
+    if(tempDn > maxSysDn)maxSysDn=tempDn;
 
-    if(i==binLo && tempUp > firstSys)firstSys=tempUp;
-    if(i==binLo && tempDn > firstSys)firstSys=tempDn;
+    if(i==binLo)firstSysUp=tempUp;
+    if(i==binLo)firstSysDn=tempDn;
 
-    if(i==binHi && tempUp > lastSys)lastSys=tempUp;
-    if(i==binHi && tempDn > lastSys)lastSys=tempDn;
+    if(i==binHi)lastSysUp=tempUp;
+    if(i==binHi)lastSysDn=tempDn;
 
 
   }
 
-  cout << "The range of systematic uncertainty for " << var << " is " << 
-    minSys*100 << " %" << " -- " << maxSys*100 << " %" << endl;
+  cout << "The range of correction for " << var << " is " << 
+    r_corr->GetBinContent(binLo) << " --- " << 
+    r_corr->GetBinContent(binHi) << endl;
+  cout << endl;
 
-  cout << "The x-range of systematic uncertainty for " << var << " is " << 
-    firstSys*100 << " %" << " -- " << lastSys*100 << " %" << endl;
-  
+  cout << "The range of systematic uncertainty for up " << var << " is " << 
+    minSysUp*100 << " %" << " -- " << maxSysUp*100 << " %" << endl;
+  cout << "The total range of systematic uncertainty for up " << var << " is " << 
+    fabs(maxSysUp-minSysUp)*100 << " %" << endl;
+
+  cout << "The range of systematic uncertainty for down " << var << " is " << 
+    minSysDn*100 << " %" << " -- " << maxSysDn*100 << " %" << endl;
+  cout << "The total range of systematic uncertainty for down " << var << " is " << 
+    fabs(maxSysDn-minSysDn)*100 << " %" << endl;
+
+  cout << endl;
+
+  cout << "The x-range of systematic uncertainty for up: " << var << " is " << 
+    firstSysUp*100 << " %" << " -- " << lastSysUp*100 << " %" << endl;
+
+  cout << "The total range of systematic uncertainty for up " << var << " is " << 
+    fabs(firstSysUp-lastSysUp)*100 << " %" << endl;
+
+  cout << "The x-range of systematic uncertainty for down: " << var << " is " << 
+    firstSysDn*100 << " %" << " -- " << lastSysDn*100 << " %" << endl;
+
+  cout << "The total range of systematic uncertainty for down: " << var << " is " << 
+    fabs(firstSysDn-lastSysDn)*100 << " %" << endl;
+
+
+
   
   std::string command = "recreate";
   if(update)command = "update";
