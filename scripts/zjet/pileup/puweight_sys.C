@@ -169,9 +169,9 @@ void puweight_sys::Loop(bool applyPUWeight, bool match)
   // number of true interactins
 
   for(int i=0; i < nPUBin; i++){
-    h_input_nint_data[0]->SetBinContent(i+1,Data[i]);
-    h_input_nint_data[1]->SetBinContent(i+1,DataUp[i]);
-    h_input_nint_data[2]->SetBinContent(i+1,DataDown[i]);
+    h_input_nint_data[0]->SetBinContent(i+1,Data2011[i]);
+    h_input_nint_data[1]->SetBinContent(i+1,Data2011Up[i]);
+    h_input_nint_data[2]->SetBinContent(i+1,Data2011Down[i]);
     h_input_nint_mc  ->SetBinContent(i+1,Fall2011[i]);
   }
 
@@ -183,9 +183,13 @@ void puweight_sys::Loop(bool applyPUWeight, bool match)
   Long64_t nentries = fChain->GetEntriesFast();
 
   cout << " has " << nentries << " entries." << endl;
-  standalone_LumiReWeighting LumiWeights_central(0);
-  standalone_LumiReWeighting LumiWeights_up(+1);
-  standalone_LumiReWeighting LumiWeights_down(-1);
+//   standalone_LumiReWeighting LumiWeights_central(0);
+//   standalone_LumiReWeighting LumiWeights_up(+1);
+//   standalone_LumiReWeighting LumiWeights_down(-1);
+
+  standalone_LumiReWeighting LumiWeights_central(2011,0);
+  standalone_LumiReWeighting LumiWeights_up(2011,+1);
+  standalone_LumiReWeighting LumiWeights_down(2011,-1);
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
