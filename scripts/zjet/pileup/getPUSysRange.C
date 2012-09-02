@@ -1,3 +1,5 @@
+#include "/afs/cern.ch/user/s/syu/scripts/histoLib.h"
+
 void getPUSysRange(std::string mcfile,std::string var, bool update=false, double xmin=-9999.0, double xmax=-9999.0)
 {
   TH1D* hcentral;
@@ -62,39 +64,40 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
   cout << "binLo = " << binLo << "\t binHi = " << binHi << endl;
   
   cout << "Before scaling = " << endl;
-  cout << "Integral of hcentral = " << hcentral->Integral(binLo, binHi) << endl;
-  cout << "Integral of hup = " << hup->Integral(binLo, binHi) << endl;
+  cout << "Integral of hcentral = " << hcentral->Integral(binLo, binHi) << endl;  cout << "Integral of hup = " << hup->Integral(binLo, binHi) << endl;
   cout << "Integral of hdown = " << hdown->Integral(binLo, binHi) << endl;
   cout << "Integral of hraw = " << hraw->Integral(binLo, binHi) << endl;
 
-  double scale=1.0/hcentral->Integral(binLo, binHi);
-  hcentral->Scale(scale);
+  double scale_central=1.0/hcentral->Integral(binLo, binHi);
   
-  scale=1.0/hup->Integral(binLo, binHi);
-  hup->Scale(scale);
+  double scale_up     =1.0/hup->Integral(binLo, binHi);
 
-  scale=1.0/hdown->Integral(binLo, binHi);
-  hdown->Scale(scale);
+  double scale_down   =1.0/hdown->Integral(binLo, binHi);
 
-  scale=1.0/hraw->Integral(binLo, binHi);
-  hraw->Scale(scale);
+  double scale_raw    =1.0/hraw->Integral(binLo, binHi);
 
-  cout << "Integral of hcentral = " << hcentral->Integral(binLo, binHi) << endl;
-  cout << "Integral of hup = " << hup->Integral(binLo, binHi) << endl;
+  cout << "After scaling = " << endl;
+  cout << "Integral of hcentral = " << hcentral->Integral(binLo, binHi) << endl;  cout << "Integral of hup = " << hup->Integral(binLo, binHi) << endl;
   cout << "Integral of hdown = " << hdown->Integral(binLo, binHi) << endl;
   cout << "Integral of hraw = " << hraw->Integral(binLo, binHi) << endl;
 
   TH1D* r_up =(TH1D*) hcentral->Clone(Form("r_%s_up",var1.data()));
   r_up->Reset();
-  r_up->Divide(hup,hcentral,1.0,1.0,"B");
+  r_up->Divide(hup,hcentral,scale_up,scale_central);
 
   TH1D* r_down =(TH1D*) hcentral->Clone(Form("r_%s_down",var1.data()));
   r_down->Reset();
-  r_down->Divide(hdown,hcentral,1.0,1.0,"B");
+  r_down->Divide(hdown,hcentral,scale_down,scale_central);
 
   TH1D* r_corr = (TH1D*) hcentral->Clone(Form("r_%s_corr",var1.data()));
   r_corr->Reset();
-  r_corr->Divide(hcentral,hraw,1.0,1.0,"B");
+  r_corr->Divide(hcentral,hraw,scale_central,scale_raw);
+
+  // now reset the error to get the spread of weights for r_corr
+
+  getWeightedHistoErrors(r_corr, hraw, hcentral);
+  getWeightedHistoErrors(r_up, hraw, hup);
+  getWeightedHistoErrors(r_down, hraw, hdown);
 
   double minSysUp =  99999.0;
   double maxSysUp = -99999.0;

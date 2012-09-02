@@ -417,7 +417,7 @@ void puweight_sys::Loop(bool applyPUWeight, bool match)
 
   std::string prefix = applyPUWeight? "puweight": "raw";
   std::string filename = "/home/syu/ZJets/CMSSW_4_4_4/src/scripts/" + prefix 
-    + Form("_sys_ZPt%02i_%s_%s.root", (int)minZPt,suffix.data(),_inputFile.data());
+    + Form("_sys_ZPt%02i_%s_%s", (int)minZPt,suffix.data(),_inputFile.data());
 
   TFile* outFile = new TFile(filename.data(),"recreate");            
 
