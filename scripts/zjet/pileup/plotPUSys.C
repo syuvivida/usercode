@@ -7,6 +7,12 @@ void plotPUSys(std::string filename)
   const double ymin = 0.95;
   const double ymax = 1.05;
   const double offset = 2.0;
+  const int LINEWIDTH =  2;
+  const int HISTLINEWIDTH=1;
+  const int LINESTYLE = 2;
+  const int UPCOLOR   = 2;
+  const int DNCOLOR   = 4;
+
   std::string ytitle = "PU Systematics/Central";
 
   TCanvas* c1 = new TCanvas("c1","",1200,1000);
@@ -16,21 +22,23 @@ void plotPUSys(std::string filename)
   cout << "nbins = " << nbins << endl;
   r_zy_up->SetMinimum(ymin);
   r_zy_up->SetMaximum(ymax);
-  r_zy_up->SetLineColor(2);
-  r_zy_up->SetMarkerColor(2);
+  r_zy_up->SetLineColor(UPCOLOR);
+  r_zy_up->SetMarkerColor(UPCOLOR);
+  r_zy_up->SetLineWidth(HISTLINEWIDTH);
   r_zy_up->SetYTitle(ytitle.data());
   r_zy_up->SetTitleOffset(offset,"Y");
-  r_zy_up->Draw("hist");
+  r_zy_up->Draw("e1");
 
   r_zy_down->SetMinimum(ymin);
   r_zy_down->SetMaximum(ymax);
-  r_zy_down->SetLineColor(4);
-  r_zy_down->SetMarkerColor(4);
-  r_zy_down->Draw("histsame");
+  r_zy_down->SetLineColor(DNCOLOR);
+  r_zy_down->SetMarkerColor(DNCOLOR);
+  r_zy_down->SetLineWidth(HISTLINEWIDTH);
+  r_zy_down->Draw("e1same");
   TLine* a = new TLine(r_zy_corr->GetBinLowEdge(1),1.0,
 		       r_zy_corr->GetBinLowEdge(nbins+1),1.0);
-  a->SetLineWidth(2);
-  a->SetLineStyle(2);
+  a->SetLineWidth(LINEWIDTH);
+  a->SetLineStyle(LINESTYLE);
   a->SetLineColor(1);
   a->Draw("same");
   float x1NDC = 0.551;
@@ -54,22 +62,24 @@ void plotPUSys(std::string filename)
   c1->cd(2);
   r_jety_up->SetMinimum(ymin);
   r_jety_up->SetMaximum(ymax);
-  r_jety_up->SetLineColor(2);
-  r_jety_up->SetMarkerColor(2);
+  r_jety_up->SetLineColor(UPCOLOR);
+  r_jety_up->SetMarkerColor(UPCOLOR);
+  r_jety_up->SetLineWidth(HISTLINEWIDTH);
   r_jety_up->SetYTitle(ytitle.data());
   r_jety_up->SetTitleOffset(offset,"Y");
-  r_jety_up->Draw("hist");
+  r_jety_up->Draw("e1");
 
   r_jety_down->SetMinimum(ymin);
   r_jety_down->SetMaximum(ymax);
-  r_jety_down->SetLineColor(4);
-  r_jety_down->SetMarkerColor(4);
-  r_jety_down->Draw("histsame");
+  r_jety_down->SetLineColor(DNCOLOR);
+  r_jety_down->SetMarkerColor(DNCOLOR);
+  r_jety_down->SetLineWidth(HISTLINEWIDTH);
+  r_jety_down->Draw("e1same");
 
   TLine* b = new TLine(r_jety_corr->GetBinLowEdge(1),1.0,
 		       r_jety_corr->GetBinLowEdge(nbins+1),1.0);
-  b->SetLineWidth(2);
-  b->SetLineStyle(2);
+  b->SetLineWidth(LINEWIDTH);
+  b->SetLineStyle(LINESTYLE);
   b->SetLineColor(1);
 
   b->Draw("Same");
@@ -78,22 +88,24 @@ void plotPUSys(std::string filename)
   c1->cd(3);
   r_ystar_up->SetMinimum(ymin);
   r_ystar_up->SetMaximum(ymax);
-  r_ystar_up->SetLineColor(2);
-  r_ystar_up->SetMarkerColor(2);
+  r_ystar_up->SetLineColor(UPCOLOR);
+  r_ystar_up->SetMarkerColor(UPCOLOR);
+  r_ystar_up->SetLineWidth(HISTLINEWIDTH);
   r_ystar_up->SetYTitle(ytitle.data());
   r_ystar_up->SetTitleOffset(offset,"Y");
-  r_ystar_up->Draw("hist");
+  r_ystar_up->Draw("e1");
 
   r_ystar_down->SetMinimum(ymin);
   r_ystar_down->SetMaximum(ymax);
-  r_ystar_down->SetLineColor(4);
-  r_ystar_down->SetMarkerColor(4);
-  r_ystar_down->Draw("histsame");
+  r_ystar_down->SetLineColor(DNCOLOR);
+  r_ystar_down->SetMarkerColor(DNCOLOR);
+  r_ystar_down->SetLineWidth(HISTLINEWIDTH);
+  r_ystar_down->Draw("e1same");
 
   TLine* c = new TLine(r_ystar_corr->GetBinLowEdge(1),1.0,
 		       r_ystar_corr->GetBinLowEdge(nbins+1),1.0);
-  c->SetLineWidth(2);
-  c->SetLineStyle(2);
+  c->SetLineWidth(LINEWIDTH);
+  c->SetLineStyle(LINESTYLE);
   c->SetLineColor(1);
 
   c->Draw("same");
@@ -103,22 +115,24 @@ void plotPUSys(std::string filename)
   c1->cd(4);
   r_yB_up->SetMinimum(ymin);
   r_yB_up->SetMaximum(ymax);
-  r_yB_up->SetLineColor(2);
-  r_yB_up->SetMarkerColor(2);
+  r_yB_up->SetLineColor(UPCOLOR);
+  r_yB_up->SetMarkerColor(UPCOLOR);
+  r_yB_up->SetLineWidth(HISTLINEWIDTH);
   r_yB_up->SetYTitle(ytitle.data());
   r_yB_up->SetTitleOffset(offset,"Y");
-  r_yB_up->Draw("hist");
+  r_yB_up->Draw("e1");
 
   r_yB_down->SetMinimum(ymin);
   r_yB_down->SetMaximum(ymax);
-  r_yB_down->SetLineColor(4);
-  r_yB_down->SetMarkerColor(4);
-  r_yB_down->Draw("histsame");
+  r_yB_down->SetLineColor(DNCOLOR);
+  r_yB_down->SetMarkerColor(DNCOLOR);
+  r_yB_down->SetLineWidth(HISTLINEWIDTH);
+  r_yB_down->Draw("e1same");
 
   TLine* d = new TLine(r_yB_corr->GetBinLowEdge(1),1.0,
 		       r_yB_corr->GetBinLowEdge(nbins+1),1.0);
-  d->SetLineWidth(2);
-  d->SetLineStyle(2);
+  d->SetLineWidth(LINEWIDTH);
+  d->SetLineStyle(LINESTYLE);
   d->SetLineColor(1);
 
   d->Draw("same");

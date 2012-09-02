@@ -25,7 +25,7 @@ void plotPUCorr(std::string filename)
   r_zy_corr->SetMaximum(ymax);
   r_zy_corr->SetYTitle(ytitle.data());
   r_zy_corr->SetTitleOffset(offset,"Y");
-  r_zy_corr->Draw("hist");
+  r_zy_corr->Draw("e1");
   a->Draw("same");
 
   /////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ void plotPUCorr(std::string filename)
   r_jety_corr->SetMaximum(ymax);
   r_jety_corr->SetYTitle(ytitle.data());
   r_jety_corr->SetTitleOffset(offset,"Y");
-  r_jety_corr->Draw("hist");
+  r_jety_corr->Draw("e1");
   b->Draw("Same");
 
   /////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ void plotPUCorr(std::string filename)
   r_ystar_corr->SetMaximum(ymax);
   r_ystar_corr->SetYTitle(ytitle.data());
   r_ystar_corr->SetTitleOffset(offset,"Y");
-  r_ystar_corr->Draw("hist");
+  r_ystar_corr->Draw("e1");
   c->Draw("same");
 
   /////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ void plotPUCorr(std::string filename)
   r_yB_corr->SetMaximum(ymax);
   r_yB_corr->SetYTitle(ytitle.data());
   r_yB_corr->SetTitleOffset(offset,"Y");
-  r_yB_corr->Draw("hist");
+  r_yB_corr->Draw("e1");
   d->Draw("same");
   
   c1->Print("pileup/PUcorr.eps");
