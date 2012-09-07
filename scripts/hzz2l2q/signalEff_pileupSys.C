@@ -112,6 +112,8 @@ void signalEff_pileupSys::Loop(int lepCode)
       double zjjMass = zjjM->at(ih);
       double zllMass = zllM->at(ih);
 
+      if(zllMass < MIN_MZ_LL || zllMass > MAX_MZ_LL)continue; 
+
       int nbtag = nBTags->at(ih);
 
       if(nbtag > NBTAGMAX)

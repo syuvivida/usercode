@@ -37,6 +37,8 @@ void pileup::Loop(int lepCode)
   Long64_t nPassTotal = 0;
   Long64_t nCount[20]={0};
 
+  TH1D* h_weight = new TH1D("h_weight","",1000,-10,10);
+
   TH1D* h_nvtx_template = new TH1D("h_nvtx_template","",50,0.5,50.5);
   h_nvtx_template->SetXTitle("Number of reconstructed good vertices");
   h_nvtx_template->Sumw2();
@@ -151,6 +153,7 @@ void pileup::Loop(int lepCode)
     double PU_weight_down    =  isData? 1.0: LumiWeights_down.weight(PU_nTrueInt);
     double PU_weight_inflat  =  isData? 1.0: LumiWeights_inflat.weight(PU_nTrueInt);
 
+    h_weight->Fill(PU_weight_central);
     double weight[4] = {PU_weight_central,
 			PU_weight_up,
 			PU_weight_down,
@@ -173,10 +176,11 @@ void pileup::Loop(int lepCode)
 
       bool Pass=false;
     
-      if((bitmap & MZJJ_SIGNAL) 
-//  	 && (bitmap & PFMET_SIG) 
-//  	 && (bitmap & HELI_LD)
-	 )
+//       if(
+// 	 (bitmap & MZJJ_SIGNAL) 
+//       //  	 && (bitmap & PFMET_SIG) 
+//       //  	 && (bitmap & HELI_LD)
+//  	 )
 	Pass=true;
       if(!Pass)continue;
 	 
@@ -263,11 +267,13 @@ void pileup::Loop(int lepCode)
     _inputFile = "test.root";
 
 
-  TFile* outFile = new TFile(Form("fixed_pileup_%s_%s",leptonName.data(),
+  TFile* outFile = new TFile(Form("loosemjj_pileup_%s_%s",leptonName.data(),
 				  _inputFile.data()),"recreate");   
 
   h_input_nint_data->Write();
   h_input_nint_mc  ->Write();
+
+  h_weight->Write();
 
   for(int i=0; i< nPUs; i++)
     {
