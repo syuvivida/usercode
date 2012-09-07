@@ -72,9 +72,7 @@ public :
    vector<double>  *genJetPt_;
    vector<double>  *genJetEta_;
    vector<double>  *genJetPhi_;
-   Int_t           nGoodHCand;
    Int_t           nAllHCand;
-   Int_t           bestHCand;
    Double_t        metSig;
    Double_t        metSigNoPU;
    vector<double>  *higgsPt;
@@ -140,9 +138,7 @@ public :
    TBranch        *b_genJetPt_;   //!
    TBranch        *b_genJetEta_;   //!
    TBranch        *b_genJetPhi_;   //!
-   TBranch        *b_nGoodHCand;   //!
    TBranch        *b_nAllHCand;   //!
-   TBranch        *b_bestHCand;   //!
    TBranch        *b_metSig;   //!
    TBranch        *b_metSigNoPU;   //!
    TBranch        *b_higgsPt;   //!
@@ -339,9 +335,7 @@ void mjj_why::Init(TTree *tree)
    fChain->SetBranchAddress("genJetPt_", &genJetPt_, &b_genJetPt_);
    fChain->SetBranchAddress("genJetEta_", &genJetEta_, &b_genJetEta_);
    fChain->SetBranchAddress("genJetPhi_", &genJetPhi_, &b_genJetPhi_);
-   fChain->SetBranchAddress("nGoodHCand", &nGoodHCand, &b_nGoodHCand);
    fChain->SetBranchAddress("nAllHCand", &nAllHCand, &b_nAllHCand);
-   fChain->SetBranchAddress("bestHCand", &bestHCand, &b_bestHCand);
    fChain->SetBranchAddress("metSig", &metSig, &b_metSig);
    fChain->SetBranchAddress("metSigNoPU", &metSigNoPU, &b_metSigNoPU);
    fChain->SetBranchAddress("higgsPt", &higgsPt, &b_higgsPt);
