@@ -30,12 +30,11 @@ class standalone_LumiReWeighting {
     
   standalone_LumiReWeighting(int year=2012,int mode=0); // 0: central, -1: down, +1: up
   virtual ~standalone_LumiReWeighting();
-  double weight( int npv) ; 
-  void weightOOT_init(); 
+  double weight( double npv) ; 
 
  protected:
 
-  TH1F*      weights_;
+  TH1D*      weights_;
 
 
 };
