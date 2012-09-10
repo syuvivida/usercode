@@ -40,8 +40,7 @@ void puweight_sys::Loop(bool applyPUWeight, bool match)
   h_puweight_template->Sumw2();
 
   const int nPUBin = 50;
-  TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,
- 				   -0.5,nPUBin-0.5);
+  TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,0,(double)nPUBin);
   h_nint_template->SetXTitle("Number of interactions");
   h_nint_template->Sumw2();
 
