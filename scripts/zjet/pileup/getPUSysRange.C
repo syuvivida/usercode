@@ -61,8 +61,6 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
     }
 
 
-  cout << "binLo = " << binLo << "\t binHi = " << binHi << endl;
-  
   cout << "Before scaling = " << endl;
   cout << "Integral of hcentral = " << hcentral->Integral(binLo, binHi) << endl;  cout << "Integral of hup = " << hup->Integral(binLo, binHi) << endl;
   cout << "Integral of hdown = " << hdown->Integral(binLo, binHi) << endl;
@@ -99,6 +97,9 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
   getWeightedHistoErrors(r_up, hraw, hup);
   getWeightedHistoErrors(r_down, hraw, hdown);
 
+  double minCorr  =  99999.0;
+  double maxCorr  = -99999.0;
+
   double minSysUp =  99999.0;
   double maxSysUp = -99999.0;
   double minSysDn =  99999.0;
@@ -110,10 +111,16 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
   double firstSysDn = -99999.0;
   double lastSysDn = -99999.0;
 
+  cout << "binLo = " << binLo << "\t binHi = " << binHi << endl;
+  
   for(int i=binLo; i <= binHi; i++){
     
     if(r_up->GetBinContent(i)<1e-6)continue;
     if(r_down->GetBinContent(i)<1e-6)continue;
+
+    double tempcorr = r_corr->GetBinContent(i);
+    if(tempcorr < minCorr)minCorr=tempcorr;
+    if(tempcorr > maxCorr)maxCorr=tempcorr;
 
     double tempUp = r_up->GetBinContent(i)-1.0;
     double tempDn = r_down->GetBinContent(i)-1.0;
@@ -134,6 +141,9 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
   }
 
   cout << "The range of correction for " << var << " is " << 
+    fabs(maxCorr-minCorr)*100 << " % " << endl;
+
+  cout << "The x-axis range of correction for " << var << " is " << 
     r_corr->GetBinContent(binLo) << " --- " << 
     r_corr->GetBinContent(binHi) << endl;
   cout << endl;

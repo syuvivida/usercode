@@ -3,6 +3,7 @@
 void plotPUSys(std::string filename)
 {
   TF1* func1 = new TF1("func1","[0]+[1]*x");
+  //  TF1* func1 = new TF1("func1","[0]");
   TFile* fin = TFile::Open(filename.data());
   
   const double ymin = 0.95;

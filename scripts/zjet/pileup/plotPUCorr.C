@@ -1,7 +1,10 @@
+
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 
 void plotPUCorr(std::string filename)
 {
+
+  TF1* func1 = new TF1("func1","[0]+[1]*x");
   TFile* fin = TFile::Open(filename.data());
   
   const double ymin = 0.95;
@@ -26,6 +29,8 @@ void plotPUCorr(std::string filename)
   r_zy_corr->SetYTitle(ytitle.data());
   r_zy_corr->SetTitleOffset(offset,"Y");
   r_zy_corr->Draw("e1");
+  r_zy_corr->Fit("func1");
+  cout << "r_zy_corr correction range: " << func1->GetParameter(1)*200.0 << endl;
   a->Draw("same");
 
   /////////////////////////////////////////////////////////////////
@@ -40,7 +45,10 @@ void plotPUCorr(std::string filename)
   r_jety_corr->SetYTitle(ytitle.data());
   r_jety_corr->SetTitleOffset(offset,"Y");
   r_jety_corr->Draw("e1");
+  r_jety_corr->Fit("func1");
+  cout << "r_jety_corr correction range: " << func1->GetParameter(1)*200.0 << endl;
   b->Draw("Same");
+
 
   /////////////////////////////////////////////////////////////////
   c1->cd(3);
@@ -54,6 +62,8 @@ void plotPUCorr(std::string filename)
   r_ystar_corr->SetYTitle(ytitle.data());
   r_ystar_corr->SetTitleOffset(offset,"Y");
   r_ystar_corr->Draw("e1");
+  r_ystar_corr->Fit("func1");
+  cout << "r_ystar_corr correction range: " << func1->GetParameter(1)*200.0 << endl;
   c->Draw("same");
 
   /////////////////////////////////////////////////////////////////
@@ -68,6 +78,8 @@ void plotPUCorr(std::string filename)
   r_yB_corr->SetYTitle(ytitle.data());
   r_yB_corr->SetTitleOffset(offset,"Y");
   r_yB_corr->Draw("e1");
+  r_yB_corr->Fit("func1");
+  cout << "r_yB_corr correction range: " << func1->GetParameter(1)*200.0 << endl; 
   d->Draw("same");
   
   c1->Print("pileup/PUcorr.eps");
