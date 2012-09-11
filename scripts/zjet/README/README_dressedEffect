@@ -1,0 +1,10 @@
+How to obtain the effect of dressed leptons vs bare leptons
+
+1) run dressedLepton, need to run 3 modes:
+
+  0: bare
+  1: dressed
+  2: both bare and dressed
+
+2) Use compareDressed_darko.C to make the ratio of bare/dressed 
+ and also to get the correct uncertainty
