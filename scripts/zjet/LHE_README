@@ -1,4 +1,0 @@
-cmsRun GeneratorInterface/LHEInterface/test/testReader_cfg.py
-cmsRun GeneratorInterface/LHEInterface/test/dumpLHE_cfg.py
-
-run the macro LHE_angular
