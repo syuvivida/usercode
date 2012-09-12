@@ -115,8 +115,7 @@ void getPUSysRange(std::string mcfile,std::string var, bool update=false, double
   
   for(int i=binLo; i <= binHi; i++){
     
-    if(r_up->GetBinContent(i)<1e-6)continue;
-    if(r_down->GetBinContent(i)<1e-6)continue;
+    if(r_corr->GetBinContent(i)<1e-6)continue;
 
     double tempcorr = r_corr->GetBinContent(i);
     if(tempcorr < minCorr)minCorr=tempcorr;
