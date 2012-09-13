@@ -7,7 +7,7 @@ void call_compare3()
   compare3("h_mh_parton_mother");
   compare3("h_mh_parton_mother",true);
   compare3("h_mll_parton_daughter",false,70,110);
-  compare3("h_mjj_parton_daughter",false,60,130);
+  compare3("h_mjj_parton_daughter",false,70,110);
 
 
   compare3("h_mjj_parton_event0",false,60,130);
@@ -31,12 +31,16 @@ void call_compare3()
   compare3("h_mjj_parton_random4",false,60,130);
   compare3("h_mjj_parton_random5",false,60,130);
 
+  compare3("h_mll_stable_random0",false,60,130);
+
   compare3("h_mjj_stable_random0",false,60,130);
   compare3("h_mjj_stable_random1");
   compare3("h_mjj_stable_random2");
   compare3("h_mjj_stable_random3");
   compare3("h_mjj_stable_random4");
   compare3("h_mjj_stable_random5");
+
+  compare3("h_mll_rec_random0",false,60,130);
 
   compare3("h_mjj_rec_random0",false,60,130);
   compare3("h_mjj_rec_random1",false,60,130);

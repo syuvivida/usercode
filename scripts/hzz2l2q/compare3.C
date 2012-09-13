@@ -36,7 +36,7 @@ void compare3(
 
     fmc[i] = TFile::Open(mcfile[i].data());
     h[i]   = (TH1D*)(fmc[i]->Get(var.data()));
-
+    cout << "Opening " << fmc[i]->GetName() << endl;
   }
 
 
@@ -157,7 +157,7 @@ void compare3(
   leg->Draw("same");
 
 
-  string dirName = "20120822_3histograms";
+  string dirName = "20120913_3histograms";
   gSystem->mkdir(dirName.data());
 
   std::string filename;
