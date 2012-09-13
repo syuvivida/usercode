@@ -4,8 +4,7 @@
 void compare3(
 		    std::string var="h_mh_parton", 
 		    bool logScale=false,
-		    float xmin=-9999.0, float xmax=-9999.0,
-		    std::string output="test"
+		    float xmin=-9999.0, float xmax=-9999.0
 		    )
 {
   
@@ -15,13 +14,12 @@ void compare3(
   const int NHISTOS=3;
   TH1D* h[NHISTOS];
 
-  char tempName[300];
   TFile *fmc[NHISTOS];
   
   std::string mcfile[NHISTOS]={
-    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
-    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
-    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
+    "dijetmass_study_20120907/studymjj_kt4_AOD_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
+    "dijetmass_study_20120907/studymjj_kt4_AOD_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
+    "dijetmass_study_20120907/studymjj_kt4_AOD_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
   };
 
   std::string mcName[NHISTOS]={
@@ -141,7 +139,7 @@ void compare3(
     mLocation.Draw("same");
   
   float x1NDC = 0.669355;
-  float y1NDC = 0.758475;
+  float y1NDC = 0.708475;
   float x2NDC = 0.889113;
   float y2NDC = 0.925847;
 
@@ -151,7 +149,7 @@ void compare3(
   leg->SetFillStyle(0);
   leg->SetTextSize(0.04);
   leg->SetBorderSize(0);
-//   leg->SetHeader(headertitle.data());
+  leg->SetHeader("kt04");
   for(int i=0; i < NHISTOS; i++)
     leg->AddEntry(h[i], mcName[i].data());
   leg->Draw("same");
@@ -161,12 +159,8 @@ void compare3(
   gSystem->mkdir(dirName.data());
 
   std::string filename;
-  std::string psname = dirName + "/" + var;
-  if(output !="test")
-    psname = dirName+ "/" + output;
-  else
-    psname = dirName+ "/" + var;
-  
+  std::string psname = dirName + "/kt4" + var;
+
   if(logScale)
     psname += "_log";
 
