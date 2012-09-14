@@ -14,7 +14,8 @@ void test_combine(std::string eikoName="h_jety",
 		  bool logScale=false,
 		  bool acceptanceCorr=true)
 {
-
+  
+  // declare histograms
   TH1D* h_e;
   TH1D* h_ejes;
   TH1D* h_ejesup;
@@ -25,9 +26,8 @@ void test_combine(std::string eikoName="h_jety",
   TH1F* h_mujesup;
   TH1F* h_mujesdn;
 
-  TH1D* h_combine;
-  
-  TH1D* h_corr;
+  TH1D* h_combine; // for combining electron and muon channels  
+  TH1D* h_corr; // for correction of acceptance
 
   std::string remword3  ="h_";
   std::string corrName = eikoName;
@@ -90,6 +90,8 @@ void test_combine(std::string eikoName="h_jety",
 
   cout << "h_e integral = " << h_e->Integral() << endl;
 
+  // to get the JES of electron channel
+
   h_ejes= (TH1D*)(f_e.Get(eikoName.data()));
   h_ejes    -> SetName("h_ejes");
   h_ejes    -> Sumw2();
@@ -134,13 +136,6 @@ void test_combine(std::string eikoName="h_jety",
   h_combine  -> SetMarkerStyle(8);
 
   // muon channel
-  TFile f_mu("DoubleMu2011_EffCorr_ZpT40_absY_051412.root");
-  if (f_mu.IsZombie()) {
-    cout << endl << "Error opening file" << f_mu.GetName() << endl << endl;
-    return;
-  }
-  else
-    cout << endl << "Opened " << f_mu.GetName() << endl << endl;
 
   std::string kengName = "Z1jets_1jeta_BE";
   std::string xtitle   = "|Y(jet)|";
@@ -176,7 +171,15 @@ void test_combine(std::string eikoName="h_jety",
       kengName ="dimuoneta1jet_BE";
       xtitle = "|Y(Z)|";
     }
-  
+
+  // central value
+  TFile f_mu("DoubleMu2011_EffCorr_ZpT40_absY_051412.root");
+  if (f_mu.IsZombie()) {
+    cout << endl << "Error opening file" << f_mu.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_mu.GetName() << endl << endl;
 
   h_mu = (TH1F*)(f_mu.Get(kengName.data()));
   h_mu -> Sumw2();
@@ -190,6 +193,7 @@ void test_combine(std::string eikoName="h_jety",
 
   cout << "h_mu integral = " << h_mu->Integral() << endl;
 
+  // to get JES uncertainty
   TFile f_jetsys_mu("DoubleMu2011_JESuncertainty_JetY_061712.root");
   if (f_jetsys_mu.IsZombie()) {
     cout << endl << "Error opening file" << f_jetsys_mu.GetName() << endl << endl;
@@ -218,10 +222,9 @@ void test_combine(std::string eikoName="h_jety",
   cout << "h_mujesdn integral = " << h_mujesdn->Integral() << endl;
 
 
-  int nbin = h_e->GetNbinsX(); // electron file has smaller statistical 
-                               // uncertainty
+  int nbin = h_e->GetNbinsX(); 
 
-  // now loop over bins to compute chi2
+  // now loop over bins to compute the best weight
   for(int i=1; i<=nbin; i++){
 
     // electron channel
@@ -271,6 +274,8 @@ void test_combine(std::string eikoName="h_jety",
   	 << "rel_state= " << stat_e/value_e << "\t rel_statmu = " <<
       stat_m/value_m << endl;
     
+    // now get the weight to combine electron and muon channel
+    // there is no correlation between different bins of observables
 
     double alpha = (total_m_2 - correlation*sys_e*sys_m)/
       (total_e_2 + total_m_2 - 2*correlation*sys_e*sys_m);
@@ -313,6 +318,10 @@ void test_combine(std::string eikoName="h_jety",
   h_mu     ->SetXTitle(xtitle.data());
   h_combine->SetXTitle(xtitle.data());
 
+
+  // save the original electron and muon root files and the combined 
+  // result in a ROOT file
+
   std::string command = "recreate";
   if(update)command="update";
   TFile* outFile = new TFile("test_combine.root", command.data());
@@ -321,6 +330,7 @@ void test_combine(std::string eikoName="h_jety",
   h_combine->Write();
   outFile->Close();
 
+  // plot the results
   TCanvas* c1 = new TCanvas("c1","",500,500);
   if(logScale)
     c1->SetLogy(1);
