@@ -10,9 +10,10 @@ using namespace std;
 
 void test_combine(std::string eikoName="h_jety", 
 		  bool update=false,
+		  bool acceptanceCorr=true,
 		  double correlation=1.0, 
-		  bool logScale=false,
-		  bool acceptanceCorr=true)
+		  bool logScale=false
+		  )
 {
   
   // declare histograms
