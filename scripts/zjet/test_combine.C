@@ -8,8 +8,11 @@
 
 using namespace std;
 
-void test_combine(std::string eikoName="h_jety",double correlation=1.0, 
-		  bool logScale=false)
+void test_combine(std::string eikoName="h_jety", 
+		  bool update=false,
+		  double correlation=1.0, 
+		  bool logScale=false,
+		  bool acceptanceCorr=true)
 {
 
   TH1D* h_e;
@@ -44,11 +47,15 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
   h_corr = (TH1D*)(f_crack.Get(Form("have_%s",corrName.data())));
 
   // for debugging
-//   h_corr->Reset();
+  if( !acceptanceCorr )
+    h_corr->Reset();
   for(int i=1; i<= h_corr->GetNbinsX(); i++)
     {
-//       h_corr->SetBinContent(i,1.0);
-//       h_corr->SetBinError(i,1e-6);
+      if( !acceptanceCorr )
+	{
+	  h_corr->SetBinContent(i,1.0);
+	  h_corr->SetBinError(i,1e-6);
+	}
       cout << "Correction for bin " << i << " = " 
 	   << h_corr->GetBinContent(i) << " +- " << h_corr->GetBinError(i) 
 	   << endl;
@@ -64,7 +71,7 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
     cout << endl << "Opened " << f_e.GetName() << endl << endl;
 
   h_e  = (TH1D*)(f_e.Get(eikoName.data()));
-  h_e  -> SetName("h_e");
+  h_e  -> SetName(Form("h_e_%s",corrName.data()));
   h_e  -> SetTitle(""); 
   //===================================================
   // 2012/09/10, New!! crack acceptance correction
@@ -118,7 +125,7 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
 
   cout << "h_ejesdn integral = " << h_ejesdn->Integral() << endl;
 
-  h_combine= (TH1D*)h_e->Clone("h_combine");
+  h_combine= (TH1D*)h_e->Clone(Form("h_combine_%s",corrName.data()));
   h_combine  -> Reset();
   h_combine  -> SetTitle("");
   h_combine  -> SetLineColor(1);
@@ -173,7 +180,8 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
 
   h_mu = (TH1F*)(f_mu.Get(kengName.data()));
   h_mu -> Sumw2();
-  h_mu  -> SetTitle("");
+  h_mu -> SetName(Form("h_mu_%s",corrName.data()));
+  h_mu -> SetTitle("");
   h_mu -> Scale(1.0/h_mu->Integral());
   h_mu -> SetLineColor(kRed-7);
   h_mu -> SetMarkerColor(kRed-7);
@@ -305,6 +313,13 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
   h_mu     ->SetXTitle(xtitle.data());
   h_combine->SetXTitle(xtitle.data());
 
+  std::string command = "recreate";
+  if(update)command="update";
+  TFile* outFile = new TFile("test_combine.root", command.data());
+  h_e      ->Write();
+  h_mu     ->Write();
+  h_combine->Write();
+  outFile->Close();
 
   TCanvas* c1 = new TCanvas("c1","",500,500);
   if(logScale)
