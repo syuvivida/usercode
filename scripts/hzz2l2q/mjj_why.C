@@ -220,12 +220,18 @@ void mjj_why::Loop(int DEBUG)
   //================================================================
   //                    status=1, 3 profiles 
   //================================================================
-  
+ 
   TProfile* pf_dR_Rm_gen = (TProfile*)pf_dR_template->Clone("pf_dR_Rm_gen");
   pf_dR_Rm_gen->SetYTitle("M_{jj}/M_{qq} [GeV]");
 
   TProfile* pf_dR_Rm_rec = (TProfile*)pf_dR_template->Clone("pf_dR_Rm_rec");
   pf_dR_Rm_rec->SetYTitle("M_{jj}/M_{qq} [GeV]");
+
+  TProfile* pf_dR_dm_gen = (TProfile*)pf_dR_template->Clone("pf_dR_dm_gen");
+  pf_dR_dm_gen->SetYTitle("M_{jj}-M_{qq} [GeV]");
+
+  TProfile* pf_dR_dm_rec = (TProfile*)pf_dR_template->Clone("pf_dR_dm_rec");
+  pf_dR_dm_rec->SetYTitle("M_{jj}-M_{qq} [GeV]");
 
 
   TProfile* pf_dR_Rpt_gen[2];
@@ -538,8 +544,8 @@ void mjj_why::Loop(int DEBUG)
 		h_mll_stable_random[0]->Fill(mZll_random);
 		h_mjj_stable_random[0]->Fill(mZjj_random);
 
-
 		pf_dR_Rm_gen->Fill(dR_parton, mZjj_random/mZjj_parton);
+		pf_dR_dm_gen->Fill(dR_parton, mZjj_random-mZjj_parton);
 		
 
 		if(iMatchedToQ1)
@@ -747,12 +753,14 @@ void mjj_why::Loop(int DEBUG)
 	  h_mjj_rec_truth[1]->Fill(mZjj_parton);
 
 	// Roberto-style profiles
-	  pf_dR_Rm_rec->Fill(dR_parton, mjj_rec/mZjj_parton, PU_weight);
-
+	  if(mjj_rec > LOOSE_MIN_MZ_JJ && mjj_rec < LOOSE_MAX_MZ_JJ){
+	    pf_dR_Rm_rec->Fill(dR_parton, mjj_rec/mZjj_parton, PU_weight);
+	    pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, PU_weight);
 	  for(int ieiko=0; ieiko<2; ieiko++)
 	    {
 	      pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]/QuarkPt[ieiko],PU_weight);
 	    }
+	  }
 	  
 	} // if for the same event, gen jets are also matched to quarks             
 
@@ -946,6 +954,9 @@ void mjj_why::Loop(int DEBUG)
 
   pf_dR_Rm_gen->Write();
   pf_dR_Rm_rec->Write();
+
+  pf_dR_dm_gen->Write();
+  pf_dR_dm_rec->Write();
 
   for(int ip=0; ip<2; ip++){
 
