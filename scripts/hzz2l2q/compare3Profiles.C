@@ -2,7 +2,7 @@
 #include "cutvalues.h"
 
 void compare3Profiles(
-		      std::string var="pf_dR_dm_gen", 
+		      std::string var="pf_dR_Rm_gen", 
 		      float xmin=0.5, float xmax=3.0
 		      )
 {
@@ -17,9 +17,9 @@ void compare3Profiles(
   TFile *fmc[NHISTOS];
   
   std::string mcfile[NHISTOS]={
-    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
-    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
-    "dijetmass_study/studymjj_AOD_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
+    "dijetmass_study_20120913/studymjj_ak5_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
+    "dijetmass_study_20120913/studymjj_ak5_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
+    "dijetmass_study_20120913/studymjj_ak5_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
   };
 
   std::string mcName[NHISTOS]={
@@ -104,7 +104,8 @@ void compare3Profiles(
   cout << "Min = " << min << endl;
 
   bool isRatio=false;
-  if(var.find("Rpt")!=std::string::npos)
+  if(var.find("Rpt")!=std::string::npos || 
+     var.find("Rm")!=std::string::npos)
     isRatio=true;
 
   for(int ih=0; ih < NHISTOS; ih++){
@@ -169,11 +170,11 @@ void compare3Profiles(
   leg->Draw("same");
 
 
-  string dirName = "20120828_3profiles";
+  string dirName = "20120913_3profiles";
   gSystem->mkdir(dirName.data());
 
   std::string filename;
-  std::string psname = dirName + "/zoomin_" + var;
+  std::string psname = dirName + "/ak5_" + var;
   
   filename = psname + ".eps";
   c1->Print(filename.data());
