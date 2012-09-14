@@ -93,7 +93,7 @@ void mjj_why::Loop(int DEBUG)
     "matched and separated (#geq 2 jets)",  //0 
     "matched and separated (#geq 2 jets)",  //1
     "matched and merged (#geq 2 jets)",     //2
-    "only one quark matched (#geq 2 jets)", //3
+    "matched and merged (#geq 2 jets)",     //3
     "only one quark matched (#geq 2 jets)", //4
     "no match (#geq 2 jets)"                //5
   };
@@ -118,6 +118,10 @@ void mjj_why::Loop(int DEBUG)
   TH1D* h_mh_rec_random[NCASES];
   TH1D* h_mll_rec_random[NCASES];
   TH1D* h_mjj_rec_random[NCASES];
+
+  TH1D* h_mh_rec_truth[NCASES];
+  TH1D* h_mll_rec_truth[NCASES];
+  TH1D* h_mjj_rec_truth[NCASES];
 
   for(int i=0; i< NCASES; i++){
 
@@ -165,6 +169,10 @@ void mjj_why::Loop(int DEBUG)
     h_mh_rec_random[i]->SetTitle(rectitle[i].data());
     h_mh_rec_random[i]->SetYTitle(ytitle.data());
 
+    h_mh_rec_truth[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_rec_truth%d",i));
+    h_mh_rec_truth[i]->SetTitle(rectitle[i].data());
+    h_mh_rec_truth[i]->SetYTitle(ytitle.data());
+
 
     ytitle = Form("Candidates per %d GeV/c^{2}",
 		  (int)h_mll_template->GetBinWidth(1));
@@ -180,6 +188,9 @@ void mjj_why::Loop(int DEBUG)
     h_mll_rec_random[i]->SetTitle(rectitle[i].data());
     h_mll_rec_random[i]->SetYTitle(ytitle.data());   
 
+    h_mll_rec_truth[i] = (TH1D*)h_mll_template->Clone(Form("h_mll_rec_truth%d",i));
+    h_mll_rec_truth[i]->SetTitle(rectitle[i].data());
+    h_mll_rec_truth[i]->SetYTitle(ytitle.data());
 
     ytitle = Form("Candidates per %d GeV/c^{2}",
 		  (int)h_mjj_template->GetBinWidth(1));
@@ -196,33 +207,30 @@ void mjj_why::Loop(int DEBUG)
     h_mjj_rec_random[i]->SetTitle(rectitle[i].data());
     h_mjj_rec_random[i]->SetYTitle(ytitle.data()); 
 
+    if(i==3)h_mjj_rec_random[i]->SetXTitle("M_{j} [GeV/c^{2}]");
+
+    h_mjj_rec_truth[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_rec_truth%d",i));
+    h_mjj_rec_truth[i]->SetTitle(rectitle[i].data());
+    h_mjj_rec_truth[i]->SetYTitle(ytitle.data());
+
   }
 
   //================================================================
   //                    status=1, 3 profiles 
   //================================================================
   
-  TProfile* pf_dR_dm_gen = (TProfile*)pf_dR_template->Clone("pf_dR_dm_gen");
-  pf_dR_dm_gen->SetYTitle("M_{Z}(genJet)-M_{Z}(q) [GeV]");
+  TProfile* pf_dR_Rm_gen = (TProfile*)pf_dR_template->Clone("pf_dR_Rm_gen");
+  pf_dR_Rm_gen->SetYTitle("M_{jj}/M_{qq} [GeV]");
 
-  TProfile* pf_dR_dm_rec = (TProfile*)pf_dR_template->Clone("pf_dR_dm_rec");
-  pf_dR_dm_rec->SetYTitle("M_{Z}(PFJet)-M_{Z}(q) [GeV]");
+  TProfile* pf_dR_Rm_rec = (TProfile*)pf_dR_template->Clone("pf_dR_Rm_rec");
+  pf_dR_Rm_rec->SetYTitle("M_{jj}/M_{qq} [GeV]");
 
-
-  TProfile* pf_dR_dpt_gen[2];
-  TProfile* pf_dR_dpt_rec[2];
 
   TProfile* pf_dR_Rpt_gen[2];
   TProfile* pf_dR_Rpt_rec[2];
 
   for(int ip=0; ip<2; ip++){
    
-    // difference
-    pf_dR_dpt_gen[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_dpt_gen%d",ip));
-    pf_dR_dpt_gen[ip]->SetYTitle(Form("p_{T}(genJet)-p_{T}(q_{%d}) [GeV]",ip+1));
-  
-    pf_dR_dpt_rec[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_dpt_rec%d",ip));
-    pf_dR_dpt_rec[ip]->SetYTitle(Form("p_{T}(PFJet)-p_{T}(q_{%d}) [GeV]",ip+1));
     // ratio
     pf_dR_Rpt_gen[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_Rpt_gen%d",ip));
     pf_dR_Rpt_gen[ip]->SetYTitle(Form("p_{T}(genJet)/p_{T}(q_{%d}) [GeV]",ip+1));
@@ -245,7 +253,7 @@ void mjj_why::Loop(int DEBUG)
     // if (Cut(ientry) < 0) continue;
     double PU_weight =  LumiWeights_central.weight(PU_nTrueInt);
 
-//     if(jentry > 50)break;
+    //     if(jentry > 50)break;
     nPass[0]++;
     //================================================================
     // STATUS=3 LEVEL
@@ -529,22 +537,16 @@ void mjj_why::Loop(int DEBUG)
 		h_mjj_stable_random[0]->Fill(mZjj_random);
 
 
-		pf_dR_dm_gen->Fill(dR_parton, mZjj_random-mZjj_parton);
+		pf_dR_Rm_gen->Fill(dR_parton, mZjj_random/mZjj_parton);
 		
 
 		if(iMatchedToQ1)
 		  {
-		    pf_dR_dpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()-q1.Pt());	 
-		    pf_dR_dpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()-q2.Pt());	 
-
 		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()/q1.Pt());	 
 		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()/q2.Pt());	 
 		  }
 		else		
 		  {
-		    pf_dR_dpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()-q1.Pt());	 
-		    pf_dR_dpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()-q2.Pt());	 
-
 		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()/q1.Pt());	 
 		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()/q2.Pt());	 
 		  }
@@ -668,16 +670,19 @@ void mjj_why::Loop(int DEBUG)
 	cout << "jet1 pt = " << jet1.Pt() << "\t jet2 pt = " << jet2.Pt() << endl;
 	cout << "q1 pt = " << q1.Pt() << "\t q2 pt = " << q2.Pt() << endl;
       }
-    
+      
 
-    // check for MC Truth
+    // ------------------------------------------------
+    // Reconstruction level
+    //-------------------------------------------------    
+
     for(int ih=0; ih<higgsM->size(); ih++){
 
       bool matchedToQ1=false;
       bool matchedToQ2=false;
       
       int nMatch=0;
-      
+      TLorentzVector mergedJet_l4(0,0,0,0);
       double jetRecPt[2]={0};
 
       for(int ijet=0; ijet<jetPt->size(); ijet++){
@@ -695,7 +700,15 @@ void mjj_why::Loop(int DEBUG)
 
 
 	if(matchedToQ1 && matchedToQ2)
-	  nMatch=100;
+	  {
+	    nMatch=100;
+	    mergedJet_l4.SetPtEtaPhiE(
+				      jetPt->at(ijet),
+				      jetEta->at(ijet),
+				      jetPhi->at(ijet),
+				      jetE->at(ijet)				      
+				      );	    
+	  }
 	else if(matchedToQ1 && !matchedToQ2)
 	  {
 	    nMatch++;
@@ -707,7 +720,7 @@ void mjj_why::Loop(int DEBUG)
 	    jetRecPt[1] = jetPt->at(ijet);
 	  }
       } // end of loop over jets
-
+      
       double mH_rec  = higgsM->at(ih);
       double mll_rec = zllM->at(ih);
       double mjj_rec = zjjM->at(ih);
@@ -716,39 +729,72 @@ void mjj_why::Loop(int DEBUG)
 	h_mh_rec_random[0]->Fill(mH_rec, PU_weight);
 	h_mll_rec_random[0]->Fill(mll_rec, PU_weight);
 	h_mjj_rec_random[0]->Fill(mjj_rec, PU_weight);
+
+	h_mh_rec_truth[0]->Fill(mH_parton);
+	h_mll_rec_truth[0]->Fill(mZll_parton);
+	h_mjj_rec_truth[0]->Fill(mZjj_parton);
 	
 	if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){       
+
 	  h_mh_rec_random[1]->Fill(mH_rec, PU_weight);
 	  h_mll_rec_random[1]->Fill(mll_rec, PU_weight);
 	  h_mjj_rec_random[1]->Fill(mjj_rec, PU_weight);
 
-	  // Roberto-style profiles
-	  pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, PU_weight);
+	  h_mh_rec_truth[1]->Fill(mH_parton);
+	  h_mll_rec_truth[1]->Fill(mZll_parton);
+	  h_mjj_rec_truth[1]->Fill(mZjj_parton);
+
+	// Roberto-style profiles
+	  pf_dR_Rm_rec->Fill(dR_parton, mjj_rec/mZjj_parton, PU_weight);
 
 	  for(int ieiko=0; ieiko<2; ieiko++)
 	    {
-	      pf_dR_dpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]-QuarkPt[ieiko],PU_weight);
 	      pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]/QuarkPt[ieiko],PU_weight);
 	    }
 	  
 	} // if for the same event, gen jets are also matched to quarks             
-      }
+
+	  
+      } // if both jets are matched
 
       else if(nMatch==100){
 	h_mh_rec_random[2]->Fill(mH_rec, PU_weight);
 	h_mll_rec_random[2]->Fill(mll_rec, PU_weight);
 	h_mjj_rec_random[2]->Fill(mjj_rec, PU_weight);
+
+	h_mh_rec_truth[2]->Fill(mH_parton);
+	h_mll_rec_truth[2]->Fill(mZll_parton);
+	h_mjj_rec_truth[2]->Fill(mZjj_parton);
+
+	if(mergedJet_l4.E()>1e-6)
+	  h_mjj_rec_random[3]->Fill(mergedJet_l4.M(), PU_weight);
+
+	h_mh_rec_truth[3]->Fill(mH_parton);
+	h_mll_rec_truth[3]->Fill(mZll_parton);
+	h_mjj_rec_truth[3]->Fill(mZjj_parton);
+
+
       }
 
       else if(nMatch==1){
 	h_mh_rec_random[4]->Fill(mH_rec, PU_weight);
 	h_mll_rec_random[4]->Fill(mll_rec, PU_weight);
 	h_mjj_rec_random[4]->Fill(mjj_rec, PU_weight);
+
+	h_mh_rec_truth[4]->Fill(mH_parton);
+	h_mll_rec_truth[4]->Fill(mZll_parton);
+	h_mjj_rec_truth[4]->Fill(mZjj_parton);
+
       }
       else if(nMatch==0){
 	h_mh_rec_random[5]->Fill(mH_rec, PU_weight);
 	h_mll_rec_random[5]->Fill(mll_rec, PU_weight);
 	h_mjj_rec_random[5]->Fill(mjj_rec, PU_weight);
+
+	h_mh_rec_truth[5]->Fill(mH_parton);
+	h_mll_rec_truth[5]->Fill(mZll_parton);
+	h_mjj_rec_truth[5]->Fill(mZjj_parton);
+
       }
       
     } // end of loop over higgs candidate
@@ -896,13 +942,10 @@ void mjj_why::Loop(int DEBUG)
   h_mll_parton_daughter->Write();
   h_mjj_parton_daughter->Write();
 
-  pf_dR_dm_gen->Write();
-  pf_dR_dm_rec->Write();
+  pf_dR_Rm_gen->Write();
+  pf_dR_Rm_rec->Write();
 
   for(int ip=0; ip<2; ip++){
-
-    pf_dR_dpt_gen[ip]->Write();
-    pf_dR_dpt_rec[ip]->Write();
 
     pf_dR_Rpt_gen[ip]->Write();
     pf_dR_Rpt_rec[ip]->Write();
@@ -919,10 +962,6 @@ void mjj_why::Loop(int DEBUG)
     h_mll_stable_event[i]->Write();
     h_mjj_stable_event[i]->Write();
 
-    h_mh_rec_random[i]->Write();
-    h_mll_rec_random[i]->Write();
-    h_mjj_rec_random[i]->Write();
-
     h_mh_parton_random[i]->Write();
     h_mll_parton_random[i]->Write();
     h_mjj_parton_random[i]->Write();
@@ -930,6 +969,16 @@ void mjj_why::Loop(int DEBUG)
     h_mh_stable_random[i]->Write();
     h_mll_stable_random[i]->Write();
     h_mjj_stable_random[i]->Write();
+
+    h_mh_rec_random[i]->Write();
+    h_mll_rec_random[i]->Write();
+    h_mjj_rec_random[i]->Write();
+
+    h_mh_rec_truth[i]->Write();
+    h_mll_rec_truth[i]->Write();
+    h_mjj_rec_truth[i]->Write();
+
+
   }
 
   outFile->Close();  
@@ -943,6 +992,10 @@ Bool_t mjj_why::matchGenToParton(Int_t igen, Int_t ijet){
   double dR = deltaR(genParEta_->at(igen), genParPhi_->at(igen),
 		     genJetEta_->at(ijet), genJetPhi_->at(ijet)
 		     ); 
+
+  Double_t relPt = genParPt_->at(igen)>1e-6?
+    fabs(genParPt_->at(igen)-genJetPt_->at(ijet))/genParPt_->at(igen)
+    : -9999.0;
 
   if(dR<0.5)
     matched = true;
@@ -958,6 +1011,10 @@ Bool_t mjj_why::matchGenToPFJet(Int_t igen, Int_t ijet){
   double dR = deltaR(genParEta_->at(igen), genParPhi_->at(igen),
 		     jetEta->at(ijet), jetPhi->at(ijet)
 		     ); 
+
+  Double_t relPt = genParPt_->at(igen)>1e-6?
+    fabs(genParPt_->at(igen)-jetPt->at(ijet))/genParPt_->at(igen)
+    : -9999.0;
 
   if(dR<0.5)
     matched = true;
