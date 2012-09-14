@@ -13,22 +13,64 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
 {
 
   TH1D* h_e;
+  TH1D* h_ejes;
   TH1D* h_ejesup;
   TH1D* h_ejesdn;
 
   TH1F* h_mu;
+  TH1F* h_mujes;
   TH1F* h_mujesup;
   TH1F* h_mujesdn;
-  TH1F* h_mujes;
 
   TH1D* h_combine;
+  
+  TH1D* h_corr;
 
+  std::string remword3  ="h_";
+  std::string corrName = eikoName;
+  size_t pos3  = corrName.find(remword3);
+  if(pos3!= std::string::npos)
+    corrName.replace(pos3,remword3.length(),"");
+
+  // acceptance correction for electrons
+  TFile f_crack("ave_sherpamadgraph.root");
+  if (f_crack.IsZombie()) {
+    cout << endl << "Error opening file" << f_crack.GetName() << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_crack.GetName() << endl << endl;
+
+  h_corr = (TH1D*)(f_crack.Get(Form("have_%s",corrName.data())));
+
+  // for debugging
+//   h_corr->Reset();
+  for(int i=1; i<= h_corr->GetNbinsX(); i++)
+    {
+//       h_corr->SetBinContent(i,1.0);
+//       h_corr->SetBinError(i,1e-6);
+      cout << "Correction for bin " << i << " = " 
+	   << h_corr->GetBinContent(i) << " +- " << h_corr->GetBinError(i) 
+	   << endl;
+    }
+  
   // electron channel
-  TFile* f_e = TFile::Open("cts_CorrectedPlotsZCut_Jes0_NoBkgSub.root");
-  h_e  = (TH1D*)(f_e->Get(eikoName.data()));
+  TFile f_e("cts_CorrectedPlotsZCut_Jes0_NoBkgSub.root");
+  if (f_e.IsZombie()) {
+    cout << endl << "Error opening file" << f_e.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_e.GetName() << endl << endl;
+
+  h_e  = (TH1D*)(f_e.Get(eikoName.data()));
   h_e  -> SetName("h_e");
-  h_e  -> SetTitle("");
+  h_e  -> SetTitle(""); 
+  //===================================================
+  // 2012/09/10, New!! crack acceptance correction
+  //===================================================
   h_e  -> Sumw2();
+  h_e  -> Divide(h_corr);
   h_e  -> Scale(1.0/h_e->Integral());
   h_e  -> SetYTitle("Arbitrary Unit");
   h_e  -> SetTitleOffset(2.0,"Y");
@@ -41,41 +83,38 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
 
   cout << "h_e integral = " << h_e->Integral() << endl;
 
+  h_ejes= (TH1D*)(f_e.Get(eikoName.data()));
+  h_ejes    -> SetName("h_ejes");
+  h_ejes    -> Sumw2();
+  h_ejes    -> Scale(1.0/h_ejes->Integral());
+  cout << "h_ejes integral = " << h_ejes->Integral() << endl;
 
-  TFile* f_ejesup = TFile::Open("cts_CorrectedPlotsZCut_JesUp_NoBkgSub.root");
-  h_ejesup  = (TH1D*)(f_ejesup->Get(eikoName.data()));
+  TFile f_ejesup("cts_CorrectedPlotsZCut_JesUp_NoBkgSub.root");
+  if (f_ejesup.IsZombie()) {
+    cout << endl << "Error opening file" << f_ejesup.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_ejesup.GetName() << endl << endl;
+
+  h_ejesup  = (TH1D*)(f_ejesup.Get(eikoName.data()));
   h_ejesup  -> SetName("h_ejesup");
-  h_ejesup  -> SetTitle("");
   h_ejesup  -> Sumw2();
   h_ejesup  -> Scale(1.0/h_ejesup->Integral());
-  h_ejesup  -> SetYTitle("Arbitrary Unit");
-  h_ejesup  -> SetTitleOffset(2.0,"Y");
-  h_ejesup  -> GetYaxis()->SetDecimals();
-  h_ejesup  -> GetXaxis()->SetDecimals();
-  h_ejesup  -> SetLineColor(kBlue-7);
-  h_ejesup  -> SetMarkerColor(kBlue-7);
-  h_ejesup  -> SetMarkerSize(1);
-  h_ejesup  -> SetMarkerStyle(24);
-
-
   cout << "h_ejesup integral = " << h_ejesup->Integral() << endl;
 
+  TFile f_ejesdn("cts_CorrectedPlotsZCut_JesDn_NoBkgSub.root");
+  if (f_ejesdn.IsZombie()) {
+    cout << endl << "Error opening file" << f_ejesdn.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_ejesdn.GetName() << endl << endl;
 
-  TFile* f_ejesdn = TFile::Open("cts_CorrectedPlotsZCut_JesDn_NoBkgSub.root");
-  h_ejesdn  = (TH1D*)(f_ejesdn->Get(eikoName.data()));
+  h_ejesdn  = (TH1D*)(f_ejesdn.Get(eikoName.data()));
   h_ejesdn  -> SetName("h_ejesdn");
-  h_ejesdn  -> SetTitle("");
   h_ejesdn  -> Sumw2();
   h_ejesdn  -> Scale(1.0/h_ejesdn->Integral());
-  h_ejesdn  -> SetYTitle("Arbitrary Unit");
-  h_ejesdn  -> SetTitleOffset(2.0,"Y");
-  h_ejesdn  -> GetYaxis()->SetDecimals();
-  h_ejesdn  -> GetXaxis()->SetDecimals();
-  h_ejesdn  -> SetLineColor(kBlue-7);
-  h_ejesdn  -> SetMarkerColor(kBlue-7);
-  h_ejesdn  -> SetMarkerSize(1);
-  h_ejesdn  -> SetMarkerStyle(24);
-
 
   cout << "h_ejesdn integral = " << h_ejesdn->Integral() << endl;
 
@@ -88,7 +127,13 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
   h_combine  -> SetMarkerStyle(8);
 
   // muon channel
-  TFile* f_mu = TFile::Open("DoubleMu2011_EffCorr_ZpT40_absY_051412.root");
+  TFile f_mu("DoubleMu2011_EffCorr_ZpT40_absY_051412.root");
+  if (f_mu.IsZombie()) {
+    cout << endl << "Error opening file" << f_mu.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_mu.GetName() << endl << endl;
 
   std::string kengName = "Z1jets_1jeta_BE";
   std::string xtitle   = "|Y(jet)|";
@@ -126,7 +171,7 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
     }
   
 
-  h_mu = (TH1F*)(f_mu->Get(kengName.data()));
+  h_mu = (TH1F*)(f_mu.Get(kengName.data()));
   h_mu -> Sumw2();
   h_mu  -> SetTitle("");
   h_mu -> Scale(1.0/h_mu->Integral());
@@ -137,21 +182,28 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
 
   cout << "h_mu integral = " << h_mu->Integral() << endl;
 
-  TFile* f_jetsys_mu = TFile::Open("DoubleMu2011_JESuncertainty_JetY_061712.root");
+  TFile f_jetsys_mu("DoubleMu2011_JESuncertainty_JetY_061712.root");
+  if (f_jetsys_mu.IsZombie()) {
+    cout << endl << "Error opening file" << f_jetsys_mu.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_jetsys_mu.GetName() << endl << endl;
 
-  h_mujes = (TH1F*)(f_jetsys_mu->Get(kengName.data()));
+
+  h_mujes = (TH1F*)(f_jetsys_mu.Get(kengName.data()));
   h_mujes -> Sumw2();
   h_mujes -> Scale(1.0/h_mujes->Integral());
 
   cout << "h_mujes integral = " << h_mujes->Integral() << endl;
 
-  h_mujesup = (TH1F*)(f_jetsys_mu->Get(Form("%sUp",kengName.data())));
+  h_mujesup = (TH1F*)(f_jetsys_mu.Get(Form("%sUp",kengName.data())));
   h_mujesup -> Sumw2();
   h_mujesup -> Scale(1.0/h_mujesup->Integral());
 
   cout << "h_mujesup integral = " << h_mujesup->Integral() << endl;
 
-  h_mujesdn = (TH1F*)(f_jetsys_mu->Get(Form("%sDn",kengName.data())));
+  h_mujesdn = (TH1F*)(f_jetsys_mu.Get(Form("%sDn",kengName.data())));
   h_mujesdn -> Sumw2();
   h_mujesdn -> Scale(1.0/h_mujesdn->Integral());
 
@@ -169,11 +221,19 @@ void test_combine(std::string eikoName="h_jety",double correlation=1.0,
     if(value_e < 1e-10)continue;
     double stat_e  = h_e->GetBinError(i);
 
-    double syse_up = fabs(h_ejesup->GetBinContent(i) - 
-			  h_e->GetBinContent(i));
-    double syse_dn = fabs(h_ejesdn->GetBinContent(i) - 
-			  h_e->GetBinContent(i));
-    double sys_e = syse_up > syse_dn? syse_up: syse_dn;
+    double value_e_jes = h_ejes->GetBinContent(i);
+    if(value_e_jes <1e-10)continue;
+
+    double rel_syse_up = fabs(h_ejesup->GetBinContent(i) -
+			     value_e_jes)/value_e_jes;
+    
+    double rel_syse_dn = fabs(h_ejesdn->GetBinContent(i) -
+			     value_e_jes)/value_e_jes;
+   
+    double rel_syse = rel_syse_up > rel_syse_dn?
+      rel_syse_up: rel_syse_dn;
+
+    double sys_e = value_e*rel_syse;
 
     double total_e_2 = stat_e*stat_e+ sys_e*sys_e;
 
