@@ -17,9 +17,9 @@ void compare3(
   TFile *fmc[NHISTOS];
   
   std::string mcfile[NHISTOS]={
-    "dijetmass_study_20120907/studymjj_kt4_AOD_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
-    "dijetmass_study_20120907/studymjj_kt4_AOD_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
-    "dijetmass_study_20120907/studymjj_kt4_AOD_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
+    "dijetmass_study_20120913/studymjj_ak5_GluGluToHToZZTo2L2Q_M-300_8TeV-powheg-pythia6.root",
+    "dijetmass_study_20120913/studymjj_ak5_GluGluToHToZZTo2L2Q_M-600_8TeV-powheg-pythia6.root",
+    "dijetmass_study_20120913/studymjj_ak5_GluGluToHToZZTo2L2Q_M-900_8TeV-powheg-pythia6.root"
   };
 
   std::string mcName[NHISTOS]={
@@ -149,7 +149,7 @@ void compare3(
   leg->SetFillStyle(0);
   leg->SetTextSize(0.04);
   leg->SetBorderSize(0);
-  leg->SetHeader("kt04");
+  leg->SetHeader("anti-kt05");
   for(int i=0; i < NHISTOS; i++)
     leg->AddEntry(h[i], mcName[i].data());
   leg->Draw("same");
@@ -159,7 +159,7 @@ void compare3(
   gSystem->mkdir(dirName.data());
 
   std::string filename;
-  std::string psname = dirName + "/kt4" + var;
+  std::string psname = dirName + "/ak5" + var;
 
   if(logScale)
     psname += "_log";

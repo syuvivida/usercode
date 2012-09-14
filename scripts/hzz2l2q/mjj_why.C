@@ -172,6 +172,7 @@ void mjj_why::Loop(int DEBUG)
     h_mh_rec_truth[i] = (TH1D*)h_mh_template->Clone(Form("h_mh_rec_truth%d",i));
     h_mh_rec_truth[i]->SetTitle(rectitle[i].data());
     h_mh_rec_truth[i]->SetYTitle(ytitle.data());
+    h_mh_rec_truth[i]->SetXTitle("M_{llqq} [GeV/c^{2}]");
 
 
     ytitle = Form("Candidates per %d GeV/c^{2}",
@@ -212,6 +213,7 @@ void mjj_why::Loop(int DEBUG)
     h_mjj_rec_truth[i] = (TH1D*)h_mjj_template->Clone(Form("h_mjj_rec_truth%d",i));
     h_mjj_rec_truth[i]->SetTitle(rectitle[i].data());
     h_mjj_rec_truth[i]->SetYTitle(ytitle.data());
+    h_mjj_rec_truth[i]->SetXTitle("M_{qq} [GeV/c^{2}]");
 
   }
 
