@@ -1,9 +1,0 @@
-new/histo_DYJets.root 3048 36264432
-new/histo_TTJets.root 157.5 59444088
-new/histo_WJets.root 31314 81310328
-new/histo_EM2030.root 2502660 35721833
-new/histo_EM3080.root 3625840 70382030
-new/histo_EM80170.root 142813.8 8150672 
-new/histo_BC2030.root 139299 2081560
-new/histo_BC3080.root 143844.80 2030033
-new/histo_BC80170.root 9431.1 1082691
