@@ -8,6 +8,7 @@
 #include <TMath.h>
 #include "cutvalues.h"
 #include <standalone_LumiReWeighting.cc>
+#include <signalShapeReWeighting.cc>
 
 double deltaR(double eta1, double phi1, double eta2, double phi2)
 {
@@ -21,7 +22,7 @@ double deltaR(double eta1, double phi1, double eta2, double phi2)
 
 }
 
-void mjj_why::Loop(int DEBUG)
+void mjj_why::Loop(int DEBUG, bool reweightSignal)
 {
   if (fChain == 0) return;
 
@@ -60,6 +61,11 @@ void mjj_why::Loop(int DEBUG)
     (TH1D*)h_mh_template->Clone("h_mh_parton_mother");
   h_mh_parton_mother->SetTitle("status==3, PID==25");
   h_mh_parton_mother->SetXTitle("M_{H} [GeV/c^{2}]");
+
+  TH1D* h_mh_parton_mother_weighted = 
+    (TH1D*)h_mh_template->Clone("h_mh_parton_mother_weighted");
+  h_mh_parton_mother_weighted->SetTitle("Reweighed, status==3, PID==25");
+  h_mh_parton_mother_weighted->SetXTitle("M_{H} [GeV/c^{2}]");
 
   TH1D* h_mh_parton_daughter = 
     (TH1D*)h_mh_template->Clone("h_mh_parton_daughter");
@@ -252,6 +258,8 @@ void mjj_why::Loop(int DEBUG)
   
   Long64_t nentries = fChain->GetEntriesFast();
   standalone_LumiReWeighting LumiWeights_central(2012,0);
+  signalShapeReWeighting 
+    signalWeightMethod("/home/syu/old/scripts/hzz2l2q/data/mZZ_Higgs900_8TeV_Lineshape+Interference.txt");
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -259,7 +267,6 @@ void mjj_why::Loop(int DEBUG)
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
-    double PU_weight =  LumiWeights_central.weight(PU_nTrueInt);
 
     //     if(jentry > 50)break;
     nPass[0]++;
@@ -287,6 +294,9 @@ void mjj_why::Loop(int DEBUG)
     int lep1PostPID = -1;
     int q1PID = -999;
 
+    double genHiggsMass = 0.0;
+    double signal_weight= 1.0;
+    
     for(unsigned int igen=0; igen < genParId_->size(); igen++)
       {
 	
@@ -412,7 +422,11 @@ void mjj_why::Loop(int DEBUG)
 	// higgs
 	if(status==3 && PID==25)
 	  {
-	    h_mh_parton_mother->Fill(genParM_->at(igen));
+	    genHiggsMass = genParM_->at(igen);
+	    h_mh_parton_mother->Fill(genHiggsMass);
+	    if(reweightSignal)
+	      signal_weight = signalWeightMethod.weight(genHiggsMass,0);
+	    h_mh_parton_mother_weighted->Fill(genHiggsMass,signal_weight);
 	    break;
 	  }
       }
@@ -423,15 +437,16 @@ void mjj_why::Loop(int DEBUG)
 
     nPass[1]++;
 
+    double PU_weight =  LumiWeights_central.weight(PU_nTrueInt);
+    double rec_weight = PU_weight*signal_weight;
     double mH_parton = (lep1+lep2+q1+q2).M();
     double mZll_parton = (lep1+lep2).M();
     double mZjj_parton = (q1+q2).M();
     double dR_parton = q1.DeltaR(q2);
 
-    h_mh_parton_daughter->Fill(mH_parton);
-    h_mll_parton_daughter->Fill(mZll_parton);
-    h_mjj_parton_daughter->Fill(mZjj_parton);
-
+    h_mh_parton_daughter->Fill(mH_parton, signal_weight);
+    h_mll_parton_daughter->Fill(mZll_parton, signal_weight);
+    h_mjj_parton_daughter->Fill(mZjj_parton, signal_weight);
 
     nPass[2]++;
 
@@ -536,27 +551,33 @@ void mjj_why::Loop(int DEBUG)
 		    cout << "random index = " << ijet << ", \t" << kjet << endl;
 		    cout << "ijet pt = " << l4_ijet.Pt() << ", \t kjet pt = " << l4_kjet.Pt() << endl;
 		  }
-		h_mh_parton_random[0]->Fill(mH_parton);
-		h_mll_parton_random[0]->Fill(mZll_parton);
-		h_mjj_parton_random[0]->Fill(mZjj_parton);
+		h_mh_parton_random[0]->Fill(mH_parton, signal_weight);
+		h_mll_parton_random[0]->Fill(mZll_parton, signal_weight);
+		h_mjj_parton_random[0]->Fill(mZjj_parton, signal_weight);
 
-		h_mh_stable_random[0]->Fill(mH_random);
-		h_mll_stable_random[0]->Fill(mZll_random);
-		h_mjj_stable_random[0]->Fill(mZjj_random);
+		h_mh_stable_random[0]->Fill(mH_random, signal_weight);
+		h_mll_stable_random[0]->Fill(mZll_random, signal_weight);
+		h_mjj_stable_random[0]->Fill(mZjj_random, signal_weight);
 
-		pf_dR_Rm_gen->Fill(dR_parton, mZjj_random/mZjj_parton);
-		pf_dR_dm_gen->Fill(dR_parton, mZjj_random-mZjj_parton);
+		pf_dR_Rm_gen->Fill(dR_parton, mZjj_random/mZjj_parton
+				   , signal_weight);
+		pf_dR_dm_gen->Fill(dR_parton, mZjj_random-mZjj_parton
+				   , signal_weight);
 		
 
 		if(iMatchedToQ1)
 		  {
-		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()/q1.Pt());	 
-		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()/q2.Pt());	 
+		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_ijet.Pt()/q1.Pt()
+					   , signal_weight);	 
+		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_kjet.Pt()/q2.Pt()
+					   , signal_weight);	 
 		  }
 		else		
 		  {
-		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()/q1.Pt());	 
-		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()/q2.Pt());	 
+		    pf_dR_Rpt_gen[0]->Fill(dR_parton, l4_kjet.Pt()/q1.Pt()
+					   , signal_weight);	 
+		    pf_dR_Rpt_gen[1]->Fill(dR_parton, l4_ijet.Pt()/q2.Pt()
+					   , signal_weight);	 
 		  }
 
 
@@ -568,13 +589,13 @@ void mjj_why::Loop(int DEBUG)
 			!iMatchedToQ1 && !iMatchedToQ2)
 		      )
 	      {
-		h_mh_parton_random[2]->Fill(mH_parton);
-		h_mll_parton_random[2]->Fill(mZll_parton);
-		h_mjj_parton_random[2]->Fill(mZjj_parton);
+		h_mh_parton_random[2]->Fill(mH_parton, signal_weight);
+		h_mll_parton_random[2]->Fill(mZll_parton, signal_weight);
+		h_mjj_parton_random[2]->Fill(mZjj_parton, signal_weight);
 
-		h_mh_stable_random[2]->Fill(mH_random);
-		h_mll_stable_random[2]->Fill(mZll_random);
-		h_mjj_stable_random[2]->Fill(mZjj_random);
+		h_mh_stable_random[2]->Fill(mH_random, signal_weight);
+		h_mll_stable_random[2]->Fill(mZll_random, signal_weight);
+		h_mjj_stable_random[2]->Fill(mZjj_random, signal_weight);
 	      }
 
 	    else if(  ( iMatchedToQ1 && !iMatchedToQ2 &&
@@ -591,26 +612,26 @@ void mjj_why::Loop(int DEBUG)
 		      )
 	      {
 
-		h_mh_parton_random[4]->Fill(mH_parton);
-		h_mll_parton_random[4]->Fill(mZll_parton);
-		h_mjj_parton_random[4]->Fill(mZjj_parton);
+		h_mh_parton_random[4]->Fill(mH_parton, signal_weight);
+		h_mll_parton_random[4]->Fill(mZll_parton, signal_weight);
+		h_mjj_parton_random[4]->Fill(mZjj_parton, signal_weight);
 
-		h_mh_stable_random[4]->Fill(mH_random);
-		h_mll_stable_random[4]->Fill(mZll_random);
-		h_mjj_stable_random[4]->Fill(mZjj_random);
+		h_mh_stable_random[4]->Fill(mH_random, signal_weight);
+		h_mll_stable_random[4]->Fill(mZll_random, signal_weight);
+		h_mjj_stable_random[4]->Fill(mZjj_random, signal_weight);
 	      }
 
 	    else if(  !iMatchedToQ1 && !iMatchedToQ2 &&
 		      !kMatchedToQ1 && !kMatchedToQ2
 		      )
 	      {
-		h_mh_parton_random[5]->Fill(mH_parton);
-		h_mll_parton_random[5]->Fill(mZll_parton);
-		h_mjj_parton_random[5]->Fill(mZjj_parton);
+		h_mh_parton_random[5]->Fill(mH_parton, signal_weight);
+		h_mll_parton_random[5]->Fill(mZll_parton, signal_weight);
+		h_mjj_parton_random[5]->Fill(mZjj_parton, signal_weight);
 
-		h_mh_stable_random[5]->Fill(mH_random);
-		h_mll_stable_random[5]->Fill(mZll_random);
-		h_mjj_stable_random[5]->Fill(mZjj_random);
+		h_mh_stable_random[5]->Fill(mH_random, signal_weight);
+		h_mll_stable_random[5]->Fill(mZll_random, signal_weight);
+		h_mjj_stable_random[5]->Fill(mZjj_random, signal_weight);
 	      }
 
 
@@ -734,31 +755,31 @@ void mjj_why::Loop(int DEBUG)
       double mjj_rec = zjjM->at(ih);
 
       if(nMatch==2){
-	h_mh_rec_random[0]->Fill(mH_rec, PU_weight);
-	h_mll_rec_random[0]->Fill(mll_rec, PU_weight);
-	h_mjj_rec_random[0]->Fill(mjj_rec, PU_weight);
+	h_mh_rec_random[0]->Fill(mH_rec, rec_weight);
+	h_mll_rec_random[0]->Fill(mll_rec, rec_weight);
+	h_mjj_rec_random[0]->Fill(mjj_rec, rec_weight);
 
-	h_mh_rec_truth[0]->Fill(mH_parton);
-	h_mll_rec_truth[0]->Fill(mZll_parton);
-	h_mjj_rec_truth[0]->Fill(mZjj_parton);
+	h_mh_rec_truth[0]->Fill(mH_parton, rec_weight);
+	h_mll_rec_truth[0]->Fill(mZll_parton, rec_weight);
+	h_mjj_rec_truth[0]->Fill(mZjj_parton, rec_weight);
 	
 	if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){       
 
-	  h_mh_rec_random[1]->Fill(mH_rec, PU_weight);
-	  h_mll_rec_random[1]->Fill(mll_rec, PU_weight);
-	  h_mjj_rec_random[1]->Fill(mjj_rec, PU_weight);
+	  h_mh_rec_random[1]->Fill(mH_rec, rec_weight);
+	  h_mll_rec_random[1]->Fill(mll_rec, rec_weight);
+	  h_mjj_rec_random[1]->Fill(mjj_rec, rec_weight);
 
-	  h_mh_rec_truth[1]->Fill(mH_parton);
-	  h_mll_rec_truth[1]->Fill(mZll_parton);
-	  h_mjj_rec_truth[1]->Fill(mZjj_parton);
+	  h_mh_rec_truth[1]->Fill(mH_parton, rec_weight);
+	  h_mll_rec_truth[1]->Fill(mZll_parton, rec_weight);
+	  h_mjj_rec_truth[1]->Fill(mZjj_parton, rec_weight);
 
 	// Roberto-style profiles
 	  if(mjj_rec > LOOSE_MIN_MZ_JJ && mjj_rec < LOOSE_MAX_MZ_JJ){
-	    pf_dR_Rm_rec->Fill(dR_parton, mjj_rec/mZjj_parton, PU_weight);
-	    pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, PU_weight);
+	    pf_dR_Rm_rec->Fill(dR_parton, mjj_rec/mZjj_parton, rec_weight);
+	    pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, rec_weight);
 	  for(int ieiko=0; ieiko<2; ieiko++)
 	    {
-	      pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]/QuarkPt[ieiko],PU_weight);
+	      pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]/QuarkPt[ieiko],rec_weight);
 	    }
 	  }
 	  
@@ -768,42 +789,42 @@ void mjj_why::Loop(int DEBUG)
       } // if both jets are matched
 
       else if(nMatch==100){
-	h_mh_rec_random[2]->Fill(mH_rec, PU_weight);
-	h_mll_rec_random[2]->Fill(mll_rec, PU_weight);
-	h_mjj_rec_random[2]->Fill(mjj_rec, PU_weight);
+	h_mh_rec_random[2]->Fill(mH_rec, rec_weight);
+	h_mll_rec_random[2]->Fill(mll_rec, rec_weight);
+	h_mjj_rec_random[2]->Fill(mjj_rec, rec_weight);
 
-	h_mh_rec_truth[2]->Fill(mH_parton);
-	h_mll_rec_truth[2]->Fill(mZll_parton);
-	h_mjj_rec_truth[2]->Fill(mZjj_parton);
+	h_mh_rec_truth[2]->Fill(mH_parton, rec_weight);
+	h_mll_rec_truth[2]->Fill(mZll_parton, rec_weight);
+	h_mjj_rec_truth[2]->Fill(mZjj_parton, rec_weight);
 
 	if(mergedJet_l4.E()>1e-6)
-	  h_mjj_rec_random[3]->Fill(mergedJet_l4.M(), PU_weight);
+	  h_mjj_rec_random[3]->Fill(mergedJet_l4.M(), rec_weight);
 
-	h_mh_rec_truth[3]->Fill(mH_parton);
-	h_mll_rec_truth[3]->Fill(mZll_parton);
-	h_mjj_rec_truth[3]->Fill(mZjj_parton);
+	h_mh_rec_truth[3]->Fill(mH_parton, rec_weight);
+	h_mll_rec_truth[3]->Fill(mZll_parton, rec_weight);
+	h_mjj_rec_truth[3]->Fill(mZjj_parton, rec_weight);
 
 
       }
 
       else if(nMatch==1){
-	h_mh_rec_random[4]->Fill(mH_rec, PU_weight);
-	h_mll_rec_random[4]->Fill(mll_rec, PU_weight);
-	h_mjj_rec_random[4]->Fill(mjj_rec, PU_weight);
+	h_mh_rec_random[4]->Fill(mH_rec, rec_weight);
+	h_mll_rec_random[4]->Fill(mll_rec, rec_weight);
+	h_mjj_rec_random[4]->Fill(mjj_rec, rec_weight);
 
-	h_mh_rec_truth[4]->Fill(mH_parton);
-	h_mll_rec_truth[4]->Fill(mZll_parton);
-	h_mjj_rec_truth[4]->Fill(mZjj_parton);
+	h_mh_rec_truth[4]->Fill(mH_parton, rec_weight);
+	h_mll_rec_truth[4]->Fill(mZll_parton, rec_weight);
+	h_mjj_rec_truth[4]->Fill(mZjj_parton, rec_weight);
 
       }
       else if(nMatch==0){
-	h_mh_rec_random[5]->Fill(mH_rec, PU_weight);
-	h_mll_rec_random[5]->Fill(mll_rec, PU_weight);
-	h_mjj_rec_random[5]->Fill(mjj_rec, PU_weight);
+	h_mh_rec_random[5]->Fill(mH_rec, rec_weight);
+	h_mll_rec_random[5]->Fill(mll_rec, rec_weight);
+	h_mjj_rec_random[5]->Fill(mjj_rec, rec_weight);
 
-	h_mh_rec_truth[5]->Fill(mH_parton);
-	h_mll_rec_truth[5]->Fill(mZll_parton);
-	h_mjj_rec_truth[5]->Fill(mZjj_parton);
+	h_mh_rec_truth[5]->Fill(mH_parton, rec_weight);
+	h_mll_rec_truth[5]->Fill(mZll_parton, rec_weight);
+	h_mjj_rec_truth[5]->Fill(mZjj_parton, rec_weight);
 
       }
       
@@ -818,17 +839,17 @@ void mjj_why::Loop(int DEBUG)
 
     if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){
 
-      h_mh_parton_event[0]->Fill(mH_parton);
-      h_mll_parton_event[0]->Fill(mZll_parton);
-      h_mjj_parton_event[0]->Fill(mZjj_parton);
+      h_mh_parton_event[0]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[0]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[0]->Fill(mZjj_parton, signal_weight);
 
       double mH_particle = (jet1+jet2+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = (jet1+jet2).M();
 
-      h_mh_stable_event[0]->Fill(mH_particle);
-      h_mll_stable_event[0]->Fill(mZll_particle);
-      h_mjj_stable_event[0]->Fill(mZjj_particle);
+      h_mh_stable_event[0]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[0]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[0]->Fill(mZjj_particle, signal_weight);
 
       if(higgsM->size()>0)nPass[4]++;
 
@@ -836,98 +857,98 @@ void mjj_why::Loop(int DEBUG)
       
     else if(jet1Index>=0 && jet2Index>=0 && jet1Index==jet2Index && nGoodJets==1){
 
-      h_mh_parton_event[1]->Fill(mH_parton);
-      h_mll_parton_event[1]->Fill(mZll_parton);
-      h_mjj_parton_event[1]->Fill(mZjj_parton);
+      h_mh_parton_event[1]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[1]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[1]->Fill(mZjj_parton, signal_weight);
 
 
       double mH_particle = (jet1+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet1.M();
 
-      h_mh_stable_event[1]->Fill(mH_particle);
-      h_mll_stable_event[1]->Fill(mZll_particle);
-      h_mjj_stable_event[1]->Fill(mZjj_particle);
+      h_mh_stable_event[1]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[1]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[1]->Fill(mZjj_particle, signal_weight);
 
     }
 
     else if(jet1Index>=0 && jet2Index>=0 && jet1Index==jet2Index && nGoodJets>1){
 
-      h_mh_parton_event[2]->Fill(mH_parton);
-      h_mll_parton_event[2]->Fill(mZll_parton);
-      h_mjj_parton_event[2]->Fill(mZjj_parton);
+      h_mh_parton_event[2]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[2]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[2]->Fill(mZjj_parton, signal_weight);
 
 
       double mH_particle = (jet1+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet1.M();
 
-      h_mh_stable_event[2]->Fill(mH_particle);
-      h_mll_stable_event[2]->Fill(mZll_particle);
-      h_mjj_stable_event[2]->Fill(mZjj_particle);
+      h_mh_stable_event[2]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[2]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[2]->Fill(mZjj_particle, signal_weight);
 
     }
       
     else if(jet1Index>=0 && jet2Index <0 && nGoodJets==1){
 
-      h_mh_parton_event[3]->Fill(mH_parton);
-      h_mll_parton_event[3]->Fill(mZll_parton);
-      h_mjj_parton_event[3]->Fill(mZjj_parton);
+      h_mh_parton_event[3]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[3]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[3]->Fill(mZjj_parton, signal_weight);
 
       double mH_particle = (jet1+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet1.M();
 
-      h_mh_stable_event[3]->Fill(mH_particle);
-      h_mll_stable_event[3]->Fill(mZll_particle);
-      h_mjj_stable_event[3]->Fill(mZjj_particle);
+      h_mh_stable_event[3]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[3]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[3]->Fill(mZjj_particle, signal_weight);
 
     }
       
     else if(jet2Index>=0 && jet1Index <0 && nGoodJets==1){
 
-      h_mh_parton_event[3]->Fill(mH_parton);
-      h_mll_parton_event[3]->Fill(mZll_parton);
-      h_mjj_parton_event[3]->Fill(mZjj_parton);
+      h_mh_parton_event[3]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[3]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[3]->Fill(mZjj_parton, signal_weight);
 
       double mH_particle = (jet2+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet2.M();
 
-      h_mh_stable_event[3]->Fill(mH_particle);
-      h_mll_stable_event[3]->Fill(mZll_particle);
-      h_mjj_stable_event[3]->Fill(mZjj_particle);
+      h_mh_stable_event[3]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[3]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[3]->Fill(mZjj_particle, signal_weight);
 
     }
     else if(jet1Index>=0 && jet2Index <0 && nGoodJets >1){
 
-      h_mh_parton_event[4]->Fill(mH_parton);
-      h_mll_parton_event[4]->Fill(mZll_parton);
-      h_mjj_parton_event[4]->Fill(mZjj_parton);
+      h_mh_parton_event[4]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[4]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[4]->Fill(mZjj_parton, signal_weight);
 
       double mH_particle = (jet1+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet1.M();
 
-      h_mh_stable_event[4]->Fill(mH_particle);
-      h_mll_stable_event[4]->Fill(mZll_particle);
-      h_mjj_stable_event[4]->Fill(mZjj_particle);
+      h_mh_stable_event[4]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[4]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[4]->Fill(mZjj_particle, signal_weight);
 
     }
       
     else if(jet2Index>=0 && jet1Index <0 && nGoodJets >1){
 
-      h_mh_parton_event[4]->Fill(mH_parton);
-      h_mll_parton_event[4]->Fill(mZll_parton);
-      h_mjj_parton_event[4]->Fill(mZjj_parton);
+      h_mh_parton_event[4]->Fill(mH_parton, signal_weight);
+      h_mll_parton_event[4]->Fill(mZll_parton, signal_weight);
+      h_mjj_parton_event[4]->Fill(mZjj_parton, signal_weight);
 
       double mH_particle = (jet2+lep1_post+lep2_post).M();
       double mZll_particle = (lep1_post + lep2_post).M();
       double mZjj_particle = jet2.M();
 
-      h_mh_stable_event[4]->Fill(mH_particle);
-      h_mll_stable_event[4]->Fill(mZll_particle);
-      h_mjj_stable_event[4]->Fill(mZjj_particle);
+      h_mh_stable_event[4]->Fill(mH_particle, signal_weight);
+      h_mll_stable_event[4]->Fill(mZll_particle, signal_weight);
+      h_mjj_stable_event[4]->Fill(mZjj_particle, signal_weight);
 
     }
          
@@ -948,6 +969,7 @@ void mjj_why::Loop(int DEBUG)
 			     "recreate");            
 
   h_mh_parton_mother->Write();
+  h_mh_parton_mother_weighted->Write();
   h_mh_parton_daughter->Write();
   h_mll_parton_daughter->Write();
   h_mjj_parton_daughter->Write();
