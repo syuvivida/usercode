@@ -44,6 +44,7 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
   std::string leptonName;
   if(abs(lepID)==13)leptonName = "muon";
   else if(abs(lepID)==11)leptonName = "electron";
+  else if(abs(lepID)==0)leptonName = "both";
 
   std::string mcName;  
 
@@ -112,7 +113,7 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
     cout << " minEleEndcapEta = " << minEleEndcapEta << endl;
     cout << " maxEleEndcapEta = " << maxEleEndcapEta << endl;
   }
-  else if(abs(lepID)==13){
+  else if(abs(lepID)==13 || abs(lepID)==0){
     cout << " minLepPt = " << minLepPt << endl;
     cout << " maxMuoEta = " << maxMuoEta << endl;
   }
@@ -219,11 +220,9 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
 
     double eventWeight = 1;
 
-    if(PU_weight >= 0.0)eventWeight *= PU_weight;
     if(mcWeight_>0)eventWeight *= mcWeight_;
       
     if(DEBUG==1){
-      cout << "PU_weight = " << PU_weight << "\t nvertex = " << EvtInfo_NumVtx << endl;
       cout << "MCweight = " << mcWeight_ << endl;
       cout << "eventWeight = " << eventWeight << endl;
     }
@@ -238,8 +237,10 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
     for(unsigned int igen=0; igen < genLepId_->size(); igen++){
 
       int PID       = genLepId_->at(igen);
-      bool isLepPlus = (PID == (-leptonPID));
-      bool isLepMinus= (PID == ( leptonPID));
+      bool isLepPlus = (PID == (-leptonPID)) || 
+	(leptonPID==0 && (PID== -11 || PID== -13));
+      bool isLepMinus= (PID == ( leptonPID)) || 
+	(leptonPID==0 && (PID==  11 || PID== 13));
 
       if(lepPlusIndex < 0 && isLepPlus)
 	lepPlusIndex = igen;
@@ -288,7 +289,7 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
       
       double ptBare = l4_lepBare[ip].Pt();
       double etaBare = l4_lepBare[ip].Eta();
-      if(leptonPID==13 && ptBare > minLepPt && fabs(etaBare) < maxMuoEta)nPt20Bare++;
+      if((leptonPID==13 || leptonPID==0) && ptBare > minLepPt && fabs(etaBare) < maxMuoEta)nPt20Bare++;
       if(leptonPID==11 && ptBare > minLepPt && ( 
 					    (fabs(etaBare) > minEleEndcapEta && 
 					     fabs(etaBare) < maxEleEndcapEta) ||
@@ -315,7 +316,8 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
       double eta = l4_lep[ip].Eta();
 
       // muon
-      if(leptonPID==13 && pt > minLepPt && fabs(eta) < maxMuoEta)nPt20++;
+      if( (leptonPID==13 || leptonPID==0) && pt > minLepPt 
+	  && fabs(eta) < maxMuoEta)nPt20++;
       if(leptonPID==11 && pt > minLepPt && ( 
 					    (fabs(eta) > minEleEndcapEta && 
 					     fabs(eta) < maxEleEndcapEta) ||
