@@ -1,15 +1,13 @@
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 
-void forPaperZMM(
-      		 std::string datavar="DEta_per2_Z1jets_BE",
-		 std::string var3="id6",
+void forPaperZMM(std::string var1="h_ystar", 
 		 float xmin=-9999.0, float xmax=-9999.0,
 		 bool logScale=false,
-		 std::string datafile="DoubleMu2011_EffCorr_ZpT40_absY_051412.root",
-		 std::string mcfile1="DYToLL-sherpa_GEN_ZpT40_absY_051412.root", 
-		 std::string mcfile2="DYJetsToLL_GEN_ZpT40_absY_051412.root", 
-		 std::string mcfile3="Z_1jet_tota_cteq61._1___1___ex_m34.root",
-		 std::string var1="", std::string var2="", 
+		 std::string datafile="darko_root/DoubleMu2011_EffCorr_091812.root",
+		 std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_muon_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
+		 std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_muon_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
+ 		 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
+		 std::string var2="", 
 		 std::string headertitle="Z(#rightarrow #mu#mu)+1 jet",
 		 std::string dataName="Data",
 		 std::string mcName1="Sherpa",
@@ -25,41 +23,40 @@ void forPaperZMM(
   TH1F* h[NHISTOS];
 
   char tempName[300];
-  if(var1 ==  "" )var1=datavar;
-  if(var2 ==  "" )var2=datavar;
-  if(var3 ==  "" )var3=datavar;
+  if(var2 ==  "" )var2=var1;
 
   std::string xtitle;
   std::string output;
-  if(datavar=="DEta_per2_Z1jets_BE")
+  std::string datavar;
+  std::string var3;
+
+  if(var1=="h_ystar")
     {
+      var3  = "id4";
       xtitle = "0.5|Y_{Z}-Y_{jet}|";
       output = "DifYMuo";
+      datavar="YDiff";      
     }
-  else if(datavar=="SumEta_per2_Z1jets_BE")
+  else if(var1=="h_yB")
     {
+      var3 = "id3";
       xtitle = "0.5|Y_{Z}+Y_{jet}|";
       output = "SumYMuo";
+      datavar="YSum";
     }
-  else if(datavar=="Z1jets_1jpt_BE")
+  else if(var1=="h_jety")
     {
-      xtitle = "p_{T}(jet) [GeV/c]";
-      output = "PtJetMuo";
-    }
-  else if(datavar=="Z1jets_1jeta_BE")
-    {
+      var3 = "id1";
       xtitle = "|Y_{jet}|";
       output = "YJetMuo";
+      datavar="Yjet";
     }
-  else if(datavar=="dimuonpt1jet_BE")
+  else if(var1=="h_zy")
     {
-      xtitle = "p_{T}(Z) [GeV/c]";
-      output = "PtZedMuo";
-    }
-  else if(datavar=="dimuoneta1jet_BE")
-    {
+      var3 = "id2";
       xtitle = "|Y_{Z}|";
       output = "YZedMuo";
+      datavar="YZ";
     }
 
   
@@ -98,11 +95,11 @@ void forPaperZMM(
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
-//     hscale[i]->SetMaximum(2.05);
-//     hscale[i]->SetMinimum(0.0);
+    hscale[i]->SetMaximum(2.05);
+    hscale[i]->SetMinimum(0.0);
 
-    hscale[i]->SetMaximum(1.45);
-    hscale[i]->SetMinimum(0.4);
+//     hscale[i]->SetMaximum(1.45);
+//     hscale[i]->SetMinimum(0.4);
     hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
@@ -162,37 +159,41 @@ void forPaperZMM(
   for(int ih=0; ih < NHISTOS-1; ih++){
     cout << "===================================================" << endl;
     cout << "For histogram " << ih << endl;
-    for(int ib=1;ib<= nbins;ib++){
+    hscale[ih]->Divide(h[ih], h[NHISTOS-1]);
+    hscale[ih]->SetMaximum(2.05);
+    hscale[ih]->SetMinimum(0.0);
 
-      double nref    =h[NHISTOS-1]->GetBinContent(ib);
-      double nreferr =h[NHISTOS-1]->GetBinError(ib);
+//     for(int ib=1;ib<= nbins;ib++){
 
-      double ncomp   =h[ih]->GetBinContent(ib); 
-      double ncomperr=h[ih]->GetBinError(ib); 
+//       double nref    =h[NHISTOS-1]->GetBinContent(ib);
+//       double nreferr =h[NHISTOS-1]->GetBinError(ib);
 
-      double ratio = -9999;
-      double err   = 1e-4;
+//       double ncomp   =h[ih]->GetBinContent(ib); 
+//       double ncomperr=h[ih]->GetBinError(ib); 
 
-      hscale[ih]->SetBinContent(ib,ratio);
-      hscale[ih]->SetBinError(ib,err);
+//       double ratio = -9999;
+//       double err   = 1e-4;
+
+//       hscale[ih]->SetBinContent(ib,ratio);
+//       hscale[ih]->SetBinError(ib,err);
     
-      if(ncomp<=0 || nref<=0)continue;    
+//       if(ncomp<=0 || nref<=0)continue;    
     
-      if(ncomperr<=0 || nreferr<=0)
-	continue;
+//       if(ncomperr<=0 || nreferr<=0)
+// 	continue;
       
-      // now calculate the ratio 1
-      ratio = ncomp/nref;
-      err =
-	(ratio)*sqrt(pow(nreferr/nref,2)+pow(ncomperr/ncomp,2));
+//       // now calculate the ratio 1
+//       ratio = ncomp/nref;
+//       err =
+// 	(ratio)*sqrt(pow(nreferr/nref,2)+pow(ncomperr/ncomp,2));
 
-      hscale[ih]->SetBinContent(ib,ratio);
-      hscale[ih]->SetBinError(ib,err);
+//       hscale[ih]->SetBinContent(ib,ratio);
+//       hscale[ih]->SetBinError(ib,err);
 
-      cout << "Bin " << ib << " ratio = " << ratio << " +- " << err << endl;
+//       cout << "Bin " << ib << " ratio = " << ratio << " +- " << err << endl;
 
-      cout << "===================================================" << endl;
-    } // end of loop over bins
+//       cout << "===================================================" << endl;
+//     } // end of loop over bins
   } // end of loop over histograms
 
   vector<float> maxArray;
@@ -261,7 +262,7 @@ void forPaperZMM(
   leg->AddEntry(h[3], mcName3.data());
   leg->Draw("same");
 
-  TLatex *lar = new TLatex(0.30, 0.91, "CMS   #sqrt{s} = 7 TeV, L_{int} = 4.7 fb^{-1}");
+  TLatex *lar = new TLatex(0.30, 0.91, "CMS   #sqrt{s} = 7 TeV, L_{int} = 5.1 fb^{-1}");
   lar->SetNDC(kTRUE);
   lar->SetTextSize(0.045);
   lar->Draw();
@@ -297,8 +298,7 @@ void forPaperZMM(
   gSystem->mkdir(dirName.data());
 
   std::string filename;
-  std::string psname = dirName + "/" + var1;
-  psname = dirName+ "/" + output;
+  std::string psname = dirName + "/" + output;
   filename = psname + ".eps";
   c1->Print(filename.data());
   filename = psname + ".gif";

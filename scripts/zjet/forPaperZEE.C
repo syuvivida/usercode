@@ -2,13 +2,12 @@
 
 void forPaperZEE(
       		 std::string datavar="h_ystar",
-		 std::string var3="id6",
 		 float xmin=-9999.0, float xmax=-9999.0,
 		 bool logScale=false,
-		 std::string datafile="unified_angular_distributions/rebinnings/zpt40/cts_CorrectedPlotsZCut_Jes0_NoBkgSub.root",
-		 std::string mcfile1="unified_angular_distributions/rebinnings/zpt40/weighted_exclusive1Jet_zPt40_electron_genMore_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
-		 std::string mcfile2="unified_angular_distributions/rebinnings/zpt40/weighted_exclusive1Jet_zPt40_electron_genMore_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-		 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq61._1___1___40ZPT00.root",
+		 std::string datafile="darko_root/corrected_electron.root",
+		 std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_electron_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
+		 std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_electron_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
+		 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
 		 std::string var1="", std::string var2="", 
 		 std::string headertitle="Z(#rightarrow ee)+1 jet",
 		 std::string dataName="Data",
@@ -27,37 +26,32 @@ void forPaperZEE(
   char tempName[300];
   if(var1 ==  "" )var1=datavar;
   if(var2 ==  "" )var2=datavar;
-  if(var3 ==  "" )var3=datavar;
 
   std::string xtitle;
   std::string output;
+  std::string var3;
+
   if(datavar=="h_ystar")
     {
+      var3  = "id4";
       xtitle = "0.5|Y_{Z}-Y_{jet}|";
       output = "DifYEle";
     }
   else if(datavar=="h_yB")
     {
+      var3 = "id3";
       xtitle = "0.5|Y_{Z}+Y_{jet}|";
       output = "SumYEle";
     }
-  else if(datavar=="h_jetpt")
-    {
-      xtitle = "p_{T}(jet) [GeV/c]";
-      output = "PtJetEle";
-    }
   else if(datavar=="h_jety")
     {
+      var3 = "id1";
       xtitle = "|Y_{jet}|";
       output = "YJetEle";
     }
-  else if(datavar=="h_zpt")
-    {
-      xtitle = "p_{T}(Z) [GeV/c]";
-      output = "PtZedEle";
-    }
   else if(datavar=="h_zy")
     {
+      var3 = "id2";
       xtitle = "|Y_{Z}|";
       output = "YZedEle";
     }
@@ -98,10 +92,10 @@ void forPaperZEE(
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
-//     hscale[i]->SetMaximum(2.05);
-//     hscale[i]->SetMinimum(0.0);
-    hscale[i]->SetMaximum(1.45);
-    hscale[i]->SetMinimum(0.4);
+    hscale[i]->SetMaximum(2.05);
+    hscale[i]->SetMinimum(0.0);
+//     hscale[i]->SetMaximum(1.45);
+//     hscale[i]->SetMinimum(0.4);
     hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
@@ -161,37 +155,41 @@ void forPaperZEE(
   for(int ih=0; ih < NHISTOS-1; ih++){
     cout << "===================================================" << endl;
     cout << "For histogram " << ih << endl;
-    for(int ib=1;ib<= nbins;ib++){
+    hscale[ih]->Divide(h[ih], h[NHISTOS-1]);
+    hscale[ih]->SetMaximum(2.05);
+    hscale[ih]->SetMinimum(0.0);
 
-      double nref    =h[NHISTOS-1]->GetBinContent(ib);
-      double nreferr =h[NHISTOS-1]->GetBinError(ib);
+//     for(int ib=1;ib<= nbins;ib++){
 
-      double ncomp   =h[ih]->GetBinContent(ib); 
-      double ncomperr=h[ih]->GetBinError(ib); 
+//       double nref    =h[NHISTOS-1]->GetBinContent(ib);
+//       double nreferr =h[NHISTOS-1]->GetBinError(ib);
 
-      double ratio = -9999;
-      double err   = 1e-4;
+//       double ncomp   =h[ih]->GetBinContent(ib); 
+//       double ncomperr=h[ih]->GetBinError(ib); 
 
-      hscale[ih]->SetBinContent(ib,ratio);
-      hscale[ih]->SetBinError(ib,err);
+//       double ratio = -9999;
+//       double err   = 1e-4;
+
+//       hscale[ih]->SetBinContent(ib,ratio);
+//       hscale[ih]->SetBinError(ib,err);
     
-      if(ncomp<=0 || nref<=0)continue;    
+//       if(ncomp<=0 || nref<=0)continue;    
     
-      if(ncomperr<=0 || nreferr<=0)
-	continue;
+//       if(ncomperr<=0 || nreferr<=0)
+// 	continue;
       
-      // now calculate the ratio 1
-      ratio = ncomp/nref;
-      err =
-	(ratio)*sqrt(pow(nreferr/nref,2)+pow(ncomperr/ncomp,2));
+//       // now calculate the ratio 1
+//       ratio = ncomp/nref;
+//       err =
+// 	(ratio)*sqrt(pow(nreferr/nref,2)+pow(ncomperr/ncomp,2));
 
-      hscale[ih]->SetBinContent(ib,ratio);
-      hscale[ih]->SetBinError(ib,err);
+//       hscale[ih]->SetBinContent(ib,ratio);
+//       hscale[ih]->SetBinError(ib,err);
 
-      cout << "Bin " << ib << " ratio = " << ratio << " +- " << err << endl;
+//       cout << "Bin " << ib << " ratio = " << ratio << " +- " << err << endl;
 
-      cout << "===================================================" << endl;
-    } // end of loop over bins
+//       cout << "===================================================" << endl;
+//     } // end of loop over bins
   } // end of loop over histograms
 
   vector<float> maxArray;
@@ -296,8 +294,7 @@ void forPaperZEE(
   gSystem->mkdir(dirName.data());
 
   std::string filename;
-  std::string psname = dirName + "/" + var1;
-  psname = dirName+ "/" + output;
+  std::string psname = dirName+ "/" + output;
   filename = psname + ".eps";
   c1->Print(filename.data());
   filename = psname + ".gif";
