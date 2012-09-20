@@ -74,11 +74,13 @@ void bigmatrix(std::string eikoName="h_jety",
   TH1D* h_ejes;
   TH1D* h_ejesup;
   TH1D* h_ejesdn;
+  TH1D* heff_e;
 
   TH1F* h_mu;
   TH1F* h_mujes;
   TH1F* h_mujesup;
   TH1F* h_mujesdn;
+  TH1D* heff_mu;
 
   TH1D* h_combine; // for combining electron and muon channels  
   TH1D* h_corr; // for correction of acceptance
@@ -115,7 +117,84 @@ void bigmatrix(std::string eikoName="h_jety",
 	   << endl;
     }
 
+
+  //================================================================
+  // efficiency errors
+  //================================================================
+ 
+  std::string xtitle;
+  std::string muName;
+  std::string kengName;
+  std::string effElectronName;
+  std::string effMuonName;
+
+  if(eikoName=="h_ystar")
+    {
+      xtitle = "0.5|Y_{Z}-Y_{jet}|";
+      muName = "YDiff";
+      kengName = "DEta_per2_Z1jets_BE";
+      
+      effElectronName = "EfficienyVsYdif";
+      effMuonName = "EffCorr_Ydiff";
+    }
+
+  else if(eikoName=="h_yB")
+    {
+      xtitle = "0.5|Y_{Z}+Y_{jet}|";
+      muName = "YSum";
+      kengName = "SumEta_per2_Z1jets_BE";
+
+      effElectronName = "EfficienyVsYsum";
+      effMuonName = "EffCorr_Ysum";
+    }
+  else if(eikoName=="h_jety")
+    {
+      xtitle = "|Y(jet)|";
+      muName = "Yjet";
+      kengName = "Z1jets_1jeta_BE";
+
+      effElectronName = "EfficienyVsYjet";
+      effMuonName = "EffCorr_Yjet";
+    }
+  else if(eikoName=="h_zy")
+    {
+      xtitle = "|Y(Z)|";
+      muName = "YZ";
+      kengName ="dimuoneta1jet_BE";
+
+      effElectronName = "EfficienyVsYz";
+      effMuonName = "EffCorr_Yz";
+    }
+
+  TFile f_eff_electron("mainCore/EffiZCut_Jer0.root");
+  if(f_eff_electron.IsZombie()){
+    cout << endl << "Error opening file" << f_eff_electron.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_eff_electron.GetName() << endl << endl;
+
+  heff_e = (TH1D*)(f_eff_electron.Get(effElectronName.data()));
+  heff_e -> SetName(Form("heff_e_%s",corrName.data()));
+
+
+  TFile f_eff_muon("mainCore/EffCorr_root_091912.root");
+  if(f_eff_muon.IsZombie()){
+    cout << endl << "Error opening file" << f_eff_muon.GetName() << endl << endl;
+    return;
+  }
+  else
+    cout << endl << "Opened " << f_eff_muon.GetName() << endl << endl;
+
+  heff_mu = (TH1D*)(f_eff_muon.Get(effMuonName.data()));
+  heff_mu -> SetName(Form("heff_mu_%s",corrName.data()));
+
+
+
+
+  //===========================================================
   // electron channel
+  //===========================================================
   TFile f_e("mainCore/cts_CorrectedPlotsZCut.root");
   if (f_e.IsZombie()) {
     cout << endl << "Error opening file" << f_e.GetName() << endl << endl;
@@ -200,39 +279,9 @@ void bigmatrix(std::string eikoName="h_jety",
   h_combine  -> SetMarkerStyle(8);
 
 
+  //===========================================================
   // muon channel
-
-  std::string xtitle;
-  std::string muName;
-  std::string kengName;
-
-  if(eikoName=="h_ystar")
-    {
-      xtitle = "0.5|Y_{Z}-Y_{jet}|";
-      muName = "YDiff";
-      kengName = "DEta_per2_Z1jets_BE";
-    }
-
-  else if(eikoName=="h_yB")
-    {
-      xtitle = "0.5|Y_{Z}+Y_{jet}|";
-      muName = "YSum";
-      kengName = "SumEta_per2_Z1jets_BE";
-    }
-  else if(eikoName=="h_jety")
-    {
-      xtitle = "|Y(jet)|";
-      muName = "Yjet";
-      kengName = "Z1jets_1jeta_BE";
-    }
-  else if(eikoName=="h_zy")
-    {
-      xtitle = "|Y(Z)|";
-      muName = "YZ";
-      kengName ="dimuoneta1jet_BE";
-    }
-
-
+  //===========================================================
 
   TFile f_mu("mainCore/DoubleMu2011_EffCorr_091812.root");
   if (f_mu.IsZombie()) {
@@ -305,16 +354,21 @@ void bigmatrix(std::string eikoName="h_jety",
     // electron channel
     double value_e = h_e->GetBinContent(ibin+1);
     if(value_e < 1e-10)continue;
-    double stat_e  = h_e->GetBinError(ibin+1);
+
+    double stat_mc_eff_e = heff_e->GetBinContent(ibin+1)<1e-6? 0: 
+      value_e*heff_e->GetBinError(ibin+1)/heff_e->GetBinContent(ibin+1);
+  
+    double stat_e  = sqrt( pow(h_e->GetBinError(ibin+1),2) + 
+			   pow(stat_mc_eff_e,2));
 
     double value_e_jes = h_ejes->GetBinContent(ibin+1);
     if(value_e_jes <1e-10)continue;
 
     double rel_syse_up = fabs(h_ejesup->GetBinContent(ibin+1) -
-			     value_e_jes)/value_e_jes;
+			      value_e_jes)/value_e_jes;
     
     double rel_syse_dn = fabs(h_ejesdn->GetBinContent(ibin+1) -
-			     value_e_jes)/value_e_jes;
+			      value_e_jes)/value_e_jes;
    
     double rel_syse = rel_syse_up > rel_syse_dn?
       rel_syse_up: rel_syse_dn;
@@ -327,7 +381,12 @@ void bigmatrix(std::string eikoName="h_jety",
     // muon channel
     double value_m = h_mu->GetBinContent(ibin+1);
     if(value_m < 1e-10)continue;
-    double stat_m  = h_mu->GetBinError(ibin+1);
+
+    double stat_mc_eff_m = heff_mu->GetBinContent(ibin+1)<1e-6? 0: 
+      value_m*heff_mu->GetBinError(ibin+1)/heff_mu->GetBinContent(ibin+1);
+    
+    double stat_m  = sqrt( pow(h_mu->GetBinError(ibin+1),2) + 
+			   pow(stat_mc_eff_m,2));
 
     double value_m_jes = h_mujes->GetBinContent(ibin+1);
     if(value_m_jes <1e-10)continue;
@@ -377,7 +436,7 @@ void bigmatrix(std::string eikoName="h_jety",
   // print out measurement value  
   dumpElements(measurement);
 
-//   // print out error matrix component
+  //   // print out error matrix component
   dumpElements(errorM);
 
 
@@ -386,8 +445,8 @@ void bigmatrix(std::string eikoName="h_jety",
   errorInverse.Invert(det);
   dumpElements(errorInverse);
 
-//   TMatrixD Unit = errorInverse*errorM;
-// dumpElements(Unit);
+  //   TMatrixD Unit = errorInverse*errorM;
+  // dumpElements(Unit);
   
 
   TMatrixD matrixRight(nbins,NELE);  
@@ -457,6 +516,8 @@ void bigmatrix(std::string eikoName="h_jety",
   h_e      ->Write();
   h_mu     ->Write();
   h_combine->Write();
+  heff_e   ->Write();
+  heff_mu  ->Write();
   outFile->Close();
 
 
