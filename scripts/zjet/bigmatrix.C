@@ -21,17 +21,7 @@ void dumpElements(TMatrixD& a)
   const int ncols = a.GetNcols();
   if(nrows==ncols)
     cout << "determinent = " << a.Determinant() << endl;
-  cout << "------------------------------------------------------------------"
-       << endl;
-  for(int i=0; i< nrows; i++)
-    {
-      for(int j=0; j< ncols; j++)
-	cout << a(i,j) << ", \t";    
-	
-      cout << endl;
-    }
-  cout << "------------------------------------------------------------------"
-       << endl;
+  a.Print();
   cout << endl << endl;
 
   return;
@@ -41,16 +31,7 @@ void dumpElements(TMatrixD& a)
 void dumpElements(TVectorD& a)
 {
   cout << endl << endl;
-  const int nrows = a.GetNoElements();
-  cout << "------------------------------------------------------------------"
-       << endl;
-  for(int i=0; i< nrows; i++)
-    {
-      cout << a(i) << ", \t";    
-      cout << endl;
-    }
-  cout << "------------------------------------------------------------------"
-       << endl;
+  a.Print();
   cout << endl << endl;
 
   return;
