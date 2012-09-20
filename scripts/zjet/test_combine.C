@@ -37,7 +37,7 @@ void test_combine(std::string eikoName="h_jety",
     corrName.replace(pos3,remword3.length(),"");
 
   // acceptance correction for electrons
-  TFile f_crack("ave_sherpamadgraph.root");
+  TFile f_crack("mainCore/ave_sherpamadgraph.root");
   if (f_crack.IsZombie()) {
     cout << endl << "Error opening file" << f_crack.GetName() << endl;
     return;
@@ -63,7 +63,7 @@ void test_combine(std::string eikoName="h_jety",
     }
   
   // electron channel
-  TFile f_e("cts_CorrectedPlotsZCut_Jes0_NoBkgSub.root");
+  TFile f_e("mainCore/cts_CorrectedPlotsZCut.root");
   if (f_e.IsZombie()) {
     cout << endl << "Error opening file" << f_e.GetName() << endl << endl;
     return;
@@ -99,7 +99,7 @@ void test_combine(std::string eikoName="h_jety",
   h_ejes    -> Scale(1.0/h_ejes->Integral());
   cout << "h_ejes integral = " << h_ejes->Integral() << endl;
 
-  TFile f_ejesup("cts_CorrectedPlotsZCut_JesUp_NoBkgSub.root");
+  TFile f_ejesup("mainCore/cts_CorrectedPlotsZCut_JesUp_NoBkgSub.root");
   if (f_ejesup.IsZombie()) {
     cout << endl << "Error opening file" << f_ejesup.GetName() << endl << endl;
     return;
@@ -113,7 +113,7 @@ void test_combine(std::string eikoName="h_jety",
   h_ejesup  -> Scale(1.0/h_ejesup->Integral());
   cout << "h_ejesup integral = " << h_ejesup->Integral() << endl;
 
-  TFile f_ejesdn("cts_CorrectedPlotsZCut_JesDn_NoBkgSub.root");
+  TFile f_ejesdn("mainCore/cts_CorrectedPlotsZCut_JesDn_NoBkgSub.root");
   if (f_ejesdn.IsZombie()) {
     cout << endl << "Error opening file" << f_ejesdn.GetName() << endl << endl;
     return;
@@ -138,43 +138,38 @@ void test_combine(std::string eikoName="h_jety",
 
   // muon channel
 
-  std::string kengName = "Z1jets_1jeta_BE";
-  std::string xtitle   = "|Y(jet)|";
+  std::string xtitle;
+  std::string muName;
+  std::string kengName;
 
   if(eikoName=="h_ystar")
     {
-      kengName = "DEta_per2_Z1jets_BE";
       xtitle = "0.5|Y_{Z}-Y_{jet}|";
+      muName = "YDiff";
+      kengName = "DEta_per2_Z1jets_BE";
     }
 
   else if(eikoName=="h_yB")
     {
-      kengName = "SumEta_per2_Z1jets_BE";
       xtitle = "0.5|Y_{Z}+Y_{jet}|";
-    }
-  else if(eikoName=="h_jetpt")
-    {
-      kengName = "Z1jets_1jpt_BE";
-      xtitle = "p_{T}(jet) [GeV/c]";
+      muName = "YSum";
+      kengName = "SumEta_per2_Z1jets_BE";
     }
   else if(eikoName=="h_jety")
     {
-      kengName = "Z1jets_1jeta_BE";
       xtitle = "|Y(jet)|";
-    }
-  else if(eikoName=="h_zpt")
-    {
-      kengName = "dimuonpt1jet_BE";
-      xtitle = "p_{T}(Z) [GeV/c]";
+      muName = "Yjet";
+      kengName = "Z1jets_1jeta_BE";
     }
   else if(eikoName=="h_zy")
     {
-      kengName ="dimuoneta1jet_BE";
       xtitle = "|Y(Z)|";
+      muName = "YZ";
+      kengName ="dimuoneta1jet_BE";
     }
 
   // central value
-  TFile f_mu("DoubleMu2011_EffCorr_ZpT40_absY_051412.root");
+  TFile f_mu("mainCore/DoubleMu2011_EffCorr_091812.root");
   if (f_mu.IsZombie()) {
     cout << endl << "Error opening file" << f_mu.GetName() << endl << endl;
     return;
@@ -182,7 +177,7 @@ void test_combine(std::string eikoName="h_jety",
   else
     cout << endl << "Opened " << f_mu.GetName() << endl << endl;
 
-  h_mu = (TH1F*)(f_mu.Get(kengName.data()));
+  h_mu = (TH1F*)(f_mu.Get(muName.data()));
   h_mu -> Sumw2();
   h_mu -> SetName(Form("h_mu_%s",corrName.data()));
   h_mu -> SetTitle("");
@@ -195,7 +190,7 @@ void test_combine(std::string eikoName="h_jety",
   cout << "h_mu integral = " << h_mu->Integral() << endl;
 
   // to get JES uncertainty
-  TFile f_jetsys_mu("DoubleMu2011_JESuncertainty_JetY_061712.root");
+  TFile f_jetsys_mu("mainCore/DoubleMu2011_JESuncertainty_JetY_061712.root");
   if (f_jetsys_mu.IsZombie()) {
     cout << endl << "Error opening file" << f_jetsys_mu.GetName() << endl << endl;
     return;
