@@ -10,7 +10,7 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
 	float p1=000;
 	float q0=999;
 	float q1=999;
-    
+	cout << "PLOTTING       " << PLOT << endl;
     if( TYPE == "scale" ){
         
         if( PLOT == "Yzed" ){ 
@@ -212,11 +212,11 @@ void theoryError(TString PLOT="Ydif", float OFFSET=0 )
     // OFFSET default is Y=0 on a linear plot
     
     TGraph * TGa = getParams( PLOT ,"scale", OFFSET);
-    colorJt(TGa,kGreen, 3006);
+    colorJt(TGa,kGreen-2, 3006);
     TGa->Draw("4 same");// works
     
     TGraph * TGb = getParams( PLOT ,"pdfs", OFFSET);
-    colorJt(TGb,kMagenta-7, 3005);
+    colorJt(TGb,kPink-8, 3005);
     TGb->Draw("4 same");  
     
     
