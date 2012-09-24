@@ -3,7 +3,7 @@
 void forPaper_combine(std::string var1="h_ystar", 
 		      float xmin=-9999.0, float xmax=-9999.0,
 		      bool logScale=false,
-		      std::string datafile="darko_root/goldenWithMCerror_bigmatrix.root",
+		      std::string datafile="darko_root/goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
 		      std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
 		      std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
 		      std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
@@ -58,7 +58,7 @@ void forPaper_combine(std::string var1="h_ystar",
       var3 = "id1";
       xtitle = "|Y_{jet}|";
       output = "YJetAll";
-      datafile = "darko_root/goldenWithMCerror_jety_bigmatrix.root";
+      datafile = "darko_root/goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
       theoryName = "Yjet";
     }
   else if(var1=="h_zy")
