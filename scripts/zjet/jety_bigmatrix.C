@@ -437,7 +437,7 @@ void jety_bigmatrix(
 
 
     // for now 
-    // the correlation between different bins within the same lepton 
+    // the correlation between different bins for different lepton channels
     // channel is zero
 
     for(int jbin=0; jbin<nbins; jbin++)
@@ -445,6 +445,9 @@ void jety_bigmatrix(
 	if(jbin!=ibin){
 	  errorM(ibin,jbin)=covEle_obj(ibin,jbin);
 	  errorM(nbins+ibin,nbins+jbin)=covMuo_obj(ibin,jbin);
+	  errorM(ibin,nbins+jbin)=0; // electron-muon channel
+	  errorM(nbins+ibin,jbin)=0; // muon-electron channel
+
 	}	
       }
 

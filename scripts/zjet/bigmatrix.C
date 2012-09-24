@@ -320,11 +320,11 @@ void bigmatrix(std::string eikoName="h_jety",
     for(int icol=0; icol < nbins; icol++)
       U(irow,icol) = ( (irow== icol) || (irow== icol+nbins) )? 1:0;
   // debug
-//   dumpElements(U);
+  //   dumpElements(U);
 
   TMatrixD transposeU(nbins,NELE);
   transposeU.Transpose(U);
-//   dumpElements(transposeU);
+  //   dumpElements(transposeU);
 
   
   TVectorD measurement(NELE);
@@ -400,13 +400,19 @@ void bigmatrix(std::string eikoName="h_jety",
 
     // for now 
     // the correlation between different bins within the same lepton 
-    // channel is zero
+    // channel is zero, also between different bins and different 
+    // channels is zero
 
     for(int jbin=0; jbin<nbins; jbin++)
       {
 	if(jbin!=ibin){
+
 	  errorM(ibin,jbin)=0; // electron channel
 	  errorM(nbins+ibin,nbins+jbin)=0; // muon channel
+
+	  errorM(ibin,nbins+jbin)=0; // electron-muon channel
+	  errorM(nbins+ibin,jbin)=0; // muon-electron channel
+
 	}	
       }
 
@@ -415,7 +421,7 @@ void bigmatrix(std::string eikoName="h_jety",
 
   // debug
   // print out measurement value  
-//   dumpElements(measurement);
+  //   dumpElements(measurement);
 
   //   // print out error matrix component
   dumpElements(errorM);
@@ -432,30 +438,30 @@ void bigmatrix(std::string eikoName="h_jety",
 
   TMatrixD matrixRight(nbins,NELE);  
   matrixRight = transposeU*errorInverse;
-//   dumpElements(matrixRight);
+  //   dumpElements(matrixRight);
 
   TMatrixD matrixLeft(nbins,nbins);
   matrixLeft = transposeU*(errorInverse*U);
-//   dumpElements(matrixLeft);
+  //   dumpElements(matrixLeft);
 
   TMatrixD matrixLeftInverse = matrixLeft;
   double* det2;
   matrixLeftInverse.Invert(det2);
-//   dumpElements(matrixLeftInverse);
+  //   dumpElements(matrixLeftInverse);
 
   TMatrixD lambda(nbins,NELE);
   lambda= matrixLeftInverse*matrixRight;
-//   dumpElements(lambda);
+  //   dumpElements(lambda);
   
   TMatrixD transposeLambda(NELE,nbins);
   transposeLambda.Transpose(lambda);
-//   dumpElements(transposeLambda);
+  //   dumpElements(transposeLambda);
 
-//   dumpElements(lambda);
+  //   dumpElements(lambda);
 
   TVectorD combined_value(nbins);
   combined_value = lambda*measurement;
-//   dumpElements(combined_value);
+  //   dumpElements(combined_value);
 
   TMatrixD combined_error(nbins,nbins);
   combined_error = lambda*(errorM*transposeLambda);
