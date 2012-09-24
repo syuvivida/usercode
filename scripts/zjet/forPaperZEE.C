@@ -92,10 +92,8 @@ void forPaperZEE(
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
-    hscale[i]->SetMaximum(2.05);
-    hscale[i]->SetMinimum(0.0);
-//     hscale[i]->SetMaximum(1.45);
-//     hscale[i]->SetMinimum(0.4);
+    hscale[i]->SetMaximum(1.65);
+    hscale[i]->SetMinimum(0.5);
     hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
@@ -156,8 +154,8 @@ void forPaperZEE(
     cout << "===================================================" << endl;
     cout << "For histogram " << ih << endl;
     hscale[ih]->Divide(h[ih], h[NHISTOS-1]);
-    hscale[ih]->SetMaximum(2.05);
-    hscale[ih]->SetMinimum(0.0);
+    hscale[ih]->SetMaximum(1.65);
+    hscale[ih]->SetMinimum(0.5);
 
 //     for(int ib=1;ib<= nbins;ib++){
 
@@ -285,8 +283,8 @@ void forPaperZEE(
 
   cout << "here5" << endl;
   TLine* l2 = new TLine(xmin,1.,xmax,1.);
-  l2->SetLineColor(4);
-  l2->SetLineStyle(3);
+  l2->SetLineColor(kOrange-1);
+  l2->SetLineStyle(1);
   l2->Draw("same");
 
 
