@@ -49,7 +49,8 @@ void forPaperZMM(std::string var1="h_ystar",
       var3 = "id1";
       xtitle = "|Y_{jet}|";
       output = "YJetMuo";
-      datavar="Yjet";
+      datavar="Bayes_UnfoldedYjet";
+      datafile = "darko_root/Unfolded_Yjet_091912.root";
     }
   else if(var1=="h_zy")
     {
