@@ -1,27 +1,12 @@
-
+#include "SMP-12-017.h"
 void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root")
 {
 
-   const double fBinsPt01[]= {30,40,55,75,105,150,210,315,500};
-   const double fBinsPt02[]= {30,40,55,75,105,150,210,315,450};
-   const double fBinsPt03[]= {30,40,55,75,105,150,300};
-   const double fBinsPt04[]= {30,40,55,75,105,200};
   
-   int nPtBins01 = sizeof(fBinsPt01)/sizeof(fBinsPt01[0])-1;
    cout << "There are " << nPtBins01 << " bins in 1st leading jet" << endl;
-
-   int nPtBins02 = sizeof(fBinsPt02)/sizeof(fBinsPt02[0])-1;
    cout << "There are " << nPtBins02 << " bins in 2nd leading jet" << endl;
-
-   int nPtBins03 = sizeof(fBinsPt03)/sizeof(fBinsPt03[0])-1;
    cout << "There are " << nPtBins03 << " bins in 3rd leading jet" << endl;
-
-   int nPtBins04 = sizeof(fBinsPt04)/sizeof(fBinsPt04[0])-1;
    cout << "There are " << nPtBins04 << " bins in 4th leading jet" << endl;
-
-   const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
-   const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
-
    cout << "There are " << nYBins << " bins." << endl;
 
 
@@ -41,8 +26,7 @@ void plotLOGenerator(std::string file="weighted_genHisto_electron_genOnly_DYJets
   TFile *fmc = TFile::Open(file.data());
 
   double xsec = 3048.0*1000;
-  double ngen = 2.59785100000000000e+07;//2.29809910000000000e+07; // madgraph, 3.38254373785480205e+06 sherpa
-  
+  double ngen = 3.54353940000000000e+07;  //raw number for madgraph: 35435553
   
   for(int ij=0; ij< nJets; ij++){
 
