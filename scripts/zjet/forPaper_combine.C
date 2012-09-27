@@ -242,7 +242,7 @@ void forPaper_combine(std::string var1="h_ystar",
   leg->AddEntry(h[3], mcName3.data());
   leg->Draw("same");
 
-  TLatex *lar = new TLatex(0.48, 0.91, "CMS #sqrt{s} = 7 TeV, L_{int} = 4.9~5.1 fb^{-1}");
+  TLatex *lar = new TLatex(0.46, 0.91, "CMS #sqrt{s} = 7 TeV, L_{int} = 4.9~5.1 fb^{-1}");
   lar->SetNDC(kTRUE);
   lar->SetTextSize(0.05);
   lar->Draw();
