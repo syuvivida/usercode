@@ -39,12 +39,17 @@ void forPaper_combine(std::string var1="h_ystar",
 
   datavar = "h_combine_" + corrName;
 
+  double ymax=1.22;
+  double ymin=0.78;
+
   if(var1=="h_ystar")
     {
       var3  = "id4";
       xtitle = "0.5|Y_{Z}-Y_{jet}|";
       output = "DifYAll";
       theoryName = "Ydif";
+      ymax = 1.55;
+      ymin = 0.5;
     }
   else if(var1=="h_yB")
     {
@@ -52,6 +57,8 @@ void forPaper_combine(std::string var1="h_ystar",
       xtitle = "0.5|Y_{Z}+Y_{jet}|";
       output = "SumYAll";
       theoryName = "Ysum";
+      ymax = 1.55;
+      ymin = 0.5;
     }
   else if(var1=="h_jety")
     {
@@ -98,6 +105,7 @@ void forPaper_combine(std::string var1="h_ystar",
     hscale[i]   ->SetYTitle(Form("Ratio to %s",mcName3.data()));
     hscale[i]   ->SetXTitle(xtitle.data());
     hscale[i]   ->GetXaxis()->SetNdivisions(5);
+//     hscale[i]->GetYaxis()->SetNdivisions(5);
     hscale[i]   ->GetXaxis()->SetDecimals();
     hscale[i]   ->GetYaxis()->SetDecimals();
 
@@ -106,16 +114,15 @@ void forPaper_combine(std::string var1="h_ystar",
     hscale[i]->SetMarkerStyle(MARKERSTYLE[i]);
 
     hscale[i]->SetTitle("");
-//     hscale[i]->SetMaximum(2.05);
-//     hscale[i]->SetMinimum(0.0);
-    hscale[i]->SetMaximum(1.65);
-    hscale[i]->SetMinimum(0.5);
+    hscale[i]->SetMaximum(ymax);
+    hscale[i]->SetMinimum(ymin);
 
     hscale[i]->SetTitleOffset(1.2,"X");
     hscale[i]->SetTitleOffset(1.2,"Y");
 
     h[i]->SetTitle("");
-//     h[i]->GetXaxis()->SetNdivisions(5);
+    h[i]->GetXaxis()->SetNdivisions(5);
+//     h[i]->GetYaxis()->SetNdivisions(5);
     h[i]->GetXaxis()->SetDecimals();
     h[i]->GetYaxis()->SetDecimals();
 
@@ -171,8 +178,8 @@ void forPaper_combine(std::string var1="h_ystar",
     cout << "===================================================" << endl;
     cout << "For histogram " << ih << endl;
     hscale[ih]->Divide(h[ih], h[NHISTOS-1]);
-    hscale[ih]->SetMaximum(1.65);
-    hscale[ih]->SetMinimum(0.5);
+    hscale[ih]->SetMaximum(ymax);
+    hscale[ih]->SetMinimum(ymin);
 
   } // end of loop over histograms
 
