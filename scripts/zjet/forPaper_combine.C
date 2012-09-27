@@ -97,7 +97,7 @@ void forPaper_combine(std::string var1="h_ystar",
     hscale[i]   =(TH1D*) h[0]->Clone(Form("hscale%02i",i));
     hscale[i]   ->SetYTitle(Form("Ratio to %s",mcName3.data()));
     hscale[i]   ->SetXTitle(xtitle.data());
-//     hscale[i]   ->GetXaxis()->SetNdivisions(5);
+    hscale[i]   ->GetXaxis()->SetNdivisions(5);
     hscale[i]   ->GetXaxis()->SetDecimals();
     hscale[i]   ->GetYaxis()->SetDecimals();
 
@@ -132,21 +132,21 @@ void forPaper_combine(std::string var1="h_ystar",
   int binLo = -1;
   int binHi = -1;
   int nbins = h[0]->GetNbinsX();
-  if(xmin>-9999.0 && xmax>-9999.0)
-    {
+//   if(xmin>-9999.0 && xmax>-9999.0)
+//     {
 
-      binLo = h[0]->FindBin(xmin);
-      binHi = h[0]->FindBin(xmax)-1;
+//       binLo = h[0]->FindBin(xmin);
+//       binHi = h[0]->FindBin(xmax)-1;
 
-    }
+//     }
 
-  else
-    {
+//   else
+//     {
       binLo = 1;
       binHi = nbins;
-      xmin = h[0]->GetBinLowEdge(1);
-      xmax = h[0]->GetBinLowEdge(nbins+1);
-    }
+//       xmin = h[0]->GetBinLowEdge(1);
+//       xmax = h[0]->GetBinLowEdge(nbins+1);
+//     }
 
 
   float scaleFactor[NHISTOS]={1};
@@ -273,8 +273,10 @@ void forPaper_combine(std::string var1="h_ystar",
   l2->SetLineStyle(1);
   l2->Draw("same");
 
-  gROOT->ProcessLine(".L ~/scripts/theoryError.c");
-  theoryError(theoryName.data());
+//   gROOT->ProcessLine(".L ~/scripts/theoryError.c");
+//   theoryError(theoryName.data());
+  gROOT->ProcessLine(".L ~/scripts/theoryErrorZed.c");
+  theoryErrorZed(theoryName.data());
   
   string dirName = "forPaper";
   gSystem->mkdir(dirName.data());
