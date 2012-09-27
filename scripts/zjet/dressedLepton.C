@@ -1,26 +1,13 @@
 #define dressedLepton_cxx
 #include "dressedLepton.h"
+#include "SMP-12-017.h" // for Z+jet cross section
+//#include "SMP-12-004.h" // for angular analysis
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <map>
 
-const double minZPt  =40.0;
-const double minMll = 76.0;
-const double maxMll =106.0;
-
-const double minJetPt=30.0;
-const double maxJetEta=2.4;
-const double mindR=0.5;
-const double minLepPt = 20.0;
-
-const double minEleBarrelEta = 0.0;
-const double maxEleBarrelEta = 2.1;
-const double minEleEndcapEta = 0.0;
-const double maxEleEndcapEta = 2.1;
-
-const double maxMuoEta = 2.1;
 
 
 void dressedLepton::Loop(int lepID, int mode, bool exclusive, 
@@ -66,26 +53,10 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
     isPythia=true;
   if(isPythia)cout << "This is a pythia MC sample" << endl;
 
-  const double fBinsPt01[]= {30,40,55,75,105,150,210,315,500};
-  const double fBinsPt02[]= {30,40,55,75,105,150,210,315,450};
-  const double fBinsPt03[]= {30,40,55,75,105,150,300};
-  const double fBinsPt04[]= {30,40,55,75,105,200};
-  
-  int nPtBins01 = sizeof(fBinsPt01)/sizeof(fBinsPt01[0])-1;
   cout << "There are " << nPtBins01 << " bins in 1st leading jet" << endl;
-
-  int nPtBins02 = sizeof(fBinsPt02)/sizeof(fBinsPt02[0])-1;
   cout << "There are " << nPtBins02 << " bins in 2nd leading jet" << endl;
-
-  int nPtBins03 = sizeof(fBinsPt03)/sizeof(fBinsPt03[0])-1;
   cout << "There are " << nPtBins03 << " bins in 3rd leading jet" << endl;
-
-  int nPtBins04 = sizeof(fBinsPt04)/sizeof(fBinsPt04[0])-1;
   cout << "There are " << nPtBins04 << " bins in 4th leading jet" << endl;
-
-  const double fBinsY[]={0.0,0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4};
-  const int nYBins = sizeof(fBinsY)/sizeof(fBinsY[0])-1;
-
   cout << "There are " << nYBins << " bins." << endl;
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -555,6 +526,7 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
     } // end of switch
 
   if(exclusive)prefix += "_exclusive1Jet";
+  else prefix += "_inclusive";
   if(minZPt>1e-6)prefix += Form("_zPt%d",(int)minZPt);
 
   std::string remword  ="/data2/syu/zjet_vectorNtuple/";
