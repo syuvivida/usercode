@@ -8,7 +8,7 @@ void forPaper_combine(std::string var1="h_ystar",
 		      std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
 		      std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
 		 std::string var2="", 
-		 std::string headertitle="Z(#rightarrow ee, #mu#mu)+1 jet",
+		 std::string headertitle="Z#rightarrow ll + 1 jet",
 		 std::string dataName="Data",
 		 std::string mcName1="Sherpa",
 		 std::string mcName2="Madgraph",
@@ -48,8 +48,8 @@ void forPaper_combine(std::string var1="h_ystar",
       xtitle = "0.5|Y_{Z}-Y_{jet}|";
       output = "DifYAll";
       theoryName = "Ydif";
-      ymax = 1.55;
-      ymin = 0.5;
+      ymax = 1.45;
+      ymin = 0.55;
     }
   else if(var1=="h_yB")
     {
@@ -57,8 +57,8 @@ void forPaper_combine(std::string var1="h_ystar",
       xtitle = "0.5|Y_{Z}+Y_{jet}|";
       output = "SumYAll";
       theoryName = "Ysum";
-      ymax = 1.55;
-      ymin = 0.5;
+      ymax = 1.45;
+      ymin = 0.55;
     }
   else if(var1=="h_jety")
     {
@@ -231,9 +231,9 @@ void forPaper_combine(std::string var1="h_ystar",
 
   cout << "here3" << endl;
 
-  float x1NDC = 0.682679;
+  float x1NDC = 0.729812;
   float y1NDC = 0.560219;
-  float x2NDC = 0.892501;
+  float x2NDC = 0.939633;
   float y2NDC = 0.871885;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
@@ -249,7 +249,7 @@ void forPaper_combine(std::string var1="h_ystar",
   leg->AddEntry(h[3], mcName3.data());
   leg->Draw("same");
 
-  TLatex *lar = new TLatex(0.46, 0.91, "CMS #sqrt{s} = 7 TeV, L_{int} = 4.9~5.1 fb^{-1}");
+  TLatex *lar = new TLatex(0.53, 0.91, "CMS #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
   lar->SetNDC(kTRUE);
   lar->SetTextSize(0.05);
   lar->Draw();
