@@ -1,8 +1,3 @@
-/*
-  Anil Singh
-  Panjab University
-*/
-
 #include "DelPanj/TreeMaker/interface/genInfoTree.h"
 
 //---------------------------------------------------------------
@@ -80,17 +75,26 @@ genInfoTree::Fill(const edm::Event& iEvent)
 
   unsigned int genIndex=0;
   const reco::GenParticleCollection* genColl= &(*genParticleHandle);
+
+  // first save the vector of candidates
+  std::vector<const reco::Candidate*> cands;
+  std::vector<const reco::Candidate*>::const_iterator found = cands.begin();
+  for( std::vector<reco::GenParticle>::const_iterator 
+	 it_gen = genParticleHandle->begin(); 
+       it_gen != genParticleHandle->end(); it_gen++ ) 
+    cands.push_back(&*it_gen);
+
+  // now loop
   reco::GenParticleCollection::const_iterator geni = genColl->begin();
-  for(; geni!=genColl->end() && genIndex < 200;geni++){
+  for(; geni!=genColl->end() && genIndex < 30;geni++){
     reco::GenParticle gen = *geni;
     
     genIndex++;
-    //Look out for the GenMuons/Electrons
-//     if(gen.status()!=1)continue; // remove this condition so to save electrons/muons before 
-//                             FSR, 2012/04/25, SSY
     
     double pid = fabs(gen.pdgId());
-    if(!( (gen.status()==3) || (pid==11)||(pid==13) || (pid==23) || (pid==24)))continue;
+
+    // need to remove the if statement to make the search for mother work
+//     if(!( (gen.status()==3) || (pid==11)||(pid==13) || (pid==23) || (pid==24)))continue;
     genParE_.push_back(gen.energy());
     genParPt_.push_back(gen.pt());
     genParEta_.push_back(gen.eta());
@@ -109,6 +113,33 @@ genInfoTree::Fill(const edm::Event& iEvent)
     genMomParId_.push_back(mompid);
 
     genParIndex_.push_back(genIndex);
+
+    int iMo1 = -1;
+    int iMo2 = -1;
+    int iDa1 = -1;
+    int iDa2 = -1;
+    int NMo = geni->numberOfMothers();
+    int NDa = geni->numberOfDaughters();
+
+    found = find(cands.begin(), cands.end(), geni->mother(0));
+    if(found != cands.end()) iMo1 = found - cands.begin() ;
+
+    found = find(cands.begin(), cands.end(), geni->mother(1));
+    if(found != cands.end()) iMo2 = found - cands.begin() ;
+
+    found = find(cands.begin(), cands.end(), geni->daughter(0));
+    if(found != cands.end()) iDa1 = found - cands.begin() ;
+
+    found = find(cands.begin(), cands.end(), geni->daughter(1));
+    if(found != cands.end()) iDa2 = found - cands.begin() ;
+
+    genNMo_.push_back(NMo);
+    genNDa_.push_back(NDa);
+    genMo1_.push_back(iMo1);
+    genMo2_.push_back(iMo2);
+    genDa1_.push_back(iDa1);
+    genDa2_.push_back(iDa2);
+
       
   }
 
@@ -123,8 +154,8 @@ genInfoTree::Fill(const edm::Event& iEvent)
    
   for(; gjeti!=genJetColl->end();gjeti++){
     reco::GenParticle gjet = *gjeti;
-    if(gjet.pt()<=20)continue;
-    if(fabs(gjet.eta())>3.0)continue;
+    //     if(gjet.pt()<=20)continue;
+    //     if(fabs(gjet.eta())>3.0)continue;
 
     genJetE_.push_back(gjet.energy()); 
     genJetPt_.push_back(gjet.pt());
@@ -150,6 +181,13 @@ genInfoTree::SetBranches(){
   AddBranch(&genParSt_,"genParSt_");
   AddBranch(&genMomParId_,"genMomParId_");
   AddBranch(&genParIndex_,"genParIndex_");
+
+  AddBranch(&genNMo_,"genNMo_");
+  AddBranch(&genNDa_,"genNDa_");
+  AddBranch(&genMo1_,"genMo1_");
+  AddBranch(&genMo2_,"genMo2_");
+  AddBranch(&genDa1_,"genDa1_");
+  AddBranch(&genDa2_,"genDa2_");
   
   AddBranch(&genJetE_, "genJetE_");
   AddBranch(&genJetPt_,"genJetPt_");
@@ -175,6 +213,12 @@ genInfoTree::Clear(){
   genParSt_.clear();
   genMomParId_.clear();
   genParIndex_.clear();
+  genNMo_.clear();
+  genNDa_.clear();
+  genMo1_.clear();
+  genMo2_.clear();
+  genDa1_.clear();
+  genDa2_.clear();
   genJetE_.clear();
   genJetPt_.clear();
   genJetEta_.clear(); 
