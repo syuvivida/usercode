@@ -29,7 +29,6 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
    fillJetInfo_=0;
    fillMetInfo_=0;
    fillPhotInfo_=0; 
-   fillZJetPlant_ = 0;
    fillZZInfo_  = 0;
 
    fillPUweightInfo_ = iConfig.getParameter<bool>("fillPUweightInfo_");
@@ -43,7 +42,6 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
    fillTrigInfo_  = iConfig.getParameter<bool>("fillTrigInfo_");
    fillPhotInfo_  = iConfig.getParameter<bool>("fillPhotInfo_");
 
-   fillZJetPlant_  = iConfig.getParameter<bool>("fillZJetPlant_");
    fillZZInfo_     = iConfig.getParameter<bool>("fillZZInfo_");
 
    //outFileName_= iConfig.getParameter<std::string>("outFileName");
@@ -64,7 +62,6 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
    if( fillJetInfo_)   jetTree_=new jetTree("patJetPfAk05",tree_,iConfig);
    if( fillTrigInfo_)  patHltTree_ = new patHltTree("Hlt",tree_); 
    if( fillPhotInfo_)  photonTree_ = new photonTree("patPhoton", tree_, iConfig); 
-   if( fillZJetPlant_) patZJetPlant_ = new patZJetPlant("patZJet_",tree_,iConfig);
 
    if( fillZZInfo_)    ZZTree_ = new ZZTree("zz",tree_,iConfig);
 
@@ -90,7 +87,6 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   if( fillMetInfo_)   patMetTree_  ->Fill(iEvent);
   if( fillTrigInfo_)  patHltTree_  ->Fill(iEvent);
   if( fillPhotInfo_)  photonTree_  ->Fill(iEvent);
-  if( fillZJetPlant_) patZJetPlant_->Fill(iEvent, iSetup);
   if( fillZZInfo_)    ZZTree_->Fill(iEvent, iSetup);
   tree_->Fill();
 }

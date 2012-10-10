@@ -18,7 +18,6 @@
 #include "DelPanj/TreeMaker/interface/jetTree.h"
 #include "DelPanj/TreeMaker/interface/photonTree.h"
 #include "DelPanj/TreeMaker/interface/patElecIsoTree.h"
-#include "DelPanj/TreeMaker/interface/patZJetPlant.h"
 #include "DelPanj/TreeMaker/interface/ZZTree.hh"
 #include "TTree.h"
 #include "TFile.h"
@@ -48,7 +47,6 @@ class TreeMaker : public edm::EDAnalyzer {
       bool fillMetInfo_;
       bool fillJetInfo_;
       bool fillPhotInfo_;
-      bool fillZJetPlant_;
       bool fillZZInfo_;
 
       puweight *puweight_;
@@ -61,7 +59,6 @@ class TreeMaker : public edm::EDAnalyzer {
       jetTree     *jetTree_;
       photonTree  *photonTree_;
       patHltTree  *patHltTree_;      
-      patZJetPlant *patZJetPlant_;
       ZZTree      *ZZTree_;
 
 };

@@ -100,6 +100,12 @@ eSelector::CutRecord(const pat::Electron& e){
   double iso3 = 999.;
   double iso4 = 999.;
   
+  bool passTriggerTight = 
+    (e.dr03TkSumPt()/std::max(0.1,pt) < 0.2) &&
+    (e.dr03EcalRecHitSumEt()/std::max(0.1,pt) < 0.2) &&
+    (e.dr03HcalTowerSumEt()/std::max(0.1,pt) < 0.2);
+  
+
   if(usePfIso_){  
     // will be fixed later, Eiko
     //std::cout<<"Using Particle Flow Iso"<<std::endl;
@@ -119,8 +125,9 @@ eSelector::CutRecord(const pat::Electron& e){
   if(doRhoCorr_)
     {
       ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_ = 
-	isData_? ElectronEffectiveArea::kEleEAData2011:
-	ElectronEffectiveArea::kEleEAFall11MC;
+  	isData_? ElectronEffectiveArea::kEleEAData2011:
+  	ElectronEffectiveArea::kEleEAFall11MC;
+
       
       ElectronEffectiveArea::ElectronEffectiveAreaType effAreaType_ =
 	ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03;      
@@ -182,7 +189,7 @@ eSelector::CutRecord(const pat::Electron& e){
       cuts["iso1"]   = 1;
       cuts["iso2"]   = 1;
       cuts["iso3"]   = 1;
-      cuts["iso4"]   = iso4 < iso4BrlX_;
+      cuts["iso4"]   = iso4 < iso4BrlX_ && passTriggerTight;
     }
     else{
       cuts["iso1"]   = iso1 < iso1BrlX_;

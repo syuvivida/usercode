@@ -50,7 +50,7 @@
 #include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
 #include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
 #include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
-
+#include <time.h>
 
 typedef std::vector< edm::Handle< edm::ValueMap<double> > >             
 IsoDepositVals;
@@ -109,8 +109,10 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   
   // the second argument is the random seed, any reason to set it 
   // differently or the same for the 3 taggers
-
-//   btsfutiljp = new BTagSFUtil("JP", 13);
+  srand ( time(NULL) );
+  int seed = rand(); //712687782, 727743360
+  std::cout << "seed = " << seed << std::endl;
+  btsfutiljp = new BTagSFUtil("JP", seed);
 
 }
 
@@ -118,7 +120,7 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
 ZZTree::~ZZTree()
 {
   delete tree_;
-//   delete btsfutiljp;
+  delete btsfutiljp;
 }
 
 
@@ -140,10 +142,6 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
   edm::Handle<pat::METCollection> met_H;
   iEvent.getByLabel("patMETsAK5", met_H);
   metSig_ = (&(met_H->front()))->significance();
-
-  edm::Handle<pat::METCollection> metNoPU_H;
-  iEvent.getByLabel("patMETsAK5NoPUSub", metNoPU_H);
-  metSigNoPU_ = (&(metNoPU_H->front()))->significance();
 
   // rho for electron
   edm::Handle<double> ele_rho_event;
@@ -234,7 +232,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 
   //initialize variables
   int hcand = -1;
-
+  int bestHCandIndex = -1;
 
   //LOOP IN 2 KINDS OF LEPTONS: ELECTRONS AND MUONS 
   for (int ilep=0; ilep<2; ilep++) {
@@ -372,9 +370,8 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	  {
 	    double phi = myJet[ijet]->phi();
 	    double sin_phi = sin(phi*1000000);
-	    int seed = abs(static_cast<int>(sin_phi*100000));
-	    
-	    BTagSFUtil* btsfutiljp = new BTagSFUtil("JP", seed);
+	    // 	    int seed = abs(static_cast<int>(sin_phi*100000));	    
+	    // 	    BTagSFUtil* btsfutiljp = new BTagSFUtil("JP", seed);
 	
 	    float Btageff_SF_ = 1.0;
 
@@ -396,8 +393,8 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
   		(1.43995e-06)*jetEt*jetEt;
 
 	      // 2011
-// 	      float SFL_JPL_2012corr = 1.00;
-//  	      float SFL_JPM_2012corr = 1.00;
+	      // 	      float SFL_JPL_2012corr = 1.00;
+	      //  	      float SFL_JPM_2012corr = 1.00;
 
 	      // Extract the mistag eff value
 	      if ( measureType[ iMeasure ] == "BTAGLEFF") {
@@ -422,16 +419,16 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	      }
 	    }
 	    
- 	    btsfutiljp->modifyBTagsWithSF( 
- 					  isLoose, isMedium, flavor, 
- 					  ScaleFactors[ijet]["MUJETSWPBTAGJPL"],
- 					  ScaleFactors[ijet]["MUJETSWPBTAGJPM"], 
- 					  ScaleFactors[ijet]["MISTAGJPL"],
- 					  ScaleFactors[ijet]["MISTAGJPM"],
+   	    btsfutiljp->modifyBTagsWithSF( 
+   					  isLoose, isMedium, flavor, 
+   					  ScaleFactors[ijet]["MUJETSWPBTAGJPL"],
+   					  ScaleFactors[ijet]["MUJETSWPBTAGJPM"], 
+   					  ScaleFactors[ijet]["MISTAGJPL"],
+   					  ScaleFactors[ijet]["MISTAGJPM"],
  					  ScaleFactorsEff[ijet]["MISTAGJPLeff"],
- 					  ScaleFactorsEff[ijet]["MISTAGJPMeff"]);
+   					  ScaleFactorsEff[ijet]["MISTAGJPMeff"]);
 	    
-	    delete btsfutiljp;
+	    // 	    delete btsfutiljp;
 	  } // if it's MC
 	
 	if(isLoose)  nLooseBTags++;
@@ -485,13 +482,14 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
       double heliLD_refit_local = goodH.userFloat("helyLDRefit");
 
       // check the dilepton Z mass
-      if(zllM_local < MIN_MZ_LL)continue;
-      if(zllM_local > MAX_MZ_LL)continue;
+      //       if(zllM_local < MIN_MZ_LL)continue;
+      //       if(zllM_local > MAX_MZ_LL)continue;
 
       // check the mass of the two jets
-      if(zjjM_local < LOOSE_MIN_MZ_JJ)continue;
-      if(zjjM_local > LOOSE_MAX_MZ_JJ)continue;
+      //       if(zjjM_local < LOOSE_MIN_MZ_JJ)continue;
+      //       if(zjjM_local > LOOSE_MAX_MZ_JJ)continue;
 
+      bestHCandIndex++;
     
       higgsPt_.push_back(higgsPt_local);
       higgsEta_.push_back(higgsEta_local);
@@ -516,44 +514,12 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	{
 
 	  jetIndex_.push_back(isjet);
+	  jetHiggsIndex_.push_back(bestHCandIndex);
 	  jetE_.push_back(myJet[isjet]->energy());
 	  jetPt_.push_back(myJet[isjet]->pt());
 	  jetEta_.push_back(myJet[isjet]->eta());
 	  jetPhi_.push_back(myJet[isjet]->phi());
-
-	  TLorentzVector tempGenJet(0,0,0,0);
-	  matchedGenJet(iEvent, myJet[isjet], tempGenJet);
-
-	  if(tempGenJet.E()<1e-6){
-	    jetGenE_.push_back(DUMMY);
-	    jetGenPt_.push_back(DUMMY);
-	    jetGenEta_.push_back(DUMMY);
-	    jetGenPhi_.push_back(DUMMY);
-	  }
-	  else{
-	    jetGenE_.push_back(tempGenJet.E());
-	    jetGenPt_.push_back(tempGenJet.Pt());
-	    jetGenEta_.push_back(tempGenJet.Eta());
-	    jetGenPhi_.push_back(tempGenJet.Phi());
-	  }
-
-	  TLorentzVector tempParton(0,0,0,0);
-	  matchedParton(iEvent, myJet[isjet], tempParton);
-
-	  if(tempParton.E()<1e-6){
-	    jetPartonE_.push_back(DUMMY);
-	    jetPartonPt_.push_back(DUMMY);
-	    jetPartonEta_.push_back(DUMMY);
-	    jetPartonPhi_.push_back(DUMMY);
-	  }
-	  else {
-	    jetPartonE_.push_back(tempParton.E());
-	    jetPartonPt_.push_back(tempParton.Pt());
-	    jetPartonEta_.push_back(tempParton.Eta());
-	    jetPartonPhi_.push_back(tempParton.Phi());
-	  }
-
-
+	  
 	  
 	}
 
@@ -561,6 +527,18 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 
       heliLD_.push_back(heliLD_local);
       heliLDRefit_.push_back(heliLD_refit_local);
+
+      costhetaNT1_.push_back(goodH.userFloat("costhetaNT1"));
+      costhetaNT2_.push_back(goodH.userFloat("costhetaNT2"));
+      phiNT_.push_back(goodH.userFloat("phiNT"));
+      phiNT1_.push_back(goodH.userFloat("phiNT1"));
+      costhetastarNT_.push_back(goodH.userFloat("costhetastarNT"));
+      
+      costhetaNT1Refit_.push_back(goodH.userFloat("costhetaNT1Refit"));
+      costhetaNT2Refit_.push_back(goodH.userFloat("costhetaNT2Refit"));
+      phiNTRefit_.push_back(goodH.userFloat("phiNTRefit"));
+      phiNT1Refit_.push_back(goodH.userFloat("phiNT1Refit"));
+      costhetastarNTRefit_.push_back(goodH.userFloat("costhetastarNTRefit"));
 
       nBTags_.push_back(nBTags);
       lepType_.push_back(ilep);
@@ -627,7 +605,6 @@ ZZTree::SetBranches(){
   AddBranch(&eleRho_, "eleRho");
   AddBranch(&muoRho_, "muoRho");
   AddBranch(&metSig_, "metSig");
-  AddBranch(&metSigNoPU_, "metSigNoPU");
 
   AddBranch(&higgsPt_,"higgsPt");
   AddBranch(&higgsEta_,"higgsEta");
@@ -649,68 +626,30 @@ ZZTree::SetBranches(){
   AddBranch(&zjjdR_,"zjjdR");
 
   AddBranch(&jetIndex_,"jetIndex");
+  AddBranch(&jetHiggsIndex_,"jetHiggsIndex_");
   AddBranch(&jetE_,"jetE");
   AddBranch(&jetPt_,"jetPt");
   AddBranch(&jetEta_,"jetEta");
   AddBranch(&jetPhi_,"jetPhi");
-
-  AddBranch(&jetGenE_,"jetGenE");
-  AddBranch(&jetGenPt_,"jetGenPt");
-  AddBranch(&jetGenEta_,"jetGenEta");
-  AddBranch(&jetGenPhi_,"jetGenPhi");
- 
-  AddBranch(&jetPartonE_,"jetPartonE");
-  AddBranch(&jetPartonPt_,"jetPartonPt");
-  AddBranch(&jetPartonEta_,"jetPartonEta");
-  AddBranch(&jetPartonPhi_,"jetPartonPhi");
  
   AddBranch(&heliLD_,"heliLD");
+  AddBranch(&costhetaNT1_,"costhetaNT1");
+  AddBranch(&costhetaNT2_,"costhetaNT2");
+  AddBranch(&phiNT_,"phiNT");
+  AddBranch(&phiNT1_,"phiNT1");
+  AddBranch(&costhetastarNT_,"costhetastarNT");
+  
   AddBranch(&heliLDRefit_,"heliLDRefit");
+  AddBranch(&costhetaNT1Refit_,"costhetaNT1Refit");
+  AddBranch(&costhetaNT2Refit_,"costhetaNT2Refit");
+  AddBranch(&phiNTRefit_,"phiNTRefit");
+  AddBranch(&phiNT1Refit_,"phiNT1Refit");
+  AddBranch(&costhetastarNTRefit_,"costhetastarNTRefit");
 
   AddBranch(&nBTags_,"nBTags");
   AddBranch(&lepType_,"lepType");
   AddBranch(&passBit_,"passBit");
 
-
-  /*
-
-  AddBranch(&higgsPt_,  "higgsPt");
-  AddBranch(&higgsEta_, "higgsEta");
-  AddBranch(&higgsPhi_, "higgsPhi");
-  AddBranch(&higgsM_,   "higgsM");
-
-  AddBranch(&zllPt_,  "zllPt");
-  AddBranch(&zllEta_, "zllEta");
-  AddBranch(&zllPhi_, "zllPhi");
-  AddBranch(&zllM_,   "zllM");
-
-  AddBranch(&zjjPt_,  "zjjPt");
-  AddBranch(&zjjEta_, "zjjEta");
-  AddBranch(&zjjPhi_, "zjjPhi");
-  AddBranch(&zjjM_,   "zjjM");
-
-  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
-  AddBranchArray(arraySize, jetPt_,  "jetPt");
-  AddBranchArray(arraySize, jetEta_, "jetEta");
-  AddBranchArray(arraySize, jetPhi_, "jetPhi");
-  AddBranchArray(arraySize, jetE_,   "jetE");
-  AddBranchArray(arraySize, jetRefitPt_,  "jetRefitPt");
-  AddBranchArray(arraySize, jetRefitEta_, "jetRefitEta");
-  AddBranchArray(arraySize, jetRefitPhi_, "jetRefitPhi");
-  AddBranchArray(arraySize, jetRefitE_, "jetRefitE");
-
-  
-  AddBranch(&lepType_,   "lepType");
-
-  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
-  AddBranchArray(arraySize, lepPt_,  "lepPt");
-  AddBranchArray(arraySize, lepEta_, "lepEta");
-  AddBranchArray(arraySize, lepPhi_, "lepPhi");
-  AddBranchArray(arraySize, lepE_,   "lepE");
-
-
-
-  */
 
 }
 
@@ -722,7 +661,6 @@ ZZTree::Clear(){
   muoRho_ = DUMMY;
 
   metSig_ = DUMMY;
-  metSigNoPU_= DUMMY;
 
   higgsPt_.clear();
   higgsEta_.clear();
@@ -744,223 +682,32 @@ ZZTree::Clear(){
   zjjdR_.clear();
 
   jetIndex_.clear();
+  jetHiggsIndex_.clear();
   jetE_.clear();
   jetPt_.clear();
   jetEta_.clear();
   jetPhi_.clear();
 
-  jetGenE_.clear();
-  jetGenPt_.clear();
-  jetGenEta_.clear();
-  jetGenPhi_.clear();
-
-  jetPartonE_.clear();
-  jetPartonPt_.clear();
-  jetPartonEta_.clear();
-  jetPartonPhi_.clear();
-
   heliLD_.clear();
+  costhetaNT1_.clear();
+  costhetaNT2_.clear();
+  phiNT_.clear();
+  phiNT1_.clear();
+  costhetastarNT_.clear();
+ 
+ 
   heliLDRefit_.clear();
+  costhetaNT1Refit_.clear();
+  costhetaNT2Refit_.clear();
+  phiNTRefit_.clear();
+  phiNT1Refit_.clear();
+  costhetastarNTRefit_.clear();
 
   nBTags_.clear();
   lepType_.clear();
   passBit_.clear();
 
 
-}
-
-void ZZTree::matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet,
-			   TLorentzVector& genJet)
-{
-  double recJetPt  = recJet->pt();
-  double recJetEta = recJet->eta();
-  double recJetPhi = recJet->phi();
-  
-  genJet.SetPtEtaPhiE(0,0,0,0);
-
-  if(iEvent.isRealData())return;
-
-  double maxGenJetPt= DUMMY;
-
-  edm::Handle<reco::GenJetCollection> genJetsHandle;
-  if( not iEvent.getByLabel("ak5GenJets",genJetsHandle)){ 
-    edm::LogInfo("GenAnalyzer") << "genJets not found, "
-      "skipping event"; 
-    return;
-  }
-  const reco::GenJetCollection* genJetColl = &(*genJetsHandle);
-  reco::GenJetCollection::const_iterator gjeti = genJetColl->begin();
-   
-  for(; gjeti!=genJetColl->end();gjeti++){
-
-    reco::GenParticle gjet = *gjeti;
-    double thisGenJetPt  = gjet.pt();
-    double thisGenJetEta = gjet.eta();
-    double thisGenJetPhi = gjet.phi();
-    
-    if(thisGenJetPt < 10.0)continue;
-    if(fabs(thisGenJetEta)>5.0)continue;
-
-
-    double dR = deltaR(thisGenJetEta, thisGenJetPhi,
-		       recJetEta, recJetPhi);
-
-    double relPt = fabs(thisGenJetPt- recJetPt)/thisGenJetPt;
-
-    if(dR<0.4 && relPt < 3.0
-       && thisGenJetPt > maxGenJetPt
-       )
-      {
-	maxGenJetPt = thisGenJetPt;
-	genJet.SetPtEtaPhiE(
-			    gjet.pt(),
-			    gjet.eta(),
-			    gjet.phi(),
-			    gjet.energy()
-			    );
-
-      }
-
-
-  } // loop over genjets
-
-  return;
-   
-}
-
-
-void ZZTree::matchedParton(const edm::Event& iEvent, const pat::Jet* recJet,
-			   TLorentzVector& parton)
-{
-  double recJetPt  = recJet->pt();
-  double recJetEta = recJet->eta();
-  double recJetPhi = recJet->phi();
-  
-  parton.SetPtEtaPhiE(0,0,0,0);
-
-  if(iEvent.isRealData())return;
-
-  edm::Handle<reco::GenParticleCollection> genParticleHandle;
-  if(not iEvent.getByLabel("genParticles", genParticleHandle))
-    {
-      std::cout<<
-	"ZZTree: Generator Level Information not found\n"
-	       <<std::endl;
-      return;
-    }
-
-
-  const reco::GenParticleCollection* genColl= &(*genParticleHandle);
-  reco::GenParticleCollection::const_iterator geni = genColl->begin();
-
-  int genIndex=-1;
-  for(; geni!=genColl->end() && genIndex < 50;geni++){
-    reco::GenParticle gen = *geni;
-    
-    genIndex++;
-    
-    int pid = abs(gen.pdgId());
-    int mompid = -9999;
-    if( gen.numberOfMothers() ==1 ) 
-      mompid = abs(gen.mother()->pdgId());
-
-    if(gen.status()!=3)continue;
-    if(mompid!=23)continue; 
-    if(pid > 6)continue;
-    
-    double thispt = gen.pt();
-    if(thispt <10.0)continue;
-    if(fabs(gen.eta())>5.0)continue;
-
-    double dR = deltaR(gen.eta(), gen.phi(),
-		       recJetEta, recJetPhi);
-
-    double relPt = fabs(thispt- recJetPt)/thispt;
-    
-    if(dR<0.4 && relPt < 3.0)
-      {
-	parton.SetPtEtaPhiE(
-			    gen.pt(),
-			    gen.eta(),
-			    gen.phi(),
-			    gen.energy()
-			    );
-	break;
-      }
-
-
-  } // loop over gen particles
-
-  return;
-   
-}
-
-
-void ZZTree::matchedLep(const edm::Event& iEvent, const reco::Candidate* recLep,
-			TLorentzVector& genLep)
-{
-  double recPt  = recLep->pt();
-  double recEta = recLep->eta();
-  double recPhi = recLep->phi();
-  
-  genLep.SetPtEtaPhiE(0,0,0,0);
-
-  edm::Handle<reco::GenParticleCollection> genParticleHandle;
-  if(not iEvent.getByLabel("genParticles", genParticleHandle))
-    {
-      std::cout<<
-	"ZZTree: Generator Level Information not found\n"
-	       <<std::endl;
-      return;
-    }
-
-
-  const reco::GenParticleCollection* genColl= &(*genParticleHandle);
-  reco::GenParticleCollection::const_iterator geni = genColl->begin();
-
-  int genIndex=-1;
-
-  for(; geni!=genColl->end() && genIndex < 50;geni++){
-    reco::GenParticle gen = *geni;
-    
-    genIndex++;
-    
-    int pid = abs(gen.pdgId());
-    int mompid = -9999;
-    if( gen.numberOfMothers() ==1 ) 
-      mompid = abs(gen.mother()->pdgId());
-
-    if(gen.status()!=1)continue;
-    if(mompid!=11 && mompid!=13  )continue; 
-    if(pid!=11 && pid!=13)continue;
-    
-    double thispt = gen.pt();
-    if(thispt <10.0)continue;
-    if(fabs(gen.eta())>5.0)continue;
-
-    if(gen.charge() * recLep->charge()<0)continue;
-
-    double dR = deltaR(gen.eta(), gen.phi(),
-		       recEta, recPhi);
-    
-    double relPt = fabs(thispt- recPt)/thispt;
-
-    if(dR<0.4 && relPt < 3.0)
-      {
-	genLep.SetPtEtaPhiE(
-			    gen.pt(),
-			    gen.eta(),
-			    gen.phi(),
-			    gen.energy()
-			    );
-	break;
-      }
-
-
-  } // loop over gen particles
-
-  return;
-   
 }
 
 

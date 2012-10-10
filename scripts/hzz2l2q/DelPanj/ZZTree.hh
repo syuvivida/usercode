@@ -41,15 +41,13 @@ class ZZTree{
 
  private:
   ZZTree();
+
+  BTagSFUtil* btsfutiljp;
   void AddBranch(double* x, std::string name);
   void AddBranch(int* x, std::string name);
   void AddBranch(std::vector<double>*, std::string name);
   void AddBranch(std::vector<int>*, std::string name);
   void AddBranchArray(const int arraySize, double* x, std::string name);
-
-  void matchedGenJet(const edm::Event& iEvent, const pat::Jet* recJet, TLorentzVector& genJet);
-  void matchedParton(const edm::Event& iEvent, const pat::Jet* recJet, TLorentzVector& parton);
-  void matchedLep(const edm::Event& iEvent, const reco::Candidate*, TLorentzVector& genLep);
 
   bool passLooseJetID(const pat::Jet* recJet);
 
@@ -65,7 +63,6 @@ class ZZTree{
   double eleRho_;
   double muoRho_;
   double metSig_;
-  double metSigNoPU_;
  
   std::vector<double> higgsPt_;
   std::vector<double> higgsEta_;
@@ -87,23 +84,28 @@ class ZZTree{
   std::vector<double> zjjdR_; // deltaR between two jets   
 
   std::vector<int>    jetIndex_;
+  std::vector<int>    jetHiggsIndex_;
   std::vector<double> jetE_;
   std::vector<double> jetPt_;
   std::vector<double> jetEta_;
   std::vector<double> jetPhi_;
 
-  std::vector<double> jetGenE_;
-  std::vector<double> jetGenPt_;
-  std::vector<double> jetGenEta_;
-  std::vector<double> jetGenPhi_;
 
-  std::vector<double> jetPartonE_;
-  std::vector<double> jetPartonPt_;
-  std::vector<double> jetPartonEta_;
-  std::vector<double> jetPartonPhi_;
-
+  // input for the angular likelihood 
   std::vector<double> heliLD_;
+  std::vector<double> costhetaNT1_;
+  std::vector<double> costhetaNT2_;
+  std::vector<double> phiNT_;
+  std::vector<double> phiNT1_;
+  std::vector<double> costhetastarNT_;
+
+  // refitted
   std::vector<double> heliLDRefit_;
+  std::vector<double> costhetaNT1Refit_;
+  std::vector<double> costhetaNT2Refit_;
+  std::vector<double> phiNTRefit_;
+  std::vector<double> phiNT1Refit_;
+  std::vector<double> costhetastarNTRefit_;
 
   std::vector<int>    nBTags_;
   std::vector<int>    lepType_;
@@ -111,36 +113,6 @@ class ZZTree{
 
   /*
 
-  double higgsPt_;
-  double higgsEta_;
-  double higgsPhi_;
-  double higgsM_;
-
-  double zllPt_;
-  double zllEta_;
-  double zllPhi_;
-  double zllM_;
-
-  double zjjPt_;
-  double zjjEta_;
-  double zjjPhi_;
-  double zjjM_;
-
-  double jetPt_[2];
-  double jetEta_[2];
-  double jetPhi_[2];
-  double jetE_[2];
-
-  double jetRefitPt_[2];
-  double jetRefitEta_[2];
-  double jetRefitPhi_[2];
-  double jetRefitE_[2];
-
-  int    lepType_;
-  double lepPt_[2];
-  double lepEta_[2];
-  double lepPhi_[2];
-  double lepE_[2];
 
   std::vector<double> eID01;
   std::vector<double> eID02;
