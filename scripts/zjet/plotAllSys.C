@@ -73,7 +73,7 @@ void plotAllSys(std::string var)
   TCanvas* c1 = new TCanvas("c1","",600,500);
 
   hstat->SetYTitle("Corrections");
-  hstat->SetFillStyle(3609);
+  hstat->SetFillStyle(3006);
   hstat->SetFillColor(kViolet);
   hstat->SetLineColor(kViolet);
   hstat->SetMarkerColor(kViolet);
@@ -140,9 +140,9 @@ void plotAllSys(std::string var)
   leg->AddEntry(hbkg, "Bkg","f");
   leg->Draw("same"); 
 
-  c1->Print(Form("AllSys_%s.eps",var1.data()));
-  c1->Print(Form("AllSys_%s.gif",var1.data()));
-  c1->Print(Form("AllSys_%s.pdf",var1.data()));
+  c1->Print(Form("AllEleSys_%s.eps",var1.data()));
+  c1->Print(Form("AllEleSys_%s.gif",var1.data()));
+  c1->Print(Form("AllEleSys_%s.pdf",var1.data()));
 
 }
 		     

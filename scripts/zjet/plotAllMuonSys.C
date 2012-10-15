@@ -64,7 +64,7 @@ void plotAllMuonSys(std::string var)
   TCanvas* c1 = new TCanvas("c1","",600,500);
 
   hstat->SetYTitle("Corrections");
-  hstat->SetFillStyle(3609);
+  hstat->SetFillStyle(3006);
   hstat->SetFillColor(kViolet);
   hstat->SetLineColor(kViolet);
   hstat->SetMarkerColor(kViolet);
@@ -111,9 +111,9 @@ void plotAllMuonSys(std::string var)
   leg->AddEntry(hjes_syst, "JES","f");
   leg->Draw("same"); 
 
-  c1->Print(Form("AllMuonSys_%s.eps",var1.data()));
-  c1->Print(Form("AllMuonSys_%s.gif",var1.data()));
-  c1->Print(Form("AllMuonSys_%s.pdf",var1.data()));
+  c1->Print(Form("AllMuoSys_%s.eps",var1.data()));
+  c1->Print(Form("AllMuoSys_%s.gif",var1.data()));
+  c1->Print(Form("AllMuoSys_%s.pdf",var1.data()));
 
 }
 		     
