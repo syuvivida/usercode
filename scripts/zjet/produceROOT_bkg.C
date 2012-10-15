@@ -78,7 +78,7 @@ void produceROOT_bkg(std::string var, bool update=false)
   for(int ib=binLo; ib<= binHi; ib++)
     {
       if(hcentral->GetBinContent(ib)<1e-6)continue;
-      r_corr->SetBinContent(ib,0);
+      r_corr->SetBinContent(ib,1.0);
       
       double original_value = (hup->GetBinContent(ib)*scale_up)/
 	(hcentral->GetBinContent(ib)*scale_central)-1.0;
