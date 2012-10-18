@@ -11,6 +11,7 @@ void displayTwoTreesRatio(std::string file,
 {
   setTDRStyle();
   gStyle->SetOptStat(0);
+  gStyle->SetOptFit(1);
  
   TChain* t1 = new TChain("tree");
   std::string file1 = "/data4/syu/52X_533_validation/533_"+file;
@@ -117,9 +118,8 @@ void displayTwoTreesRatio(std::string file,
   gPad->SetBottomMargin(0.2);
   gPad->SetTickx();
   gStyle->SetOptFit(1);
-
+  
   TH1F* hscale = new TH1F("hscale","",nbin,xmin,xmax);
-  hscale->Divide(h1,h2,1,1,"B");
 
   hscale->SetTitle("");
   hscale->SetMaximum(2.0);
@@ -129,8 +129,30 @@ void displayTwoTreesRatio(std::string file,
   hscale->GetXaxis()->SetNdivisions(5);
   hscale->GetYaxis()->SetDecimals();
   hscale->SetTitleOffset(1.2,"Y");
-  hscale->Draw("hist");
 
+  for(int i=1;i<=hscale->GetNbinsX();i++)
+    {
+      float npass = h1->GetBinContent(i);
+      float ntotal = h2->GetBinContent(i);
+
+      if(ntotal<1e-6)continue;
+
+      float tempRatio = ntotal > npass? npass/ntotal: ntotal/npass;
+      float nbig      = ntotal > npass? ntotal: npass;
+      float tempErr   = sqrt( (1-tempRatio)*tempRatio/nbig);
+
+      float err = npass/ntotal * tempErr/tempRatio;
+
+      hscale->SetBinContent(i, npass/ntotal);
+      hscale->SetBinError(i, err);
+      
+//       cout << "Bin " << i << ": " << h1->GetBinContent(i) << "/" 
+// 	   << h2->GetBinContent(i) << " = " << 
+// 	hscale->GetBinContent(i) << " +- " << hscale->GetBinError(i) << endl;
+    }
+
+  hscale->Draw("e1");
+  hscale->Fit("pol1");
 
   string dirName = "validation";
   gSystem->mkdir(dirName.data());
