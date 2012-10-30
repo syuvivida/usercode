@@ -239,7 +239,8 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
   // OFFSET default is Y=0 on a linear plot
     
   TGraph * TGa = getParams( PLOT ,"scale", OFFSET);
-  colorJt(TGa,kGreen-2, 3006);
+/*   colorJt(TGa,kGreen-2, 3006); */
+  colorJt(TGa,kGreen-2, 3004);
   TGa->Draw("4 same");// works
     
   TGraph * TGb = getParams( PLOT ,"pdfs", OFFSET);
