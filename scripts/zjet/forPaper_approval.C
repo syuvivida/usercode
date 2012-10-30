@@ -1,7 +1,7 @@
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 
 void forPaper_approval(std::string var1="h_ystar", 
-		      float xmin=-9999.0, float xmax=-9999.0,
+		       //		      float xmin=-9999.0, float xmax=-9999.0,
 		      bool logScale=false,
 		      std::string datafile="darko_root/goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
 		      std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
@@ -43,23 +43,30 @@ void forPaper_approval(std::string var1="h_ystar",
   double ymax=1.22;
   double ymin=0.78;
 
+  double xmax=3.0;
+  double xmin=0.0;
+
   if(var1=="h_ystar")
     {
       var3  = "id4";
-      xtitle = "0.5|Y_{Z}-Y_{jet}|";
+//       xtitle = "0.5|Y_{Z}-Y_{jet}|";
+      xtitle = "Y_{dif}";
       output = "DifYAll";
       theoryName = "Ydif";
       ymax = 1.45;
-      ymin = 0.55;
+      ymin = 0.55; 
+      xmax = 1.7999;
     }
   else if(var1=="h_yB")
     {
       var3 = "id3";
-      xtitle = "0.5|Y_{Z}+Y_{jet}|";
+//       xtitle = "0.5|Y_{Z}+Y_{jet}|";
+      xtitle = "Y_{sum}";
       output = "SumYAll";
       theoryName = "Ysum";
       ymax = 1.45;
       ymin = 0.55;
+      xmax = 2.1999;
     }
   else if(var1=="h_jety")
     {
@@ -68,6 +75,8 @@ void forPaper_approval(std::string var1="h_ystar",
       output = "YJetAll";
       datafile = "darko_root/goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
       theoryName = "Yjet";
+      xmax = 2.3999;
+
     }
   else if(var1=="h_zy")
     {
@@ -75,6 +84,7 @@ void forPaper_approval(std::string var1="h_ystar",
       xtitle = "|Y_{Z}|";
       output = "YZedAll";
       theoryName = "Yzed";
+      xmax = 2.1999;
     }
 
   
@@ -106,7 +116,7 @@ void forPaper_approval(std::string var1="h_ystar",
     hscale[i]   =(TH1D*) h[0]->Clone(Form("hscale%02i",i));
     hscale[i]   ->SetYTitle(Form("Ratio to %s",mcName3.data()));
     hscale[i]   ->SetXTitle(xtitle.data());
-    hscale[i]   ->GetXaxis()->SetNdivisions(5);
+//     hscale[i]   ->GetXaxis()->SetNdivisions(510);
 //     hscale[i]->GetYaxis()->SetNdivisions(5);
     hscale[i]   ->GetXaxis()->SetDecimals();
     hscale[i]   ->GetYaxis()->SetDecimals();
@@ -126,7 +136,7 @@ void forPaper_approval(std::string var1="h_ystar",
     hscale[i]->SetTitleOffset(1.2,"Y");
 
     h[i]->SetTitle("");
-    h[i]->GetXaxis()->SetNdivisions(5);
+//     h[i]->GetXaxis()->SetNdivisions(510);
 //     h[i]->GetYaxis()->SetNdivisions(5);
     h[i]->SetLineStyle(LINESTYLE[i]);
     h[i]->GetXaxis()->SetDecimals();
@@ -228,7 +238,8 @@ void forPaper_approval(std::string var1="h_ystar",
 
   
   cout << "here1" << endl;
-  h[0]->SetYTitle("Arbitrary Unit");
+//   h[0]->SetYTitle("Arbitrary Unit");
+  h[0]->SetYTitle("1/#sigma d#sigma/dY");
   h[0]->Draw("e");
   for(int ih=1; ih < NHISTOS; ih++)
     h[ih]->Draw("chistsame");
