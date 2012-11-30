@@ -6,7 +6,7 @@ void forPaper_approval(std::string var1="h_ystar",
 		      std::string datafile="darko_root/goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
 		      std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
 		      std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-		      std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
+		      std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34_mod.root",
 		 std::string var2="", 
 		 std::string headertitle="Z#rightarrow ll + 1 jet",
 		 std::string dataName="Data",
@@ -304,6 +304,14 @@ void forPaper_approval(std::string var1="h_ystar",
 //   theoryError(theoryName.data());
   gROOT->ProcessLine(".L ~/scripts/theoryErrorZed.c");
   theoryErrorZed(theoryName.data());
+
+  hscale[0]->Draw("e1same");
+  for(int ih=1; ih < NHISTOS-1; ih++){
+    hscale[ih]->Draw("chistsame");
+  }
+  hscale[0]->Draw("e1same");
+  l2->Draw("same");
+
   
   string dirName = "forPaper";
   gSystem->mkdir(dirName.data());
