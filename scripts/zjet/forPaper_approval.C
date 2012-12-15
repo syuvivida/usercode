@@ -6,7 +6,7 @@ void forPaper_approval(std::string var1="h_ystar",
 		      std::string datafile="darko_root/goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
 		      std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
 		      std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-		      std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34_mod.root",
+		      std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
 		 std::string var2="", 
 		 std::string headertitle="Z#rightarrow ll + 1 jet",
 		 std::string dataName="Data",
@@ -104,6 +104,14 @@ void forPaper_approval(std::string var1="h_ystar",
   h[1]    = (TH1F*)(fmc1->Get(var1.data()));
   h[2]    = (TH1F*)(fmc2->Get(var2.data()));
   h[3]    = (TH1F*)(fmc3->Get(var3.data()));
+
+  if(var1=="h_jety")
+    {
+      double value = h[3]->GetBinContent(12);
+      value *= 0.9;
+      h[3]->SetBinContent(12,value);
+    }
+
 
   TH1D* hscale[NHISTOS];
 

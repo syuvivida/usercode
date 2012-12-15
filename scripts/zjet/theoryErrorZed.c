@@ -240,21 +240,26 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
     
   TGraph * TGa = getParams( PLOT ,"scale", OFFSET);
 /*   colorJt(TGa,kGreen-2, 3006); */
-  colorJt(TGa,kGreen-2, 3004);
+//  colorJt(TGa,kGreen-2, 3004);
+  colorJt(TGa,kGreen, 1001);
   TGa->Draw("4 same");// works
     
   TGraph * TGb = getParams( PLOT ,"pdfs", OFFSET);
-  colorJt(TGb,kPink-8, 3005);
+  //  colorJt(TGb,kPink-8, 3005);
+  colorJt(TGb,kYellow, 1001);
   TGb->Draw("4 same");
     
-        
-  TLegend *legend1 = new TLegend(0.713,0.813,0.871,0.954);
+  if(PLOT=="Yjet")
+    TGa->Draw("4 same");// works
+  
+/*   TLegend *legend1 = new TLegend(0.713,0.813,0.871,0.954); */
+  TLegend *legend1 = new TLegend(0.179412,0.802363,0.337538,0.943347);
   legend1->SetFillColor(0);
   legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.045);
+  legend1->SetTextSize(0.04);
   legend1->SetBorderSize(0);
-  legend1->AddEntry(TGa,"Scale","f");
-  legend1->AddEntry(TGb,"PDF","f");
+  legend1->AddEntry(TGa,"MCFM Scale uncertainty","f");
+  legend1->AddEntry(TGb,"MCFM PDF uncertainty","f");
   //legend1->AddEntry(TGc,"Correlated","f");
   legend1->Draw("same");
     
