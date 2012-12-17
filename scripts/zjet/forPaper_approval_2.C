@@ -1,4 +1,5 @@
 #include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
+#include <algorithm>
 
 void forPaper_approval_2(std::string var1="h_ystar", 
 			 bool logScale=false,
@@ -18,6 +19,7 @@ void forPaper_approval_2(std::string var1="h_ystar",
   setTDRStyle();
   gStyle->SetOptStat(0);
 
+  const double LABELSIZE = 20.0;
   const int LINEWIDTH=3;
   const int NHISTOS=4;
   TH1F* h[NHISTOS];
@@ -88,19 +90,21 @@ void forPaper_approval_2(std::string var1="h_ystar",
 
   // first get the histogram files
   TFile *fdata  = TFile::Open(datafile.data());
-  TFile *fmc1   = TFile::Open(mcfile1.data());
-  TFile *fmc2   = TFile::Open(mcfile2.data());
-  TFile *fmc3   = TFile::Open(mcfile3.data());
-
   cout << "Opening " << fdata->GetName() << endl;
+
+  TFile *fmc1   = TFile::Open(mcfile1.data());
   cout << "Opening " << fmc1->GetName() << endl;
+
+  TFile *fmc2   = TFile::Open(mcfile2.data());
   cout << "Opening " << fmc2->GetName() << endl;
+
+  TFile *fmc3   = TFile::Open(mcfile3.data());
   cout << "Opening " << fmc3->GetName() << endl;
 
   h[0] = (TH1F*)(fdata->Get(datavar.data()));
-  h[1]    = (TH1F*)(fmc1->Get(var1.data()));
-  h[2]    = (TH1F*)(fmc2->Get(var2.data()));
-  h[3]    = (TH1F*)(fmc3->Get(var3.data()));
+  h[1] = (TH1F*)(fmc1->Get(var1.data()));
+  h[2] = (TH1F*)(fmc2->Get(var2.data()));
+  h[3] = (TH1F*)(fmc3->Get(var3.data()));
 
   if(var1=="h_jety")
     {
@@ -162,29 +166,14 @@ void forPaper_approval_2(std::string var1="h_ystar",
   int binLo = -1;
   int binHi = -1;
   int nbins = h[0]->GetNbinsX();
-//   if(xmin>-9999.0 && xmax>-9999.0)
-//     {
+  binLo = 1;
+  binHi = nbins;
 
-//       binLo = h[0]->FindBin(xmin);
-//       binHi = h[0]->FindBin(xmax)-1;
-
-//     }
-
-//   else
-//     {
-      binLo = 1;
-      binHi = nbins;
-//       xmin = h[0]->GetBinLowEdge(1);
-//       xmax = h[0]->GetBinLowEdge(nbins+1);
-//     }
-
-
-  float scaleFactor[NHISTOS]={1};
+  double scaleFactor[NHISTOS]={1};
 
   for(int ih=0; ih < NHISTOS; ih++){
     
-    float integral = h[ih]->Integral(binLo,binHi);
-//     scaleFactor[ih] = integral > 0? (float)h[0]->Integral(binLo,binHi)/integral: 1;
+    double integral = h[ih]->Integral(binLo,binHi);
     scaleFactor[ih] = integral > 0? 1.0/integral: 1;
     h[ih]->Sumw2();
     h[ih]->Scale(scaleFactor[ih]);
@@ -206,20 +195,20 @@ void forPaper_approval_2(std::string var1="h_ystar",
 
   } // end of loop over histograms
 
-  vector<float> maxArray;
+  vector<double> maxArray;
   maxArray.clear();
-
+  
   for(int ih=0; ih < NHISTOS; ih++){
 
     h[ih]->GetXaxis()->SetRangeUser(xmin,xmax);
     hscale[ih]->GetXaxis()->SetRangeUser(xmin,xmax);
-    float max_this  = h[ih]->GetBinError(h[ih]->GetMaximumBin()) + h[ih]->GetMaximum();
+    double max_this  = h[ih]->GetBinError(h[ih]->GetMaximumBin()) + h[ih]->GetMaximum();
     maxArray.push_back(max_this);
 
   }
 
 
-  float max = *max_element(maxArray.begin(),maxArray.end());
+  double max = *(std::max_element(maxArray.begin(),maxArray.end()));
   cout << "Max = " << max << endl;
 
   for(int ih=0; ih < NHISTOS; ih++){
@@ -231,7 +220,13 @@ void forPaper_approval_2(std::string var1="h_ystar",
       h[ih]->SetMinimum(5e-6);
   }
 
-  cout << "here" << endl;
+
+  //////////////////////////////////////////////////////////////////////////
+  /// 
+  ///   Making final figures and save the canvas in files
+  ///
+  //////////////////////////////////////////////////////////////////////////
+
   TCanvas* c1 = new TCanvas("c1","",700,1000);  
   c1->Divide(1,2,0.01,0);
   c1->cd(1);
@@ -240,25 +235,30 @@ void forPaper_approval_2(std::string var1="h_ystar",
   gPad->SetTopMargin(0.01);
   gPad->SetBottomMargin(0);
   gPad->SetRightMargin(0.04);
+  gStyle->SetStatFontSize(0.05);
 
-  
-  cout << "here1" << endl;
-//   h[0]->SetYTitle("Arbitrary Unit");
+  // pad 1 and pad 2 have different sizes, need to rescale to 
+  // make the label size the same
+  double temp1_pad = gPad->GetWh()*gPad->GetAbsHNDC();
+  cout << "pad 1 size in pixels = " << temp1_pad << endl;
+  double label1_size = LABELSIZE/temp1_pad;
+  for(int ih=0; ih < NHISTOS; ih++)
+    {
+      h[ih]->GetYaxis()->SetLabelSize(label1_size);
+      h[ih]->GetXaxis()->SetLabelSize(label1_size);
+    }
+
   h[0]->SetYTitle("1/#sigma d#sigma/dY");
-  h[0]->Draw("e1");
+  h[0]->Draw("9e1");
   for(int ih=1; ih < NHISTOS; ih++)
-    h[ih]->Draw("histsame");
-  h[0]->Draw("e1same");
-
-  cout << "here2" << endl;
+    h[ih]->Draw("9histsame");
+  h[0]->Draw("9e1same");
 
 
-  cout << "here3" << endl;
-
-  float x1NDC = 0.729812;
-  float y1NDC = 0.560219;
-  float x2NDC = 0.939633;
-  float y2NDC = 0.871885;
+  double x1NDC = 0.729812;
+  double y1NDC = 0.560219;
+  double x2NDC = 0.939633;
+  double y2NDC = 0.871885;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
@@ -296,29 +296,34 @@ void forPaper_approval_2(std::string var1="h_ystar",
   pavetex->AddText("#Delta R(l,jet)>0.5");
   pavetex->Draw();
 
+  cout << "pad 1 label size = " << h[0]->GetYaxis()->GetLabelSize() << endl;
+
+  //////////////////////////////////////////////////////////////////////  
 
   c1->cd(2);
-  gStyle->SetStatW       (0.3);
-  gStyle->SetStatH       (0.3);
-  gStyle->SetStatX       (0.879447);
-  gStyle->SetStatY       (0.939033);
-  gStyle->SetStatFontSize(0.05);
-  gStyle->SetStatBorderSize(0);
   gPad->SetRightMargin(0.04);
   gPad->SetTopMargin(0);
   gPad->SetBottomMargin(0.2);
   gPad->SetTickx();
-  gStyle->SetOptFit(1);
 
-  cout << "here4" << endl;
+  // pad 1 and pad 2 have different sizes, need to rescale to 
+  // make the label size the same
+  double temp2_pad = gPad->GetWh()*gPad->GetAbsHNDC();
+  cout << "pad 2 size in pixels = " << temp2_pad << endl;
+  double label2_size = LABELSIZE/temp2_pad;
+  for(int ih=0; ih < NHISTOS; ih++)
+    {
+      hscale[ih]->GetYaxis()->SetLabelSize(label2_size);
+      hscale[ih]->GetXaxis()->SetLabelSize(label2_size);
+    }
 
-  hscale[0]->Draw("e1");
+
+  hscale[0]->Draw("9e1");
   for(int ih=1; ih < NHISTOS-1; ih++){
-    hscale[ih]->Draw("e3same");
+    hscale[ih]->Draw("9e3same");
   }
-  hscale[0]->Draw("e1same");
+  hscale[0]->Draw("9e1same");
 
-  cout << "here5" << endl;
   TLine* l2 = new TLine(xmin,1.,xmax,1.);
   l2->SetLineColor(kOrange-1);
   l2->SetLineStyle(1);
@@ -336,18 +341,17 @@ void forPaper_approval_2(std::string var1="h_ystar",
   leg2->Draw("same");
 
 
-//   gROOT->ProcessLine(".L ~/scripts/theoryError.c");
-//   theoryError(theoryName.data());
   gROOT->ProcessLine(".L ~/scripts/theoryErrorZed.c");
   theoryErrorZed(theoryName.data());
 
-  hscale[0]->Draw("e1same");
+  hscale[0]->Draw("9e1same");
   for(int ih=1; ih < NHISTOS-1; ih++){
-    hscale[ih]->Draw("e3same");
+    hscale[ih]->Draw("9e3same");
   }
-  hscale[0]->Draw("e1same");
+  hscale[0]->Draw("9e1same");
   l2->Draw("same");
 
+  cout << "pad 2 label size = " << hscale[0]->GetYaxis()->GetLabelSize() << endl;
   
   string dirName = "forPaper";
   gSystem->mkdir(dirName.data());
