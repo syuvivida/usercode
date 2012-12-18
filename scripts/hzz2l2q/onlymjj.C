@@ -17,7 +17,7 @@ double deltaR(double eta1, double phi1, double eta2, double phi2)
   double dphi = phi1-phi2;
   while (dphi > TMath::Pi()) dphi -= 2*TMath::Pi();
   while (dphi <= -TMath::Pi()) dphi += 2*TMath::Pi();
-  double dR = sqrt(deta*deta+dphi*dphi);
+  double dR = sqrt(deta*deta + dphi*dphi);
   return dR;
 
 }
@@ -30,6 +30,10 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
   //                    Template histograms
   //================================================================
 
+  TH1D* h_ratio_template = new TH1D("h_ratio_template","",50,0.5,1.5);
+  h_ratio_template->Sumw2();
+  h_ratio_template->SetYTitle(Form("Events per %.2lf",
+				   h_ratio_template->GetBinWidth(1)));
 
   TH1D* h_mh_template = new TH1D("h_mh_template","",300,0.0,1500);
   h_mh_template->Sumw2();
@@ -61,10 +65,44 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
   h_dR_template->SetYTitle(Form("Events per %.2f",
 				h_dR_template->GetBinWidth(1)));
 
+  // separated in dR
+  const double dRArray[]={0.5,1.0,1.5,2.0,2.5,3.0,3.5};
+  const int NBINS = sizeof(dRArray)/sizeof(dRArray[0])-1;
+  TH1D* h_dR = new TH1D("h_dR","",NBINS,dRArray);
+
 
   //================================================================
   //                    status=3 histograms
   //================================================================
+  
+  TH1D* h_rm_gen[NBINS];
+  TH1D* h_rm_rec[NBINS];
+  TH1D* h_rpt_gen[NBINS][2];
+  TH1D* h_rpt_rec[NBINS][2];
+
+  for(int ibin=0; ibin < NBINS; ibin++){
+    
+    std::string dRstring = Form("when %.1f < #DeltaR_{qq} < %.1f",
+				dRArray[ibin],dRArray[ibin+1]);
+    h_rm_gen[ibin] = (TH1D*)h_ratio_template->Clone(Form("h_rm_gen%02i",ibin));
+    h_rm_gen[ibin]->SetXTitle(Form("M_{jj}^{GEN}/M_{qq} %s",dRstring.data()));
+
+    h_rm_rec[ibin] = (TH1D*)h_ratio_template->Clone(Form("h_rm_rec%02i",ibin));
+    h_rm_rec[ibin]->SetXTitle(Form("M_{jj}^{REC}/M_{qq} %s",dRstring.data()));
+
+    for(int ip=0; ip<2; ip++){
+      
+      h_rpt_gen[ibin][ip] = (TH1D*)h_ratio_template->Clone(Form("h_rpt_gen%02i_%d",ibin,ip));
+      h_rpt_gen[ibin][ip]->SetXTitle(Form("p_{T}(genJet_{%d})/p_{T}(q_{%d}) %s",ip+1,ip+1,dRstring.data()));
+
+      h_rpt_rec[ibin][ip] = (TH1D*)h_ratio_template->Clone(Form("h_rpt_rec%02i_%d",ibin,ip));
+      h_rpt_rec[ibin][ip]->SetXTitle(Form("p_{T}(PFJet_{%d})/p_{T}(q_{%d}) %s",ip+1,ip+1,dRstring.data()));
+
+    }
+
+  }
+
+
 
 
   TH1D* h_mh_parton_mother = 
@@ -148,10 +186,10 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
    
     // ratio
     pf_dR_Rpt_gen[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_Rpt_gen%d",ip));
-    pf_dR_Rpt_gen[ip]->SetYTitle(Form("p_{T}(genJet)/p_{T}(q_{%d}) [GeV]",ip+1));
+    pf_dR_Rpt_gen[ip]->SetYTitle(Form("p_{T}(genJet_{%d})/p_{T}(q_{%d}) [GeV]",ip+1,ip+1));
   
     pf_dR_Rpt_rec[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_Rpt_rec%d",ip));
-    pf_dR_Rpt_rec[ip]->SetYTitle(Form("p_{T}(PFJet)/p_{T}(q_{%d}) [GeV]",ip+1));
+    pf_dR_Rpt_rec[ip]->SetYTitle(Form("p_{T}(PFJet_{%d})/p_{T}(q_{%d}) [GeV]",ip+1,ip+1));
     pf_dR_jetArea_rec[ip] = (TProfile*)pf_dR_template->Clone(Form("pf_dR_jetArea_rec%d",ip));
     pf_dR_jetArea_rec[ip] -> SetYTitle(Form("jet area for PFJet %d",ip+1));
 
@@ -172,7 +210,7 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
 
-//     if(jentry > 50)break;
+    //    if(jentry > 1000)break;
     nPass[0]++;
     //================================================================
     // STATUS=3 LEVEL
@@ -207,6 +245,16 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 	int status = genParSt_->at(igen);
 	int PID    = genParId_->at(igen);
 	int momPID = genMomParId_->at(igen);
+
+	// higgs
+	if(status==3 && PID==25)
+	  {
+	    genHiggsMass = genParM_->at(igen);
+	    h_mh_parton_mother->Fill(genHiggsMass);
+	    if(reweightSignal)
+	      signal_weight = signalWeightMethod.weight(genHiggsMass,0);
+	    h_mh_parton_mother_weighted->Fill(genHiggsMass,signal_weight);
+	  }
 
 	// first status=3 lepton from Z
 	if(status==3 && lep1.E() < 1e-6 && (abs(PID) == 11 ||
@@ -319,22 +367,6 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
     }
     if(LEPTYPE==-1)continue;
 
-    for(unsigned int igen=0; igen < genParId_->size(); igen++)
-      {	
-	int status = genParSt_->at(igen);
-	int PID    = genParId_->at(igen);
-	// higgs
-	if(status==3 && PID==25)
-	  {
-	    genHiggsMass = genParM_->at(igen);
-	    h_mh_parton_mother->Fill(genHiggsMass);
-	    if(reweightSignal)
-	      signal_weight = signalWeightMethod.weight(genHiggsMass,0);
-	    h_mh_parton_mother_weighted->Fill(genHiggsMass,signal_weight);
-	    break;
-	  }
-      }
-
     if(lep1Index<0 || lep2Index<0)continue;
     if(lep1PostIndex<0 || lep2PostIndex<0)continue;
     nPass[1]++;
@@ -349,6 +381,13 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
     double mZll_parton = (lep1+lep2).M();
     double mZjj_parton = (q1+q2).M();
     double dR_parton = q1.DeltaR(q2);
+
+    int dRJJ_index = h_dR->FindBin(dR_parton)-1;
+    if(dRJJ_index < 0)dRJJ_index = 0;
+    if(dRJJ_index >= NBINS)dRJJ_index = NBINS-1; 
+    if(DEBUG==1)
+      cout << "dR_parton = " << dR_parton << "\t dRJJ_index = " << 
+	dRJJ_index << endl;
 
     h_mh_parton_daughter->Fill(mH_parton, signal_weight);
     h_mll_parton_daughter->Fill(mZll_parton, signal_weight);
@@ -386,6 +425,7 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
     double lep2posteta = lep2_post.Eta();
     double lep2postphi = lep2_post.Phi();
 
+    double mZll_particle = (lep1_post + lep2_post).M();
     
     //================================================================
     //    Starting from quarks
@@ -414,7 +454,7 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 	
 	nGoodJets++;
 
-	if(matchGenToParton(q1Index,ijet) && jet1.E()<1e-6)
+	if(matchGenJetToParton(q1Index,ijet) && jet1.E()<1e-6)
 	  {
 	    jet1.SetPtEtaPhiE(
 			      genJetPt_->at(ijet),
@@ -424,7 +464,7 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 	    jet1Index = ijet;
 	  }
 
-	if(matchGenToParton(q2Index,ijet) && jet2.E()<1e-6)
+	if(matchGenJetToParton(q2Index,ijet) && jet2.E()<1e-6)
 	  {
 
 	    jet2.SetPtEtaPhiE(
@@ -446,6 +486,8 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 	cout << "q1 pt = " << q1.Pt() << "\t q2 pt = " << q2.Pt() << endl;
       }
       
+    
+    double mZjj_particle = -999;
     if(jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index){
       nPass[3]++;
       h_mh_parton_event->Fill(mH_parton, signal_weight);
@@ -453,30 +495,39 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
       h_mjj_parton_event->Fill(mZjj_parton, signal_weight);
 
       double mH_particle = (jet1+jet2+lep1_post+lep2_post).M();
-      double mZll_particle = (lep1_post + lep2_post).M();
-      double mZjj_particle = (jet1+jet2).M();
+      mZjj_particle = (jet1+jet2).M();
 
       h_mh_stable_event->Fill(mH_particle, signal_weight);
       h_mll_stable_event->Fill(mZll_particle, signal_weight);
       h_mjj_stable_event->Fill(mZjj_particle, signal_weight);
 
-      if(mZll_particle > MIN_MZ_LL       && mZll_particle < MAX_MZ_LL && 
-	 mZjj_particle > LOOSE_MIN_MZ_JJ && mZjj_particle < LOOSE_MAX_MZ_JJ)
-	{
-	  pf_dR_Rm_gen->Fill(dR_parton, mZjj_particle/mZjj_parton, signal_weight);
-	  pf_dR_dm_gen->Fill(dR_parton, mZjj_particle-mZjj_parton, signal_weight);
+      double rm = mZjj_particle/mZjj_parton;
+      double dm = mZjj_particle-mZjj_parton; 
+      double rpt[2]={jet1.Pt()/q1.Pt(),
+		     jet2.Pt()/q2.Pt()};
+
+      if(mZll_particle > MIN_MZ_LL       && mZll_particle < MAX_MZ_LL 
+	 && mZjj_particle > LOOSE_MIN_MZ_JJ && mZjj_particle < LOOSE_MAX_MZ_JJ
+	 )
+       	{
+	  h_rm_gen[dRJJ_index]->Fill(rm);
+	  for(int ip=0;ip<2;ip++)
+	    h_rpt_gen[dRJJ_index][ip]->Fill(rpt[ip]);
+
+	  pf_dR_Rm_gen->Fill(dR_parton, rm, signal_weight);
+	  pf_dR_dm_gen->Fill(dR_parton, dm, signal_weight);
 		
-	  pf_dR_Rpt_gen[0]->Fill(dR_parton, jet1.Pt()/q1.Pt(), signal_weight);
-	  pf_dR_Rpt_gen[1]->Fill(dR_parton, jet2.Pt()/q2.Pt(), signal_weight);
+	  for(int ip=0;ip<2;ip++)
+	    pf_dR_Rpt_gen[ip]->Fill(dR_parton, rpt[ip], signal_weight);
 	}
 
-    }
+    } 
       
     // ------------------------------------------------
     // Reconstruction level
     //-------------------------------------------------    
 
-    for(int ih=0; ih<higgsM->size(); ih++){
+    for(unsigned int ih=0; ih<higgsM->size(); ih++){
 
       bool matchedToQ1=false;
       bool matchedToQ2=false;
@@ -485,7 +536,7 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
       
       int pfJetIndex[2]={-1,-1};
 
-      for(int ijet=0; ijet<jetPt->size(); ijet++){
+      for(unsigned int ijet=0; ijet<jetPt->size(); ijet++){
 
 	if(jetHiggsIndex_->at(ijet)!=ih)continue;
 	if(jetPt->at(ijet)<30.0)continue;
@@ -495,8 +546,8 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 	if(jet_index<0)continue;
 	if(jet_index>1)continue;
 	
-	matchedToQ1=matchGenToPFJet(q1Index, ijet);
-	matchedToQ2=matchGenToPFJet(q2Index, ijet);
+	matchedToQ1=matchPFJetToParton(q1Index, ijet);
+	matchedToQ2=matchPFJetToParton(q2Index, ijet);
 
 
 	if(matchedToQ1 && !matchedToQ2)
@@ -525,27 +576,42 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 	h_mh_rec_event->Fill(mH_rec, rec_weight);
 	h_mll_rec_event->Fill(mll_rec, rec_weight);
 	h_mjj_rec_event->Fill(mjj_rec, rec_weight);
-
-	if(mll_rec > MIN_MZ_LL  && mll_rec < MAX_MZ_LL && 
-	   mjj_rec > LOOSE_MIN_MZ_JJ && mjj_rec < LOOSE_MAX_MZ_JJ && 
+	
+	if(
+	   mll_rec > MIN_MZ_LL  && mll_rec < MAX_MZ_LL  
+	   && mjj_rec > LOOSE_MIN_MZ_JJ && mjj_rec < LOOSE_MAX_MZ_JJ  
+	   && mZll_particle > MIN_MZ_LL && mZll_particle < MAX_MZ_LL  
+	   &&  mZjj_particle > LOOSE_MIN_MZ_JJ && mZjj_particle < LOOSE_MAX_MZ_JJ&&
 	   jet1Index>=0 && jet2Index>=0 && jet1Index!=jet2Index
 	   )
 	  {
-	    pf_dR_Rm_rec->Fill(dR_parton, mjj_rec/mZjj_parton, rec_weight);
-	    pf_dR_dm_rec->Fill(dR_parton, mjj_rec-mZjj_parton, rec_weight);
+
+	    double rm = mjj_rec/mZjj_parton;
+	    h_rm_rec[dRJJ_index]->Fill(rm);
+	    double dm = mjj_rec-mZjj_parton;
+	
+	    double rpt[2];
+	    for(int ip=0; ip<2; ip++)
+	      {
+		rpt[ip]= jetRecPt[ip]/QuarkPt[ip];
+		h_rpt_rec[dRJJ_index][ip]->Fill(rpt[ip]);
+	      }
+
+	    pf_dR_Rm_rec->Fill(dR_parton, rm, rec_weight);
+	    pf_dR_dm_rec->Fill(dR_parton, dm, rec_weight);
 	    for(int ieiko=0; ieiko<2; ieiko++)
 	      {
 		if(DEBUG==1)cout << "jetRecPt[" << ieiko << "] = " << 
 		  jetRecPt[ieiko] << "\t QuarkPt[" << ieiko << "] = " << 
 		  QuarkPt[ieiko] << endl;
-		pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, jetRecPt[ieiko]/QuarkPt[ieiko],rec_weight);
+		pf_dR_Rpt_rec[ieiko]->Fill(dR_parton, rpt[ieiko],rec_weight);
 		pf_dR_jetArea_rec[ieiko]->Fill(dR_parton,
 					       jetArea->at(pfJetIndex[ieiko]),
 					       rec_weight);
 
 	      }
-	  }
-
+	  } // after pass dilepton mass cuts
+	    
       }
 
     } // end of loop over higgs candidates
@@ -582,7 +648,21 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
     pf_dR_Rpt_gen[ip]->Write();
     pf_dR_Rpt_rec[ip]->Write();    
     pf_dR_jetArea_rec[ip]->Write();
+
   }
+
+
+  for(int ib=0; ib<NBINS; ib++){      
+
+    h_rm_gen[ib]->Write();
+    h_rm_rec[ib]->Write();
+
+    for(int ip=0; ip<2; ip++){
+      h_rpt_gen[ib][ip]->Write();
+      h_rpt_rec[ib][ip]->Write();
+    }
+  }
+
 
     
   h_mh_parton_event->Write();
@@ -603,7 +683,7 @@ void onlymjj::Loop(int DEBUG, bool reweightSignal)
 }
 
 
-Bool_t onlymjj::matchGenToParton(Int_t igen, Int_t ijet){
+Bool_t onlymjj::matchGenJetToParton(Int_t igen, Int_t ijet){
 
   Bool_t matched = false;
   double dR = deltaR(genParEta_->at(igen), genParPhi_->at(igen),
@@ -622,7 +702,7 @@ Bool_t onlymjj::matchGenToParton(Int_t igen, Int_t ijet){
 
 }
 
-Bool_t onlymjj::matchGenToPFJet(Int_t igen, Int_t ijet){
+Bool_t onlymjj::matchPFJetToParton(Int_t igen, Int_t ijet){
 
   Bool_t matched = false;
   double dR = deltaR(genParEta_->at(igen), genParPhi_->at(igen),

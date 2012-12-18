@@ -410,8 +410,8 @@ class onlymjj {
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
 
-  virtual Bool_t   matchGenToParton(Int_t igen, Int_t ijet);
-  virtual Bool_t   matchGenToPFJet(Int_t igen, Int_t ijet);
+  virtual Bool_t   matchGenJetToParton(Int_t igen, Int_t ijet);
+  virtual Bool_t   matchPFJetToParton(Int_t igen, Int_t ijet);
   int     _higgsMass;
 
 };
@@ -642,6 +642,7 @@ void onlymjj::Init(TTree *tree)
   fChain->SetBranchAddress("genJetPt_", &genJetPt_, &b_genJetPt_);
   fChain->SetBranchAddress("genJetEta_", &genJetEta_, &b_genJetEta_);
   fChain->SetBranchAddress("genJetPhi_", &genJetPhi_, &b_genJetPhi_);
+  /*
   fChain->SetBranchAddress("NumMu", &NumMu, &b_ElectronNumMu);
   fChain->SetBranchAddress("patMuonPt_", &patMuonPt_, &b_patMuonPt_);
   fChain->SetBranchAddress("patMuonEta_", &patMuonEta_, &b_patMuonEta_);
@@ -703,6 +704,7 @@ void onlymjj::Init(TTree *tree)
   fChain->SetBranchAddress("patJetPfAk05CharHadEFr_", &patJetPfAk05CharHadEFr_, &b_patJetPfAk05CharHadEFr_);
   fChain->SetBranchAddress("patJetPfAk05NeutHadEFr_", &patJetPfAk05NeutHadEFr_, &b_patJetPfAk05NeutHadEFr_);
   fChain->SetBranchAddress("patJetPfAk05CharEmEFr_", &patJetPfAk05CharEmEFr_, &b_patJetPfAk05CharEmEFr_);
+  */
   fChain->SetBranchAddress("eleRho", &eleRho, &b_eleRho);
   fChain->SetBranchAddress("muoRho", &muoRho, &b_muoRho);
   fChain->SetBranchAddress("metSig", &metSig, &b_metSig);
