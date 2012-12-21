@@ -18,6 +18,8 @@ process.load('Configuration.StandardSequences.SimIdeal_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
@@ -25,38 +27,35 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("LHESource",firstEvent = cms.untracked.uint32(0),skipEvents = cms.untracked.uint32(0),
     fileNames = cms.untracked.vstring(
-#        'file:/home/syu/madgraph/CMSSW_5_3_2_patch4/src/runJob/1_unweighted_events.lhe'
-#	'file:/home/syu/madgraph/MG5v1.1/Zjet/TEST/Events/zjets_unweighted_events.lhe'
-	'file:/home/syu/madgraph/MG5v1.1/Zjet_test/TEST/Events/1_unweighted_events.lhe'
-        )
+	'file:1_unweighted_events.lhe',
+	'file:2_unweighted_events.lhe'
+	)
 )
-
 process.options = cms.untracked.PSet(
-
-)
+	)
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.381.2.2 $'),
-    annotation = cms.untracked.string('Configuration/GenProduction/python/EightTeV/file:/tmp/ymtzeng/ttbar.root'),
-    name = cms.untracked.string('PyReleaseValidation')
-)
+	version = cms.untracked.string('$Revision: 1.381.2.2 $'),
+	annotation = cms.untracked.string('Configuration/GenProduction/python/EightTeV/file:/tmp/ymtzeng/ttbar.root'),
+	name = cms.untracked.string('PyReleaseValidation')
+	)
 
 # Output definition
 
 process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
-    splitLevel = cms.untracked.int32(0),
-    eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    outputCommands = process.RAWSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('zjettest.root'),
-    dataset = cms.untracked.PSet(
-        filterName = cms.untracked.string(''),
-        dataTier = cms.untracked.string('GEN-SIM')
-    ),
-    SelectEvents = cms.untracked.PSet(
+					splitLevel = cms.untracked.int32(0),
+					eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
+					outputCommands = process.RAWSIMEventContent.outputCommands,
+					fileName = cms.untracked.string('sim.root'),
+					dataset = cms.untracked.PSet(
+	filterName = cms.untracked.string(''),
+	dataTier = cms.untracked.string('GEN-SIM')
+	),
+					SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring('generation_step')
-    )
-)
+	)
+					)
 
 # Additional output definition
 
@@ -68,12 +67,12 @@ process.generator = cms.EDFilter("Pythia6HadronizerFilter",
         MEMAIN_showerkt = cms.double(0),
         MEMAIN_nqmatch = cms.int32(5),
         MEMAIN_minjets = cms.int32(0),
+        MEMAIN_maxjets = cms.int32(3),
         MEMAIN_qcut = cms.double(20.0),
         MEMAIN_excres = cms.string(''),
         MEMAIN_etaclmax = cms.double(5.0),
         outTree_flag = cms.int32(0),
         scheme = cms.string('Madgraph'),
-        MEMAIN_maxjets = cms.int32(2),
         mode = cms.string('auto')
     ),
     pythiaPylistVerbosity = cms.untracked.int32(0),
@@ -97,17 +96,17 @@ process.generator = cms.EDFilter("Pythia6HadronizerFilter",
 	'MSTP(95)=6     ! CR (color reconnection parameters)',
 	'PARP(77)=1.016 ! CR',
 	'PARP(78)=0.538 ! CR',
-	
+
 	'PARP(80)=0.1   ! Prob. colored parton from BBR',
-	
+
 	'PARP(83)=0.356 ! Multiple interactions: matter distribution parameter', 
 	'PARP(84)=0.651 ! Multiple interactions: matter distribution parameter', 
-	
+
 	'PARP(62)=1.025 ! ISR cutoff', 
-	
+
 	'MSTP(91)=1     ! Gaussian primordial kT', 
 	'PARP(93)=10.0  ! primordial kT-max', 
-	
+
 	'MSTP(81)=21    ! multiple parton interactions 1 is Pythia default', 
 	'MSTP(82)=4     ! Defines the multi-parton model', 
 	),
