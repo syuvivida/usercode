@@ -27,8 +27,16 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("LHESource",firstEvent = cms.untracked.uint32(0),skipEvents = cms.untracked.uint32(0),
     fileNames = cms.untracked.vstring(
-	'file:1_unweighted_events.lhe',
-	'file:2_unweighted_events.lhe'
+	'file:/data4/syu/madgraph_lhe/11_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/12_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/13_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/14_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/15_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/16_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/17_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/18_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/19_unweighted_events.lhe',
+	'file:/data4/syu/madgraph_lhe/20_unweighted_events.lhe'
 	)
 )
 process.options = cms.untracked.PSet(
@@ -67,7 +75,7 @@ process.generator = cms.EDFilter("Pythia6HadronizerFilter",
         MEMAIN_showerkt = cms.double(0),
         MEMAIN_nqmatch = cms.int32(5),
         MEMAIN_minjets = cms.int32(0),
-        MEMAIN_maxjets = cms.int32(3),
+        MEMAIN_maxjets = cms.int32(2),
         MEMAIN_qcut = cms.double(20.0),
         MEMAIN_excres = cms.string(''),
         MEMAIN_etaclmax = cms.double(5.0),
@@ -153,7 +161,7 @@ process.tree = cms.EDAnalyzer(
 
 
 process.TFileService = cms.Service("TFileService", fileName =
-				   cms.string('zJettest.root'))
+				   cms.string('zJettest_test.root'))
 
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 
