@@ -407,13 +407,14 @@ class onlymjj {
   virtual Long64_t LoadTree(Long64_t entry);
   virtual void     Init(TTree *tree);
   virtual void     Loop(int DEBUG=0, 
-			bool reweighSignal=true,
-			bool reweighPU=true);
+			bool reweighSignal=false,
+			bool reweighPU=false);
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
 
   virtual Bool_t   matchGenJetToParton(Int_t igen, Int_t ijet);
   virtual Bool_t   matchPFJetToParton(Int_t igen, Int_t ijet);
+  virtual Bool_t   matchPatJetToParton(Int_t igen, Int_t ijet);
   int     _higgsMass;
 
 };
@@ -438,6 +439,9 @@ onlymjj::onlymjj(int mass, TTree *tree) : fChain(0)
 
   Init(tree);
   _higgsMass = mass;
+  cout << endl << "File " << filename << " has " << tree->GetEntriesFast() << 
+    " entries" << endl;
+
 }
 
 onlymjj::~onlymjj()
@@ -694,6 +698,7 @@ void onlymjj::Init(TTree *tree)
   fChain->SetBranchAddress("patElecInEndcap_", &patElecInEndcap_, &b_patElecInEndcap_);
   fChain->SetBranchAddress("patElecHasConv_", &patElecHasConv_, &b_patElecHasConv_);
   fChain->SetBranchAddress("patElecPassID_", &patElecPassID_, &b_patElecPassID_);
+  */
   fChain->SetBranchAddress("patJetPfAk05Pt_", &patJetPfAk05Pt_, &b_patJetPfAk05Pt_);
   fChain->SetBranchAddress("patJetPfAk05Eta_", &patJetPfAk05Eta_, &b_patJetPfAk05Eta_);
   fChain->SetBranchAddress("patJetPfAk05Phi_", &patJetPfAk05Phi_, &b_patJetPfAk05Phi_);
@@ -701,6 +706,7 @@ void onlymjj::Init(TTree *tree)
   fChain->SetBranchAddress("patJetPfAk05En_", &patJetPfAk05En_, &b_patJetPfAk05En_);
   fChain->SetBranchAddress("patJetPfAk05Beta_", &patJetPfAk05Beta_, &b_patJetPfAk05Beta_);
   fChain->SetBranchAddress("patJetPfAk05PassID_", &patJetPfAk05PassID_, &b_patJetPfAk05PassID_);
+  /*
   fChain->SetBranchAddress("patJetPfAk05CharMulti_", &patJetPfAk05CharMulti_, &b_patJetPfAk05CharMulti_);
   fChain->SetBranchAddress("patJetPfAk05NeutEmEFr_", &patJetPfAk05NeutEmEFr_, &b_patJetPfAk05NeutEmEFr_);
   fChain->SetBranchAddress("patJetPfAk05CharHadEFr_", &patJetPfAk05CharHadEFr_, &b_patJetPfAk05CharHadEFr_);
