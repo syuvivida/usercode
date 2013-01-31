@@ -1,8 +1,9 @@
 #!/bin/sh
 
 if [ -z $7 ] ; then
-    echo "Usage: $0 [JOB] [PROC] [PART] [STRING] [NITER] [PDFGROUP] [PDFSET]"
+    echo "Usage: $0 [JOB] [PROC] [PART] [STRING] [NITER] [PDFGROUP] [PDFSET] [CME]"
     echo "PART: lord, real, virt, tota"
+    echo "CME: center of mass energy in GeV"
     echo "If PDFSET is -1, will do PDF error evalulation."
     exit 1
 fi
@@ -23,17 +24,19 @@ SCALE='sqrt(M^2+pt34^2)'
 NITER=$5
 PDFGROUP=$6
 PDFSET=$7
-M34MIN=70
-M34MAX=110
+CME=$8
+M34MIN=71
+M34MAX=111
 INCLUSIVE=true
 RJETLEP=0.5
 ETALEP=2.4
 
-FILENAME=mcfm_${PROC}_${PART}_${PDFGROUP}_${PDFSET}_${STRING}${JOB}.DAT
+FILENAME=mcfm_sqrts${CME}_${PROC}_${PART}_${PDFGROUP}_${PDFSET}_${STRING}${JOB}.DAT
 
 echo "JOB index " $JOB
 echo "SEED = " $SEED
-echo Will do: $PROC $PART $STRING $SCALE $NITER $PDFGROUP $PDFSET 
+echo Will do: $PROC $PART $STRING $SCALE $NITER $PDFGROUP $PDFSET $CME 
+echo "center of mass energy = " $CME " GeV"
 echo " dR(lep,jet) > " $RJETLEP
 echo $M34MIN" < M(ll) <"$M34MAX" GeV/c^2"
 echo " |eta(lep)| < " $ETALEP
@@ -57,10 +60,10 @@ cat > ${FILENAME} << EOF
 ${PROC}	        [nproc]
 '${PART}'  	[part 'lord','real' or 'virt','tota']
 '${STRING}${JOB}'            ['runstring']
-7000d0		[sqrts in GeV]
+${CME}d0	[sqrts in GeV]
 +1		[ih1 =1 for proton and -1 for antiproton]
 +1		[ih2 =1 for proton and -1 for antiproton]
-120d0		[hmass]
+125d0		[hmass]
 1.0d0		[scale:QCD scale choice]
 1.0d0		[facscale:QCD fac_scale choice]
 '${SCALE}'      [dynamicscale, of the four momentum sum of outgoing parton]
