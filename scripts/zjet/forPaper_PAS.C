@@ -50,7 +50,7 @@ void forPaper_approval_2(std::string var1="h_ystar",
   if(var1=="h_ystar")
     {
       var3  = "id4";
-      xtitle = "Y_{dif}";
+      xtitle = "Y_{dif} = |Y_{Z}-Y_{jet}|/2";
       output = "DifYAll";
       theoryName = "Ydif";
       ymax = 1.45;
@@ -60,7 +60,7 @@ void forPaper_approval_2(std::string var1="h_ystar",
   else if(var1=="h_yB")
     {
       var3 = "id3";
-      xtitle = "Y_{sum}";
+      xtitle = "Y_{sum} = |Y_{Z}+Y_{jet}|/2";
       output = "SumYAll";
       theoryName = "Ysum";
       ymax = 1.45;
