@@ -258,8 +258,8 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
   legend1->SetFillStyle(0);
   legend1->SetTextSize(0.05);
   legend1->SetBorderSize(0);
-  legend1->AddEntry(TGa,"MCFM Scale uncertainty","f");
-  legend1->AddEntry(TGb,"MCFM PDF uncertainty","f");
+  legend1->AddEntry(TGa,"MCFM uncertainty from QCD scale","f");
+  legend1->AddEntry(TGb,"MCFM uncertainty from PDF","f");
   //legend1->AddEntry(TGc,"Correlated","f");
   legend1->Draw("same");
     

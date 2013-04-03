@@ -1,15 +1,15 @@
-#include "setTDRStyle.C"
+#include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
 #include <algorithm>
 
 void forPaper_approval(std::string var1="h_ystar", 
 			 bool logScale=false,
-			 std::string datafile="goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
-			 std::string mcfile1="bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
-			 std::string mcfile2="bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-			 std::string mcfile3="Z_1jet_tota_cteq66_1___1___ex_m34.root",
+			 std::string datafile="darko_root/goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
+			 std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
+			 std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
+			 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
 			 std::string var2="", 
-			 std::string headertitle="Z#rightarrow ll + 1 jet",
-			 std::string dataName="Data",
+			 std::string headertitle="Z + 1 jet",
+			 std::string dataName="CMS Data",
 			 std::string mcName1="Sherpa",
 			 std::string mcName2="Madgraph",
 			 std::string mcName3="MCFM"
@@ -75,7 +75,7 @@ void forPaper_approval(std::string var1="h_ystar",
       var3 = "id1";
       xtitle = "|Y_{jet}|";
       output = "YJetAll";
-      datafile = "goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
+      datafile = "darko_root/goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
       theoryName = "Yjet";
       xmax = 2.3999;
       indexName = "(b)";
@@ -218,7 +218,7 @@ void forPaper_approval(std::string var1="h_ystar",
 
   for(int ih=0; ih < NHISTOS; ih++){
 
-    h[ih]->SetMaximum(1.1*max);
+    h[ih]->SetMaximum(1.5*max);
     if(!logScale)
       h[ih]->SetMinimum(-0.015);
     else
@@ -260,10 +260,10 @@ void forPaper_approval(std::string var1="h_ystar",
   h[0]->Draw("9e1same");
 
 
-  double x1NDC = 0.709812;
-  double y1NDC = 0.560219;
-  double x2NDC = 0.919633;
-  double y2NDC = 0.871885;
+  double x1NDC = 0.647708;
+  double y1NDC = 0.512271;
+  double x2NDC = 0.857529;
+  double y2NDC = 0.823937;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
@@ -275,16 +275,16 @@ void forPaper_approval(std::string var1="h_ystar",
   leg->AddEntry(h[0], dataName.data());
   leg->AddEntry(h[1], mcName1.data(),"l");
   leg->AddEntry(h[2], mcName2.data(),"l");
-  leg->AddEntry(h[3], mcName3.data(),"l");
+  leg->AddEntry(h[3], Form("%s (NLO)",mcName3.data()),"l");
   leg->Draw("same");
 
-  TLatex *lar = new TLatex(0.4, 0.91, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
+  TLatex *lar = new TLatex(0.35, 0.89, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
   lar->SetNDC(kTRUE); 
   lar->SetTextSize(0.06);
   lar->Draw();
 
 
-  TLatex *larIndex = new TLatex(0.175, 0.72, indexName.data());
+  TLatex *larIndex = new TLatex(0.20, 0.89, indexName.data());
   larIndex->SetNDC(kTRUE);
   larIndex->SetTextSize(0.06);
   larIndex->Draw();
@@ -347,12 +347,12 @@ void forPaper_approval(std::string var1="h_ystar",
   leg2->SetFillStyle(0);
   leg2->SetTextSize(0.05);
   leg2->SetBorderSize(0);
-  leg2->AddEntry(hscale[1], "Sherpa stat. uncertainty","f");
-  leg2->AddEntry(hscale[2], "Madgraph stat. uncertainty","f");
+  leg2->AddEntry(hscale[1], "Stat. uncertainty on Sherpa","f");
+  leg2->AddEntry(hscale[2], "Stat. uncertainty on Madgraph","f");
   leg2->Draw("same");
 
 
-  gROOT->ProcessLine(".L theoryErrorZed.c");
+  gROOT->ProcessLine(".L /afs/cern.ch/user/s/syu/scripts/theoryErrorZed.c");
   theoryErrorZed(theoryName.data());
 
   hscale[0]->Draw("9e1same");
