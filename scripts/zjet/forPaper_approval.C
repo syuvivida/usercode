@@ -1,12 +1,12 @@
-#include "/afs/cern.ch/user/s/syu/scripts/setTDRStyle.C"
+#include "setTDRStyle.C"
 #include <algorithm>
 
 void forPaper_approval(std::string var1="h_ystar", 
 			 bool logScale=false,
-			 std::string datafile="darko_root/goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
-			 std::string mcfile1="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
-			 std::string mcfile2="darko_root/bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-			 std::string mcfile3="unified_angular_distributions/rebinnings/zpt40/Z_1jet_tota_cteq66_1___1___ex_m34.root",
+			 std::string datafile="goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
+			 std::string mcfile1="bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
+			 std::string mcfile2="bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
+			 std::string mcfile3="Z_1jet_tota_cteq66_1___1___ex_m34.root",
 			 std::string var2="", 
 			 std::string headertitle="Z#rightarrow ll + 1 jet",
 			 std::string dataName="Data",
@@ -19,7 +19,7 @@ void forPaper_approval(std::string var1="h_ystar",
   setTDRStyle();
   gStyle->SetOptStat(0);
 
-  const double LABELSIZE = 20.0;
+  const double LABELSIZE = 25.0;
   const int LINEWIDTH=3;
   const int NHISTOS=4;
   TH1F* h[NHISTOS];
@@ -32,6 +32,7 @@ void forPaper_approval(std::string var1="h_ystar",
   std::string datavar;
   std::string var3;
   std::string theoryName;
+  std::string indexName;
 
   std::string remword3  ="h_";
   std::string corrName = var1;
@@ -56,6 +57,7 @@ void forPaper_approval(std::string var1="h_ystar",
       ymax = 1.45;
       ymin = 0.55; 
       xmax = 1.7999;
+      indexName = "(d)";
     }
   else if(var1=="h_yB")
     {
@@ -66,16 +68,17 @@ void forPaper_approval(std::string var1="h_ystar",
       ymax = 1.45;
       ymin = 0.55;
       xmax = 2.1999;
+      indexName = "(c)";
     }
   else if(var1=="h_jety")
     {
       var3 = "id1";
       xtitle = "|Y_{jet}|";
       output = "YJetAll";
-      datafile = "darko_root/goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
+      datafile = "goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
       theoryName = "Yjet";
       xmax = 2.3999;
-
+      indexName = "(b)";
     }
   else if(var1=="h_zy")
     {
@@ -84,6 +87,7 @@ void forPaper_approval(std::string var1="h_ystar",
       output = "YZedAll";
       theoryName = "Yzed";
       xmax = 2.1999;
+      indexName = "(a)";
     }
 
   
@@ -120,7 +124,8 @@ void forPaper_approval(std::string var1="h_ystar",
   int MARKERSTYLE[NHISTOS]={8,24,21,29};
   int MARKERSIZE[NHISTOS]={1,0,0,0};
   int LINESTYLE[NHISTOS]={1,1,2,6};
-  int FILLSTYLE[NHISTOS]={1,3345,3436,1};
+  //  int FILLSTYLE[NHISTOS]={1,3345,3436,1};
+  int FILLSTYLE[NHISTOS]={1,3345,3354,1};
 
   for(int i=0; i < NHISTOS; i++){
 
@@ -255,16 +260,16 @@ void forPaper_approval(std::string var1="h_ystar",
   h[0]->Draw("9e1same");
 
 
-  double x1NDC = 0.729812;
+  double x1NDC = 0.709812;
   double y1NDC = 0.560219;
-  double x2NDC = 0.939633;
+  double x2NDC = 0.919633;
   double y2NDC = 0.871885;
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
-  leg->SetTextSize(0.045);
+  leg->SetTextSize(0.055);
   leg->SetBorderSize(0);
   leg->SetHeader(headertitle.data());
   leg->AddEntry(h[0], dataName.data());
@@ -273,29 +278,35 @@ void forPaper_approval(std::string var1="h_ystar",
   leg->AddEntry(h[3], mcName3.data(),"l");
   leg->Draw("same");
 
-  TLatex *lar = new TLatex(0.51, 0.91, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
-  lar->SetNDC(kTRUE);
-  lar->SetTextSize(0.05);
+  TLatex *lar = new TLatex(0.4, 0.91, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
+  lar->SetNDC(kTRUE); 
+  lar->SetTextSize(0.06);
   lar->Draw();
 
+
+  TLatex *larIndex = new TLatex(0.175, 0.72, indexName.data());
+  larIndex->SetNDC(kTRUE);
+  larIndex->SetTextSize(0.06);
+  larIndex->Draw();
 
   TPaveText *pavetex = new TPaveText(0.17029, 
 				     0.0495665, 
 				     0.478939, 
-				     0.483501,"NDCBR");
+				     0.5,"NDCBR");
   pavetex->SetBorderSize(0);
   pavetex->SetFillColor(0);
   pavetex->SetFillStyle(0);
   pavetex->SetLineWidth(3);
   pavetex->SetTextAlign(12);
-  pavetex->SetTextSize(0.04);
+  pavetex->SetTextSize(0.05);
   pavetex->AddText("76 < M_{ll} < 106 GeV");
   pavetex->AddText("p_{T}^{ll} > 40 GeV"); 
   pavetex->AddText("p_{T}^{l} > 20 GeV, |#eta^{l}| < 2.1");
   pavetex->AddText("N_{jet}=1, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4");
   pavetex->AddText("#Delta R(l,jet)>0.5");
-  pavetex->Draw();
-
+  if(var1=="h_zy"){
+    pavetex->Draw();
+  }
   cout << "pad 1 label size = " << h[0]->GetYaxis()->GetLabelSize() << endl;
 
   //////////////////////////////////////////////////////////////////////  
@@ -334,14 +345,14 @@ void forPaper_approval(std::string var1="h_ystar",
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);
-  leg2->SetTextSize(0.04);
+  leg2->SetTextSize(0.05);
   leg2->SetBorderSize(0);
   leg2->AddEntry(hscale[1], "Sherpa stat. uncertainty","f");
   leg2->AddEntry(hscale[2], "Madgraph stat. uncertainty","f");
   leg2->Draw("same");
 
 
-  gROOT->ProcessLine(".L ~/scripts/theoryErrorZed.c");
+  gROOT->ProcessLine(".L theoryErrorZed.c");
   theoryErrorZed(theoryName.data());
 
   hscale[0]->Draw("9e1same");
