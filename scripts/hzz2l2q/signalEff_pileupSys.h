@@ -35,10 +35,79 @@ const Int_t kMaxgenParId = 1;
 const Int_t kMaxgenParSt = 1;
 const Int_t kMaxgenMomParId = 1;
 const Int_t kMaxgenParIndex = 1;
+const Int_t kMaxgenNMo = 1;
+const Int_t kMaxgenNDa = 1;
+const Int_t kMaxgenMo1 = 1;
+const Int_t kMaxgenMo2 = 1;
+const Int_t kMaxgenDa1 = 1;
+const Int_t kMaxgenDa2 = 1;
 const Int_t kMaxgenJetE = 1;
 const Int_t kMaxgenJetPt = 1;
 const Int_t kMaxgenJetEta = 1;
 const Int_t kMaxgenJetPhi = 1;
+const Int_t kMaxpatMuonPt = 1;
+const Int_t kMaxpatMuonEta = 1;
+const Int_t kMaxpatMuonPhi = 1;
+const Int_t kMaxpatMuonM = 1;
+const Int_t kMaxpatMuonTrkIso = 1;
+const Int_t kMaxpatMuonHcalIso = 1;
+const Int_t kMaxpatMuonEcalIso = 1;
+const Int_t kMaxpatMuonCharge = 1;
+const Int_t kMaxpatMuonNumChambers = 1;
+const Int_t kMaxpatMuonNumMatches = 1;
+const Int_t kMaxpatMuonStationMask = 1;
+const Int_t kMaxpatMuonNumSegments = 1;
+const Int_t kMaxpatMuonChi2Ndoff = 1;
+const Int_t kMaxpatMuonNhits = 1;
+const Int_t kMaxpatMuonDxy = 1;
+const Int_t kMaxpatMuonDz = 1;
+const Int_t kMaxpatMuonPassID = 1;
+const Int_t kMaxpatMuonChHadIso = 1;
+const Int_t kMaxpatMuonNeHadIso = 1;
+const Int_t kMaxpatMuonGamIso = 1;
+const Int_t kMaxpatMuonPUPt = 1;
+const Int_t kMaxpatElecEt = 1;
+const Int_t kMaxpatElecEnergy = 1;
+const Int_t kMaxpatElecPt = 1;
+const Int_t kMaxpatElecEta = 1;
+const Int_t kMaxpatElecPhi = 1;
+const Int_t kMaxpatElecM = 1;
+const Int_t kMaxpatElecScEta = 1;
+const Int_t kMaxpatElecSigIhIh = 1;
+const Int_t kMaxpatElecDelEtaIn = 1;
+const Int_t kMaxpatElecDelPhiIn = 1;
+const Int_t kMaxpatElecHoE = 1;
+const Int_t kMaxpatElecTrkIso = 1;
+const Int_t kMaxpatElecHcalIso = 1;
+const Int_t kMaxpatElecEcalIso = 1;
+const Int_t kMaxpatElecEoverP = 1;
+const Int_t kMaxpatElecDxy = 1;
+const Int_t kMaxpatElecDz = 1;
+const Int_t kMaxpatElecChHadIso = 1;
+const Int_t kMaxpatElecNeHadIso = 1;
+const Int_t kMaxpatElecGamIso = 1;
+const Int_t kMaxpatElecMissingHits = 1;
+const Int_t kMaxpatElecDist = 1;
+const Int_t kMaxpatElecDeltaCotTheta = 1;
+const Int_t kMaxpatElecInBarrel = 1;
+const Int_t kMaxpatElecInEndcap = 1;
+const Int_t kMaxpatElecHasConv = 1;
+const Int_t kMaxpatElecPassID = 1;
+const Int_t kMaxpatElecPassVBTFID = 1;
+const Int_t kMaxpatJetPfAk05Pt = 1;
+const Int_t kMaxpatJetPfAk05Eta = 1;
+const Int_t kMaxpatJetPfAk05Phi = 1;
+const Int_t kMaxpatJetPfAk05M = 1;
+const Int_t kMaxpatJetPfAk05En = 1;
+const Int_t kMaxpatJetPfAk05Beta = 1;
+const Int_t kMaxpatJetPfAk05PassID = 1;
+const Int_t kMaxpatJetPfAk05CharMulti = 1;
+const Int_t kMaxpatJetPfAk05NeutEmEFr = 1;
+const Int_t kMaxpatJetPfAk05CharHadEFr = 1;
+const Int_t kMaxpatJetPfAk05NeutHadEFr = 1;
+const Int_t kMaxpatJetPfAk05CharEmEFr = 1;
+const Int_t kMaxjetHiggsIndex = 1;
+
 
 class signalEff_pileupSys {
 public :
@@ -68,12 +137,81 @@ public :
    vector<int>     *genParSt_;
    vector<int>     *genMomParId_;
    vector<int>     *genParIndex_;
+   vector<int>     *genNMo_;
+   vector<int>     *genNDa_;
+   vector<int>     *genMo1_;
+   vector<int>     *genMo2_;
+   vector<int>     *genDa1_;
+   vector<int>     *genDa2_;
    vector<double>  *genJetE_;
    vector<double>  *genJetPt_;
    vector<double>  *genJetEta_;
    vector<double>  *genJetPhi_;
+   Double_t        NumMu;
+   vector<double>  *patMuonPt_;
+   vector<double>  *patMuonEta_;
+   vector<double>  *patMuonPhi_;
+   vector<double>  *patMuonM_;
+   vector<double>  *patMuonTrkIso_;
+   vector<double>  *patMuonHcalIso_;
+   vector<double>  *patMuonEcalIso_;
+   vector<double>  *patMuonCharge_;
+   vector<double>  *patMuonNumChambers_;
+   vector<double>  *patMuonNumMatches_;
+   vector<double>  *patMuonStationMask_;
+   vector<double>  *patMuonNumSegments_;
+   vector<double>  *patMuonChi2Ndoff_;
+   vector<double>  *patMuonNhits_;
+   vector<double>  *patMuonDxy_;
+   vector<double>  *patMuonDz_;
+   vector<int>     *patMuonPassID_;
+   vector<double>  *patMuonChHadIso_;
+   vector<double>  *patMuonNeHadIso_;
+   vector<double>  *patMuonGamIso_;
+   vector<double>  *patMuonPUPt_;
+   vector<double>  *patElecEt_;
+   vector<double>  *patElecEnergy_;
+   vector<double>  *patElecPt_;
+   vector<double>  *patElecEta_;
+   vector<double>  *patElecPhi_;
+   vector<double>  *patElecM_;
+   vector<double>  *patElecScEta_;
+   vector<double>  *patElecSigIhIh_;
+   vector<double>  *patElecDelEtaIn_;
+   vector<double>  *patElecDelPhiIn_;
+   vector<double>  *patElecHoE_;
+   vector<double>  *patElecTrkIso_;
+   vector<double>  *patElecHcalIso_;
+   vector<double>  *patElecEcalIso_;
+   vector<double>  *patElecEoverP_;
+   vector<double>  *patElecDxy_;
+   vector<double>  *patElecDz_;
+   vector<double>  *patElecChHadIso_;
+   vector<double>  *patElecNeHadIso_;
+   vector<double>  *patElecGamIso_;
+   vector<double>  *patElecMissingHits_;
+   vector<double>  *patElecDist_;
+   vector<double>  *patElecDeltaCotTheta_;
+   vector<double>  *patElecInBarrel_;
+   vector<double>  *patElecInEndcap_;
+   vector<int>     *patElecHasConv_;
+   vector<int>     *patElecPassID_;
+   vector<int>     *patElecPassVBTFID_;
+   vector<double>  *patJetPfAk05Pt_;
+   vector<double>  *patJetPfAk05Eta_;
+   vector<double>  *patJetPfAk05Phi_;
+   vector<double>  *patJetPfAk05M_;
+   vector<double>  *patJetPfAk05En_;
+   vector<double>  *patJetPfAk05Beta_;
+   vector<int>     *patJetPfAk05PassID_;
+   vector<double>  *patJetPfAk05CharMulti_;
+   vector<double>  *patJetPfAk05NeutEmEFr_;
+   vector<double>  *patJetPfAk05CharHadEFr_;
+   vector<double>  *patJetPfAk05NeutHadEFr_;
+   vector<double>  *patJetPfAk05CharEmEFr_;
+   Double_t        eleRho;
+   Double_t        muoRho;
    Double_t        metSig;
-   Double_t        metSigNoPU;
    vector<double>  *higgsPt;
    vector<double>  *higgsEta;
    vector<double>  *higgsPhi;
@@ -91,18 +229,11 @@ public :
    vector<double>  *zjjMRefit;
    vector<double>  *zjjdR;
    vector<int>     *jetIndex;
+   vector<int>     *jetHiggsIndex_;
    vector<double>  *jetE;
    vector<double>  *jetPt;
    vector<double>  *jetEta;
    vector<double>  *jetPhi;
-   vector<double>  *jetGenE;
-   vector<double>  *jetGenPt;
-   vector<double>  *jetGenEta;
-   vector<double>  *jetGenPhi;
-   vector<double>  *jetPartonE;
-   vector<double>  *jetPartonPt;
-   vector<double>  *jetPartonEta;
-   vector<double>  *jetPartonPhi;
    vector<double>  *heliLD;
    vector<double>  *heliLDRefit;
    vector<int>     *nBTags;
@@ -132,12 +263,81 @@ public :
    TBranch        *b_genParSt_;   //!
    TBranch        *b_genMomParId_;   //!
    TBranch        *b_genParIndex_;   //!
+   TBranch        *b_genNMo_;   //!
+   TBranch        *b_genNDa_;   //!
+   TBranch        *b_genMo1_;   //!
+   TBranch        *b_genMo2_;   //!
+   TBranch        *b_genDa1_;   //!
+   TBranch        *b_genDa2_;   //!
    TBranch        *b_genJetE_;   //!
    TBranch        *b_genJetPt_;   //!
    TBranch        *b_genJetEta_;   //!
    TBranch        *b_genJetPhi_;   //!
+   TBranch        *b_ElectronNumMu;   //!
+   TBranch        *b_patMuonPt_;   //!
+   TBranch        *b_patMuonEta_;   //!
+   TBranch        *b_patMuonPhi_;   //!
+   TBranch        *b_patMuonM_;   //!
+   TBranch        *b_patMuonTrkIso_;   //!
+   TBranch        *b_patMuonHcalIso_;   //!
+   TBranch        *b_patMuonEcalIso_;   //!
+   TBranch        *b_patMuonCharge_;   //!
+   TBranch        *b_patMuonNumChambers_;   //!
+   TBranch        *b_patMuonNumMatches_;   //!
+   TBranch        *b_patMuonStationMask_;   //!
+   TBranch        *b_patMuonNumSegments_;   //!
+   TBranch        *b_patMuonChi2Ndoff_;   //!
+   TBranch        *b_patMuonNhits_;   //!
+   TBranch        *b_patMuonDxy_;   //!
+   TBranch        *b_patMuonDz_;   //!
+   TBranch        *b_patMuonPassID_;   //!
+   TBranch        *b_patMuonChHadIso_;   //!
+   TBranch        *b_patMuonNeHadIso_;   //!
+   TBranch        *b_patMuonGamIso_;   //!
+   TBranch        *b_patMuonPUPt_;   //!
+   TBranch        *b_patElecEt_;   //!
+   TBranch        *b_patElecEnergy_;   //!
+   TBranch        *b_patElecPt_;   //!
+   TBranch        *b_patElecEta_;   //!
+   TBranch        *b_patElecPhi_;   //!
+   TBranch        *b_patElecM_;   //!
+   TBranch        *b_patElecScEta_;   //!
+   TBranch        *b_patElecSigIhIh_;   //!
+   TBranch        *b_patElecDelEtaIn_;   //!
+   TBranch        *b_patElecDelPhiIn_;   //!
+   TBranch        *b_patElecHoE_;   //!
+   TBranch        *b_patElecTrkIso_;   //!
+   TBranch        *b_patElecHcalIso_;   //!
+   TBranch        *b_patElecEcalIso_;   //!
+   TBranch        *b_patElecEoverP_;   //!
+   TBranch        *b_patElecDxy_;   //!
+   TBranch        *b_patElecDz_;   //!
+   TBranch        *b_patElecChHadIso_;   //!
+   TBranch        *b_patElecNeHadIso_;   //!
+   TBranch        *b_patElecGamIso_;   //!
+   TBranch        *b_patElecMissingHits_;   //!
+   TBranch        *b_patElecDist_;   //!
+   TBranch        *b_patElecDeltaCotTheta_;   //!
+   TBranch        *b_patElecInBarrel_;   //!
+   TBranch        *b_patElecInEndcap_;   //!
+   TBranch        *b_patElecHasConv_;   //!
+   TBranch        *b_patElecPassID_;   //!
+   TBranch        *b_patElecPassVBTFID_;   //!
+   TBranch        *b_patJetPfAk05Pt_;   //!
+   TBranch        *b_patJetPfAk05Eta_;   //!
+   TBranch        *b_patJetPfAk05Phi_;   //!
+   TBranch        *b_patJetPfAk05M_;   //!
+   TBranch        *b_patJetPfAk05En_;   //!
+   TBranch        *b_patJetPfAk05Beta_;   //!
+   TBranch        *b_patJetPfAk05PassID_;   //!
+   TBranch        *b_patJetPfAk05CharMulti_;   //!
+   TBranch        *b_patJetPfAk05NeutEmEFr_;   //!
+   TBranch        *b_patJetPfAk05CharHadEFr_;   //!
+   TBranch        *b_patJetPfAk05NeutHadEFr_;   //!
+   TBranch        *b_patJetPfAk05CharEmEFr_;   //!
+   TBranch        *b_eleRho;   //!
+   TBranch        *b_muoRho;   //!
    TBranch        *b_metSig;   //!
-   TBranch        *b_metSigNoPU;   //!
    TBranch        *b_higgsPt;   //!
    TBranch        *b_higgsEta;   //!
    TBranch        *b_higgsPhi;   //!
@@ -155,25 +355,18 @@ public :
    TBranch        *b_zjjMRefit;   //!
    TBranch        *b_zjjdR;   //!
    TBranch        *b_jetIndex;   //!
+   TBranch        *b_jetHiggsIndex_;   //!
    TBranch        *b_jetE;   //!
    TBranch        *b_jetPt;   //!
    TBranch        *b_jetEta;   //!
    TBranch        *b_jetPhi;   //!
-   TBranch        *b_jetGenE;   //!
-   TBranch        *b_jetGenPt;   //!
-   TBranch        *b_jetGenEta;   //!
-   TBranch        *b_jetGenPhi;   //!
-   TBranch        *b_jetPartonE;   //!
-   TBranch        *b_jetPartonPt;   //!
-   TBranch        *b_jetPartonEta;   //!
-   TBranch        *b_jetPartonPhi;   //!
    TBranch        *b_heliLD;   //!
    TBranch        *b_heliLDRefit;   //!
    TBranch        *b_nBTags;   //!
    TBranch        *b_lepType;   //!
    TBranch        *b_passBit;   //!
 
-   signalEff_pileupSys(string filename, TTree *tree=0);
+   signalEff_pileupSys(int m, int nevt, TTree *tree=0);
    virtual ~signalEff_pileupSys();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -183,27 +376,34 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    string _inputFile;
+   int     _Mass;   // higgs nominal mass
+   Long64_t _nTotalEvt;
 };
 
 #endif
 
 #ifdef signalEff_pileupSys_cxx
-signalEff_pileupSys::signalEff_pileupSys(string filename, TTree *tree) : fChain(0) 
+signalEff_pileupSys::signalEff_pileupSys(int higgsM, int nevt, 
+					 TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-   if (tree == 0) {
-     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.data());
-      if (!f) {
-	f = new TFile(filename.data());
-	f->cd(Form("%s:/tree",filename.data()));
-      }
-      tree = (TTree*)gDirectory->Get("tree");
-
-   }
-
-   _inputFile = filename;
-   Init(tree);
+  _Mass = higgsM;
+  _nTotalEvt = nevt;
+  _inputFile = Form("/scratch/syu/CMGTools/CMSSW_5_3_3_patch3/src/runJob/"
+		    "rootfiles/533_GluGluToHToZZTo2L2Q_M-%d_8TeV-powheg-pythia6.root",_Mass);
+  std::cout << "Input file name = " << _inputFile.data() << std::endl;
+  if (tree == 0) {
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(_inputFile.data());
+    if (!f) {
+      f = new TFile(_inputFile.data());
+      f->cd(Form("%s:/tree", _inputFile.data()));
+    }
+    tree = (TTree*)gDirectory->Get("tree");
+    
+  }
+  
+  Init(tree);
 }
 
 signalEff_pileupSys::~signalEff_pileupSys()
@@ -255,10 +455,77 @@ void signalEff_pileupSys::Init(TTree *tree)
    genParSt_ = 0;
    genMomParId_ = 0;
    genParIndex_ = 0;
+   genNMo_ = 0;
+   genNDa_ = 0;
+   genMo1_ = 0;
+   genMo2_ = 0;
+   genDa1_ = 0;
+   genDa2_ = 0;
    genJetE_ = 0;
    genJetPt_ = 0;
    genJetEta_ = 0;
    genJetPhi_ = 0;
+   patMuonPt_ = 0;
+   patMuonEta_ = 0;
+   patMuonPhi_ = 0;
+   patMuonM_ = 0;
+   patMuonTrkIso_ = 0;
+   patMuonHcalIso_ = 0;
+   patMuonEcalIso_ = 0;
+   patMuonCharge_ = 0;
+   patMuonNumChambers_ = 0;
+   patMuonNumMatches_ = 0;
+   patMuonStationMask_ = 0;
+   patMuonNumSegments_ = 0;
+   patMuonChi2Ndoff_ = 0;
+   patMuonNhits_ = 0;
+   patMuonDxy_ = 0;
+   patMuonDz_ = 0;
+   patMuonPassID_ = 0;
+   patMuonChHadIso_ = 0;
+   patMuonNeHadIso_ = 0;
+   patMuonGamIso_ = 0;
+   patMuonPUPt_ = 0;
+   patElecEt_ = 0;
+   patElecEnergy_ = 0;
+   patElecPt_ = 0;
+   patElecEta_ = 0;
+   patElecPhi_ = 0;
+   patElecM_ = 0;
+   patElecScEta_ = 0;
+   patElecSigIhIh_ = 0;
+   patElecDelEtaIn_ = 0;
+   patElecDelPhiIn_ = 0;
+   patElecHoE_ = 0;
+   patElecTrkIso_ = 0;
+   patElecHcalIso_ = 0;
+   patElecEcalIso_ = 0;
+   patElecEoverP_ = 0;
+   patElecDxy_ = 0;
+   patElecDz_ = 0;
+   patElecChHadIso_ = 0;
+   patElecNeHadIso_ = 0;
+   patElecGamIso_ = 0;
+   patElecMissingHits_ = 0;
+   patElecDist_ = 0;
+   patElecDeltaCotTheta_ = 0;
+   patElecInBarrel_ = 0;
+   patElecInEndcap_ = 0;
+   patElecHasConv_ = 0;
+   patElecPassID_ = 0;
+   patElecPassVBTFID_ = 0;
+   patJetPfAk05Pt_ = 0;
+   patJetPfAk05Eta_ = 0;
+   patJetPfAk05Phi_ = 0;
+   patJetPfAk05M_ = 0;
+   patJetPfAk05En_ = 0;
+   patJetPfAk05Beta_ = 0;
+   patJetPfAk05PassID_ = 0;
+   patJetPfAk05CharMulti_ = 0;
+   patJetPfAk05NeutEmEFr_ = 0;
+   patJetPfAk05CharHadEFr_ = 0;
+   patJetPfAk05NeutHadEFr_ = 0;
+   patJetPfAk05CharEmEFr_ = 0;
    higgsPt = 0;
    higgsEta = 0;
    higgsPhi = 0;
@@ -276,18 +543,11 @@ void signalEff_pileupSys::Init(TTree *tree)
    zjjMRefit = 0;
    zjjdR = 0;
    jetIndex = 0;
+   jetHiggsIndex_ = 0;
    jetE = 0;
    jetPt = 0;
    jetEta = 0;
    jetPhi = 0;
-   jetGenE = 0;
-   jetGenPt = 0;
-   jetGenEta = 0;
-   jetGenPhi = 0;
-   jetPartonE = 0;
-   jetPartonPt = 0;
-   jetPartonEta = 0;
-   jetPartonPhi = 0;
    heliLD = 0;
    heliLDRefit = 0;
    nBTags = 0;
@@ -321,12 +581,83 @@ void signalEff_pileupSys::Init(TTree *tree)
    fChain->SetBranchAddress("genParSt_", &genParSt_, &b_genParSt_);
    fChain->SetBranchAddress("genMomParId_", &genMomParId_, &b_genMomParId_);
    fChain->SetBranchAddress("genParIndex_", &genParIndex_, &b_genParIndex_);
+   fChain->SetBranchAddress("genNMo_", &genNMo_, &b_genNMo_);
+   fChain->SetBranchAddress("genNDa_", &genNDa_, &b_genNDa_);
+   fChain->SetBranchAddress("genMo1_", &genMo1_, &b_genMo1_);
+   fChain->SetBranchAddress("genMo2_", &genMo2_, &b_genMo2_);
+   fChain->SetBranchAddress("genDa1_", &genDa1_, &b_genDa1_);
+   fChain->SetBranchAddress("genDa2_", &genDa2_, &b_genDa2_);
    fChain->SetBranchAddress("genJetE_", &genJetE_, &b_genJetE_);
    fChain->SetBranchAddress("genJetPt_", &genJetPt_, &b_genJetPt_);
    fChain->SetBranchAddress("genJetEta_", &genJetEta_, &b_genJetEta_);
    fChain->SetBranchAddress("genJetPhi_", &genJetPhi_, &b_genJetPhi_);
+   /*
+   fChain->SetBranchAddress("NumMu", &NumMu, &b_ElectronNumMu);
+   fChain->SetBranchAddress("patMuonPt_", &patMuonPt_, &b_patMuonPt_);
+   fChain->SetBranchAddress("patMuonEta_", &patMuonEta_, &b_patMuonEta_);
+   fChain->SetBranchAddress("patMuonPhi_", &patMuonPhi_, &b_patMuonPhi_);
+   fChain->SetBranchAddress("patMuonM_", &patMuonM_, &b_patMuonM_);
+   fChain->SetBranchAddress("patMuonTrkIso_", &patMuonTrkIso_, &b_patMuonTrkIso_);
+   fChain->SetBranchAddress("patMuonHcalIso_", &patMuonHcalIso_, &b_patMuonHcalIso_);
+   fChain->SetBranchAddress("patMuonEcalIso_", &patMuonEcalIso_, &b_patMuonEcalIso_);
+   fChain->SetBranchAddress("patMuonCharge_", &patMuonCharge_, &b_patMuonCharge_);
+   fChain->SetBranchAddress("patMuonNumChambers_", &patMuonNumChambers_, &b_patMuonNumChambers_);
+   fChain->SetBranchAddress("patMuonNumMatches_", &patMuonNumMatches_, &b_patMuonNumMatches_);
+   fChain->SetBranchAddress("patMuonStationMask_", &patMuonStationMask_, &b_patMuonStationMask_);
+   fChain->SetBranchAddress("patMuonNumSegments_", &patMuonNumSegments_, &b_patMuonNumSegments_);
+   fChain->SetBranchAddress("patMuonChi2Ndoff_", &patMuonChi2Ndoff_, &b_patMuonChi2Ndoff_);
+   fChain->SetBranchAddress("patMuonNhits_", &patMuonNhits_, &b_patMuonNhits_);
+   fChain->SetBranchAddress("patMuonDxy_", &patMuonDxy_, &b_patMuonDxy_);
+   fChain->SetBranchAddress("patMuonDz_", &patMuonDz_, &b_patMuonDz_);
+   fChain->SetBranchAddress("patMuonPassID_", &patMuonPassID_, &b_patMuonPassID_);
+   fChain->SetBranchAddress("patMuonChHadIso_", &patMuonChHadIso_, &b_patMuonChHadIso_);
+   fChain->SetBranchAddress("patMuonNeHadIso_", &patMuonNeHadIso_, &b_patMuonNeHadIso_);
+   fChain->SetBranchAddress("patMuonGamIso_", &patMuonGamIso_, &b_patMuonGamIso_);
+   fChain->SetBranchAddress("patMuonPUPt_", &patMuonPUPt_, &b_patMuonPUPt_);
+   fChain->SetBranchAddress("patElecEt_", &patElecEt_, &b_patElecEt_);
+   fChain->SetBranchAddress("patElecEnergy_", &patElecEnergy_, &b_patElecEnergy_);
+   fChain->SetBranchAddress("patElecPt_", &patElecPt_, &b_patElecPt_);
+   fChain->SetBranchAddress("patElecEta_", &patElecEta_, &b_patElecEta_);
+   fChain->SetBranchAddress("patElecPhi_", &patElecPhi_, &b_patElecPhi_);
+   fChain->SetBranchAddress("patElecM_", &patElecM_, &b_patElecM_);
+   fChain->SetBranchAddress("patElecScEta_", &patElecScEta_, &b_patElecScEta_);
+   fChain->SetBranchAddress("patElecSigIhIh_", &patElecSigIhIh_, &b_patElecSigIhIh_);
+   fChain->SetBranchAddress("patElecDelEtaIn_", &patElecDelEtaIn_, &b_patElecDelEtaIn_);
+   fChain->SetBranchAddress("patElecDelPhiIn_", &patElecDelPhiIn_, &b_patElecDelPhiIn_);
+   fChain->SetBranchAddress("patElecHoE_", &patElecHoE_, &b_patElecHoE_);
+   fChain->SetBranchAddress("patElecTrkIso_", &patElecTrkIso_, &b_patElecTrkIso_);
+   fChain->SetBranchAddress("patElecHcalIso_", &patElecHcalIso_, &b_patElecHcalIso_);
+   fChain->SetBranchAddress("patElecEcalIso_", &patElecEcalIso_, &b_patElecEcalIso_);
+   fChain->SetBranchAddress("patElecEoverP_", &patElecEoverP_, &b_patElecEoverP_);
+   fChain->SetBranchAddress("patElecDxy_", &patElecDxy_, &b_patElecDxy_);
+   fChain->SetBranchAddress("patElecDz_", &patElecDz_, &b_patElecDz_);
+   fChain->SetBranchAddress("patElecChHadIso_", &patElecChHadIso_, &b_patElecChHadIso_);
+   fChain->SetBranchAddress("patElecNeHadIso_", &patElecNeHadIso_, &b_patElecNeHadIso_);
+   fChain->SetBranchAddress("patElecGamIso_", &patElecGamIso_, &b_patElecGamIso_);
+   fChain->SetBranchAddress("patElecMissingHits_", &patElecMissingHits_, &b_patElecMissingHits_);
+   fChain->SetBranchAddress("patElecDist_", &patElecDist_, &b_patElecDist_);
+   fChain->SetBranchAddress("patElecDeltaCotTheta_", &patElecDeltaCotTheta_, &b_patElecDeltaCotTheta_);
+   fChain->SetBranchAddress("patElecInBarrel_", &patElecInBarrel_, &b_patElecInBarrel_);
+   fChain->SetBranchAddress("patElecInEndcap_", &patElecInEndcap_, &b_patElecInEndcap_);
+   fChain->SetBranchAddress("patElecHasConv_", &patElecHasConv_, &b_patElecHasConv_);
+   fChain->SetBranchAddress("patElecPassID_", &patElecPassID_, &b_patElecPassID_);
+   fChain->SetBranchAddress("patElecPassVBTFID_", &patElecPassVBTFID_, &b_patElecPassVBTFID_);
+   fChain->SetBranchAddress("patJetPfAk05Pt_", &patJetPfAk05Pt_, &b_patJetPfAk05Pt_);
+   fChain->SetBranchAddress("patJetPfAk05Eta_", &patJetPfAk05Eta_, &b_patJetPfAk05Eta_);
+   fChain->SetBranchAddress("patJetPfAk05Phi_", &patJetPfAk05Phi_, &b_patJetPfAk05Phi_);
+   fChain->SetBranchAddress("patJetPfAk05M_", &patJetPfAk05M_, &b_patJetPfAk05M_);
+   fChain->SetBranchAddress("patJetPfAk05En_", &patJetPfAk05En_, &b_patJetPfAk05En_);
+   fChain->SetBranchAddress("patJetPfAk05Beta_", &patJetPfAk05Beta_, &b_patJetPfAk05Beta_);
+   fChain->SetBranchAddress("patJetPfAk05PassID_", &patJetPfAk05PassID_, &b_patJetPfAk05PassID_);
+   fChain->SetBranchAddress("patJetPfAk05CharMulti_", &patJetPfAk05CharMulti_, &b_patJetPfAk05CharMulti_);
+   fChain->SetBranchAddress("patJetPfAk05NeutEmEFr_", &patJetPfAk05NeutEmEFr_, &b_patJetPfAk05NeutEmEFr_);
+   fChain->SetBranchAddress("patJetPfAk05CharHadEFr_", &patJetPfAk05CharHadEFr_, &b_patJetPfAk05CharHadEFr_);
+   fChain->SetBranchAddress("patJetPfAk05NeutHadEFr_", &patJetPfAk05NeutHadEFr_, &b_patJetPfAk05NeutHadEFr_);
+   fChain->SetBranchAddress("patJetPfAk05CharEmEFr_", &patJetPfAk05CharEmEFr_, &b_patJetPfAk05CharEmEFr_);
+   */
+   fChain->SetBranchAddress("eleRho", &eleRho, &b_eleRho);
+   fChain->SetBranchAddress("muoRho", &muoRho, &b_muoRho);
    fChain->SetBranchAddress("metSig", &metSig, &b_metSig);
-   fChain->SetBranchAddress("metSigNoPU", &metSigNoPU, &b_metSigNoPU);
    fChain->SetBranchAddress("higgsPt", &higgsPt, &b_higgsPt);
    fChain->SetBranchAddress("higgsEta", &higgsEta, &b_higgsEta);
    fChain->SetBranchAddress("higgsPhi", &higgsPhi, &b_higgsPhi);
@@ -344,23 +675,17 @@ void signalEff_pileupSys::Init(TTree *tree)
    fChain->SetBranchAddress("zjjMRefit", &zjjMRefit, &b_zjjMRefit);
    fChain->SetBranchAddress("zjjdR", &zjjdR, &b_zjjdR);
    fChain->SetBranchAddress("jetIndex", &jetIndex, &b_jetIndex);
+   fChain->SetBranchAddress("jetHiggsIndex_", &jetHiggsIndex_, &b_jetHiggsIndex_);
    fChain->SetBranchAddress("jetE", &jetE, &b_jetE);
    fChain->SetBranchAddress("jetPt", &jetPt, &b_jetPt);
    fChain->SetBranchAddress("jetEta", &jetEta, &b_jetEta);
    fChain->SetBranchAddress("jetPhi", &jetPhi, &b_jetPhi);
-   fChain->SetBranchAddress("jetGenE", &jetGenE, &b_jetGenE);
-   fChain->SetBranchAddress("jetGenPt", &jetGenPt, &b_jetGenPt);
-   fChain->SetBranchAddress("jetGenEta", &jetGenEta, &b_jetGenEta);
-   fChain->SetBranchAddress("jetGenPhi", &jetGenPhi, &b_jetGenPhi);
-   fChain->SetBranchAddress("jetPartonE", &jetPartonE, &b_jetPartonE);
-   fChain->SetBranchAddress("jetPartonPt", &jetPartonPt, &b_jetPartonPt);
-   fChain->SetBranchAddress("jetPartonEta", &jetPartonEta, &b_jetPartonEta);
-   fChain->SetBranchAddress("jetPartonPhi", &jetPartonPhi, &b_jetPartonPhi);
    fChain->SetBranchAddress("heliLD", &heliLD, &b_heliLD);
    fChain->SetBranchAddress("heliLDRefit", &heliLDRefit, &b_heliLDRefit);
    fChain->SetBranchAddress("nBTags", &nBTags, &b_nBTags);
    fChain->SetBranchAddress("lepType", &lepType, &b_lepType);
    fChain->SetBranchAddress("passBit", &passBit, &b_passBit);
+
    Notify();
 }
 

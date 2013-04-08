@@ -27,12 +27,11 @@ void signalEff_pileupSys::Loop(int lepCode)
   double nPassEvts_central[3]={0};
   double nPassEvts_up[3]={0};
   double nPassEvts_down[3]={0};
-
+  Long64_t nPass[20]={0};
   Long64_t nPassTotal = 0;
 
   const int nPUBin = 60;
-  TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,
- 				   -0.5,nPUBin-0.5);
+  TH1D* h_nint_template = new TH1D("h_nint_template","",nPUBin,0,nPUBin);
   h_nint_template->SetXTitle("Number of true interactions");
   h_nint_template->Sumw2();
 
@@ -44,7 +43,7 @@ void signalEff_pileupSys::Loop(int lepCode)
 
   for(int i=0; i < nPUBin; i++){
     h_input_nint_data->SetBinContent(i+1,Data2012[i]);
-    h_input_nint_mc  ->SetBinContent(i+1,Summer2012[i]);
+    h_input_nint_mc  ->SetBinContent(i+1,Summer2012_S10[i]);
   }
 
   const int nPUs= 3;
@@ -77,7 +76,8 @@ void signalEff_pileupSys::Loop(int lepCode)
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    // if (Cut(ientry) < 0) continue;
+
+    nPass[0]++;
 
     double PU_weight_central =  LumiWeights_central.weight(PU_nTrueInt);
     double PU_weight_up      =  LumiWeights_up.weight(PU_nTrueInt);
@@ -91,28 +91,33 @@ void signalEff_pileupSys::Loop(int lepCode)
     h_output_nint_mc[1]->Fill(PU_nTrueInt, PU_weight_up); 
     h_output_nint_mc[2]->Fill(PU_nTrueInt, PU_weight_down); 
 
+    if(metSig > 10.0)continue;
+
+    nPass[1]++;
 
     int NBTAGMAX = -1;
-    for(int ih=0; ih < lepType->size(); ih++){
+    for(unsigned int ih=0; ih < lepType->size(); ih++){
 
       int lepton = lepType->at(ih);
       if(lepton!= lepCode)continue;
     
       int bitmap = passBit->at(ih);
 
-      bool Pass=false;
-    
-      if((bitmap & MZJJ_SIGNAL) &&
-	 (bitmap & PFMET_SIG) &&
-	 (bitmap & HELI_LD)
-	 )
-	Pass=true;
-      if(!Pass)continue;
+//       bool Pass=false;      
+//       if((bitmap & MZJJ_SIGNAL) &&
+//  	 (bitmap & PFMET_SIG) &&
+// 	 (bitmap & HELI_LD))
+// 	       
+//       Pass=true;
+//       if(!Pass)continue;
 	 
-      double zjjMass = zjjM->at(ih);
-      double zllMass = zllM->at(ih);
+      double zjjMass   = zjjM->at(ih);
+      double zllMass   = zllM->at(ih);
+      double heliLDRaw = heliLD->at(ih);
 
       if(zllMass < MIN_MZ_LL || zllMass > MAX_MZ_LL)continue; 
+      if(zjjMass < MIN_MZ_JJ || zjjMass > MAX_MZ_JJ)continue;
+      if(heliLDRaw < 0.5)continue;
 
       int nbtag = nBTags->at(ih);
 
@@ -137,8 +142,13 @@ void signalEff_pileupSys::Loop(int lepCode)
 	}      
     } // loop over candidates
 
+    nPass[2]++;
+
     if(myBest<0)continue;
+    nPass[3]++;
+
     if(NBTAGMAX<0)continue;
+    nPass[4]++;
 
     nPassTotal ++;
 
@@ -212,38 +222,58 @@ void signalEff_pileupSys::Loop(int lepCode)
 
 //   outFile->Close();     
 
+  ofstream fout6;
+  fout6.open(Form("%s_eff.dat",leptonName.data()), ios::out | ios::app);
+
+  for(int i=0;i<20;i++)
+    if(nPass[i]>0)cout << "nPass[" << i << "]=" << nPass[i] << endl;
+  double eff_rough = _nTotalEvt>1e-6? 
+    (double)(nPass[4])/(double)(_nTotalEvt):0;
+  fout6 << _Mass << "\t" << eff_rough << endl;
+  fout6.close();
+  cout << "Rough efficiency = " << eff_rough << endl;
+  cout << endl;
+
   cout << "Total number of events = " << nPassTotal << endl;
 
   cout << "Separated into different number of btags" << endl;
   for(int ib=0; ib<3; ib++)
     {
-      cout << ib << " btag: " << nPassEvts[ib] << endl;
+      cout << ib << " btag: " << nPassEvts[ib] << "\t" << nPassEvts_central[ib] << endl;
     }
   cout << endl;
   cout << endl;
 
+  ofstream fout4;
+  fout4.open(Form("%s_nEvt.tex",leptonName.data()), ios::out | ios::app);
+
+  fout4 << _Mass;
   for(int ib=0; ib<3; ib++)
     {
-
-      cout << " & ";
-      cout << nPassEvts[ib];
+      fout4 << " & ";
+      fout4 << nPassEvts[ib];
     }
-  cout << " \\\\" << endl;
+  fout4 << " \\\\" << endl;
+  fout4.close();
   cout << endl;
 
-
+  ofstream fout5;
+  fout5.open(Form("%s_sys.tex",leptonName.data()), ios::out | ios::app);
+  
+  fout5 << _Mass;
   for(int ib=0; ib<3; ib++)
     {
-      cout << " & ";
-      cout << fixed;
-      cout << "${+ " << setprecision(2) << sysP[ib] << " \\atop " << 
+      fout5 << " & ";
+      fout5 << fixed;
+      fout5 << "${+ " << setprecision(2) << sysP[ib] << " \\atop " << 
 	sysM[ib] << "}$";     
     }
 
-  cout << " \\\\" << endl;
+  fout5 << " \\\\" << endl;
+  fout5.close();
   cout << endl;
-  cout.unsetf(ios_base::fixed);
-  cout.precision(6);
+  fout.unsetf(ios_base::fixed);
+  fout.precision(6);
     
 }
 
