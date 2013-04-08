@@ -227,9 +227,12 @@ void signalEff_pileupSys::Loop(int lepCode)
 
   for(int i=0;i<20;i++)
     if(nPass[i]>0)cout << "nPass[" << i << "]=" << nPass[i] << endl;
-  double eff_rough = _nTotalEvt>1e-6? 
-    (double)(nPass[4])/(double)(_nTotalEvt):0;
-  fout6 << _Mass << "\t" << eff_rough << endl;
+  double eff_rough[3]={0}; 
+  for(int j=0;j<3;j++)
+    eff_rough[j] = _nTotalEvt>1e-6? 
+    (double)(nPassEvts[j])/(double)(_nTotalEvt):0;
+    fout6 << _Mass << "\t" << eff_rough[0] << "\t" <<
+      eff_rough[1] << "\t" << eff_rough[2] << endl;
   fout6.close();
   cout << "Rough efficiency = " << eff_rough << endl;
   cout << endl;
