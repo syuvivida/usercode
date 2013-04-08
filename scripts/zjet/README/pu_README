@@ -38,6 +38,6 @@
 
 ./pileupCalc.py -i /afs/cern.ch/user/h/hernan/public/skim_Run2012.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-208686_corr.txt --calcMode true --minBiasXsec 69300 --maxPileupBin 60 --numPileupBins 60 533_190645_208686_central.root
 
-./pileupCalc.py -i /afs/cern.ch/user/h/hernan/public/skim_Run2012.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-208686_corr.txt --calcMode true --minBiasXsec 74151 --maxPileupBin 60 --numPileupBins 60 533_190645_208686_up.root
+./pileupCalc.py -i /afs/cern.ch/user/h/hernan/public/skim_Run2012.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-208686_corr.txt --calcMode true --minBiasXsec 72765 --maxPileupBin 60 --numPileupBins 60 533_190645_208686_up.root
 
-./pileupCalc.py -i /afs/cern.ch/user/h/hernan/public/skim_Run2012.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-208686_corr.txt --calcMode true --minBiasXsec 64449 --maxPileupBin 60 --numPileupBins 60 533_190645_208686_down.root
+./pileupCalc.py -i /afs/cern.ch/user/h/hernan/public/skim_Run2012.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-208686_corr.txt --calcMode true --minBiasXsec 65835 --maxPileupBin 60 --numPileupBins 60 533_190645_208686_down.root
