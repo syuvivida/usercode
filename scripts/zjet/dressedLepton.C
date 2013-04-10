@@ -1,7 +1,7 @@
 #define dressedLepton_cxx
 #include "dressedLepton.h"
-#include "SMP-12-017.h" // for Z+jet cross section
-//#include "SMP-12-004.h" // for angular analysis
+//#include "SMP-12-017.h" // for Z+jet cross section
+#include "SMP-12-004.h" // for angular analysis
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -109,6 +109,10 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
   h_njet->SetXTitle("#geq n jet");
   h_njet->Sumw2();
 
+  TH1D* h_nparton = new TH1D("h_nparton","",6,-0.5,5.5);
+  h_nparton->SetXTitle("== n partons");
+  h_nparton->Sumw2();
+
   TH2D* h2_ystarpstar = new TH2D("h2_ystarpstar","",60,-3.0,3.0,125,0,250);
   h2_ystarpstar->SetXTitle("0.5(Y_{Z}-Y_{jet})");
   h2_ystarpstar->SetYTitle("p_{T}cosh[0.5(Y_{Z}-Y_{jet})]");
@@ -205,9 +209,49 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
     
     int lepPlusIndex = -1;
     int lepMinusIndex = -1;
+
+
+    int numberOfPartons = 0;
+    for(unsigned int igen=0; igen < genParId_->size(); igen++){
+      
+      int PID       = genParId_->at(igen);
+      int motherPID = genMomParId_->at(igen);
+      int status    = genParSt_->at(igen);
+
+
+      if(status==3 && ( abs(PID)==21 || (abs(PID)>=1 && abs(PID)<=5) ) 
+	 && motherPID == 10002)
+	numberOfPartons++;
+
+    }
+
+    int enhancement = 1.0/mcWeight_;
+    if(isSherpa){
+      switch (enhancement)
+	{
+	case 1:
+	  numberOfPartons = 0;
+	  break;
+	case 2:
+	  numberOfPartons = 1;
+	  break;
+	case 35:
+	  numberOfPartons = 2;
+	  break;
+	case 40:
+	  numberOfPartons = 3;
+	  break;
+	case 50:
+	  numberOfPartons = 4;
+	  break;
+	} // end of switch
+
+    }
+
     for(unsigned int igen=0; igen < genLepId_->size(); igen++){
 
       int PID       = genLepId_->at(igen);
+
       bool isLepPlus = (PID == (-leptonPID)) || 
 	(leptonPID==0 && (PID== -11 || PID== -13));
       bool isLepMinus= (PID == ( leptonPID)) || 
@@ -225,6 +269,14 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
 	break;
 	
     }
+
+
+    if(DEBUG==1)
+      cout << "This event " << EvtInfo_EventNum << " has " 
+	   << numberOfPartons << " partons " << " and event weight = " 
+	   << 1.0/mcWeight_ << endl;
+    
+
     
     // do not find m+ or lep-
     if(lepPlusIndex < 0 || lepMinusIndex < 0)continue;
@@ -465,6 +517,7 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
       h_zy->Fill(fabs(yz),eventWeight);
       h_yB->Fill(fabs(yB),eventWeight);
       h_ystar->Fill(fabs(ystar),eventWeight);
+      h_nparton->Fill(numberOfPartons,eventWeight);
     }
 
     else
@@ -545,6 +598,8 @@ void dressedLepton::Loop(int lepID, int mode, bool exclusive,
   h_mZ->Write();
   h_nvtx->Write();
   h_njet->Write();
+
+  h_nparton->Write();
         
   h_yB->Write();
   h_ystar->Write();
