@@ -1,0 +1,36 @@
+Name: CMS_SMP_12_004_Z
+Year: 2013
+Summary: Z+jet angular distribution
+Experiment: CMS
+Collider: LHC
+InspireID: <Insert the Inspire ID>
+Status: UNVALIDATED
+Authors:
+ - Shin-Shan Eiko Yu <syu@cern.ch>
+References:
+ - http://cms.cern.ch/iCMS/analysisadmin/cadi?ancode=SMP-12-004
+RunInfo:
+   Run MC generators with Z decaying to leptonic modes at 7TeV comEnergy
+NumEvents: 1000
+Beams: [p+, p+]
+Energies: [7000]
+PtCuts: 
+  leptons Pt>20GeV and |leptons_eta|<2.1,| Jets>30GeV, |Jet eta| < 2.1, exclusive 1 jet event
+Description:
+  Rapidity distributions are presented for events containing a Z boson or a 
+  photon in association with a single jet produced at the CERN Large Hadron 
+  Collider. The data are from proton-proton collisions collected with the CMS 
+  detector, and corresponding to an integrated luminosity of 5/fb at 
+  sqrt(s)=7 TeV. In the laboratory reference frame,  the rapidities of Z 
+  bosons and direct photons and of their accompanying jet are consistent within 
+  5% with expectations from QCD. Nevertheless, significant differences are 
+  found in the center-of-momentum frame of the two final-state objects between 
+  the data and predictions from next-to-leading order perturbative QCD 
+  calculations, as well as between two Monte Carlo generators that merge 
+  matrix-elements and parton showers using alternative methods.
+BibKey: 
+   '<Insert SPIRES BibTeX key>'
+BibTeX: 
+   '<Insert SPIRES BibTeX block>'
+ToDo:
+ - update reference when paper published
