@@ -302,13 +302,13 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
     TGa->Draw("4 same");// works
   
   /*   TLegend *legend1 = new TLegend(0.713,0.813,0.871,0.954); */
-  TLegend *legend1 = new TLegend(0.179412,0.802363,0.337538,0.943347);
+  TLegend *legend1 = new TLegend(0.19,0.802363,0.337538,0.943347);
   legend1->SetFillColor(0);
   legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.05);
+  legend1->SetTextSize(0.075);
   legend1->SetBorderSize(0);
-  legend1->AddEntry(TGa,"MCFM uncertainty from QCD scale","f");
-  legend1->AddEntry(TGb,"MCFM uncertainty from PDF","f");
+  legend1->AddEntry(TGa,"QCD scale uncertainty","f");
+  legend1->AddEntry(TGb,"PDF uncertainty","f");
   //legend1->AddEntry(TGc,"Correlated","f");
   legend1->Draw("same");
     
