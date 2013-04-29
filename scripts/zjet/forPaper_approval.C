@@ -230,8 +230,10 @@ void forPaper_approval(std::string var1="h_ystar",
   cout << "Max = " << max << endl;
 
   for(int ih=0; ih < NHISTOS; ih++){
-
-    h[ih]->SetMaximum(1.7*max);
+ 
+    h[ih]->SetMaximum(1.2*max);
+    if(var1=="h_zy")
+      h[ih]->SetMaximum(1.9*max);
     if(!logScale)
       h[ih]->SetMinimum(-0.015);
     else
@@ -275,10 +277,17 @@ void forPaper_approval(std::string var1="h_ystar",
   h[0]->Draw("9e1same");
 
 
-  double x1NDC = 0.599054;
-  double y1NDC = 0.474286;
-  double x2NDC = 0.856009;
-  double y2NDC = 0.824535;
+  // double x1NDC = 0.599054;
+  // double y1NDC = 0.474286;
+  // double x2NDC = 0.856009;
+  // double y2NDC = 0.824535;
+
+  double x1NDC = 0.206780;
+  double y1NDC = 0.0474932;
+  double x2NDC = 0.465255;
+  double y2NDC = 0.400061;
+
+
 
   TLegend* leg = new TLegend(x1NDC,y1NDC,x2NDC,y2NDC);
   
@@ -300,30 +309,31 @@ void forPaper_approval(std::string var1="h_ystar",
   lar->Draw();
 
 
-  TLatex *larIndex = new TLatex(0.20, 0.89, indexName.data());
+  TLatex *larIndex = new TLatex(0.22, 0.89, indexName.data());
   larIndex->SetNDC(kTRUE);
   larIndex->SetTextSize(LATEXSIZE);
   larIndex->SetLineWidth(5);
   larIndex->Draw();
 
-  TPaveText *pavetex = new TPaveText(0.17029, 
-				     0.0495665, 
-				     0.478939, 
-				     0.5,"NDCBR");
+  TPaveText *pavetex = new TPaveText(0.427244, 
+				     0.520677, 
+				     0.664433, 
+				     0.836132,"NDCBR");
   pavetex->SetBorderSize(0);
   pavetex->SetFillColor(0);
   pavetex->SetFillStyle(0);
   pavetex->SetLineWidth(3);
   pavetex->SetTextAlign(12);
-  pavetex->SetTextSize(LATEXSIZE);
-  pavetex->AddText("76 < M_{ll} < 106 GeV");
-  pavetex->AddText("p_{T}^{ll} > 40 GeV"); 
+  pavetex->SetTextSize(0.055);
+  // pavetex->AddText("76 < M_{ll} < 106 GeV");
+  // pavetex->AddText("p_{T}^{ll} > 40 GeV"); 
+  pavetex->AddText("76 < M_{ll} < 106 GeV, p_{T}^{ll} > 40 GeV"); 
   pavetex->AddText("p_{T}^{l} > 20 GeV, |#eta^{l}| < 2.1");
   pavetex->AddText("N_{jet}=1, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4");
   pavetex->AddText("#Delta R(l,jet)>0.5");
-  // if(var1=="h_zy"){
-  //   pavetex->Draw();
-  // }
+  if(var1=="h_zy"){
+    pavetex->Draw();
+  }
   cout << "pad 1 label size = " << h[0]->GetYaxis()->GetLabelSize() << endl;
 
   //////////////////////////////////////////////////////////////////////  
