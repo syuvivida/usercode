@@ -54,7 +54,7 @@ void forPaper_approval(std::string var1="h_ystar",
   if(var1=="h_ystar")
     {
       var3  = "id4";
-      xtitle = "Y_{dif}";
+      xtitle = "y_{dif}";
       output = "DifYAll";
       theoryName = "Ydif";
       // ymax = 1.45;
@@ -67,7 +67,7 @@ void forPaper_approval(std::string var1="h_ystar",
   else if(var1=="h_yB")
     {
       var3 = "id3";
-      xtitle = "Y_{sum}";
+      xtitle = "y_{sum}";
       output = "SumYAll";
       theoryName = "Ysum";
       ymax = 1.45;
@@ -78,7 +78,7 @@ void forPaper_approval(std::string var1="h_ystar",
   else if(var1=="h_jety")
     {
       var3 = "id1";
-      xtitle = "|Y_{jet}|";
+      xtitle = "|y_{jet}|";
       output = "YJetAll";
       datafile = "goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
       theoryName = "Yjet";
@@ -88,7 +88,7 @@ void forPaper_approval(std::string var1="h_ystar",
   else if(var1=="h_zy")
     {
       var3 = "id2";
-      xtitle = "|Y_{Z}|";
+      xtitle = "|y_{Z}|";
       output = "YZedAll";
       theoryName = "Yzed";
       xmax = 2.1999;
@@ -375,8 +375,8 @@ void forPaper_approval(std::string var1="h_ystar",
   leg2->SetFillStyle(0);
   leg2->SetTextSize(LATEXSIZE);
   leg2->SetBorderSize(0);
-  leg2->AddEntry(hscale[1], "Sherpa stat. uncertainty","f");
-  leg2->AddEntry(hscale[2], "Madgraph stat. uncertainty","f");
+  leg2->AddEntry(hscale[1], "Sherpa plus stat. uncert.","f");
+  leg2->AddEntry(hscale[2], "Madgraph plus stat. uncert.","f");
   leg2->Draw("same");
 
 

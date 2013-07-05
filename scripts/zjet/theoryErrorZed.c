@@ -295,7 +295,7 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
     
   TGraph * TGb = getParams( PLOT ,"pdfs", OFFSET);
   //  colorJt(TGb,kPink-8, 3005);
-  colorJt(TGb,kYellow, 1001);
+  colorJt(TGb,kOrange, 1001);
   TGb->Draw("4 same");
     
   if(PLOT=="Yjet" || PLOT=="Yzed")
