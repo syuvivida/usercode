@@ -1,0 +1,6 @@
+
+export LHAPATH=/afs/cern.ch/work/s/syu/jetsub/LHAPDF/share/lhapdf/PDFsets/
+echo $LHAPATH
+root -q -b runPDF.C\(\"myLHAPDF_reweighing\"\)
+
+echo "Job finished"
