@@ -301,7 +301,10 @@ void myLHAPDF_reweighing::Loop(int lepID)
     double ptz = l4_z.Pt();
     double etaz = l4_z.Eta();
     if(ptz < minVPt)continue;
+    nPass[6]++;
+
     if(leptonPID == 22 && fabs(etaz) > maxVEta)continue;
+    nPass[7]++;
  
     TLorentzVector l4_j(0,0,0,0);
     l4_j.SetPtEtaPhiE(genJetPt_->at(maxGenJetIndex),
@@ -351,6 +354,7 @@ void myLHAPDF_reweighing::Loop(int lepID)
   } // end of loop over entries
   delete cteq66R;
   delete mstw2008R;
+  for(int i=0;i<30;i++)if(nPass[i]>0)cout << "nPass[" << i << "] = " << nPass[i] << endl;
 
   std::string remword  ="root://eoscms//eos/cms/store/user/syu/PDF_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/zjets_mc_";
 
