@@ -5,27 +5,22 @@
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 
-const double minZPt  =40.0;
+const double minVPt  =40.0;
+const double maxVEta = 1.45; // for photon
 
 const double minJetPt=30.0;
 const double maxJetEta=2.4;
 const double mindR=0.5;
 
-const double minElePt = 20.0;
-const double maxEleEta = 2.1;
+const double minLepPt = 20.0;
+const double maxLepEta = 2.1;
+const double minM = 76.0;
+const double maxM =106.0;
 
-const double minMee = 76.0;
-const double maxMee =106.0;
-
-const double minMuoPt = 20.0;
-const double maxMuoEta = 2.1;
-const double minMmm = 76.0;
-const double maxMmm =106.0;
 
 
 void myLHAPDF_reweighing::Loop(int lepID)
 {
-
   //===========================================================================
   //   Print out information
   //===========================================================================
@@ -39,27 +34,26 @@ void myLHAPDF_reweighing::Loop(int lepID)
   std::string leptonName;
   if(abs(lepID)==13)leptonName = "muon";
   else if(abs(lepID)==11)leptonName = "electron";
+  else if(abs(lepID)==22)leptonName = "photon";
+  else if(abs(lepID)== 0)leptonName = "all";
 
   cout << "Running mode: " << endl;
   cout << "The cuts applied: " << endl;
   
-  cout << " minZPt= " << minZPt << endl;
+  cout << " minVPt= " << minVPt << endl;
   cout << " minJetPt= " << minJetPt << endl;
   cout << " maxJetEta= " << maxJetEta << endl;
   cout << " mindR= " << mindR << endl;
 
   cout << "studying " << leptonName << endl;
-  if(abs(lepID)==11){
-    cout << " minElePt= " << minElePt << endl;
-    cout << " maxEleEta = " << maxEleEta << endl;
-    cout << " minMee = " << minMee << endl;
-    cout << " maxMee = " << maxMee << endl;
+  if(abs(lepID)==0 || abs(lepID)==11 || abs(lepID)==13){
+    cout << " minLepPt= " << minLepPt << endl;
+    cout << " maxLepEta = " << maxLepEta << endl;
+    cout << " minM = " << minM << endl;
+    cout << " maxM = " << maxM << endl;
   }
-  else if(abs(lepID)==13){
-    cout << " minMuoPt = " << minMuoPt << endl;
-    cout << " maxMuoEta = " << maxMuoEta << endl;
-    cout << " minMmm = " << minMmm << endl;
-    cout << " maxMmm = " << maxMmm << endl;
+  else if(abs(lepID)==22){
+    cout << " maxVEta = " << maxVEta << endl;
   }
   cout << "=========================================================" << endl;
 
@@ -145,11 +139,10 @@ void myLHAPDF_reweighing::Loop(int lepID)
 
   MyPDF* cteq66R = new MyPDF("cteq66.LHgrid",1);
   MyPDF* mstw2008R = new MyPDF("MSTW2008nlo68cl.LHgrid",2);
-   
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
-//     if(jentry > 1000) break;
+    //    if(jentry > 10000) break;
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -169,10 +162,16 @@ void myLHAPDF_reweighing::Loop(int lepID)
       int motherPID = genMomParId_->at(igen);
       int status    = genParSt_->at(igen);
       bool isFromZAfterFSR  = (motherPID == PID) && (status == 1);
-//       bool isFromZAfterFSR  = (motherPID == 23) && (status == 3);
 
-      bool isLepPlus = (PID == (-leptonPID)) && isFromZAfterFSR;
-      bool isLepMinus= (PID == ( leptonPID)) && isFromZAfterFSR;
+      
+      bool isLepPlus = ((PID == (-leptonPID)) || 
+			(leptonPID==0 && (PID== -11 || PID== -13)))  
+	&& isFromZAfterFSR;
+
+      bool isLepMinus= ((PID == ( leptonPID)) || 
+			(leptonPID==0 && (PID==  11 || PID== 13)))
+	&& isFromZAfterFSR;
+
 
       TLorentzVector temp_l4(0,0,0,0);
       temp_l4.SetPtEtaPhiE(
@@ -191,14 +190,16 @@ void myLHAPDF_reweighing::Loop(int lepID)
       if(lepMinusIndex < 0 && isLepMinus)
 	lepMinusIndex = igen;
 	
-      // need to add a line and see if this is a daughter of Z-> tau tau
-      if(lepPlusIndex >= 0 && lepMinusIndex >=0)
+      if(leptonPID< 22 && lepPlusIndex >= 0 && lepMinusIndex >=0)
+	break;
+      if(leptonPID== 22 && lepMinusIndex >=0)
 	break;
 	
     }
 
     // do not find m+ or lep-
-    if(lepPlusIndex < 0 || lepMinusIndex < 0)continue;
+    if(leptonPID < 22 && (lepPlusIndex < 0 || lepMinusIndex < 0))continue;
+    if(leptonPID == 22 && lepMinusIndex < 0)continue;
 
     nPass[1]++;
 
@@ -206,29 +207,29 @@ void myLHAPDF_reweighing::Loop(int lepID)
 
     int indexNumbers[2] = {lepPlusIndex, lepMinusIndex};
 
-    for(int ip=0; ip < 2; ip++){
-
-      double pt  = genParPt_->at(indexNumbers[ip]);
-      double eta = genParEta_->at(indexNumbers[ip]);
-
-      // muon
-      if(leptonPID==13 && pt > minMuoPt && fabs(eta) < maxMuoEta)nPt20++;
-      if(leptonPID==11 && pt > minElePt && fabs(eta) < maxEleEta)nPt20++;
+    if(leptonPID < 22){
+      for(int ip=0; ip < 2; ip++){
+	
+	double pt  = genParPt_->at(indexNumbers[ip]);
+	double eta = genParEta_->at(indexNumbers[ip]);
+	
+	if(pt > minLepPt && fabs(eta) < maxLepEta)nPt20++;
       
+      }
+
+    if(nPt20 < 2)continue;
     }
-
-
-    if(leptonPID==13 && (nPt20 < 2))continue;
-    if(leptonPID==11 && (nPt20 < 2))continue;
 
     nPass[2]++;
 
     TLorentzVector l4_lepp(0,0,0,0);
 
-    l4_lepp.SetPtEtaPhiE(genParPt_->at(lepPlusIndex),
-			 genParEta_->at(lepPlusIndex),
-			 genParPhi_->at(lepPlusIndex),
-			 genParE_->at(lepPlusIndex));
+    if(leptonPID<22){
+      l4_lepp.SetPtEtaPhiE(genParPt_->at(lepPlusIndex),
+			   genParEta_->at(lepPlusIndex),
+			   genParPhi_->at(lepPlusIndex),
+			   genParE_->at(lepPlusIndex));
+    }
 
     TLorentzVector l4_lepm(0,0,0,0);
 
@@ -238,15 +239,17 @@ void myLHAPDF_reweighing::Loop(int lepID)
 			 genParE_->at(lepMinusIndex));
 
 
-    TLorentzVector l4_z = l4_lepp + l4_lepm;
 
+    TLorentzVector l4_z = leptonPID< 22? l4_lepp + l4_lepm : l4_lepm;
+//     cout << EvtInfo_EventNum << "\t vector boson " << l4_z.Pt() 
+// 	 << "\t" << l4_z.Eta() << "\t" << 
+//       l4_z.Phi() << "\t" << l4_z.E() << endl;
 
     double mll = l4_z.M();
 
     h_mZ->Fill(mll,eventWeight);
 
-    if(leptonPID==13 && (mll < minMmm || mll > maxMmm))continue;
-    if(leptonPID==11 && (mll < minMee || mll > maxMee))continue;
+    if(leptonPID < 22 && (mll < minM || mll > maxM))continue;
 
     nPass[3]++;
 
@@ -270,11 +273,12 @@ void myLHAPDF_reweighing::Loop(int lepID)
 				 genJetPhi_->at(ij),
 				 genJetE_->at(ij));
 	
-      double dr_ep = l4_lepp.DeltaR(thisGenJet_l4);
+      double dr_ep = leptonPID < 22? l4_lepp.DeltaR(thisGenJet_l4) : 2.0;
       double dr_em = l4_lepm.DeltaR(thisGenJet_l4);
 
       if(dr_ep < mindR)continue;
       if(dr_em < mindR)continue;
+      
       nGenJets++; 
 
       if(thisGenJetPt > maxGenJetPt)
@@ -295,9 +299,9 @@ void myLHAPDF_reweighing::Loop(int lepID)
 
 
     double ptz = l4_z.Pt();
-
-    if(ptz < minZPt)continue;
-
+    double etaz = l4_z.Eta();
+    if(ptz < minVPt)continue;
+    if(leptonPID == 22 && fabs(etaz) > maxVEta)continue;
  
     TLorentzVector l4_j(0,0,0,0);
     l4_j.SetPtEtaPhiE(genJetPt_->at(maxGenJetIndex),
@@ -317,12 +321,14 @@ void myLHAPDF_reweighing::Loop(int lepID)
       1.0,
       cteq66R->weight(pdfInfo_,0),
       mstw2008R->weight(pdfInfo_,0)
+      //      1.0,
+      //      1.0
     };
 
-//     cout << "weight = " << weight_pdf[1] << "\t" << 
-//       cteq66PDFw_->at(0) << endl;
-//     cout << "weight = " << weight_pdf[2] << "\t" << 
-//       mstw2008PDFw_->at(0) << endl;
+    //    cout << "weight = " << weight_pdf[1] << "\t" << 
+    //       cteq66PDFw_->at(0) << endl;
+    //    cout << "weight = " << weight_pdf[2] << "\t" << 
+    //      mstw2008PDFw_->at(0) << endl;
     h_zpt->Fill(ptz,eventWeight);
     h_jetpt->Fill(ptjet,eventWeight); 
     h_zy->Fill(fabs(yz),eventWeight);
@@ -343,8 +349,17 @@ void myLHAPDF_reweighing::Loop(int lepID)
 
 
   } // end of loop over entries
+  delete cteq66R;
+  delete mstw2008R;
 
-  TFile* outFile = new TFile("PDF_study.root","recreate");       
+  std::string remword  ="root://eoscms//eos/cms/store/user/syu/PDF_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/zjets_mc_";
+
+  size_t pos  = _inputFileName.find(remword);
+
+  if(pos!= std::string::npos)
+    _inputFileName.swap(_inputFileName.erase(pos,remword.length()));
+
+  TFile* outFile = new TFile(Form("DY_PDFstudy_%s",_inputFileName.data()),"recreate");       
 
   h_mZ->Write();
   h_mZ_parton->Write();
@@ -372,6 +387,4 @@ void myLHAPDF_reweighing::Loop(int lepID)
     }
 
   outFile->Close();
-  delete cteq66R;
-  delete mstw2008R;
 }

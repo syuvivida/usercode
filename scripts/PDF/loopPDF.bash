@@ -2,13 +2,12 @@
 
 
 iteration=0
-lastfile=2
+lastfile=176
 while [ $iteration -lt $lastfile ]; 
 do
   iteration=$(( iteration + 1 ))
 #  echo $iteration
-  filename=(`head -n $iteration PDFFiles | tail -1`)
+  filename=(`head -n $iteration PDFFilesDY | tail -1`)
   echo $filename
-  ./runPDF $filename 13 >& $iteration.Log &
-
+  bsub -q 2nd $PWD/runPDF.csh $filename 0 
 done

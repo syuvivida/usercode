@@ -13,8 +13,14 @@
 #include <TFile.h>
 #include <vector>
 #include <iostream>
+#include <string>
+/*
+#include <TBranch.h>
+#include <TLeaf.h>
+#include <TSystemDirectory.h>
+#include <TList.h>
+*/
 #include "LHAPDF/LHAPDF.h"
-
 using namespace std;
 
 
@@ -138,7 +144,8 @@ class myLHAPDF_reweighing {
   TBranch        *b_genJetEta_;   //!
   TBranch        *b_genJetPhi_;   //!
 
-  myLHAPDF_reweighing(TTree *tree=0);
+  myLHAPDF_reweighing(std::string filename, TTree *tree=0);
+  std::string _inputFileName;
   virtual ~myLHAPDF_reweighing();
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
@@ -186,17 +193,42 @@ class MyPDF {
 }; // end of myPDF definitions
 
 
-
 #endif
 
 #ifdef myLHAPDF_reweighing_cxx
-myLHAPDF_reweighing::myLHAPDF_reweighing(TTree *tree)
+myLHAPDF_reweighing::myLHAPDF_reweighing(std::string filename, TTree *tree)
 {
+  _inputFileName = filename;
+  cout << "Input file = " << _inputFileName << endl;
   TChain* chain = new TChain("tree/tree");
-  for(int i=1;i<=4;i++)      
-    chain->Add(Form("/data2/syu/zjet_vectorNtuple/PDF/PDF_DYJets_madgraph_%d.root",i));  
+  chain->Add(_inputFileName.data());
+  //  for(int i=1;i<=4;i++)      
+  //    chain->Add(Form("/data2/syu/zjet_vectorNtuple/PDF/PDF_DYJets_madgraph_%d.root",i));  
+  /*
+  TSystemDirectory *base = new TSystemDirectory("root","root");
+  string dirName = "root://eoscms//eos/cms/store/user/syu/PDF_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola";
+  //    string dirName = "root://eoscms//eos/cms/store/user/syu/PDF_GJets_TuneZ2_40_HT_100_7TeV-madgraph";
+  base->SetDirectory(dirName.data());
+  TList *listOfFiles = base->GetListOfFiles();
+  TIter fileIt(listOfFiles);
+  TFile *fileH = new TFile();
+  int nfile=0;
+  while(fileH = (TFile*)fileIt()) {
+    std::string fileN = fileH->GetName();
+    std::string baseString = "zjets_mc";
+    if( fileH->IsFolder())  continue;
+    if(fileN.find(baseString) == std::string::npos)continue;
+    cout << fileN.data() << endl;
+    nfile++;
+    chain->Add(Form("%s/%s",dirName.data(),fileN.data()));
+  }
+  
+  cout << "Opening " << nfile << " files " << endl;
+  */
+
   tree = chain;
   Init(tree);
+  cout << "Number of entries are " << tree->GetEntries() << endl;
 }
 
 myLHAPDF_reweighing::~myLHAPDF_reweighing()

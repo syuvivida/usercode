@@ -1,0 +1,15 @@
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root\",13,1\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root\",13,2\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root\",11,0\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root\",11,1\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root\",11,2\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root\",13,0\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root\",13,1\) > & ! Log < /dev/null &
+
+root -q -b runLoop.C\(\"dressedLepton\",\"/data2/syu/zjet_vectorNtuple/dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root\",13,2\) > & ! Log < /dev/null &
