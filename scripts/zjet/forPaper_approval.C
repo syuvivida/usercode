@@ -2,18 +2,19 @@
 #include <algorithm>
 
 void forPaper_approval(std::string var1="h_ystar", 
-			 bool logScale=false,
-			 std::string datafile="goldenWithMCerror_withJESCorr_bigmatrix_corr.root",
-			 std::string mcfile1="bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
-			 std::string mcfile2="bare_exclusive1Jet_zPt40_both_dressed_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root", 
-			 std::string mcfile3="Z_1jet_tota_cteq66_1___1___ex_m34.root",
-			 std::string var2="", 
-			 std::string headertitle="Z + 1 jet",
-			 std::string dataName="CMS Data",
-			 std::string mcName1="Sherpa",
-			 std::string mcName2="Madgraph",
-			 std::string mcName3="MCFM"
-			 )
+		       bool logScale=false,
+		       std::string datafile="goldenWithMCerror_withJESCorr_bigmatrix_corr.root",			 
+		       std::string mcfile1="bare_exclusive1Jet_zPt40_both_dressed_DYToLL_M-50_1jEnh2_2jEnh35_3jEnh40_4jEnh50_7TeV-sherpa.root", 
+		       std::string mcfile2="DY_PDFstudy_both.root", 
+		       std::string mcfile3="DY_PDFstudy_both.root", 
+		       std::string mcfile4="Z_1jet_tota_cteq66_1___1___ex_m34.root",
+		       std::string headertitle="Z + 1 jet",
+		       std::string dataName="CMS Data",
+		       std::string mcName1="Sherpa",
+		       std::string mcName2="Madgraph",
+		       std::string mcName3="Madgraph",
+		       std::string mcName4="MCFM"
+		       )
 {
   
   setTDRStyle();
@@ -24,18 +25,23 @@ void forPaper_approval(std::string var1="h_ystar",
   const int NYDIVISIONS=6;
   const double LATEXSIZE = 0.075;// x axis
   const double LABELSIZE = 37.5; //numbers
-  const int NHISTOS=4;
+  const int NHISTOS=5;
   TH1F* h[NHISTOS];
 
   char tempName[300];
-  if(var2 ==  "" )var2=var1;
+
 
   std::string xtitle;
   std::string output;
   std::string datavar;
+  std::string var2;
   std::string var3;
+  std::string var4;
   std::string theoryName;
   std::string indexName;
+
+  var2=var1 + "_cteq66m";
+  var3=var1 + "_cteq6l1";
 
   std::string remword3  ="h_";
   std::string corrName = var1;
@@ -53,20 +59,18 @@ void forPaper_approval(std::string var1="h_ystar",
 
   if(var1=="h_ystar")
     {
-      var3  = "id4";
+      var4  = "id4";
       xtitle = "y_{dif}";
       output = "DifYAll";
       theoryName = "Ydif";
-      // ymax = 1.45;
-      // ymin = 0.55; 
       ymax = 1.75;
-      ymin = 0.25; 
+      ymin = 0.15; 
       xmax = 1.7999;
       indexName = "(d)";
     }
   else if(var1=="h_yB")
     {
-      var3 = "id3";
+      var4 = "id3";
       xtitle = "y_{sum}";
       output = "SumYAll";
       theoryName = "Ysum";
@@ -77,7 +81,7 @@ void forPaper_approval(std::string var1="h_ystar",
     }
   else if(var1=="h_jety")
     {
-      var3 = "id1";
+      var4 = "id1";
       xtitle = "|y_{jet}|";
       output = "YJetAll";
       datafile = "goldenWithMCerror_withJESCorr_jety_bigmatrix.root";
@@ -87,7 +91,7 @@ void forPaper_approval(std::string var1="h_ystar",
     }
   else if(var1=="h_zy")
     {
-      var3 = "id2";
+      var4 = "id2";
       xtitle = "|y_{Z}|";
       output = "YZedAll";
       theoryName = "Yzed";
@@ -111,32 +115,36 @@ void forPaper_approval(std::string var1="h_ystar",
   TFile *fmc3   = TFile::Open(mcfile3.data());
   cout << "Opening " << fmc3->GetName() << endl;
 
+  TFile *fmc4   = TFile::Open(mcfile4.data());
+  cout << "Opening " << fmc4->GetName() << endl;
+
   h[0] = (TH1F*)(fdata->Get(datavar.data()));
   h[1] = (TH1F*)(fmc1->Get(var1.data()));
   h[2] = (TH1F*)(fmc2->Get(var2.data()));
   h[3] = (TH1F*)(fmc3->Get(var3.data()));
+  h[4] = (TH1F*)(fmc4->Get(var4.data()));
 
   if(var1=="h_jety")
     {
-      double value = h[3]->GetBinContent(12);
+      double value = h[4]->GetBinContent(12);
       value *= 0.9;
-      h[3]->SetBinContent(12,value);
+      h[4]->SetBinContent(12,value);
     }
 
 
   TH1D* hscale[NHISTOS];
 
-  int COLOR[NHISTOS]={1,4,2,kOrange-1};
-  int MARKERSTYLE[NHISTOS]={8,24,21,29};
-  int MARKERSIZE[NHISTOS]={1.5,0,0,0};
-  int LINESTYLE[NHISTOS]={1,1,2,6};
+  int COLOR[NHISTOS]={1,4,2,6,kOrange-1};
+  int MARKERSTYLE[NHISTOS]={8,24,21,21,29};
+  int MARKERSIZE[NHISTOS]={1.5,0,0,0,0};
+  int LINESTYLE[NHISTOS]={1,1,2,4,6};
   //  int FILLSTYLE[NHISTOS]={1,3345,3436,1};
-  int FILLSTYLE[NHISTOS]={1,3345,3354,1};
+  int FILLSTYLE[NHISTOS]={1,3345,3354,0,1};
 
   for(int i=0; i < NHISTOS; i++){
 
-    hscale[i]   =(TH1D*) h[0]->Clone(Form("hscale%02i",i));
-    hscale[i]   ->SetYTitle(Form("Ratio to %s",mcName3.data()));
+    hscale[i]   =(TH1D*) h[0]->Clone(Form("%s_hscale%02i",corrName.data(),i));
+    hscale[i]   ->SetYTitle(Form("Ratio to %s",mcName4.data()));
     hscale[i]   ->SetXTitle(xtitle.data());
     hscale[i]   ->GetXaxis()->SetDecimals();
     hscale[i]   ->GetYaxis()->SetDecimals();
@@ -272,8 +280,9 @@ void forPaper_approval(std::string var1="h_ystar",
 
   h[0]->SetYTitle("1/#sigma d#sigma/dY");
   h[0]->Draw("9e1");
-  for(int ih=1; ih < NHISTOS; ih++)
+  for(int ih=1; ih < NHISTOS-2; ih++)
     h[ih]->Draw("9histsame");
+  h[NHISTOS-1]->Draw("9histsame");
   h[0]->Draw("9e1same");
 
 
@@ -299,7 +308,8 @@ void forPaper_approval(std::string var1="h_ystar",
   leg->AddEntry(h[0], dataName.data());
   leg->AddEntry(h[1], mcName1.data(),"l");
   leg->AddEntry(h[2], mcName2.data(),"l");
-  leg->AddEntry(h[3], Form("%s (NLO)",mcName3.data()),"l");
+  //  leg->AddEntry(h[3], mcName3.data(),"l");
+  leg->AddEntry(h[4], Form("%s (NLO)",mcName4.data()),"l");
   leg->Draw("same");
 
   TLatex *lar = new TLatex(0.30, 0.89, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
@@ -358,7 +368,7 @@ void forPaper_approval(std::string var1="h_ystar",
 
 
   hscale[0]->Draw("9e1");
-  for(int ih=1; ih < NHISTOS-1; ih++){
+  for(int ih=1; ih < NHISTOS-2; ih++){
     hscale[ih]->Draw("9e3same");
   }
   hscale[0]->Draw("9e1same");
@@ -369,7 +379,7 @@ void forPaper_approval(std::string var1="h_ystar",
   l2->Draw("same");
 
 
-  TLegend* leg2 = new TLegend(0.191576,0.202598,0.393795,0.435284);
+  TLegend* leg2 = new TLegend(0.191576,0.211476,0.393795,0.443684);
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);
@@ -377,6 +387,7 @@ void forPaper_approval(std::string var1="h_ystar",
   leg2->SetBorderSize(0);
   leg2->AddEntry(hscale[1], "Sherpa plus stat. uncert.","f");
   leg2->AddEntry(hscale[2], "Madgraph plus stat. uncert.","f");
+  leg2->AddEntry(hscale[3], "Madgraph (LO PDFs)","l");
   leg2->Draw("same");
 
 
@@ -384,9 +395,10 @@ void forPaper_approval(std::string var1="h_ystar",
   theoryErrorZed(theoryName.data());
 
   hscale[0]->Draw("9e1same");
-  for(int ih=1; ih < NHISTOS-1; ih++){
+  for(int ih=1; ih < NHISTOS-2; ih++){
     hscale[ih]->Draw("9e3same");
   }
+  hscale[NHISTOS-2]->Draw("9chistsame");
   hscale[0]->Draw("9e1same");
   l2->Draw("same");
 
@@ -404,5 +416,12 @@ void forPaper_approval(std::string var1="h_ystar",
   filename = psname + ".pdf";
   c1->Print(filename.data());
   //   c1->Close();
+
+
+  TFile* outFile = new TFile("output.root","update");   
+  for(int ih=0; ih < NHISTOS-1; ih++){
+    hscale[ih]->Write();
+  }
+  outFile->Write();
 }
 		     
