@@ -387,7 +387,7 @@ void forPaper_approval(std::string var1="h_ystar",
   leg2->SetBorderSize(0);
   leg2->AddEntry(hscale[1], "Sherpa plus stat. uncert.","f");
   leg2->AddEntry(hscale[2], "Madgraph plus stat. uncert.","f");
-  leg2->AddEntry(hscale[3], "Madgraph (LO PDFs)","l");
+  leg2->AddEntry(hscale[3], "Madgraph (LO PDF)","l");
   leg2->Draw("same");
 
 
