@@ -278,7 +278,7 @@ void forPaper_approval(std::string var1="h_ystar",
       h[ih]->GetXaxis()->SetLabelSize(label1_size);
     }
 
-  h[0]->SetYTitle("1/#sigma d#sigma/dY");
+  h[0]->SetYTitle("1/#sigma d#sigma/dy");
   h[0]->Draw("9e1");
   for(int ih=1; ih < NHISTOS-2; ih++)
     h[ih]->Draw("9histsame");
