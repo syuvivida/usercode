@@ -307,8 +307,8 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
   legend1->SetFillStyle(0);
   legend1->SetTextSize(0.075);
   legend1->SetBorderSize(0);
-  legend1->AddEntry(TGa,"Scale uncertainties","f");
-  legend1->AddEntry(TGb,"PDF uncertainty","f");
+  legend1->AddEntry(TGa,"MCFM scale uncert.","f");
+  legend1->AddEntry(TGb,"MCFM PDF uncert.","f");
   //legend1->AddEntry(TGc,"Correlated","f");
   legend1->Draw("same");
     

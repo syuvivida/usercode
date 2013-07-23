@@ -134,7 +134,7 @@ void forPaper_approval(std::string var1="h_ystar",
 
   TH1D* hscale[NHISTOS];
 
-  int COLOR[NHISTOS]={1,4,2,6,kOrange-1};
+  int COLOR[NHISTOS]={1,4,2,kViolet,kOrange-1};
   int MARKERSTYLE[NHISTOS]={8,24,21,21,29};
   int MARKERSIZE[NHISTOS]={1.5,0,0,0,0};
   int LINESTYLE[NHISTOS]={1,1,2,4,6};
@@ -383,10 +383,10 @@ void forPaper_approval(std::string var1="h_ystar",
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);
-  leg2->SetTextSize(LATEXSIZE);
+  leg2->SetTextSize(0.075);
   leg2->SetBorderSize(0);
-  leg2->AddEntry(hscale[1], "Sherpa plus stat. uncert.","f");
-  leg2->AddEntry(hscale[2], "Madgraph plus stat. uncert.","f");
+  leg2->AddEntry(hscale[1], "Sherpa with stat. uncert.","f");
+  leg2->AddEntry(hscale[2], "Madgraph with stat. uncert.","f");
   leg2->AddEntry(hscale[3], "Madgraph LO PDF","l");
   leg2->Draw("same");
 
