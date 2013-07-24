@@ -240,8 +240,8 @@ void forPaper_approval(std::string var1="h_ystar",
   for(int ih=0; ih < NHISTOS; ih++){
  
     h[ih]->SetMaximum(1.2*max);
-    if(var1=="h_zy")
-      h[ih]->SetMaximum(1.9*max);
+//     if(var1=="h_zy")
+//       h[ih]->SetMaximum(1.9*max);
     if(!logScale)
       h[ih]->SetMinimum(-0.015);
     else
@@ -261,9 +261,11 @@ void forPaper_approval(std::string var1="h_ystar",
   if(logScale)
     gPad->SetLogy(1); 
   // gPad->SetTopMargin(0.01);
-  gPad->SetTopMargin(0.02);
+//   gPad->SetTopMargin(0.06);
+  gPad->SetTopMargin(0.1);
   gPad->SetBottomMargin(0);
-  gPad->SetRightMargin(0.04);
+//   gPad->SetRightMargin(0.04);
+  gPad->SetRightMargin(0.01);
   gPad->SetLeftMargin(0.17);
   gStyle->SetStatFontSize(0.05);
 
@@ -286,15 +288,16 @@ void forPaper_approval(std::string var1="h_ystar",
   h[0]->Draw("9e1same");
 
 
-  // double x1NDC = 0.599054;
-  // double y1NDC = 0.474286;
-  // double x2NDC = 0.856009;
-  // double y2NDC = 0.824535;
+
+//   double x1NDC = 0.206780;
+//   double y1NDC = 0.0474932;
+//   double x2NDC = 0.465255;
+//   double y2NDC = 0.400061;
 
   double x1NDC = 0.206780;
-  double y1NDC = 0.0474932;
+  double y1NDC = 0.0423742;
   double x2NDC = 0.465255;
-  double y2NDC = 0.400061;
+  double y2NDC = 0.416373;
 
 
 
@@ -312,14 +315,15 @@ void forPaper_approval(std::string var1="h_ystar",
   leg->AddEntry(h[4], Form("%s (NLO)",mcName4.data()),"l");
   leg->Draw("same");
 
-  TLatex *lar = new TLatex(0.30, 0.89, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
+//   TLatex *lar = new TLatex(0.30, 0.89, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
+  TLatex *lar = new TLatex(0.20, 0.92, "CMS,   #sqrt{s} = 7 TeV, L = 5 fb^{-1}");
   lar->SetNDC(kTRUE); 
   lar->SetTextSize(LATEXSIZE);
   lar->SetLineWidth(5);
   lar->Draw();
 
 
-  TLatex *larIndex = new TLatex(0.22, 0.89, indexName.data());
+  TLatex *larIndex = new TLatex(0.22, 0.80, indexName.data());
   larIndex->SetNDC(kTRUE);
   larIndex->SetTextSize(LATEXSIZE);
   larIndex->SetLineWidth(5);
@@ -341,15 +345,16 @@ void forPaper_approval(std::string var1="h_ystar",
   pavetex->AddText("p_{T}^{l} > 20 GeV, |#eta^{l}| < 2.1");
   pavetex->AddText("N_{jet}=1, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4");
   pavetex->AddText("#Delta R(l,jet)>0.5");
-  if(var1=="h_zy"){
-    pavetex->Draw();
-  }
+//   if(var1=="h_zy"){
+//     pavetex->Draw();
+//   }
   cout << "pad 1 label size = " << h[0]->GetYaxis()->GetLabelSize() << endl;
 
   //////////////////////////////////////////////////////////////////////  
 
   c1->cd(2);
-  gPad->SetRightMargin(0.04);
+//   gPad->SetRightMargin(0.04);
+  gPad->SetRightMargin(0.01);
   gPad->SetTopMargin(0);
   gPad->SetBottomMargin(0.2);
   gPad->SetLeftMargin(0.17);
@@ -383,7 +388,7 @@ void forPaper_approval(std::string var1="h_ystar",
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);
-  leg2->SetTextSize(0.075);
+  leg2->SetTextSize(0.065);
   leg2->SetBorderSize(0);
   leg2->AddEntry(hscale[1], "Sherpa with stat. uncert.","f");
   leg2->AddEntry(hscale[2], "Madgraph with stat. uncert.","f");

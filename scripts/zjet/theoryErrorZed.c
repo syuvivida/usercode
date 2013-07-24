@@ -302,12 +302,12 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
     TGa->Draw("4 same");// works
   
   /*   TLegend *legend1 = new TLegend(0.713,0.813,0.871,0.954); */
-  TLegend *legend1 = new TLegend(0.19,0.802363,0.337538,0.943347);
+  TLegend *legend1 = new TLegend(0.19,0.784679,0.337538,0.944099);
   legend1->SetFillColor(0);
   legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.075);
+  legend1->SetTextSize(0.065);
   legend1->SetBorderSize(0);
-  legend1->AddEntry(TGa,"MCFM scale uncert.","f");
+  legend1->AddEntry(TGa,"MCFM #mu_{R} and #mu_{F} uncert.","f");
   legend1->AddEntry(TGb,"MCFM PDF uncert.","f");
   //legend1->AddEntry(TGc,"Correlated","f");
   legend1->Draw("same");
