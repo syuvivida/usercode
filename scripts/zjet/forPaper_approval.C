@@ -384,7 +384,7 @@ void forPaper_approval(std::string var1="h_ystar",
   l2->Draw("same");
 
 
-  TLegend* leg2 = new TLegend(0.191576,0.211476,0.393795,0.443684);
+  TLegend* leg2 = new TLegend(0.206780,0.211476,0.409075,0.443684);
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);

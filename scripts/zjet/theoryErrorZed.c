@@ -302,7 +302,7 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
     TGa->Draw("4 same");// works
   
   /*   TLegend *legend1 = new TLegend(0.713,0.813,0.871,0.954); */
-  TLegend *legend1 = new TLegend(0.19,0.784679,0.337538,0.944099);
+  TLegend *legend1 = new TLegend(0.206780,0.784679,0.357538,0.944099);
   legend1->SetFillColor(0);
   legend1->SetFillStyle(0);
   legend1->SetTextSize(0.065);
