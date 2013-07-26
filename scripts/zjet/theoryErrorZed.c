@@ -36,8 +36,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
       q1                        =    -0.006601   ;//;//+/-   0.00296803  
       xmax = 2.2;
       /*       cout << "scale uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "Scale uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "Scale uncertainty = " <<TMath::Max(fabs(p0-q0)*100.0,
+						  fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
             
     }
     else if(PLOT=="Yjet"){
@@ -61,8 +61,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
       q1                        = -0.000743084   ;//;//+/-   0.00423974  
       xmax = 2.4;
 /*       cout << "scale uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "Scale uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "Scale uncertainty = " << TMath::Max(fabs(p0-q0)*100.0, 
+						   fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
             
     }
     else if(PLOT=="Ysum"){
@@ -87,8 +87,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
       
       xmax = 2.2;
 /*       cout << "scale uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "Scale uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "Scale uncertainty = " << TMath::Max(fabs(p0-q0)*100.0, 
+						   fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
     }
     else if(PLOT=="Ydif"){
       //****************************************ok
@@ -112,8 +112,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
 /*       xmax = 2.0; */
       xmax = 1.8;
 /*       cout << "scale uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "Scale uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "Scale uncertainty = " << TMath::Max(fabs(p0-q0)*100.0,
+						   fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
 
     }        
         
@@ -145,8 +145,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
 
       xmax = 2.4;
 /*       cout << "PDF uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "PDF uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "PDF uncertainty = " << TMath::Max(fabs(p0-q0)*100.0,
+						 fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
             
     }
     else if(PLOT=="Yzed"){
@@ -172,8 +172,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
 
       xmax = 2.2;
 /*       cout << "PDF uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "PDF uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "PDF uncertainty = " << TMath::Max(fabs(p0-q0)*100.0,
+						 fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
             
     }
     else if(PLOT=="Ysum"){
@@ -199,8 +199,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
 
       xmax = 2.2;
 /*       cout << "PDF uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "PDF uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "PDF uncertainty = " << TMath::Max(fabs(p0-q0)*100.0,
+						 fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
             
     }
     else if(PLOT=="Ydif"){
@@ -226,8 +226,8 @@ TGraph * getParams(TString PLOT ,TString TYPE, float offset){
 /*       xmax = 2.0; */
       xmax = 1.8;
 /*       cout << "PDF uncertainty = " << fabs(p1-q1)*xmax << endl; */
-      cout << "PDF uncertainty = " <<fabs(p0-q0)*100.0 << "\t"
-	   << fabs(p0-q0+p1*xmax-q1*xmax)*100.0 << endl;
+      cout << "PDF uncertainty = " <<  TMath::Max(fabs(p0-q0)*100.0,
+						  fabs(p0-q0+p1*xmax-q1*xmax)*100.0) << endl;
 
     }
   }
