@@ -13,7 +13,7 @@
 
 namespace Rivet {
 
-  //class CMS_SMP_12_004_Z : public Analysis {
+
   class CMS_SMP_12_004_PhotonJet : public Analysis {
   public:
 
