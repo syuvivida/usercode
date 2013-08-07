@@ -1,0 +1,54 @@
+Name: CMS_SMP_12_004_PhotonJet
+
+Year: 2013
+
+Summary: Photon+jet angular distribution
+
+Experiment: CMS
+
+Collider: LHC
+
+InspireID: <Insert the Inspire ID>
+
+Status: UNVALIDATED
+
+Authors:
+ - Steve Linn <linn@cern.ch>, Shin-Shan Eiko Yu <syu@cern.ch>, You-Hsiang Chang <index0192@yahoo.com.tw>
+
+References:
+ - http://cms.cern.ch/iCMS/analysisadmin/cadi?ancode=SMP-12-004
+
+RunInfo:
+   Run MC generators with photon+jet at 7TeV comEnergy
+
+NumEvents: 1000
+
+Beams: [p+, p+]
+
+Energies: [7000]
+
+PtCuts: 
+  Jets>30GeV, |Jet eta| < 2.1, exclusive 1 jet event, photon Pt >40 GeV, |photon eta| < 1.44
+
+Description:
+Rapidity distributions are presented for events containing either a 
+Z boson or a photon in association with a single jet in proton-proton 
+collisions produced at the CERN LHC. The data, collected with the CMS
+detector at sqrt(s)=7 TeV, correspond to an integrated luminosity of 5.0/fb. 
+The individual rapidity distributions of the boson and the jet are 
+consistent within 5% with expectations from perturbative QCD. However,
+QCD predictions for the sum and the difference in rapidities of the two
+final-state objects show significant discrepancies with CMS data. In
+particular, next-to-leading-order QCD calculations, and two Monte Carlo
+event generators using different methods to merge matrix-element
+partons with evolved parton showers, appear inconsistent with the data
+as well as with each other.	
+
+BibKey: 
+   '<Insert SPIRES BibTeX key>'
+
+BibTeX: 
+   '<Insert SPIRES BibTeX block>'
+
+ToDo:
+ - update reference when paper published
