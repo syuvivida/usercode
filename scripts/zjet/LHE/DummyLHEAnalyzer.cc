@@ -34,8 +34,6 @@ const double maxM =106.0;
 
 class DummyLHEAnalyzer : public EDAnalyzer {
 private: 
-  bool dumpLHE_;
-  bool checkPDG_;
 
   TFile * output;
   TH1F* h_mZ;
