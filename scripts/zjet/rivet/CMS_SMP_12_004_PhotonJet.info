@@ -21,7 +21,7 @@ References:
 RunInfo:
    Run MC generators with photon+jet at 7TeV comEnergy
 
-NumEvents: 1000
+NumEvents: 2500000
 
 Beams: [p+, p+]
 
