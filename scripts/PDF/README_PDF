@@ -1,0 +1,26 @@
+1) install LHAPDF 
+
+2) Once LHAPDF is installed, set up a few enviornment variables to point 
+to the LHAPDF directory
+
+setenv LHAPATH /afs/cern.ch/work/s/syu/jetsub/LHAPDF/share/lhapdf/PDFsets/
+
+3) Before calling the macro to reweigh distributions, 
+  gROOT->ProcessLine(".L /afs/cern.ch/work/s/syu/jetsub/LHAPDF/lib/libLHAPDF.so");
+
+4) Run myLHAPDF_reweighing. One needs to save the following variables in the 
+flat ntuples
+
+  Handle<GenEventInfoProduct> pdfInfoHandle;
+  if (iEvent.getByLabel("generator", pdfInfoHandle)) {
+    if (pdfInfoHandle->pdf()) {
+
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->id.first);
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->id.second);
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->x.first);
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->x.second);
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->xPDF.first);
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->xPDF.second);
+      pdfInfo_.push_back(pdfInfoHandle->pdf()->scalePDF);
+    }
+  }
