@@ -1,15 +1,42 @@
-1) install LHAPDF 
+1) install LHAPDF
 
-2) Once LHAPDF is installed, set up a few enviornment variables to point 
-to the LHAPDF directory
+ [Download LHAPDF from https://lhapdf.hepforge.org/.
+  I did not use the latest LHAPDF version (6.0.0) because I had problem 
+  compiling it. I downloaded 5.8.7.
+  Put it in a private directory. ]
+  
+ mkdir test_pdf
 
-setenv LHAPATH /afs/cern.ch/work/s/syu/jetsub/LHAPDF/share/lhapdf/PDFsets/
+ mkdir test_pdf/LHAPDF
 
-3) Before calling the macro to reweigh distributions, 
-  gROOT->ProcessLine(".L /afs/cern.ch/work/s/syu/jetsub/LHAPDF/lib/libLHAPDF.so");
+ setenv LHAPDFDIR $PWD/test_pdf/LHAPDF
 
-4) Run myLHAPDF_reweighing. One needs to save the following variables in the 
-flat ntuples
+ cd test_pdf
+
+ tar xvzf lhapdf-5.8.7.tar.gz
+ 
+ cd lhapdf-5.8.7/
+
+ ./configure --prefix=$LHAPDFDIR
+
+ make
+ 
+ make install
+
+ [If the build is succesfull, you will find both shared libraries and 
+ static library in $LHAPDFDIR/lib.
+ Also you will find PDFsets.index in $LHAPDFDIR/share/lhapdf/PDFsets.index
+ ]
+ 
+2) [Download PDFsets from http://lhapdf.hepforge.org/pdfsets]
+
+ mkdir  $LHAPDFDIR/share/lhapdf/PDFsets/
+ 
+ [Put the downloaded LHgrid files in this directory]
+
+
+3) Prepare ntuples that include the following information:
+
 
   Handle<GenEventInfoProduct> pdfInfoHandle;
   if (iEvent.getByLabel("generator", pdfInfoHandle)) {
@@ -24,3 +51,27 @@ flat ntuples
       pdfInfo_.push_back(pdfInfoHandle->pdf()->scalePDF);
     }
   }
+
+
+4) In the directory where you will run macros to perform PDF 
+ reweighing, do a soft link to link to the header files:
+ 
+ ln -s $LHAPDFDIR/include/LHAPDF .
+
+5) Set up the enviornment variable to point 
+   to the LHAPDF directory
+
+ setenv LHAPATH $LHAPDFDIR/share/lhapdf/PDFsets/
+
+
+6) Prepare a ROOT macro to use the LHAPDF set to perform PDF reweighing 
+ and also use pdfInfo_.
+ Here is an example of .h and .C files:
+ http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/syu/scripts/PDF/myLHAPDF_reweighing.h?view=log
+ http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/syu/scripts/PDF/myLHAPDF_reweighing.C?view=log
+
+Before calling the macro to reweigh distributions, remember to load 
+ the following library:
+  gROOT->ProcessLine(".L ${LHAPDFDIR}/lib/libLHAPDF.so");
+
+
