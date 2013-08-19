@@ -119,9 +119,9 @@ from Configuration.GenProduction.rivet_customize import customise
 #call to customisation function customise imported from Configuration.GenProduction.rivet_customize
 process = customise(process)
 
-process.rivetAnalyzer.AnalysisNames = cms.vstring('CMS_SMP_12_004_PhotonJet')
 
-process.rivetAnalyzer.OutputFile = cms.string('mcfileGammaJet2500000.aida')
+process.rivetAnalyzer.AnalysisNames = cms.vstring('CMS_SMP_12_004')
+process.rivetAnalyzer.OutputFile = cms.string('mcfilePhotonJet2500000New.aida')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 

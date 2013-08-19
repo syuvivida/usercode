@@ -99,19 +99,17 @@ namespace Rivet {
 
     }
 
-    void normalizeNoOverflows(AIDA::IHistogram1D* plot, double integral){
-      double factor=1.;
-      if (plot->sumBinHeights()>0 && plot->sumAllBinHeights()>0)
-        factor = plot->sumAllBinHeights()/plot->sumBinHeights();
-      normalize(plot, factor*integral);  
+    void normalizeByContents(AIDA::IHistogram1D* plot){
+      double binwidth = plot->axis().binWidth(1);
+      normalize(plot, binwidth);  
     }
 
     void finalize() 
     {
-      normalizeNoOverflows(_histYZ         ,1.);
-      normalizeNoOverflows(_histYJet       ,1.);
-      normalizeNoOverflows(_histYSum         ,1.);
-      normalizeNoOverflows(_histYDif         ,1.);
+      normalizeByContents(_histYZ  );
+      normalizeByContents(_histYJet);
+      normalizeByContents(_histYSum);
+      normalizeByContents(_histYDif);
     }
     
   private:

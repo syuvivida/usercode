@@ -136,11 +136,9 @@ from Configuration.GenProduction.rivet_customize import customise
 #call to customisation function customise imported from Configuration.GenProduction.rivet_customize
 process = customise(process)
 
-process.rivetAnalyzer.AnalysisNames = cms.vstring('CMS_SMP_12_004_Z')
 
-
-process.rivetAnalyzer.OutputFile = cms.string('mcfileZJet2500000.aida')
-
+process.rivetAnalyzer.AnalysisNames = cms.vstring('CMS_SMP_12_004')
+process.rivetAnalyzer.OutputFile = cms.string('mcfileZJet2500000New.aida')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 # End of customisation functions
