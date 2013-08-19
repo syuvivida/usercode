@@ -1,0 +1,76 @@
+Name: CMS_SMP_12_004
+
+Year: 2013
+
+Summary: Rapidity distributions in exclusive Z + jet and gamma + jet events in 
+         pp collisions at sqrt(s) = 7 TeV
+
+Experiment: CMS
+
+Collider: LHC
+
+InspireID: <Insert the Inspire ID>
+
+Status: UNVALIDATED
+
+Authors:
+ - Steve Linn <linn@cern.ch>, 
+   Shin-Shan Eiko Yu <syu@cern.ch>, 
+   Anil Sing Pratap <singh.ap79@gmail.com>,
+   Lovedeep Kaur Saini <lvdeep9@gmail.com>,
+   Kittikul Kovitanggoon <kovitang.cern@gmail.com>,
+   Luis Lebolo <luis.lebolo@cern.ch>,
+   Vanessa Gaultney Werner <vgaul001@fiu.edu>,
+   Yun-Ju Lu <Yun-Ju.Lu@cern.ch>,
+   Syue-Wei Li <Syue-Wei.Li@cern.ch>,
+   Yu-Hsiang Chang <index0192@yahoo.com.tw>,  
+   Sung-Won Lee <Sungwon.Lee@ttu.edu>,
+   Pete E.C. Markowitz <markowit@fiu.edu>,
+   Darko Mekterovic <Darko.Mekterovic@cern.ch>,
+   Jorge Rodriguez <jrodriguez@cern.ch>
+
+References:
+ - http://cms.cern.ch/iCMS/analysisadmin/cadi?ancode=SMP-12-004
+
+RunInfo:
+   Run MC generators with Z decaying to leptonic modes + jets 
+   and photon + jets at 7TeV comEnergy
+
+NumEvents: 2500000 for each process
+
+Beams: [p+, p+]
+
+Energies: [7000]
+
+PtCuts: 
+     Z+jet: lepton pt > 20GeV and |lepton eta| < 2.1, 
+            Jet pt > 30GeV, |Jet eta| < 2.1, exclusive 1 jet, 
+            Z pt > 40 GeV, 76 < MZ < 106 GeV
+
+ Gamma+jet: Jet > 30GeV, |Jet eta| < 2.1, exclusive 1 jet, 
+            Photon pt > 40 GeV, |Photon eta| < 1.4442
+
+
+Description:
+
+Rapidity distributions are presented for events containing either a 
+Z boson or a photon in association with a single jet in proton-proton 
+collisions produced at the CERN LHC. The data, collected with the CMS
+detector at sqrt(s)=7 TeV, correspond to an integrated luminosity of 5.0/fb. 
+The individual rapidity distributions of the boson and the jet are 
+consistent within 5% with expectations from perturbative QCD. However,
+QCD predictions for the sum and the difference in rapidities of the two
+final-state objects show significant discrepancies with CMS data. In
+particular, next-to-leading-order QCD calculations, and two Monte Carlo
+event generators using different methods to merge matrix-element
+partons with evolved parton showers, appear inconsistent with the data
+as well as with each other.
+
+BibKey: 
+   '<Insert SPIRES BibTeX key>'
+
+BibTeX: 
+   '<Insert SPIRES BibTeX block>'
+
+ToDo:
+ - update reference when paper published
