@@ -13,6 +13,8 @@ the working directory.
 Note, if you are not using CMSSW, the following line is not required. 
 setenv SCRAM_ARCH slc5_amd64_gcc462; eval `scramv1 runtime -csh`
 
+If your job requires special environment settings, such as LHAPDF setting, 
+you need to include it in runJob.csh
 
 loopLHE.bash calls runJob.csh
 
