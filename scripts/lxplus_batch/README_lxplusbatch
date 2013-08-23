@@ -1,5 +1,5 @@
-1) Note, because all the batch jobs will be run in the same directory. 
- Therefore, you need to make sure the output root files have different 
+1) Note, because all the batch jobs will be run in the same directory, 
+ you need to make sure the output root files have different 
  names for each job segment.
 
 2) Prepare two shell script as loopLHE.bash and runJob.csh
