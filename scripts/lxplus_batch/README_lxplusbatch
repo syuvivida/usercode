@@ -1,0 +1,22 @@
+1) Note, because all the batch jobs will be run in the same directory. 
+ Therefore, you need to make sure the output root files have different 
+ names for each job segment.
+
+2) Prepare two shell script as loopLHE.bash and runJob.csh
+
+loopLHE.bash includes information of the job queue, number of jobs, input 
+arguments that varies with the job segment number
+
+runJob.csh includes the environment setup before running job and also 
+the working directory. 
+
+Note, if you are not using CMSSW, the following line is not required. 
+setenv SCRAM_ARCH slc5_amd64_gcc462; eval `scramv1 runtime -csh`
+
+
+loopLHE.bash calls runJob.csh
+
+3) to submit job, run ./loopLHE.bash
+
+4) More information about the job queue is here:
+https://twiki.cern.ch/twiki/bin/view/Main/BatchJobs
