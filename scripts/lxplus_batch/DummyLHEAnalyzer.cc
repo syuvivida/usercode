@@ -197,7 +197,7 @@ public:
     h_phiZ   ->SetXTitle("phi of Z");
     h_phiZ   ->Sumw2();
 
-    h_thetaZ = new TH1D("h_thetaZ","",200,-TMath::Pi(),TMath::Pi());
+    h_thetaZ = new TH1D("h_thetaZ","",200,0.0,TMath::Pi());
     h_thetaZ  ->SetXTitle("#theta of Z");
     h_thetaZ  ->Sumw2();
 
