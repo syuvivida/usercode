@@ -7,6 +7,7 @@ if [ -z $7 ] ; then
     exit 1
 fi
 
+
 let k=$RANDOM
 echo $k
 i=`date '+%s'`
