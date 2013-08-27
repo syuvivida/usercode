@@ -383,7 +383,7 @@ void forPaper_approval(std::string var1="h_ystar",
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);
-  leg2->SetTextSize(0.065);
+  leg2->SetTextSize(0.062);
   leg2->SetBorderSize(0);
   leg2->AddEntry(hscale[1], "SHERPA with stat. uncert.","f");
   leg2->AddEntry(hscale[2], "MADGRAPH with stat. uncert.","f");

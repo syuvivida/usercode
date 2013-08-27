@@ -331,7 +331,7 @@ void theoryErrorZed(TString PLOT="Ydif", float OFFSET=0 )
   TLegend *legend1 = new TLegend(0.206780,0.784679,0.357538,0.944099);
   legend1->SetFillColor(0);
   legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.065);
+  legend1->SetTextSize(0.062);
   legend1->SetBorderSize(0);
   legend1->AddEntry(TGa,"MCFM #mu_{R} and #mu_{F} uncert.","f");
   legend1->AddEntry(TGb,"MCFM PDF uncert.","f");
