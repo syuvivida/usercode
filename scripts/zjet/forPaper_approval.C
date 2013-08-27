@@ -10,9 +10,9 @@ void forPaper_approval(std::string var1="h_ystar",
 		       std::string mcfile4="Z_1jet_tota_cteq66_1___1___ex_m34.root",
 		       std::string headertitle="Z + 1 jet",
 		       std::string dataName="CMS Data",
-		       std::string mcName1="Sherpa",
-		       std::string mcName2="Madgraph",
-		       std::string mcName3="Madgraph",
+		       std::string mcName1="SHERPA (NLO PDF)",
+		       std::string mcName2="MADGRAPH (NLO PDF)",
+		       std::string mcName3="MADGRAPH (LO PDF)",
 		       std::string mcName4="MCFM"
 		       )
 {
@@ -23,7 +23,7 @@ void forPaper_approval(std::string var1="h_ystar",
   const int LINEWIDTH=3;
   const int NXDIVISIONS=5;
   const int NYDIVISIONS=6;
-  const double LATEXSIZE = 0.075;// x axis
+  const double LATEXSIZE = 0.070;// x axis // 0.070
   const double LABELSIZE = 37.5; //numbers
   const int NHISTOS=5;
   TH1F* h[NHISTOS];
@@ -240,9 +240,9 @@ void forPaper_approval(std::string var1="h_ystar",
   for(int ih=0; ih < NHISTOS; ih++){
  
     h[ih]->SetMaximum(1.2*max);
-//     if(var1=="h_zy")
-//       h[ih]->SetMaximum(1.9*max);
-    if(!logScale)
+    if(var1=="h_ystar")
+      h[ih]->SetMinimum(-0.08);
+    else if(!logScale)
       h[ih]->SetMinimum(-0.015);
     else
       h[ih]->SetMinimum(5e-6);
@@ -289,15 +289,10 @@ void forPaper_approval(std::string var1="h_ystar",
 
 
 
-//   double x1NDC = 0.206780;
-//   double y1NDC = 0.0474932;
-//   double x2NDC = 0.465255;
-//   double y2NDC = 0.400061;
-
   double x1NDC = 0.206780;
-  double y1NDC = 0.0423742;
+  double y1NDC = 0.02320;
   double x2NDC = 0.465255;
-  double y2NDC = 0.416373;
+  double y2NDC = 0.397194;
 
 
 
@@ -316,14 +311,14 @@ void forPaper_approval(std::string var1="h_ystar",
   leg->Draw("same");
 
 //   TLatex *lar = new TLatex(0.30, 0.89, "CMS,   #sqrt{s} = 7 TeV, L_{int} = 5 fb^{-1}");
-  TLatex *lar = new TLatex(0.20, 0.92, "CMS,   #sqrt{s} = 7 TeV, L = 5 fb^{-1}");
+  TLatex *lar = new TLatex(0.20, 0.92, "CMS,  #sqrt{s} = 7 TeV, L = 5 fb^{-1}");
   lar->SetNDC(kTRUE); 
   lar->SetTextSize(LATEXSIZE);
   lar->SetLineWidth(5);
   lar->Draw();
 
 
-  TLatex *larIndex = new TLatex(0.22, 0.80, indexName.data());
+  TLatex *larIndex = new TLatex(0.20, 0.82, indexName.data());
   larIndex->SetNDC(kTRUE);
   larIndex->SetTextSize(LATEXSIZE);
   larIndex->SetLineWidth(5);
@@ -390,9 +385,9 @@ void forPaper_approval(std::string var1="h_ystar",
   leg2->SetFillStyle(0);
   leg2->SetTextSize(0.065);
   leg2->SetBorderSize(0);
-  leg2->AddEntry(hscale[1], "Sherpa with stat. uncert.","f");
-  leg2->AddEntry(hscale[2], "Madgraph with stat. uncert.","f");
-  leg2->AddEntry(hscale[3], "Madgraph LO PDF","l");
+  leg2->AddEntry(hscale[1], "SHERPA with stat. uncert.","f");
+  leg2->AddEntry(hscale[2], "MADGRAPH with stat. uncert.","f");
+  leg2->AddEntry(hscale[3], "MADGRAPH (LO PDF)","l");
   leg2->Draw("same");
 
 
