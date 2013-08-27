@@ -318,7 +318,7 @@ void forPaper_approval(std::string var1="h_ystar",
   lar->Draw();
 
 
-  TLatex *larIndex = new TLatex(0.20, 0.82, indexName.data());
+  TLatex *larIndex = new TLatex(0.22, 0.82, indexName.data());
   larIndex->SetNDC(kTRUE);
   larIndex->SetTextSize(LATEXSIZE);
   larIndex->SetLineWidth(5);
@@ -379,7 +379,7 @@ void forPaper_approval(std::string var1="h_ystar",
   l2->Draw("same");
 
 
-  TLegend* leg2 = new TLegend(0.206780,0.211476,0.409075,0.443684);
+  TLegend* leg2 = new TLegend(0.206780,0.223915,0.409075,0.454051);
   
   leg2->SetFillColor(0);
   leg2->SetFillStyle(0);
