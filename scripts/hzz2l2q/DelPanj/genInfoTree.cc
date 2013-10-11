@@ -154,8 +154,8 @@ genInfoTree::Fill(const edm::Event& iEvent)
    
   for(; gjeti!=genJetColl->end();gjeti++){
     reco::GenParticle gjet = *gjeti;
-    //     if(gjet.pt()<=20)continue;
-    //     if(fabs(gjet.eta())>3.0)continue;
+    if(gjet.pt()<=20)continue;
+    if(fabs(gjet.eta())>3.0)continue;
 
     genJetE_.push_back(gjet.energy()); 
     genJetPt_.push_back(gjet.pt());

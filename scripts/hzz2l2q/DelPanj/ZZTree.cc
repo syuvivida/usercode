@@ -111,7 +111,6 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
   // differently or the same for the 3 taggers
   srand ( time(NULL) );
   int seed = rand(); //712687782, 727743360
-  std::cout << "seed = " << seed << std::endl;
   btsfutiljp = new BTagSFUtil("JP", seed);
 
 }
@@ -149,6 +148,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
   eleRho_ = *(ele_rho_event.product());
   e2012ID_.SetData(isData);
   e2012ID_.SetRho(eleRho_);
+//   std::cout << "rho = " << eleRho_ << std::endl;
 
   // rho for muon
   edm::Handle<double> muo_rho_event;
@@ -298,13 +298,8 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	    = dynamic_cast<const pat::Electron*>(h.daughter(LEPZ)->daughter(iele)->masterClone().get());
 
 	  std::map<std::string, bool> Pass    = e2012ID_.CutRecord(*myEle); 
-	  int passOrNot = PassAll(Pass);
-
-	  // 	      std::map<std::string, bool>::iterator iterCut= Pass.begin();
-	  // 	      for(;iterCut!=Pass.end();iterCut++)
-	  // 		std::cout<< myEle->eta() << "-->"<<iterCut->first<<"\t"
-	  // 			 <<iterCut->second<<std::endl;            
-
+	  int passOrNot = //(myEle->electronID("eidVBTFCom95")==7);
+	    PassAll(Pass);
 
 	  if(passOrNot==0)continue; // 2012 loose electron ID	  
 	  nPassID++;
@@ -320,12 +315,54 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	    = dynamic_cast<const pat::Muon*>(h.daughter(LEPZ)->daughter(imuo)->masterClone().get());
 	  std::map<std::string, bool> Pass = mu2012ID_.CutRecord(*myMuo);
 	  int passOrNot = PassAll(Pass);
+	  double pt    =  myMuo->pt();
+	  double eta   =  myMuo->eta();
+	  double iso1  =  myMuo->pfIsolationR04().sumChargedHadronPt;
+	  double iso2  =  myMuo->pfIsolationR04().sumNeutralHadronEt;
+	  double iso3  =  myMuo->pfIsolationR04().sumPhotonEt;
+	  double isoPU =  myMuo->pfIsolationR04().sumPUPt;    
+	  double iso4Beta = iso1 + std::max(iso3+iso2-0.5*isoPU,0.);
+	  MuonEffectiveArea::MuonEffectiveAreaTarget effAreaTarget_ = 
+	    isData? MuonEffectiveArea::kMuEAData2012:
+	    MuonEffectiveArea::kMuEAData2012;
+	  MuonEffectiveArea::MuonEffectiveAreaType effAreaType_= 
+	    MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
+	  double Area = MuonEffectiveArea::GetMuonEffectiveArea(
+			     effAreaType_, fabs(eta), effAreaTarget_);
+	  
+	  double iso4Rho =  iso1 + std::max(iso3+iso2-muoRho_*Area,0.);
+	  double isoBeta = iso4Beta/pt;	  
+	  double isoRho  = iso4Rho/pt;
+
+
+	  muID01.push_back(isoBeta);
+
+  // 	  muID01.push_back(myMuo->isGlobalMuon());
+	  muID02.push_back(passOrNot);
+  //  muID02.push_back(myMuo->isPFMuon());
+	  muID03.push_back(myMuo->isTrackerMuon());
+	  if(myMuo->isTrackerMuon() && myMuo->isGlobalMuon()){
+	    muID04.push_back(myMuo->globalTrack()->normalizedChi2());
+	    muID05.push_back(myMuo->globalTrack()->hitPattern().numberOfValidMuonHits());
+	    muID06.push_back(myMuo->numberOfMatchedStations());
+	    muID07.push_back(myMuo->dB());
+	    double dzV =myMuo->userFloat("dzVtx") ;
+	    muID08.push_back(dzV);
+	    muID09.push_back(myMuo->innerTrack()->hitPattern().numberOfValidPixelHits());
+	    muID10.push_back(myMuo->innerTrack()->hitPattern().trackerLayersWithMeasurement());
+  }
+	  muID11.push_back(myMuo->pfIsolationR04().sumChargedHadronPt);
+	  muID12.push_back(myMuo->pfIsolationR04().sumNeutralHadronEt);
+	  muID13.push_back(myMuo->pfIsolationR04().sumPhotonEt);
+	  muID14.push_back(myMuo->pfIsolationR04().sumPUPt);
+	  muID15.push_back(isoRho);
+
 	  if(passOrNot==0)continue; // 2012 tight muon ID	  
 	  nPassID++;	  	  
 	} // end of loop over muon
       } // if is a muon type
-     
-      
+    
+    
       if(nPassID < 2)continue;
 
 
@@ -528,18 +565,6 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
       heliLD_.push_back(heliLD_local);
       heliLDRefit_.push_back(heliLD_refit_local);
 
-      costhetaNT1_.push_back(goodH.userFloat("costhetaNT1"));
-      costhetaNT2_.push_back(goodH.userFloat("costhetaNT2"));
-      phiNT_.push_back(goodH.userFloat("phiNT"));
-      phiNT1_.push_back(goodH.userFloat("phiNT1"));
-      costhetastarNT_.push_back(goodH.userFloat("costhetastarNT"));
-      
-      costhetaNT1Refit_.push_back(goodH.userFloat("costhetaNT1Refit"));
-      costhetaNT2Refit_.push_back(goodH.userFloat("costhetaNT2Refit"));
-      phiNTRefit_.push_back(goodH.userFloat("phiNTRefit"));
-      phiNT1Refit_.push_back(goodH.userFloat("phiNT1Refit"));
-      costhetastarNTRefit_.push_back(goodH.userFloat("costhetastarNTRefit"));
-
       nBTags_.push_back(nBTags);
       lepType_.push_back(ilep);
 
@@ -631,24 +656,30 @@ ZZTree::SetBranches(){
   AddBranch(&jetPt_,"jetPt");
   AddBranch(&jetEta_,"jetEta");
   AddBranch(&jetPhi_,"jetPhi");
+
  
   AddBranch(&heliLD_,"heliLD");
-  AddBranch(&costhetaNT1_,"costhetaNT1");
-  AddBranch(&costhetaNT2_,"costhetaNT2");
-  AddBranch(&phiNT_,"phiNT");
-  AddBranch(&phiNT1_,"phiNT1");
-  AddBranch(&costhetastarNT_,"costhetastarNT");
-  
   AddBranch(&heliLDRefit_,"heliLDRefit");
-  AddBranch(&costhetaNT1Refit_,"costhetaNT1Refit");
-  AddBranch(&costhetaNT2Refit_,"costhetaNT2Refit");
-  AddBranch(&phiNTRefit_,"phiNTRefit");
-  AddBranch(&phiNT1Refit_,"phiNT1Refit");
-  AddBranch(&costhetastarNTRefit_,"costhetastarNTRefit");
 
   AddBranch(&nBTags_,"nBTags");
   AddBranch(&lepType_,"lepType");
   AddBranch(&passBit_,"passBit");
+
+  AddBranch(&muID01, "muID01");
+  AddBranch(&muID02, "muID02");
+  AddBranch(&muID03, "muID03");
+  AddBranch(&muID04, "muID04");
+  AddBranch(&muID05, "muID05");
+  AddBranch(&muID06, "muID06");
+  AddBranch(&muID07, "muID07");
+  AddBranch(&muID08, "muID08");
+  AddBranch(&muID09, "muID09");
+  AddBranch(&muID10, "muID10");
+  AddBranch(&muID11, "muID11");
+  AddBranch(&muID12, "muID12");
+  AddBranch(&muID13, "muID13");
+  AddBranch(&muID14, "muID14");
+  AddBranch(&muID15, "muID15");
 
 
 }
@@ -689,23 +720,27 @@ ZZTree::Clear(){
   jetPhi_.clear();
 
   heliLD_.clear();
-  costhetaNT1_.clear();
-  costhetaNT2_.clear();
-  phiNT_.clear();
-  phiNT1_.clear();
-  costhetastarNT_.clear();
- 
- 
   heliLDRefit_.clear();
-  costhetaNT1Refit_.clear();
-  costhetaNT2Refit_.clear();
-  phiNTRefit_.clear();
-  phiNT1Refit_.clear();
-  costhetastarNTRefit_.clear();
 
   nBTags_.clear();
   lepType_.clear();
   passBit_.clear();
+
+  muID01.clear();
+  muID02.clear();
+  muID03.clear();
+  muID04.clear();
+  muID05.clear();
+  muID06.clear();
+  muID07.clear();
+  muID08.clear();
+  muID09.clear();
+  muID10.clear();
+  muID11.clear();
+  muID12.clear();
+  muID13.clear();
+  muID14.clear();
+  muID15.clear();
 
 
 }
@@ -808,117 +843,113 @@ bool ZZTree::passLooseJetID(const pat::Jet* recjet)
 */
 
 /*
+  higgsPt_  = DUMMY;
+  higgsEta_ = DUMMY;
+  higgsPhi_ = DUMMY;
+  higgsM_   = DUMMY;
 
-higgsPt_  = DUMMY;
-higgsEta_ = DUMMY;
-higgsPhi_ = DUMMY;
-higgsM_   = DUMMY;
+  zllPt_  = DUMMY;
+  zllEta_ = DUMMY;
+  zllPhi_ = DUMMY;
+  zllM_   = DUMMY;
 
-zllPt_  = DUMMY;
-zllEta_ = DUMMY;
-zllPhi_ = DUMMY;
-zllM_   = DUMMY;
-
-zjjPt_  = DUMMY;
-zjjEta_ = DUMMY;
-zjjPhi_ = DUMMY;
-zjjM_   = DUMMY;
+  zjjPt_  = DUMMY;
+  zjjEta_ = DUMMY;
+  zjjPhi_ = DUMMY;
+  zjjM_   = DUMMY;
 
 
-int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
+  int arraySize = sizeof(jetPt_)/sizeof(jetPt_[0]);
 
-for(int i=0; i<arraySize;i++)
-{
-jetPt_[i] =DUMMY;
-jetEta_[i]=DUMMY;
-jetPhi_[i]=DUMMY;
-jetE_[i]  =DUMMY;
-jetRefitPt_[i] =DUMMY;
-jetRefitEta_[i]=DUMMY;
-jetRefitPhi_[i]=DUMMY;
-jetRefitE_[i]=DUMMY;
+  for(int i=0; i<arraySize;i++)
+  {
+  jetPt_[i] =DUMMY;
+  jetEta_[i]=DUMMY;
+  jetPhi_[i]=DUMMY;
+  jetE_[i]  =DUMMY;
+  jetRefitPt_[i] =DUMMY;
+  jetRefitEta_[i]=DUMMY;
+  jetRefitPhi_[i]=DUMMY;
+  jetRefitE_[i]=DUMMY;
 
-}
-lepType_ = -1;
+  }
+  lepType_ = -1;
   
-arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
+  arraySize = sizeof(lepPt_)/sizeof(lepPt_[0]);
 
-for(int i=0; i<arraySize;i++)
-{
-lepPt_[i] =DUMMY;
-lepEta_[i]=DUMMY;
-lepPhi_[i]=DUMMY;
-lepE_[i]  =DUMMY;
+  for(int i=0; i<arraySize;i++)
+  {
+  lepPt_[i] =DUMMY;
+  lepEta_[i]=DUMMY;
+  lepPhi_[i]=DUMMY;
+  lepE_[i]  =DUMMY;
 
-}
+  }
+  AddBranch(&eID01, "eID01");
+  AddBranch(&eID02, "eID02");
+  AddBranch(&eID03, "eID03");
+  AddBranch(&eID04, "eID04");
+  AddBranch(&eID05, "eID05");
+  AddBranch(&eID06, "eID06");
+  AddBranch(&eID07, "eID07");
+  AddBranch(&eID08, "eID08");
+  AddBranch(&eID09, "eID09");
+  AddBranch(&eID10, "eID10");
+  AddBranch(&eID11, "eID11");
+  AddBranch(&eID12, "eID12");
+  AddBranch(&eID13, "eID13");
+  AddBranch(&eID14, "eID14");
+  AddBranch(&eID15, "eID15");
+  AddBranch(&eID16, "eID16");
+  AddBranch(&eID17, "eID17");
 
-AddBranch(&eID01, "eID01");
-AddBranch(&eID02, "eID02");
-AddBranch(&eID03, "eID03");
-AddBranch(&eID04, "eID04");
-AddBranch(&eID05, "eID05");
-AddBranch(&eID06, "eID06");
-AddBranch(&eID07, "eID07");
-AddBranch(&eID08, "eID08");
-AddBranch(&eID09, "eID09");
-AddBranch(&eID10, "eID10");
-AddBranch(&eID11, "eID11");
-AddBranch(&eID12, "eID12");
-AddBranch(&eID13, "eID13");
-AddBranch(&eID14, "eID14");
-AddBranch(&eID15, "eID15");
-AddBranch(&eID16, "eID16");
-AddBranch(&eID17, "eID17");
+  eID01.clear();
+  eID02.clear();
+  eID03.clear();
+  eID04.clear();
+  eID05.clear();
+  eID06.clear();
+  eID07.clear();
+  eID08.clear();
+  eID09.clear();
+  eID10.clear();
+  eID11.clear();
+  eID12.clear();
+  eID13.clear();
+  eID14.clear();
+  eID15.clear();
+  eID16.clear();
+  eID17.clear();
 
-eID01.clear();
-eID02.clear();
-eID03.clear();
-eID04.clear();
-eID05.clear();
-eID06.clear();
-eID07.clear();
-eID08.clear();
-eID09.clear();
-eID10.clear();
-eID11.clear();
-eID12.clear();
-eID13.clear();
-eID14.clear();
-eID15.clear();
-eID16.clear();
-eID17.clear();
+  AddBranch(&muID01, "muID01");
+  AddBranch(&muID02, "muID02");
+  AddBranch(&muID03, "muID03");
+  AddBranch(&muID04, "muID04");
+  AddBranch(&muID05, "muID05");
+  AddBranch(&muID06, "muID06");
+  AddBranch(&muID07, "muID07");
+  AddBranch(&muID08, "muID08");
+  AddBranch(&muID09, "muID09");
+  AddBranch(&muID10, "muID10");
+  AddBranch(&muID11, "muID11");
+  AddBranch(&muID12, "muID12");
+  AddBranch(&muID13, "muID13");
+  AddBranch(&muID14, "muID14");
+  AddBranch(&muID15, "muID15");
 
-AddBranch(&muID01, "muID01");
-AddBranch(&muID02, "muID02");
-AddBranch(&muID03, "muID03");
-AddBranch(&muID04, "muID04");
-AddBranch(&muID05, "muID05");
-AddBranch(&muID06, "muID06");
-AddBranch(&muID07, "muID07");
-AddBranch(&muID08, "muID08");
-AddBranch(&muID09, "muID09");
-AddBranch(&muID10, "muID10");
-AddBranch(&muID11, "muID11");
-AddBranch(&muID12, "muID12");
-AddBranch(&muID13, "muID13");
-AddBranch(&muID14, "muID14");
-AddBranch(&muID15, "muID15");
-
-muID01.clear();
-muID02.clear();
-muID03.clear();
-muID04.clear();
-muID05.clear();
-muID06.clear();
-muID07.clear();
-muID08.clear();
-muID09.clear();
-muID10.clear();
-muID11.clear();
-muID12.clear();
-muID13.clear();
-muID14.clear();
-muID15.clear();
-
-
+  muID01.clear();
+  muID02.clear();
+  muID03.clear();
+  muID04.clear();
+  muID05.clear();
+  muID06.clear();
+  muID07.clear();
+  muID08.clear();
+  muID09.clear();
+  muID10.clear();
+  muID11.clear();
+  muID12.clear();
+  muID13.clear();
+  muID14.clear();
+  muID15.clear();
 */

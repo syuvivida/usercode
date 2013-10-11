@@ -1,9 +1,5 @@
 #ifndef __JET_TREE_H_
 #define __JET_TREE_H_
-/*
-  Author: Anil P Singh
-  Panjab University
-*/
 
 
 
@@ -38,6 +34,7 @@ class jetTree  : public baseTree{
   jetTree(std::string name, TTree* tree, const edm::ParameterSet& cfg);//name=patJetAk05
   ~jetTree();
   void Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup) ; 
+  bool passLooseJetID(std::vector<pat::Jet>::const_iterator recJet);
   void SetBranches();
   void Clear();
  
@@ -54,11 +51,13 @@ class jetTree  : public baseTree{
   std::vector<double> JetPhi_;
   std::vector<double> JetM_;
   std::vector<double> JetEn_;
+  std::vector<double> JetBeta_; // only works for H->ZZ->2l2q
   std::vector<double> JetCharMulti_;
   std::vector<double> JetNeutEmEFr_;
   std::vector<double> JetCharHadEFr_;
   std::vector<double> JetNeutHadEFr_;
   std::vector<double> JetCharEmEFr_;
+  std::vector<int>    JetPassID_;
 
 };
 

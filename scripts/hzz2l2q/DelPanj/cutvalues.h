@@ -37,7 +37,6 @@ const double MAX_MZ_JJ=105.0;
 
 const double LOOSE_MIN_MZ_JJ=60.0;
 const double LOOSE_MAX_MZ_JJ=130.0;
-const double MORELOOSE_MAX_MZ_JJ=160.0;
 
 const double MIN_MZ_LL=70.0;
 const double MAX_MZ_LL=110.0;

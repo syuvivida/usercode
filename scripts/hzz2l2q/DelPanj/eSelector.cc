@@ -125,16 +125,14 @@ eSelector::CutRecord(const pat::Electron& e){
   if(doRhoCorr_)
     {
       ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_ = 
-  	isData_? ElectronEffectiveArea::kEleEAData2011:
-  	ElectronEffectiveArea::kEleEAFall11MC;
-
+  	ElectronEffectiveArea::kEleEAData2012;
       
       ElectronEffectiveArea::ElectronEffectiveAreaType effAreaType_ =
 	ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03;      
  
       double AEff = ElectronEffectiveArea::GetElectronEffectiveArea
 	(effAreaType_, fabs(eta), effAreaTarget_);
-      
+
       iso4 = iso1 + std::max(0.0, iso2+iso3-rho_*AEff);
 
     }
