@@ -105,8 +105,12 @@ ZZTree::ZZTree(std::string name, TTree* tree, const edm::ParameterSet& iConfig):
 {
   tree_=tree; 
   SetBranches();
+  merged_ = false;
+  merged_ = iConfig.getParameter<bool>("merged_");
 
-  
+  nJets_ = 2;
+  if(merged_)nJets_=1;
+
   // the second argument is the random seed, any reason to set it 
   // differently or the same for the 3 taggers
   srand ( time(NULL) );
@@ -127,7 +131,6 @@ ZZTree::~ZZTree()
 void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 {
   Clear();
-  int eventNum = iEvent.id().event();
   
   //============================================================================
   // 
@@ -243,9 +246,11 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
     if(ilep==0) iEvent.getByLabel(hzzeejj_, hzzlljj);
     else iEvent.getByLabel(hzzmmjj_, hzzlljj);
 
+
     // LOOP OVER HIGGS CANDIDATES
 
     for(unsigned i=0; i<hzzlljj->size(); i++){
+
       const pat::CompositeCandidate & h = (*hzzlljj)[i];	
 
       const reco::Candidate*  myLepton[2];  
@@ -253,10 +258,16 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	myLepton[il]= h.daughter(LEPZ)->daughter(il)->masterClone().get();
 
       const pat::Jet * myJet[2];
-      for(unsigned int ijet=0; ijet < 2; ijet++)
-	myJet[ijet] =
-	  dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
-					 masterClone().get());
+
+
+      if(merged_)
+	myJet[0] =
+	  dynamic_cast<const pat::Jet *>(h.daughter(HADZ));	
+      else
+	for(unsigned int ijet=0; ijet < nJets_; ijet++)
+	  myJet[ijet] =
+	    dynamic_cast<const pat::Jet *>(h.daughter(HADZ)->daughter(ijet)->
+					   masterClone().get());
       
       // LOOK FOR TWO GOOD CHARGED LEPTONS
       int nLepPtHi=0;
@@ -267,8 +278,8 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	if(deltaR(myLepton[il]->eta(), myLepton[il]->phi(),
 		  myJet[0]->eta(), myJet[0]->phi()) < MIN_DR_JETLEP)continue;
 
-	if(deltaR(myLepton[il]->eta(), myLepton[il]->phi(),
-		  myJet[1]->eta(), myJet[1]->phi()) < MIN_DR_JETLEP)continue;
+	if(nJets_ > 1 && deltaR(myLepton[il]->eta(), myLepton[il]->phi(),
+				myJet[1]->eta(), myJet[1]->phi()) < MIN_DR_JETLEP)continue;
 
 
 	double pt = myLepton[il]->pt();	  
@@ -278,6 +289,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
       }
 
       if(nLepPtHi < 1)continue;
+
       if(nLepPtLo < 2)continue;
       
       bool OppCharge = myLepton[0]->charge()*myLepton[1]->charge() < 0 ? 
@@ -315,6 +327,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	    = dynamic_cast<const pat::Muon*>(h.daughter(LEPZ)->daughter(imuo)->masterClone().get());
 	  std::map<std::string, bool> Pass = mu2012ID_.CutRecord(*myMuo);
 	  int passOrNot = PassAll(Pass);
+	  /*
 	  double pt    =  myMuo->pt();
 	  double eta   =  myMuo->eta();
 	  double iso1  =  myMuo->pfIsolationR04().sumChargedHadronPt;
@@ -356,23 +369,25 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	  muID13.push_back(myMuo->pfIsolationR04().sumPhotonEt);
 	  muID14.push_back(myMuo->pfIsolationR04().sumPUPt);
 	  muID15.push_back(isoRho);
-
+	  */
 	  if(passOrNot==0)continue; // 2012 tight muon ID	  
 	  nPassID++;	  	  
 	} // end of loop over muon
       } // if is a muon type
     
-    
+      
+
       if(nPassID < 2)continue;
+
 
 
       // LOOK FOR 2 JETS PASSING BETA CUTS
 
-      int nGoodJets=0;
-      int nLooseBTags=0;
-      int nMediumBTags=0;
+      unsigned int nGoodJets=0;
+      unsigned int nLooseBTags=0;
+      unsigned int nMediumBTags=0;
 
-      for(unsigned int ijet=0; ijet < 2; ijet++){	 
+      for(unsigned int ijet=0; ijet < nJets_; ijet++){	 
 	
 	double pt  = myJet[ijet]->pt();
 	if(pt < MIN_JETPT)continue;
@@ -382,7 +397,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	
 	// to suppress jets from pileups
 	double puBeta = myJet[ijet]->userFloat("puBeta");
-	if(puBeta < MIN_JETBETA)continue;
+	if(!merged_ && puBeta < MIN_JETBETA)continue;
 
 	
 	if(deltaR(myLepton[0]->eta(), myLepton[0]->phi(),
@@ -392,7 +407,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 		  myJet[ijet]->eta(), myJet[ijet]->phi()) < MIN_DR_JETLEP)continue;
 	  
 	
-	if( !passLooseJetID(myJet[ijet]) )continue;
+	if(!merged_ && !passLooseJetID(myJet[ijet]) )continue;
 
 
 	bool isLoose  = false;
@@ -403,6 +418,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	if(jpBTag > MIN_BTAG_JP_LOOSE)isLoose=true;
 	if(jpBTag > MIN_BTAG_JP_MEDIUM)isMedium=true;
 	
+
  	if(!isData)
 	  {
 	    double phi = myJet[ijet]->phi();
@@ -473,9 +489,10 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 
 	nGoodJets++; 
       } // end of loop over jets
+
       
       // there must be at least two jets
-      if(nGoodJets < 2)continue;
+      if(nGoodJets < nJets_)continue;
 
       // number of btags
       int nBTags = 0;
@@ -510,8 +527,8 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
       double zjjPhi_local = Zjj->phi();
       double zjjM_local   = Zjj->mass();
       double zjjM_refit_local = goodH.userFloat("ZjjRefitMass");
-      double zjjdR_local  = deltaR(myJet[0]->eta(),myJet[0]->phi(),
-				   myJet[1]->eta(),myJet[1]->phi());
+      double zjjdR_local  = nJets_ > 1? deltaR(myJet[0]->eta(),myJet[0]->phi(),
+					       myJet[1]->eta(),myJet[1]->phi()):DUMMY;
 
 
       
@@ -547,7 +564,7 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
       zjjMRefit_.push_back(zjjM_refit_local);
       zjjdR_.push_back(zjjdR_local);
 
-      for(int isjet=0; isjet<2; isjet++)
+      for(unsigned int isjet=0; isjet<nJets_; isjet++)
 	{
 
 	  jetIndex_.push_back(isjet);
@@ -556,7 +573,9 @@ void ZZTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup)
 	  jetPt_.push_back(myJet[isjet]->pt());
 	  jetEta_.push_back(myJet[isjet]->eta());
 	  jetPhi_.push_back(myJet[isjet]->phi());
-	  
+	  jetTau1_.push_back(myJet[isjet]->userFloat("tau1"));
+	  jetTau2_.push_back(myJet[isjet]->userFloat("tau2"));
+	  jetQV_.push_back(myJet[isjet]->userFloat("qjetsvolatility"));
 	  
 	}
 
@@ -656,6 +675,9 @@ ZZTree::SetBranches(){
   AddBranch(&jetPt_,"jetPt");
   AddBranch(&jetEta_,"jetEta");
   AddBranch(&jetPhi_,"jetPhi");
+  AddBranch(&jetTau1_,"jetTau1");
+  AddBranch(&jetTau2_,"jetTau2");
+  AddBranch(&jetQV_,"jetQV");
 
  
   AddBranch(&heliLD_,"heliLD");
@@ -665,21 +687,21 @@ ZZTree::SetBranches(){
   AddBranch(&lepType_,"lepType");
   AddBranch(&passBit_,"passBit");
 
-  AddBranch(&muID01, "muID01");
-  AddBranch(&muID02, "muID02");
-  AddBranch(&muID03, "muID03");
-  AddBranch(&muID04, "muID04");
-  AddBranch(&muID05, "muID05");
-  AddBranch(&muID06, "muID06");
-  AddBranch(&muID07, "muID07");
-  AddBranch(&muID08, "muID08");
-  AddBranch(&muID09, "muID09");
-  AddBranch(&muID10, "muID10");
-  AddBranch(&muID11, "muID11");
-  AddBranch(&muID12, "muID12");
-  AddBranch(&muID13, "muID13");
-  AddBranch(&muID14, "muID14");
-  AddBranch(&muID15, "muID15");
+//   AddBranch(&muID01, "muID01");
+//   AddBranch(&muID02, "muID02");
+//   AddBranch(&muID03, "muID03");
+//   AddBranch(&muID04, "muID04");
+//   AddBranch(&muID05, "muID05");
+//   AddBranch(&muID06, "muID06");
+//   AddBranch(&muID07, "muID07");
+//   AddBranch(&muID08, "muID08");
+//   AddBranch(&muID09, "muID09");
+//   AddBranch(&muID10, "muID10");
+//   AddBranch(&muID11, "muID11");
+//   AddBranch(&muID12, "muID12");
+//   AddBranch(&muID13, "muID13");
+//   AddBranch(&muID14, "muID14");
+//   AddBranch(&muID15, "muID15");
 
 
 }
@@ -718,6 +740,9 @@ ZZTree::Clear(){
   jetPt_.clear();
   jetEta_.clear();
   jetPhi_.clear();
+  jetTau1_.clear();
+  jetTau2_.clear();
+  jetQV_.clear();
 
   heliLD_.clear();
   heliLDRefit_.clear();
@@ -726,21 +751,21 @@ ZZTree::Clear(){
   lepType_.clear();
   passBit_.clear();
 
-  muID01.clear();
-  muID02.clear();
-  muID03.clear();
-  muID04.clear();
-  muID05.clear();
-  muID06.clear();
-  muID07.clear();
-  muID08.clear();
-  muID09.clear();
-  muID10.clear();
-  muID11.clear();
-  muID12.clear();
-  muID13.clear();
-  muID14.clear();
-  muID15.clear();
+//   muID01.clear();
+//   muID02.clear();
+//   muID03.clear();
+//   muID04.clear();
+//   muID05.clear();
+//   muID06.clear();
+//   muID07.clear();
+//   muID08.clear();
+//   muID09.clear();
+//   muID10.clear();
+//   muID11.clear();
+//   muID12.clear();
+//   muID13.clear();
+//   muID14.clear();
+//   muID15.clear();
 
 
 }

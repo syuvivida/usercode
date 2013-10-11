@@ -55,6 +55,8 @@ class ZZTree{
   edm::InputTag hzzmmjj_;
   edm::InputTag eleRhoIsoInputTag_;
   edm::InputTag muoRhoIsoInputTag_;
+  bool merged_;
+
   eSelector e2012ID_;
   muSelector mu2012ID_;
 
@@ -63,6 +65,7 @@ class ZZTree{
   double eleRho_;
   double muoRho_;
   double metSig_;
+  unsigned int nJets_;
  
   std::vector<double> higgsPt_;
   std::vector<double> higgsEta_;
@@ -89,31 +92,18 @@ class ZZTree{
   std::vector<double> jetPt_;
   std::vector<double> jetEta_;
   std::vector<double> jetPhi_;
-
-
-  // input for the angular likelihood 
+  std::vector<double> jetTau1_;
+  std::vector<double> jetTau2_;
+  std::vector<double> jetQV_;
+  
   std::vector<double> heliLD_;
-  std::vector<double> costhetaNT1_;
-  std::vector<double> costhetaNT2_;
-  std::vector<double> phiNT_;
-  std::vector<double> phiNT1_;
-  std::vector<double> costhetastarNT_;
-
-  // refitted
   std::vector<double> heliLDRefit_;
-  std::vector<double> costhetaNT1Refit_;
-  std::vector<double> costhetaNT2Refit_;
-  std::vector<double> phiNTRefit_;
-  std::vector<double> phiNT1Refit_;
-  std::vector<double> costhetastarNTRefit_;
 
   std::vector<int>    nBTags_;
   std::vector<int>    lepType_;
   std::vector<int>    passBit_;
 
   /*
-
-
   std::vector<double> eID01;
   std::vector<double> eID02;
   std::vector<double> eID03;
@@ -132,7 +122,6 @@ class ZZTree{
   std::vector<double> eID16;
   std::vector<double> eID17;
 
-
   std::vector<double> muID01;
   std::vector<double> muID02;
   std::vector<double> muID03;
@@ -148,9 +137,8 @@ class ZZTree{
   std::vector<double> muID13;
   std::vector<double> muID14;
   std::vector<double> muID15;
-
   */
-  
+
 };
 
 #endif
