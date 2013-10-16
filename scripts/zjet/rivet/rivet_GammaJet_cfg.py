@@ -34,9 +34,9 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('\\$Revision: 1.9 $'),
+    version = cms.untracked.string('\\$Revision: 1.2 $'),
     annotation = cms.untracked.string('Summer2011 sample with PYTHIA6: Prompt photon production, pThat = 30 ...inf GeV, TuneZ2'),
-    name = cms.untracked.string('\\$Source: /cvs/CMSSW/CMSSW/Configuration/GenProduction/python/G_Pt_30_TuneZ2_7TeV_pythia6_cff.py,v $')
+    name = cms.untracked.string('\\$Source: /local/reps/CMSSW/UserCode/syu/scripts/zjet/rivet/rivet_GammaJet_cfg.py,v $')
 )
 
 # Output definition
@@ -120,7 +120,7 @@ from Configuration.GenProduction.rivet_customize import customise
 process = customise(process)
 
 
-process.rivetAnalyzer.AnalysisNames = cms.vstring('CMS_SMP_12_004')
+process.rivetAnalyzer.AnalysisNames = cms.vstring('CMS_2013_1258128')
 process.rivetAnalyzer.OutputFile = cms.string('mcfilePhotonJet2500000New.aida')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
