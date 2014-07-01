@@ -204,6 +204,8 @@ then
     done
 
     rm -rf powheg.input*
+    sed -e "/#new weight/d" -e "/#rwgt/d" -e "/<wgt id='c'>/d" -e "/<weight id='c'>/d" pwgevents.lhe > pwgevents.lhe.tmp
+    mv pwgevents.lhe.tmp pwgevents.lhe 
     echo -e "\n finished computing weights ..\n" 
 fi
 
