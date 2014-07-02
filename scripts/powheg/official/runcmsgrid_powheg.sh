@@ -57,12 +57,16 @@ fi
 cat ${card} | sed -e "s#SEED#${seed}#g" | sed -e "s#NEVENTS#${nevt}#g" > powheg.input
 
 # Check if the powheg.input file contains the proper settings to calculate weights                                                                                                                           
- 
-if [ grep -q "storeinfo_rwgt 1" powheg.input ; test $? -eq 0 ] && [ grep -q "pdfreweight 1" powheg.input ; test $? -eq 0 ] && [ grep -q "withnegweight 1" powheg.input ; test $? -eq 0 ] ;
+produceWeights="true" 
+grep -q "storeinfo_rwgt 1" powheg.input ; test $? -eq 0  || produceWeights="false"
+grep -q "pdfreweight 1" powheg.input ; test $? -eq 0 || produceWeights="false"
+
+grep -q "withnegweights 1" powheg.input ; test $? -eq 0 || produceWeights="false"
+if [ "$produceWeights" == "true" ];
 then
-    produceWeights="true"
     cp -p powheg.input powheg.input.orig
     cat <<'EOF' >> powheg.input
+
 lhrwgt_id 'c'
 lhrwgt_descr 'muR=0.10000E+01 muF=0.10000E+01'
 lhrwgt_group_name 'scale_variation'
