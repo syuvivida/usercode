@@ -111,6 +111,10 @@ mkdir workdir
 cd workdir
 localDir=`pwd`
 
+if [ -e  ${WORKDIR}/vbfnlo.input ]; then
+    cp -p ${WORKDIR}/vbfnlo.input .
+fi
+
 cat ${card} | sed -e "s#SEED#${seed}#g" | sed -e "s#NEVENTS#${nevt}#g" > powheg.input
 cat powheg.input
 ../pwhg_main &> log_${process}_${seed}.txt
