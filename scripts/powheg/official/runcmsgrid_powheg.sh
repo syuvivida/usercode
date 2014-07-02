@@ -109,7 +109,7 @@ then
 	if (( $(bc <<< "$scale1 <= 2*$scale2") == 1 && $(bc <<< "$scale1 >= 0.5*$scale2") == 1 )); 
 	    then 
 	    echo -e "\n doing scale ${scale1}, ${scale2}\n"
-            sed  -e '/renscfact/s=1d0='$scale1'd0=' -e '/facscfact/s=1d0='$scale2'd0=' powheg.input.tmp > powheg.input
+	    sed -e 's/.*renscfact.*/renscfact '$scale1'd0/ ; s/.*facscfact.*/facscfact '$scale2'd0/' powheg.input.tmp > powheg.input
 
 	    counter=$(( counter + 1 ))
 	    echo -e "\nlhrwgt_id '${counter}'" >> powheg.input
@@ -132,7 +132,7 @@ then
       do
       iteration=$(( iteration + 1 ))
       echo -e "\n PDF set ${iteration}"
-      cat powheg.input.tmp | sed '/lhans/s=11000='$iteration'=' > powheg.input
+      sed -e 's/.*lhans1.*/lhans1 '$iteration'/ ; s/.*lhans2.*/lhans2 '$iteration'/' powheg.input.tmp > powheg.input
 
       counter=$(( counter + 1 ))
       echo -e "\nlhrwgt_id '${counter}'" >> powheg.input
