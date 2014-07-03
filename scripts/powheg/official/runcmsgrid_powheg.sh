@@ -37,6 +37,12 @@ export WORKDIR=`pwd`
 myDir=powhegbox_${process}
 card=${WORKDIR}/powheg.input
 
+if [[ -e ${myDir} ]]; then
+  echo -e "The directory ${myDir} exists! Move the directory to old_${myDir}\n"
+  mv ${myDir} old_${myDir}
+  mv cmsgrid_final.lhe old_cmsgrid_final.lhe
+fi
+
 mkdir ${myDir}; cd ${myDir} ;  
 
 # force the f77 compiler to be the CMS defined one
@@ -45,10 +51,10 @@ mkdir ${myDir}; cd ${myDir} ;
 export PATH=`pwd`:${PATH}
 
 if [[ -e ${WORKDIR}/pwggrid.dat ]]; then
-    mv ${WORKDIR}/pwg*.dat .
+    cp -p ${WORKDIR}/pwg*.dat .
 fi
 if [ -e  ${WORKDIR}/vbfnlo.input ]; then
-    mv ${WORKDIR}/vbfnlo.input .
+    cp -p ${WORKDIR}/vbfnlo.input .
 fi
 
 if [[ ! -e ${card} ]]; then
@@ -74,7 +80,7 @@ lhrwgt_group_name 'scale_variation'
 lhrwgt_group_combine 'envelope'
 EOF
 else
-    echo "Warning!! The output will not contain weights!"
+    echo -e "\nWarning!! The output will not contain weights!\n"
     produceWeights="false"
 fi
 
@@ -90,7 +96,7 @@ then
     grep -q "storeinfo_rwgt 0" powheg.input.tmp ; test $? -eq 0 || fail_exit "Weights will be re-written!"
     grep -q "compute_rwgt 1" powheg.input.tmp ; test $? -eq 0 || fail_exit "Weights are not calculated!"
 
-    echo -e "\ncomputing weights for 7 scale variation\n"
+    echo -e "\ncomputing weights for 9 scale variations\n"
     iteration=-1
     lastfile=2
     array=(1 2 0.5)
@@ -125,7 +131,7 @@ then
       done
     done
 
-    echo -e "\ncomputing weights for 52 CT10 PDF variation\n"
+    echo -e "\ncomputing weights for 52 CT10 PDF variations\n"
     iteration=10800
     lastfile=10852
     counter=2000
