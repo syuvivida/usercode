@@ -129,6 +129,9 @@ myDir=powhegbox_${process}
 mkdir ${WORKDIR}/${myDir}
 cp -p ../pwhg_main ${WORKDIR}/${myDir}/.
 cp -p pwg*.dat ${WORKDIR}/${myDir}/.
+if [ -e  ${WORKDIR}/vbfnlo.input ]; then
+    cp -p ${WORKDIR}/vbfnlo.input ${WORKDIR}/${myDir}/.
+fi
 
 cd ${WORKDIR}/${myDir}
 cp -p ${card} .
