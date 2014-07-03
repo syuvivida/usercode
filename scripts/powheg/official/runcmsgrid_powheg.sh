@@ -31,15 +31,13 @@ file="cmsgrid"
 process="PROCESS"
 
 # Release to be used to define the environment and the compiler needed
-export RELEASE=${CMSSW_VERSION}
 export WORKDIR=`pwd`
 
 # initialize the CMS environment 
 myDir=powhegbox_${process}
 card=${WORKDIR}/powheg.input
 
-scram project -n ${myDir} CMSSW ${RELEASE}; cd ${myDir} ;  
-eval `scram runtime -sh`
+mkdir ${myDir}; cd ${myDir} ;  
 
 # force the f77 compiler to be the CMS defined one
 #ln -s `which gfortran` f77
@@ -47,7 +45,10 @@ eval `scram runtime -sh`
 export PATH=`pwd`:${PATH}
 
 if [[ -e ${WORKDIR}/pwggrid.dat ]]; then
- mv ${WORKDIR}/pwg*.dat .
+    mv ${WORKDIR}/pwg*.dat .
+fi
+if [ -e  ${WORKDIR}/vbfnlo.input ]; then
+    mv ${WORKDIR}/vbfnlo.input .
 fi
 
 if [[ ! -e ${card} ]]; then
