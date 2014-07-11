@@ -89,7 +89,7 @@ tar xzf ${name}.tar.gz
 cd POWHEG-BOX/${process}
 
 mv Makefile Makefile.orig
-cat Makefile.orig | sed -e "s#STATIC[ \t]*=[ \t]*-static#STATIC=-dynamic#g" | sed -e "s#PDF[ \t]*=[ \t]*native#PDF=lhapdf#g"  | sed -e '/FJCXXFLAGS/s=--cxxflags)=--cxxflags) -std\=c++11='> Makefile
+cat Makefile.orig | sed -e "s#STATIC[ \t]*=[ \t]*-static#STATIC=-dynamic#g" | sed -e "s#PDF[ \t]*=[ \t]*native#PDF=lhapdf#g" > Makefile
 echo "LIBS+=-lz -lstdc++" >> Makefile
 
 
@@ -136,7 +136,6 @@ fi
 cd ${WORKDIR}/${myDir}
 cp -p ${card} .
 
-curl https://raw2.github.com/cms-sw/genproductions/master/bin/Powheg/runcmsgrid_powheg.sh -o ${WORKDIR}/runcmsgrid_powheg.sh
 if [ ! -e  ${WORKDIR}/runcmsgrid_powheg.sh ]; then
  fail_exit "Did not find " ${WORKDIR}/runcmsgrid_powheg.sh 
 fi
