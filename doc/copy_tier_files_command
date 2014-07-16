@@ -1,0 +1,1 @@
+./data_replica.py --from-site=T2_CH_CSCS --to-site=T3_TW_NCU short.txt /store/user/syu/JetHT/EDBRTauTau_RunA

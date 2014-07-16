@@ -1,0 +1,3 @@
+screen -DR
+k5reauth -r ./pwg
+ctrl+a  d

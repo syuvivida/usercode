@@ -1,0 +1,47 @@
+srmls -count=1000  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/Jet/EDBRTauTau_RunA/f74317ae72b4bfd52dad4bdaf2a7fb2a/  >& Log
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" > filelist_A.txt
+rm -rf Log
+
+srmls -count=1000  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunB/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log  
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" > filelist_B.txt
+rm -rf Log
+
+srmls -count=600  -offset=1000 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunB/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log  
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_B.txt
+rm -rf Log
+
+srmls -count=1000  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunB_topup/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log   
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_B.txt
+rm -rf Log
+
+srmls -count=1000  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunC/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" > filelist_C.txt
+rm -rf Log
+
+srmls -count=1000  -offset=1000 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunC/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_C.txt
+rm -rf Log
+
+srmls -count=500  -offset=2000 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunC/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_C.txt
+rm -rf Log
+
+srmls -count=500  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunC_topup/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_C.txt
+rm -rf Log
+
+srmls -count=1000  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunD/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" > filelist_D.txt
+rm -rf Log
+
+srmls -count=1000  -offset=1000 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunD/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_D.txt
+rm -rf Log
+
+srmls -count=1000  -offset=2000 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunD/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_D.txt
+rm -rf Log
+
+srmls -count=500  -offset=0 srm://storage01.lcg.cscs.ch:8443/pnfs/lcg.cscs.ch/cms/trivcat/store/user/aspiezia/JetHT/EDBRTauTau_RunD_topup/f74317ae72b4bfd52dad4bdaf2a7fb2a/ >& Log 
+awk '{print $2}' Log | awk -F"/pnfs/lcg.cscs.ch/cms/trivcat" '{print $2}' | grep "root" >> filelist_D.txt
+rm -rf Log
