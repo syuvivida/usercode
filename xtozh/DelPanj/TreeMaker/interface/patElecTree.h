@@ -69,6 +69,8 @@ class patElecTree : public baseTree {
   std::vector<Float_t> patElecEcalIso_;
   std::vector<Float_t> patElecCorrPfIso_;
   std::vector<Float_t> patElecTauCorrPfIso_;
+  std::vector<Float_t> patElecUserTrkIso_;
+  std::vector<Float_t> patElecUserCalIso_;
 
   std::vector<Float_t> patElecEoverP_;
   std::vector<Float_t> patElecDxy_;

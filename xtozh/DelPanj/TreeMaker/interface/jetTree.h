@@ -68,7 +68,7 @@ class jetTree  : public baseTree{
   std::vector<Float_t> JetPhi_;
   std::vector<Float_t> JetM_;
   std::vector<Float_t> JetEn_;
-  std::vector<Float_t> JetCorrFac_;
+/*   std::vector<Float_t> JetCorrFac_; */
   std::vector<Int_t>   JetPassID_;
   std::vector<Float_t> JetPrunedPt_;
   std::vector<Float_t> JetPrunedEta_;

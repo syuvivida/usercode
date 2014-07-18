@@ -32,16 +32,19 @@ eventInfo::Fill(const edm::Event& iEvent){
   bunchX_ = iEvent.bunchCrossing();
 
 
-  edm::Handle<reco::VertexCollection> recVtxs;
-  iEvent.getByLabel("offlinePrimaryVertices",recVtxs);
-  for(unsigned int ind=0;ind<recVtxs->size();ind++) {
-    if (!((*recVtxs)[ind].isFake()) && ((*recVtxs)[ind].ndof()>4) 
-	&& (fabs((*recVtxs)[ind].z())<=24.0) &&  
-	((*recVtxs)[ind].position().Rho()<=2.0) ) {   
-      nVtx_++;
-      vertexX_.push_back((*recVtxs)[ind].x());
-      vertexY_.push_back((*recVtxs)[ind].y());
-      vertexZ_.push_back((*recVtxs)[ind].z());
+  edm::Handle<reco::VertexCollection> recVtxs_;
+
+  if (iEvent.getByLabel("goodOfflinePrimaryVertices", recVtxs_)) {
+    for (size_t i=0; i<recVtxs_->size(); ++i) {
+      if((*recVtxs_)[i].ndof() >= 4 && fabs((*recVtxs_)[i].z()) <= 24 && fabs((*recVtxs_)[i].position().rho()) <= 2
+	 && !((*recVtxs_)[i].isFake())
+	 )
+	{
+	  nVtx_++;
+	  vertexX_.push_back((*recVtxs_)[i].x());
+	  vertexY_.push_back((*recVtxs_)[i].y());
+	  vertexZ_.push_back((*recVtxs_)[i].z());
+	} // if satifying good vertices
     }
   }
 }

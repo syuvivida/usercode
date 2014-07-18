@@ -144,6 +144,9 @@ patElecTree::Fill(const edm::Event& iEvent){
     patElecNeHadIso_.push_back(ele->neutralHadronIso());
     patElecGamIso_.push_back(ele->photonIso());
 
+    patElecUserTrkIso_.push_back(ele->userIso(0));
+    patElecUserCalIso_.push_back(ele->userIso(1)+ele->userIso(2));
+
 
     patElecInBarrel_.push_back(ele->isEB());
     patElecInEndcap_.push_back(ele->isEE());
@@ -189,6 +192,8 @@ patElecTree::SetBranches(){
   AddBranch(&patElecTrkIso_, "eleTrkIso");
   AddBranch(&patElecHcalIso_, "eleHcalIso");
   AddBranch(&patElecEcalIso_, "eleEcalIso");
+  AddBranch(&patElecUserTrkIso_,"eleUserTrkIso");
+  AddBranch(&patElecUserCalIso_,"eleUserCalIso");
   
   AddBranch(&patElecCorrPfIso_, "eleCorrPfIso");
   AddBranch(&patElecTauCorrPfIso_, "eleTauCorrPfIso");
@@ -242,6 +247,8 @@ patElecTree::Clear(){
   patElecGamIso_.clear();
   patElecCorrPfIso_.clear();
   patElecTauCorrPfIso_.clear();
+  patElecUserTrkIso_.clear();
+  patElecUserCalIso_.clear();
 
 
   patElecMissingHits_.clear();

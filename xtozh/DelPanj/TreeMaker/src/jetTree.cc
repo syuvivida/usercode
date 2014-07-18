@@ -11,30 +11,29 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
   baseTree(desc, tree),
   JetLabel_(iConfig.getParameter<edm::InputTag>("Jets")),
   PrunedJetLabel_ ( iConfig.getParameter<edm::InputTag>("PrunedJets")),
-  rhoSrc_   (iConfig.getParameter<edm::InputTag>("rhoSrc") ),                     \
-  pvSrc_    (iConfig.getParameter<edm::InputTag>("pvSrc") ),                      \
-  jecPayloadNames_( iConfig.getParameter<std::vector<std::string> >("jecPayloadNam\
-es") ), 
-  jecUncName_( iConfig.getParameter<std::string>("jecUncName") ),	\
+  rhoSrc_   (iConfig.getParameter<edm::InputTag>("rhoSrc") ),                     
+  pvSrc_    (iConfig.getParameter<edm::InputTag>("pvSrc") ),                      
+  jecPayloadNames_( iConfig.getParameter<std::vector<std::string> >("jecPayloadNames") ), 
+  jecUncName_( iConfig.getParameter<std::string>("jecUncName") ),	
   jet2012ID_()
 {
 
   SetBranches();
 
   //Get the factorized jet corrector parameters.                                                                                                                        
-  std::vector<JetCorrectorParameters> vPar;
-  for ( std::vector<std::string>::const_iterator payloadBegin = 
-	  jecPayloadNames_.begin(),
-          payloadEnd = jecPayloadNames_.end(), ipayload = payloadBegin; 
-	ipayload != payloadEnd; ++ipayload ) 
-    {
-      JetCorrectorParameters pars(*ipayload);
-      vPar.push_back(pars);
-    }
+  //   std::vector<JetCorrectorParameters> vPar;
+  //   for ( std::vector<std::string>::const_iterator payloadBegin = 
+  // 	  jecPayloadNames_.begin(),
+  //           payloadEnd = jecPayloadNames_.end(), ipayload = payloadBegin; 
+  // 	ipayload != payloadEnd; ++ipayload ) 
+  //     {
+  //       JetCorrectorParameters pars(*ipayload);
+  //       vPar.push_back(pars);
+  //     }
 
-  // Make the FactorizedJetCorrector and Uncertainty                                                                                                                    
-  jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
-  jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
+  //   // Make the FactorizedJetCorrector and Uncertainty                                                                                                                    
+  //   jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
+  //   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
 
 
 }
@@ -62,8 +61,8 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
   iEvent.getByLabel(JetLabel_,JetHandle);
 
   if(not iEvent.getByLabel(JetLabel_,JetHandle)){
-     std::cout<<"FATAL EXCEPTION: "<<"Following Not Found: "
-	      <<JetLabel_<<std::endl; exit(0);}
+    std::cout<<"FATAL EXCEPTION: "<<"Following Not Found: "
+	     <<JetLabel_<<std::endl; exit(0);}
 
   edm::Handle<std::vector<pat::Jet> > PrunedJetHandle;
   iEvent.getByLabel(PrunedJetLabel_,PrunedJetHandle);
@@ -86,46 +85,52 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
     JetTau4_.push_back(jet->userFloat("tau4"));
 
     // now making correction of jet energy
-    reco::Candidate::LorentzVector uncorrJet;
-    uncorrJet = jet->correctedP4(0);
+    //     reco::Candidate::LorentzVector uncorrJet;
+    //     uncorrJet = jet->correctedP4(0);
 
 
-    // Get the correction itself. This needs the jet area,                     
-    // the rho value, and the number of primary vertices to                    
-    // run the correction.                                                     
-    jec_->setJetEta( uncorrJet.eta() );
-    jec_->setJetPt ( uncorrJet.pt() );
-    jec_->setJetE  ( uncorrJet.energy() );
-    jec_->setJetA  ( jet->jetArea() );
-    jec_->setRho   ( *(h_rho.product()) );
-    jec_->setNPV   ( h_pv->size() );
+    //     // Get the correction itself. This needs the jet area,                     
+    //     // the rho value, and the number of primary vertices to                    
+    //     // run the correction.                                                     
+    //     jec_->setJetEta( uncorrJet.eta() );
+    //     jec_->setJetPt ( uncorrJet.pt() );
+    //     jec_->setJetE  ( uncorrJet.energy() );
+    //     jec_->setJetA  ( jet->jetArea() );
+    //     jec_->setRho   ( *(h_rho.product()) );
+    //     jec_->setNPV   ( h_pv->size() );
 
-    Float_t corr = jec_->getCorrection();
+    //     Float_t corr = jec_->getCorrection();
 
-//     // Now access the uncertainty on the jet energy correction.                
-//     // Pass the corrected jet pt to the "setJetPt" method.                     
+    //     // Now access the uncertainty on the jet energy correction.                
+    //     // Pass the corrected jet pt to the "setJetPt" method.                     
 
-//     // Access the "scale up" uncertainty (+1)                                  
-//     jecUnc_->setJetEta( uncorrJet.eta() );
-//     jecUnc_->setJetPt( corr * uncorrJet.pt() );
-//     double corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
-//     // Access the "scale down" uncertainty (-1)                                
-//     jecUnc_->setJetEta( uncorrJet.eta() );
-//     jecUnc_->setJetPt( corr * uncorrJet.pt() );
-//     double corrDown = corr * ( 1 - fabs(jecUnc_->getUncertainty(-1)) );
+    //     // Access the "scale up" uncertainty (+1)                                  
+    //     jecUnc_->setJetEta( uncorrJet.eta() );
+    //     jecUnc_->setJetPt( corr * uncorrJet.pt() );
+    //     double corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
+    //     // Access the "scale down" uncertainty (-1)                                
+    //     jecUnc_->setJetEta( uncorrJet.eta() );
+    //     jecUnc_->setJetPt( corr * uncorrJet.pt() );
+    //     double corrDown = corr * ( 1 - fabs(jecUnc_->getUncertainty(-1)) );
 
-    Float_t corrCA8JetPt = uncorrJet.pt()*corr;
-    Float_t corrCA8JetM  = uncorrJet.mass()*corr;
-    Float_t corrCA8JetE  = uncorrJet.energy()*corr; 
+    //     Float_t corrCA8JetPt = uncorrJet.pt()*corr;
+    //     Float_t corrCA8JetM  = uncorrJet.mass()*corr;
+    //     Float_t corrCA8JetE  = uncorrJet.energy()*corr; 
 
-    JetPt_.push_back( corrCA8JetPt );
-    JetEta_.push_back( jet->eta() );
-    JetPhi_.push_back( jet->phi() );
-    JetM_.push_back( corrCA8JetM );
-    JetEn_.push_back( corrCA8JetE );
-    JetCorrFac_.push_back(corr);
+    //     JetPt_.push_back( corrCA8JetPt );
+    //     JetEta_.push_back( jet->eta() );
+    //     JetPhi_.push_back( jet->phi() );
+    //     JetM_.push_back( corrCA8JetM );
+    //     JetEn_.push_back( corrCA8JetE );
+    //     JetCorrFac_.push_back(corr);
 
-    
+
+    JetPt_.push_back(jet->pt());
+    JetEta_.push_back(jet->eta());
+    JetPhi_.push_back(jet->phi());
+    JetM_.push_back(jet->mass());
+    JetEn_.push_back(jet->energy());
+
     std::map<std::string, bool> Pass = jet2012ID_.MergedJetCut(*jet);
     Int_t passOrNot = PassAll(Pass); 
     JetPassID_.push_back(passOrNot);
@@ -140,13 +145,13 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
     Float_t pruneden =0;
     Float_t prunedJetArea=0;
 
-    Float_t corrPruned   = 1; 
-    Float_t corrPrunedPt = 0;
-    Float_t corrPrunedM  = 0; 
-    Float_t corrPrunedE  = 0;
+    //     Float_t corrPruned   = 1; 
+    //     Float_t corrPrunedPt = 0;
+    //     Float_t corrPrunedM  = 0; 
+    //     Float_t corrPrunedE  = 0;
 
 
-    reco::Candidate::LorentzVector uncorrPrunedJet(0,0,0,0);
+    //     reco::Candidate::LorentzVector uncorrPrunedJet(0,0,0,0);
     if(iEvent.getByLabel(PrunedJetLabel_,PrunedJetHandle)){
       for(pat::JetCollection::const_iterator jetPruned = PrunedJetHandle->begin(); 
 	  jetPruned != PrunedJetHandle->end(); ++jetPruned) {
@@ -159,33 +164,39 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
 	  prunedphi =jetPruned->phi(); 
 	  prunedm   =jetPruned->mass();
 	  pruneden  =jetPruned->energy();
-	  uncorrPrunedJet = jetPruned->correctedP4(0);
-	  prunedJetArea = jetPruned->jetArea();
+	  // 	  uncorrPrunedJet = jetPruned->correctedP4(0);
+	  // 	  prunedJetArea = jetPruned->jetArea();
 	}
       } // end of loop over PrunedJets
     } // if one could find CA8PrunedJet
       
     // now making correction for pruned jets
-    if(prunedpt>0.1){
-      jec_->setJetEta( uncorrPrunedJet.eta() );
-      jec_->setJetPt ( uncorrPrunedJet.pt() );
-      jec_->setJetE  ( uncorrPrunedJet.energy() );
-      jec_->setJetA  ( prunedJetArea );
-      jec_->setRho   ( *(h_rho.product()) );
-      jec_->setNPV   ( h_pv->size() );
+    //     if(prunedpt>0.1){
+    //       jec_->setJetEta( uncorrPrunedJet.eta() );
+    //       jec_->setJetPt ( uncorrPrunedJet.pt() );
+    //       jec_->setJetE  ( uncorrPrunedJet.energy() );
+    //       jec_->setJetA  ( prunedJetArea );
+    //       jec_->setRho   ( *(h_rho.product()) );
+    //       jec_->setNPV   ( h_pv->size() );
 
-      corrPruned   = jec_->getCorrection();
-      corrPrunedPt = uncorrPrunedJet.pt() * corrPruned;
-      corrPrunedM  = uncorrPrunedJet.mass() * corrPruned;
-      corrPrunedE  = uncorrPrunedJet.energy() * corrPruned;
+    //       corrPruned   = jec_->getCorrection();
+    //       corrPrunedPt = uncorrPrunedJet.pt() * corrPruned;
+    //       corrPrunedM  = uncorrPrunedJet.mass() * corrPruned;
+    //       corrPrunedE  = uncorrPrunedJet.energy() * corrPruned;
 
-    }
+    //     }
 
-    JetPrunedPt_.push_back( corrPrunedPt );
-    JetPrunedEta_.push_back( prunedeta );
-    JetPrunedPhi_.push_back( prunedphi );
-    JetPrunedM_.push_back( corrPrunedM );
-    JetPrunedEn_.push_back( corrPrunedE );
+    //     JetPrunedPt_.push_back( corrPrunedPt );
+    //     JetPrunedEta_.push_back( prunedeta );
+    //     JetPrunedPhi_.push_back( prunedphi );
+    //     JetPrunedM_.push_back( corrPrunedM );
+    //     JetPrunedEn_.push_back( corrPrunedE );
+
+    JetPrunedPt_.push_back(prunedpt);
+    JetPrunedEta_.push_back(prunedeta);
+    JetPrunedPhi_.push_back(prunedphi);
+    JetPrunedM_.push_back(prunedm);
+    JetPrunedEn_.push_back(pruneden);
 
     
   } // end of loop over jets
@@ -204,7 +215,7 @@ jetTree::SetBranches(){
   AddBranch(&JetPhi_, "jetPhi");
   AddBranch(&JetM_, "jetMass");
   AddBranch(&JetEn_, "jetEn");
-  AddBranch(&JetCorrFac_, "jetCorrFac");
+//   AddBranch(&JetCorrFac_, "jetCorrFac");
   AddBranch(&JetPassID_, "jetPassID");
   AddBranch(&JetPrunedPt_, "jetPrunedPt");
   AddBranch(&JetPrunedEta_, "jetPrunedEta");
@@ -226,7 +237,7 @@ jetTree::Clear(){
   JetPhi_.clear();
   JetM_.clear();
   JetEn_.clear();
-  JetCorrFac_.clear();
+//   JetCorrFac_.clear();
   JetPassID_.clear();
   JetPrunedPt_.clear();
   JetPrunedEta_.clear();

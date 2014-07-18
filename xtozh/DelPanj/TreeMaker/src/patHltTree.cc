@@ -7,6 +7,7 @@
 
 patHltTree::patHltTree(std::string name,TTree* tree):baseTree(name,tree)
 {
+  SetBranches();
 }
 
 void
@@ -28,18 +29,12 @@ patHltTree::Fill(const edm::Event& iEvent)
   for (unsigned int i=0; i<trigResults->size(); i++)
     {
       std::string trigName = trigNames.triggerName(i);
-      size_t foundEle00=trigName.find("HLT_Ele17");
-      size_t foundEle01=trigName.find("Ele8");
-      size_t foundMuo00=trigName.find("HLT_Mu17_Mu8");
-      size_t foundMuo01=trigName.find("HLT_Mu17_TkMu8");
+      size_t foundEle00=trigName.find("HLT_DoubleEle33");
+      size_t foundMuo00=trigName.find("HLT_Mu22_TkMu8");
 
-      if ( (foundEle00==std::string::npos ||
-	    foundEle01==std::string::npos) &&
-	   foundMuo00==std::string::npos &&
-	   foundMuo01==std::string::npos )
-	continue;
-
-//       std::cout << trigName << std::endl;
+      if ( foundEle00==std::string::npos &&
+ 	   foundMuo00==std::string::npos )
+ 	continue;
 
       trigName_.push_back(trigName);
       int trigResult = trigResults->accept(i); //bool not to use
