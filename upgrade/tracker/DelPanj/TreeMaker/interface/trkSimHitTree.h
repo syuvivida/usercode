@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
 #include <string>
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -49,6 +50,7 @@
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
 
+using namespace std;
 
 class trkSimHitTree : public baseTree{
 
@@ -80,6 +82,8 @@ class trkSimHitTree : public baseTree{
 
   std::vector<Float_t> hitTof_;
   std::vector<Float_t> hitEloss_;
+
+  std::vector<Int_t>   hitPID_;
 
   std::vector<Int_t>   hitSubDec_;
   // variables for barrel

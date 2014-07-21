@@ -109,8 +109,14 @@ trkSimHitTree::Fill(const edm::Event& iEvent,  const edm::EventSetup& iSetup )
    for (std::vector<PSimHit>::iterator isim = theTrackerHits.begin();
 	isim != theTrackerHits.end(); ++isim){
 
+     int PID = abs(isim->particleType());
+     
+     if(PID== 22 || PID== 12 || PID== 14 || PID== 16 
+	|| PID== 130 || PID== 310 || PID== 311 || PID == 2112 || PID== 3122)continue;
+
      nSimHits_++;
      SimHitMap[(*isim).detUnitId()].push_back((*isim));
+
 
      // create a DetId from the detUnitId
      DetId theDetUnitId(isim->detUnitId());
@@ -140,6 +146,8 @@ trkSimHitTree::Fill(const edm::Event& iEvent,  const edm::EventSetup& iSetup )
 
      hitTof_.push_back(isim->timeOfFlight());
      hitEloss_.push_back(isim->energyLoss());
+
+     hitPID_.push_back(isim->particleType());
  
      hitSubDec_.push_back(theDetUnitId.subdetId());
 
@@ -211,6 +219,8 @@ trkSimHitTree::SetBranches(){
 
   AddBranch(&hitTof_,"hitTof");
   AddBranch(&hitEloss_,"hitEloss");
+
+  AddBranch(&hitPID_,"hitPID");
  
   AddBranch(&hitSubDec_,"hitSubDec");
   AddBranch(&hitLayer_,"hitLayer");  
@@ -249,7 +259,10 @@ trkSimHitTree::Clear(){
 
   hitTof_.clear();
   hitEloss_.clear();
- 
+
+  hitPID_.clear();
+
+
   hitSubDec_.clear();
   hitLayer_.clear();  
   hitLadder_.clear(); 
