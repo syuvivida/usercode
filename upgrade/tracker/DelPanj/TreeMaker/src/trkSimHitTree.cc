@@ -110,9 +110,11 @@ trkSimHitTree::Fill(const edm::Event& iEvent,  const edm::EventSetup& iSetup )
 	isim != theTrackerHits.end(); ++isim){
 
      int PID = abs(isim->particleType());
+
+     if(PID!=13)continue;
      
-     if(PID== 22 || PID== 12 || PID== 14 || PID== 16 
-	|| PID== 130 || PID== 310 || PID== 311 || PID == 2112 || PID== 3122)continue;
+     // if(PID== 22 || PID== 12 || PID== 14 || PID== 16 
+     // 	|| PID== 130 || PID== 310 || PID== 311 || PID == 2112 || PID== 3122)continue;
 
      nSimHits_++;
      SimHitMap[(*isim).detUnitId()].push_back((*isim));
