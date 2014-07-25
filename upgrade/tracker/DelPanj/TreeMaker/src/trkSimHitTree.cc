@@ -109,12 +109,17 @@ trkSimHitTree::Fill(const edm::Event& iEvent,  const edm::EventSetup& iSetup )
    for (std::vector<PSimHit>::iterator isim = theTrackerHits.begin();
 	isim != theTrackerHits.end(); ++isim){
 
-     int PID = abs(isim->particleType());
-
-     if(PID!=13)continue;
+     // int PID = abs(isim->particleType());
+     // if(PID!=13)continue;
      
      // if(PID== 22 || PID== 12 || PID== 14 || PID== 16 
-     // 	|| PID== 130 || PID== 310 || PID== 311 || PID == 2112 || PID== 3122)continue;
+     //  	|| PID== 130 || PID== 310 || PID== 311 || PID == 2112 || PID== 3122)continue;
+
+
+     if(isim->processType()!=2)continue;
+
+     // std::cout << "Hit from Process " << isim->processType() << " PID " << isim->particleType() << " " 
+     // 	       << "Track Id " << isim->trackId() << std::endl;
 
      nSimHits_++;
      SimHitMap[(*isim).detUnitId()].push_back((*isim));
