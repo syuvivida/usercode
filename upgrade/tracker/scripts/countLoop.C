@@ -10,7 +10,7 @@ void countLoop::Loop()
   std::string title[2]={"Barrel","Endcap"};
   std::string subtitle[2]={"Layer","Disk"};
   TH1F* hcount_1d = new TH1F("hcount_1d","",5, 0.5,5.5);
-  TH1F* htof = new TH1F("htof","",100,0,10);
+  TH1F* htof = new TH1F("htof","",100,-0.5,0.5);
   TH1F* h[2][15];
   TH1F* ht[2][15];
   for(int k=0;k<2; k++){
@@ -22,7 +22,7 @@ void countLoop::Loop()
 			       subtitle[k].data(),i+1));
 
       ht[k][i]=(TH1F*)htof->Clone(Form("ht%d%02i",k,i));
-      ht[k][i]->SetXTitle("Time of flight: ns");
+      ht[k][i]->SetXTitle("Difference of TOF from the first hit: ns");
       ht[k][i]->SetTitle(Form("%s, %s %d",title[k].data(),
 			       subtitle[k].data(),i+1));
 
@@ -41,6 +41,8 @@ void countLoop::Loop()
 
   int countB[10]={0};
   int countE[15]={0};
+  float tofB[10]={0.};
+  float tofE[15]={0.};
 
   if (fChain == 0) return;
   
@@ -58,24 +60,26 @@ void countLoop::Loop()
       
       for(int i=0; i < hitSubDec->size(); i++){
 	
-	if(hitPID->at(i)!=-13)continue;
-	if(hitSubDec->at(i)==1)
-	  countB[hitLayer->at(i)-1]++;
-	else
-	  if(hitSubDec->at(i)==2)
-	  countE[hitDisk->at(i)-1]++;
-      }
-   
-      for(int i=0; i < hitSubDec->size(); i++){
-	
-	if(hitPID->at(i)!=-13)continue;
+	if(hitPID->at(i)!= +13)continue;
 	int hitLayerIndex = hitLayer->at(i)-1;
 	int hitDiskIndex = hitDisk->at(i)-1;
-	if(hitSubDec->at(i)==1 && countB[hitLayerIndex]>1)
-	  ht[0][hitLayerIndex]->Fill(hitTof->at(i));
+	if(hitSubDec->at(i)==1)
+	  {
+	    countB[hitLayerIndex]++;
+	    if(countB[hitLayerIndex]==1)
+	      tofB[hitLayerIndex]= hitTof->at(i);
+	    else if(countB[hitLayerIndex]>1)
+	      ht[0][hitLayerIndex]->Fill(hitTof->at(i)-tofB[hitLayerIndex]);
+	  }
 	else
-	  if(hitSubDec->at(i)==2 && countE[hitDiskIndex]>1)
-	  ht[1][hitDiskIndex]->Fill(hitTof->at(i));
+	  if(hitSubDec->at(i)==2)
+	    {
+	      countE[hitDiskIndex]++;
+	      if(countE[hitDiskIndex]==1)
+		tofE[hitDiskIndex]= hitTof->at(i);
+	      else if(countE[hitDiskIndex]>1)
+		ht[1][hitDiskIndex]->Fill(hitTof->at(i)-tofE[hitDiskIndex]);
+	    }
       }
    
       

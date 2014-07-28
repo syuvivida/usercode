@@ -36,8 +36,6 @@ void plot(){
       {
 	c1->SetLogy(1);
 	TH1F *h = (TH1F*)inf->FindObjectAny(Form("ht%d%02i",i,k));
-	if(i==0)
-	  h->GetXaxis()->SetRangeUser(0,2);
 	h->Draw();
 	cout << h->GetName() << endl;
 	c1->Print(Form("%s/%s.gif",name.data(),h->GetName()));
