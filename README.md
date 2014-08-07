@@ -1,0 +1,13 @@
+usercode
+========
+
+My usercode area
+
+
+git clone git@github.com:syuvivida/usercode.git usercode
+cd usercode
+git remote add upstream git@github.com:syuvivida/usercode.git
+git add scripts/powheg/run_powheg_tarball.sh
+git commit -m "remove lines"
+git pull --rebase upstream master
+git push origin master
