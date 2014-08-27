@@ -5,7 +5,8 @@
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
 #include "FWCore/Common/interface/TriggerNames.h" 
 
-patHltTree::patHltTree(std::string name,TTree* tree):baseTree(name,tree)
+patHltTree::patHltTree(std::string name,TTree* tree):baseTree(name,tree),
+						     nTrigs_(0)						     
 {
   SetBranches();
 }
@@ -39,11 +40,13 @@ patHltTree::Fill(const edm::Event& iEvent)
       trigName_.push_back(trigName);
       int trigResult = trigResults->accept(i); //bool not to use
       trigResult_.push_back(trigResult);
+      nTrigs_++;
     }
 }
 
 void patHltTree::SetBranches(){
   
+  AddBranch(&nTrigs_,"nTrigs");
   AddBranch(&trigResult_,"trigResult");
   AddBranch(&trigName_,"trigName");
 
@@ -52,6 +55,7 @@ void patHltTree::SetBranches(){
 
 void
 patHltTree::Clear(){
+  nTrigs_ = 0;
   trigResult_.clear();
   trigName_.clear();
 }
