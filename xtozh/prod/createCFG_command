@@ -1,0 +1,1 @@
+awk '{print "sed -e \"s/INPUT/"$2"/g\" -e \"s/OUTPUT/"$1"/g\" crabTreemaker_MC.cfg > crabTreeMaker_"$1".cfg"}' mcsample | bash

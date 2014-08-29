@@ -52,7 +52,7 @@ process.source = cms.Source("PoolSource",
     
 ## Maximal Number of Events
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 print sep_line
 print process.source.fileNames
