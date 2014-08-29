@@ -733,13 +733,13 @@ from DelPanj.TreeMaker.muSelXZh_tracker_cff import *
 
 process.tree = cms.EDAnalyzer(
 	'TreeMaker',
-	fillPUweightInfo_ = cms.bool(False),
+	fillPUweightInfo_ = cms.bool(True),
 	fillEventInfo_ = cms.bool(True),
 	fillGenInfo_   = cms.bool(True),
 	fillMuonInfo_  = cms.bool(True),
 	fillElecInfo_  = cms.bool(True),
 	fillJetInfo_   = cms.bool(True),
-	fillMetInfo_   = cms.bool(False),
+	fillMetInfo_   = cms.bool(True),
 	fillTrigInfo_  = cms.bool(True),
 	fillPhotInfo_  = cms.bool(False),
 	genPartLabel=cms.InputTag("genParticles"),
