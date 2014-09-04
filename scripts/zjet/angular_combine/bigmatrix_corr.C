@@ -515,13 +515,18 @@ void bigmatrix_corr(std::string eikoName="h_jety",
 
   std::string command = "recreate";
   if(update)command="update";
-  TFile* outFile = new TFile("bigmatrix_corr.root", command.data());
+  TFile* outFile = new TFile("test.root", command.data());
   h_e      ->Write();
   h_mu     ->Write();
   h_combine->Write();
   heff_e   ->Write();
   heff_mu  ->Write();
   outFile->Close();
+
+
+  TFile* outFile2 = new TFile("matrix_corr.root", command.data());
+  combined_error.Write(Form("covarianceM_%s",corrName.data()));
+  outFile2->Close();
 
 
   TCanvas* c1 = new TCanvas("c1","",500,500);
