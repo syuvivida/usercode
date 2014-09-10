@@ -19,11 +19,11 @@ lastfile=$3
 while [ $iteration -lt $lastfile ]; 
 do
   iteration=$(( iteration + 1 ))
-  number=`grep -a "patTuple_"$iteration"_" $1 | wc -l`
+  number=`grep -a "patTuple_muon_"$iteration"_" $1 | wc -l`
   rm -rf temp
   if [ $((number)) -gt 1 ]; then 
       echo $iteration "has problem"; 
-      grep -a "patTuple_"$iteration"_" $1 > temp
+      grep -a "patTuple_muon_"$iteration"_" $1 > temp
       tempiteration=0
       lasttemp=$((number))
 #      echo $lasttemp
@@ -39,9 +39,11 @@ do
 	      echo $infilename " should be removed" 
 	      lcg-ls -l "srm://grid71.phy.ncu.edu.tw:8446/srm/managerv2?SFN=${infilename}"
 # when you are sure which files to remove, uncomment the following line
-#	      lcg-del -l "srm://grid71.phy.ncu.edu.tw:8446/srm/managerv2?SFN=${infilename}"
+#              lcg-del -l "srm://grid71.phy.ncu.edu.tw:8446/srm/managerv2?SFN=${infilename}"
 	  fi
       done
+  else if [ $((number)) -lt 1 ]; then    
+      echo "Missing " $iteration ;
   fi
-
+  fi
 done
