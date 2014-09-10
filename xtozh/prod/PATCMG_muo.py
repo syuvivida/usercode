@@ -717,12 +717,12 @@ if runOnMC:
           ]
 else :
       jecLevels = [
-            'START53_V23_L1FastJet_AK7PFchs.txt',
-            'START53_V23_L2Relative_AK7PFchs.txt',
-            'START53_V23_L3Absolute_AK7PFchs.txt',
-            'START53_V23_L2L3Residual_AK7PFchs.txt'
+            'FT_53_V21_AN4_L1FastJet_AK7PFchs.txt',
+            'FT_53_V21_AN4_L2Relative_AK7PFchs.txt',
+            'FT_53_V21_AN4_L3Absolute_AK7PFchs.txt',
+            'FT_53_V21_AN4_L2L3Residual_AK7PFchs.txt'
             ]
-            
+                        
 
 
 
@@ -733,13 +733,13 @@ from DelPanj.TreeMaker.muSelXZh_tracker_cff import *
 
 process.tree = cms.EDAnalyzer(
 	'TreeMaker',
-	fillPUweightInfo_ = cms.bool(True),
+	fillPUweightInfo_ = cms.bool(False),
 	fillEventInfo_ = cms.bool(True),
 	fillGenInfo_   = cms.bool(True),
 	fillMuonInfo_  = cms.bool(True),
 	fillElecInfo_  = cms.bool(True),
 	fillJetInfo_   = cms.bool(True),
-	fillMetInfo_   = cms.bool(True),
+	fillMetInfo_   = cms.bool(False),
 	fillTrigInfo_  = cms.bool(True),
 	fillPhotInfo_  = cms.bool(False),
 	genPartLabel=cms.InputTag("genParticles"),
