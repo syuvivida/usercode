@@ -764,9 +764,10 @@ process.tree = cms.EDAnalyzer(
 if not runOnMC:
     process.tree.fillGenInfo_   = cms.bool(False)
 
-process.TFileService = cms.Service("TFileService",
-        fileName = cms.string('flattuple_muon.root')
-)
+if createFlatTuple: 
+    process.TFileService = cms.Service("TFileService",
+                                       fileName = cms.string('flattuple_muon.root')
+                                       )
 
 process.eiko_e = cms.Path(process.ZToEEcand * process.ZToEEfilter*process.tree)
 process.eiko_m = cms.Path(process.ZToMUMUcand * process.ZToMUMUfilter*process.tree)
