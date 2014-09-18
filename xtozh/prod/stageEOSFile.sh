@@ -13,4 +13,6 @@ fi
 echo $1
 mkdir temp/$1
 
-cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a root | awk -v my_var=$1 '{print "cmsStage "$5" temp/"my_var"/."}'
+cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a root | awk -v my_var=$1 '{print "cmsStage "$5" temp/"my_var"/."}' | bash
+
+hadd temp/$1.root temp/$1/*root
