@@ -26,6 +26,7 @@ void
 eventInfo::Fill(const edm::Event& iEvent){
   Clear();
 
+  isData_ = iEvent.isRealData()? 1:0;
   nEvt_   = iEvent.id().event();
   nRun_   = iEvent.id().run();
   nLumiS_ = iEvent.luminosityBlock();
@@ -51,6 +52,7 @@ eventInfo::Fill(const edm::Event& iEvent){
 
 void
 eventInfo::SetBranches(){
+  AddBranch(&isData_, "isData");
   AddBranch(&nEvt_,"eventId");
   AddBranch(&nRun_,  "runId");
   AddBranch(&nLumiS_, "lumiSection");
@@ -64,6 +66,8 @@ eventInfo::SetBranches(){
 
 void 
 eventInfo::Clear(){
+
+  isData_  = 0;
   nEvt_   = -99999;
   nRun_   = -99999;
   nLumiS_ = -99999;
