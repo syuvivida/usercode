@@ -79,6 +79,7 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
  	     <<PrunedJetLabel_<<std::endl; exit(0);}
 
   const std::vector<pat::Jet>* jets = JetHandle.product();
+  std::sort(jets->begin(),jets->end(),PtGreater());
   std::vector<pat::Jet>::const_iterator jet =jets->begin();
 
 
