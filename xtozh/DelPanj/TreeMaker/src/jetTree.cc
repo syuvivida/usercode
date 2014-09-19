@@ -64,7 +64,7 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
   iEvent.getByLabel( pvSrc_, h_pv );
 
 
-  edm::Handle<std::vector<pat::Jet> > JetHandle;
+  edm::Handle<pat::JetCollection> JetHandle;
   iEvent.getByLabel(JetLabel_,JetHandle);
 
   if(not iEvent.getByLabel(JetLabel_,JetHandle)){
@@ -78,12 +78,13 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
     std::cout<<"FATAL EXCEPTION: "<<"Following Not Found: "
  	     <<PrunedJetLabel_<<std::endl; exit(0);}
 
-  const std::vector<pat::Jet>* jets = JetHandle.product();
-  std::sort(jets->begin(),jets->end(),PtGreater());
-  std::vector<pat::Jet>::const_iterator jet =jets->begin();
+  pat::JetCollection jets(*(JetHandle.product()));
+  std::sort(jets.begin(),jets.end(),PtGreater());
+
+  std::vector<pat::Jet>::const_iterator jet =jets.begin();
 
 
-  for(;jet!=jets->end();jet++){
+  for(;jet!=jets.end();jet++){
     nJet_++;
     //Stuff common for all jets.
 

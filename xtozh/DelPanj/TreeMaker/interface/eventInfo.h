@@ -23,7 +23,6 @@ class eventInfo : public baseTree {
   void SetBranches();
 
   int isData_;
-
   int nEvt_;
   int nRun_;
   int nLumiS_;
