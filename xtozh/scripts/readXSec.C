@@ -1,6 +1,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 std::string par[]={"M0", 
@@ -520,29 +521,53 @@ void readXSec(double searchM)
     myMap.insert(std::pair<double, parMap>(numbers[i][0],thisMass));
   }
 
+  ofstream foutbb;
+  foutbb.open("xsec_Zhllbb.txt",ios::out | ios::app);
+  ofstream foutww;
+  foutww.open("xsec_Zhllww.txt",ios::out | ios::app);
+  ofstream foutzz;
+  foutzz.open("xsec_Zhllzz.txt",ios::out | ios::app);
+
   double xsec=myMap[searchM]["CX0(pb)"];
   cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
   cout << "Production cross section of X(" << searchM << ") = " << xsec << " pb" << endl;
   double brZh=myMap[searchM]["BRhZ"];
   cout << "BR(X->Zh) = " << brZh << endl;
   cout << "Production cross section of X(" << searchM << ") -> Zh = " << xsec*brZh << " pb" << endl;
+
   cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
   cout << endl;
   cout << "Production cross section of X(" << searchM << ") -> Zh -> qqbb = " << xsec*brZh*hbbBR*ZqqBR << " pb" << endl;
-  cout << "Production cross section of X(" << searchM << ") -> Zh -> llbb = " << xsec*brZh*hbbBR*ZllBR << " pb" << endl;
-  cout << "Production cross section of X(" << searchM << ") -> Zh -> ee/mmbb = " << 2*xsec*brZh*hbbBR*ZllBR << " pb" << endl;
+  double myResult = xsec*brZh*hbbBR*ZllBR;
+  cout << "Production cross section of X(" << searchM << ") -> Zh -> llbb = " << myResult << " pb" << endl;
+  myResult *=2;
+  cout << "Production cross section of X(" << searchM << ") -> Zh -> ee/mmbb = " << myResult << " pb" << endl;
+  foutbb << (int) searchM << " " << myResult << endl;
+
   cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
   cout << endl;
   cout << "Production cross section of X(" << searchM << ") -> Zh -> qqWW->qqqqqq = " << xsec*brZh*hWWBR*WqqBR*WqqBR*ZqqBR << " pb" << endl;
-  cout << "Production cross section of X(" << searchM << ") -> Zh -> llWW->llqqqq = " << xsec*brZh*hWWBR*WqqBR*WqqBR*ZllBR << " pb" << endl;
-  cout << "Production cross section of X(" << searchM << ") -> Zh -> ee/mmWW->ee/mmqqqq = " << 2*xsec*brZh*hWWBR*WqqBR*WqqBR*ZllBR << " pb" << endl;
+  myResult = xsec*brZh*hWWBR*WqqBR*WqqBR*ZllBR;
+  cout << "Production cross section of X(" << searchM << ") -> Zh -> llWW->llqqqq = " << myResult << " pb" << endl;
+  myResult *=2;
+  cout << "Production cross section of X(" << searchM << ") -> Zh -> ee/mmWW->ee/mmqqqq = " << myResult << " pb" << endl;
+  foutww << (int) searchM << " " << myResult << endl;
+
   cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
   cout << endl;
   cout << "Production cross section of X(" << searchM << ") -> Zh -> qqZZ->qqqqqq = " << xsec*brZh*hZZBR*ZqqBR*ZqqBR*ZqqBR << " pb" << endl;
-  cout << "Production cross section of X(" << searchM << ") -> Zh -> llZZ->llqqqq = " << xsec*brZh*hZZBR*ZqqBR*ZqqBR*ZllBR << " pb" << endl;
-  cout << "Production cross section of X(" << searchM << ") -> Zh -> ee/mmZZ->ee/mmqqqq = " << 2*xsec*brZh*hZZBR*ZqqBR*ZqqBR*ZllBR << " pb" << endl;
+  myResult = xsec*brZh*hZZBR*ZqqBR*ZqqBR*ZllBR;
+  cout << "Production cross section of X(" << searchM << ") -> Zh -> llZZ->llqqqq = " << myResult << " pb" << endl;
+  myResult *=2;
+  cout << "Production cross section of X(" << searchM << ") -> Zh -> ee/mmZZ->ee/mmqqqq = " << myResult << " pb" << endl;
+  foutzz << (int) searchM << " " << myResult << endl;
+
+
   cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
   cout << endl;
 
+  foutbb.close();
+  foutww.close();
+  foutzz.close();
 
 }
