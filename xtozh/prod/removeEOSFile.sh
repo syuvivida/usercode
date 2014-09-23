@@ -12,7 +12,7 @@ fi
 
 echo $1
 
-cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a root | awk -v my_var=$1 '{print "cmsRm "$5" temp/"my_var"/."}' | bash
+cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a root | awk -v my_var=$1 '{print "cmsRm "$5}' | bash
 
 cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a syu | awk '{print "cmsRmdir "$5}' | bash
 
