@@ -1,19 +1,25 @@
 import FWCore.ParameterSet.Config as cms
 
+from FWCore.ParameterSet.VarParsing import VarParsing
+options = VarParsing ('analysis')
+options.parseArguments()
+
+
 process = cms.Process("dumpLHE")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(options.maxEvents)
 )
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:MCDBtoEDM_NONE.root')
+process.source = cms.Source("LHESource",
+    fileNames = cms.untracked.vstring(options.inputFiles)
 )
 
 process.dummy = cms.EDAnalyzer("DummyLHEAnalyzer",
     src = cms.InputTag("source"),
-    histoutputFile= cms.untracked.string('gen.root')          
+    histoutputFile= cms.untracked.string(options.outputFile)          
 )
+
 
 process.p = cms.Path(process.dummy)
 
