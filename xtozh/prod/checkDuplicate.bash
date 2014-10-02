@@ -21,9 +21,10 @@ if [[ -e temp2 ]]; then
     rm -rf temp2
 fi
 
-prefix="srm://grid71.phy.ncu.edu.tw/"
+
+prefix="srm://f-dpm001.grid.sinica.edu.tw:8446"
 echo $prefix
-dpmprefix=$prefix"/dpm/phy.ncu.edu.tw/home/cms/store/user/syu/"
+dpmprefix=$prefix"/dpm/grid.sinica.edu.tw/home/cms/store/user/syu/"
 echo $dpmprefix
 
 if [[ $1 == */* ]];
