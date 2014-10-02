@@ -2,15 +2,22 @@
 
 
 scriptname=`basename $0`
-EXPECTED_ARGS=4
-
-if [ $# -ne $EXPECTED_ARGS ]
+EXPECTED_ARGS=5
+userid="syu"
+if [ $# -eq $(( EXPECTED_ARGS - 1 )) ]
 then
-    echo "Usage: $scriptname remoteDirectory string logdirectory numberofjobs"
-    echo "Example: ./$scriptname TTT flattuple TTTo2L2Nu2B_8TeV-powheg 2160"
+    echo "user ID is set to "$userid
+else if [ $# -ne $EXPECTED_ARGS ]
+then
+    echo "Usage: $scriptname remoteDirectory string logdirectory numberofjobs userid"
+    echo "Example: ./$scriptname TTT flattuple TTTo2L2Nu2B_8TeV-powheg 2160 syu"
     exit 1
+else 
+    userid=$5
+fi
 fi
 
+echo "user id is "$userid
 
 string=$2
 if [[ -e filelist ]]; then
@@ -20,9 +27,9 @@ fi
 
 if [[ $1 == */* ]];
 then
-    cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a $string | awk '{print $5}' >& filelist
+    cmsLs /store/user/$userid/$1 | grep -a $userid | awk '{print "cmsLs "$5}' | bash | grep -a $string | awk '{print $5}' >& filelist
 else
-    cmsLs /store/user/syu/$1 | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a syu | awk '{print "cmsLs "$5}' | bash | grep -a $string | awk '{print $5}' >& filelist
+    cmsLs /store/user/$userid/$1 | grep -a $userid | awk '{print "cmsLs "$5}' | bash | grep -a $userid | awk '{print "cmsLs "$5}' | bash | grep -a $string | awk '{print $5}' >& filelist
 fi
 
 iteration=0

@@ -2,14 +2,23 @@
 
 
 scriptname=`basename $0`
-EXPECTED_ARGS=4
-
-if [ $# -ne $EXPECTED_ARGS ]
+EXPECTED_ARGS=5
+userid="syu"
+if [ $# -eq $(( EXPECTED_ARGS - 1 )) ]
+then  
+    echo "user ID is set to "$userid
+else if [ $# -ne $EXPECTED_ARGS ]
 then
-    echo "Usage: $scriptname remote_directory string logdirectory numberofjobs"
-    echo "Example: ./$scriptname TTT flattuple TTTo2L2Nu2B_8TeV-powheg 2160"
+    echo "Usage: $scriptname remote_directory string logdirectory numberofjobs userid"
+    echo "Example: ./$scriptname TTT flattuple TTTo2L2Nu2B_8TeV-powheg 2160 syu"
     exit 1
+else
+    userid=$5
 fi
+fi
+
+
+echo "user id is "$userid
 
 string=$2
 if [[ -e filelist ]]; then
@@ -24,15 +33,15 @@ fi
 
 prefix="srm://f-dpm001.grid.sinica.edu.tw:8446"
 echo $prefix
-dpmprefix=$prefix"/dpm/grid.sinica.edu.tw/home/cms/store/user/syu/"
+dpmprefix=$prefix"/dpm/grid.sinica.edu.tw/home/cms/store/user/"$userid"/"
 echo $dpmprefix
 
 if [[ $1 == */* ]];
 then
-    lcg-ls $dpmprefix/$1 | grep -a syu |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash | grep -a $string | awk '{print $1}' > temp2
+    lcg-ls $dpmprefix/$1 | grep -a $userid |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash | grep -a $string | awk '{print $1}' > temp2
     sed -e 's/\/\//\//g' -e 's/\/\//\//g' temp2 > filelist
 else
-    lcg-ls $dpmprefix/$1 | grep -a syu |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash | grep -a syu |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash | grep -a $string | awk '{print $1}' > temp2
+    lcg-ls $dpmprefix/$1 | grep -a $userid |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash | grep -a $userid |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash | grep -a $string | awk '{print $1}' > temp2
     sed -e 's/\/\//\//g' -e 's/\/\//\//g' temp2 > filelist
 fi
 
