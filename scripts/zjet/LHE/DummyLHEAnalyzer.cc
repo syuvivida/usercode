@@ -102,6 +102,7 @@ private:
     const std::vector<int> idup_ = hepeup_.IDUP;
     const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP;
     const std::vector<int> istup_ = hepeup_.ISTUP;
+    const std::vector<std::pair< int,int > > motup_ = hepeup_.MOTHUP;
 
 
     TLorentzVector lep_p(0,0,0,0);
@@ -115,7 +116,9 @@ private:
       double py = (pup_[icount])[1];
       double pz = (pup_[icount])[2];
       double e  = (pup_[icount])[3];
-      
+      int momIndex = motup_[icount].first-1;
+      int momPID =  momIndex >=0 ? idup_[momIndex]:-1;
+ 
       if(status!=1)continue;
       if(PID==LEPPID)
 	lep_m.SetPxPyPzE(px,py,pz,e);
