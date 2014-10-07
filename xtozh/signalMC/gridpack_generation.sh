@@ -111,7 +111,9 @@ LHAPDFCONFIG=`echo "$LHAPATH/../../../full/bin/lhapdf-config"`
 LHAPDFINCLUDES=`$LHAPDFCONFIG --incdir`
 LHAPDFLIBS=`$LHAPDFCONFIG --libdir`
 
+
 echo "set auto_update 0" > mgconfigscript
+
 echo "set automatic_html_opening False" >> mgconfigscript
 echo "set output_dependencies internal" >> mgconfigscript
 echo "set lhapdf $LHAPDFCONFIG" >> mgconfigscript
@@ -181,7 +183,15 @@ else
 cp $CARDSDIR/${name}_run_card.dat ./Cards/run_card.dat
 fi      
 
-cp $CARDSDIR/${name}_param_card.dat ./Cards/param_card.dat
+if [ -e $CARDSDIR/${name}_param_card.dat ]; then
+    cp $CARDSDIR/${name}_param_card.dat ./Cards/param_card.dat
+fi
+
+if [ -e $CARDSDIR/${name}_reweight_card.dat ]; then
+    cp $CARDSDIR/${name}_reweight_card.dat ./Cards/reweight_card.dat
+    echo "reweight=ON" >> ./Cards/me5_configuration.txt
+fi
+
 
 #######################
 #Locating the madspin card#
