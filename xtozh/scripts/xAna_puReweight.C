@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <TString.h>
 #include <map>
 #include <TH1D.h>
 #include <TFile.h>
@@ -71,8 +72,9 @@ void xAna_puReweight(std::string inputFile){
   } // end of loop over entries
 
   //save output
-  std::string outputFile = "histo_" + inputFile;
-  TFile* outFile = new TFile(outputFile.data(),"recreate");
+  TString endfix=gSystem->GetFromPipe(Form("file=%s; echo \"${file##*/}\"",inputFile.data()));
+  TString outputFile = "muHisto_" + endfix;
+  TFile* outFile = new TFile(outputFile.Data(),"recreate");
   h_nvtx->Write();
   h_nvtx2->Write();
   outFile->Close();
