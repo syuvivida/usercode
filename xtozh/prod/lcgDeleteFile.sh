@@ -13,21 +13,14 @@ fi
 
 userid=$3
 
-topdir="temp"
-string=$2
-
-if [[ ! -e $topdir ]]; then
-    echo "creating directory "$topdir
-    mkdir $topdir
-fi
 
 
-prefix="srm://f-dpm001.grid.sinica.edu.tw:8446"
+prefix="srm://grid71.phy.ncu.edu.tw/"
 echo $prefix
-dpmprefix=$prefix"/dpm/grid.sinica.edu.tw/home/cms/store/user/"$userid"/"$1
+dpmprefix=$prefix"/dpm/phy.ncu.edu.tw/home/cms/store/user/"$userid"/"$1
 echo $dpmprefix
 
-
+string=$2
 
 if [[ $1 == */* ]];
 then
@@ -36,7 +29,7 @@ then
     dpmprefix=$prefix$removeprefix
     echo $dpmprefix
     
-    lcg-ls $dpmprefix | grep -a $string |  awk -F $removeprefix -v my_var=$dpmprefix -v my_dir=$topdir"/"$1 '{print "lcg-del -l -v "my_var"/"$2}' | bash
+    lcg-ls $dpmprefix | grep -a $string |  awk -F $removeprefix -v my_var=$dpmprefix '{print "lcg-del -l -v "my_var"/"$2}' | bash
 
 else
     removeprefix=`lcg-ls $dpmprefix | grep -a $userid |  awk -v my_var=$prefix '{print "lcg-ls "my_var""$1}' | bash`
@@ -44,7 +37,7 @@ else
     dpmprefix=$prefix$removeprefix
     echo $dpmprefix
     
-    lcg-ls $dpmprefix | grep -a $string |  awk -F $removeprefix -v my_var=$dpmprefix -v my_dir=$topdir"/"$1 '{print "lcg-del -l -v "my_var"/"$2}' | bash
+    lcg-ls $dpmprefix | grep -a $string |  awk -F $removeprefix -v my_var=$dpmprefix '{print "lcg-del -l -v "my_var"/"$2}' | bash
 
 fi
 
