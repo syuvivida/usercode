@@ -70,9 +70,9 @@ do
 	      echo $infilename " is really produced"
 	  else
 	      echo $infilename " should be removed" 
-	      lcg-ls -l $prefix":8446/srm/managerv2?SFN=${infilename}"
+	      lcg-ls -l $prefix"/${infilename}"
 # when you are sure which files to remove, uncomment the following line
-#              lcg-del -l $prefix":8446/srm/managerv2?SFN=${infilename}"
+#              lcg-del -l $prefix"/${infilename}"
 	  fi
       done
   else if [ $((number)) -lt 1 ]; then    
