@@ -44,7 +44,11 @@ if [[ $1 == test* ]]; then
 	lcg-ls $prefix$infilename | grep -a $string | awk -v my_var=$prefix '{print "lcg-del -l -v "my_var"/"$1}' | bash
 	lcg-ls $prefix$infilename"/failed" | grep -a $string | awk -v my_var=$prefix '{print "lcg-del -l -v "my_var"/"$1}' | bash
     done
-
+    lcg-del -d $prefix$infilename"/failed"
+    lcg-del -d $prefix$infilename
+    lcg-ls $dpmprefix | awk -v my_var=$prefix '{print "lcg-del -d "my_var"/"$1}' | bash
+    lcg-del -d $dpmprefix
+    lcg-del -d $prefix"/dpm/phy.ncu.edu.tw/home/cms/store/user/"$userid"/"$1
 else
     echo "This is a real directory"
     lcg-ls $dpmprefix > temp3 
@@ -60,7 +64,11 @@ else
 	lcg-ls $prefix$infilename | grep -a $string | awk -v my_var=$prefix '{print "lcg-del -l -v "my_var"/"$1}' | bash
 	lcg-ls $prefix$infilename"/failed" | grep -a $string | awk -v my_var=$prefix '{print "lcg-del -l -v "my_var"/"$1}' | bash
     done
-
+    lcg-del -d $prefix$infilename"/failed"
+    lcg-del -d $prefix$infilename
+    lcg-ls $dpmprefix | awk -v my_var=$prefix '{print "lcg-del -d "my_var"/"$1}' | bash
+    lcg-del -d $dpmprefix
+    lcg-del -d $prefix"/dpm/phy.ncu.edu.tw/home/cms/store/user/"$userid"/"$1
 
 fi
 
