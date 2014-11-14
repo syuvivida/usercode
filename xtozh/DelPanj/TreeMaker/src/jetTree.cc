@@ -6,6 +6,7 @@
 #include "Math/VectorUtil.h"
 
 typedef math::XYZTLorentzVector LorentzVector;
+const double DUMMY=-9999.;
 
 jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig):
   baseTree(desc, tree),
@@ -216,51 +217,120 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
       jetPrunedJP_.push_back(pj->bDiscriminator("jetProbabilityBJetTags"));
       jetPrunedJBP_.push_back(pj->bDiscriminator("jetBProbabilityBJetTags"));
 
-      nSubPrunedJet_ = pj->numberOfDaughters();
+      std::vector<Int_t>   subjetMotherIndex;
+      std::vector<Float_t> subjetPrunedPt;
+      std::vector<Float_t> subjetPrunedEta;
+      std::vector<Float_t> subjetPrunedPhi;
+      std::vector<Float_t> subjetPrunedM;
+      std::vector<Float_t> subjetPrunedEn;
+      std::vector<Int_t>   subjetPrunedCharge;
+      std::vector<Int_t>   subjetPrunedPartonFlavor;
+      std::vector<Float_t> subjetPrunedCSV; 
 
-      for(int sj=0; sj< nSubPrunedJet_ ; ++sj ){
+      subjetMotherIndex.clear();
+      subjetPrunedPt.clear();
+      subjetPrunedEta.clear();
+      subjetPrunedPhi.clear();
+      subjetPrunedM.clear();
+      subjetPrunedEn.clear();
+      subjetPrunedCharge.clear();
+      subjetPrunedPartonFlavor.clear();
+      subjetPrunedCSV.clear(); 
+
+
+      Int_t nsubjets= pj->numberOfDaughters();
+      nSubPrunedJet_.push_back(nsubjets);
+
+      for(int sj=0; sj< nsubjets ; ++sj ){
 	const pat::Jet* subjet = dynamic_cast<const pat::Jet*>(pj->daughter(sj));
 
-  
-	subjetPrunedPt_.push_back(subjet->pt()); 
-	subjetPrunedEta_.push_back(subjet->eta()); 
-	subjetPrunedPhi_.push_back(subjet->phi());
-	subjetPrunedM_.push_back(subjet->mass());
-	subjetPrunedEn_.push_back(subjet->energy());
-	subjetPrunedCharge_.push_back(subjet->charge());
-	subjetPrunedPartonFlavor_.push_back(subjet->partonFlavour());
-
-	// subjetPrunedSSV_.push_back(subjet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags")); 
-	subjetPrunedCSV_.push_back(subjet->bDiscriminator("combinedSecondaryVertexBJetTags"     )); 
-	// subjetPrunedTCHP_.push_back(subjet->bDiscriminator("trackCountingHighPurBJetTags"        )); 
-	// subjetPrunedTCHE_.push_back(subjet->bDiscriminator("trackCountingHighEffBJetTags"        ));
-	// subjetPrunedJP_.push_back(subjet->bDiscriminator("jetProbabilityBJetTags"              ));
-	// subjetPrunedJBP_.push_back(subjet->bDiscriminator("jetBProbabilityBJetTags"             ));       
+	subjetMotherIndex.push_back(nJet_-1);
+	subjetPrunedPt.push_back(subjet->pt()); 
+	subjetPrunedEta.push_back(subjet->eta()); 
+	subjetPrunedPhi.push_back(subjet->phi());
+	subjetPrunedM.push_back(subjet->mass());
+	subjetPrunedEn.push_back(subjet->energy());
+	subjetPrunedCharge.push_back(subjet->charge());
+	subjetPrunedPartonFlavor.push_back(subjet->partonFlavour());
+	subjetPrunedCSV.push_back(subjet->bDiscriminator("combinedSecondaryVertexBJetTags")); 
       
-      }// end of loop over prunedjets
-    }
+      }// end of loop over subjets
+
+      subjetMotherIndex_.push_back(subjetMotherIndex);
+      subjetPrunedPt_.push_back(subjetPrunedPt); 
+      subjetPrunedEta_.push_back(subjetPrunedEta); 
+      subjetPrunedPhi_.push_back(subjetPrunedPhi);
+      subjetPrunedM_.push_back(subjetPrunedM);
+      subjetPrunedEn_.push_back(subjetPrunedEn);
+      subjetPrunedCharge_.push_back(subjetPrunedCharge);
+      subjetPrunedPartonFlavor_.push_back(subjetPrunedPartonFlavor);
+      subjetPrunedCSV_.push_back(subjetPrunedCSV);       
+
+    } // if find a pruned jet
     else // if pruned jet is not found
       {
 
-	jetPrunedPt_.push_back(-9999.);
-	jetPrunedEta_.push_back(-9999.);
-	jetPrunedPhi_.push_back(-9999.);
-	jetPrunedM_.push_back(-9999.);
-	jetPrunedEn_.push_back(-9999.);
-	jetPrunedCharge_.push_back(-9999);
-	jetPrunedPartonFlavor_.push_back(-9999);
+	jetPrunedPt_.push_back(DUMMY);
+	jetPrunedEta_.push_back(DUMMY);
+	jetPrunedPhi_.push_back(DUMMY);
+	jetPrunedM_.push_back(DUMMY);
+	jetPrunedEn_.push_back(DUMMY);
+	jetPrunedCharge_.push_back(DUMMY);
+	jetPrunedPartonFlavor_.push_back(DUMMY);
 
-	jetPrunedCorrUncUp_.push_back(-9999.);
-	jetPrunedCorrUncDown_.push_back(-9999.);
+	jetPrunedCorrUncUp_.push_back(DUMMY);
+	jetPrunedCorrUncDown_.push_back(DUMMY);
 
-	jetPrunedSSV_.push_back(-9999.);
-	jetPrunedCSV_.push_back(-9999.);        
-	jetPrunedTCHP_.push_back(-9999.);
-	jetPrunedTCHE_.push_back(-9999.);
-	jetPrunedJP_.push_back(-9999.);
-	jetPrunedJBP_.push_back(-9999.);
+	jetPrunedSSV_.push_back(DUMMY);
+	jetPrunedCSV_.push_back(DUMMY);        
+	jetPrunedTCHP_.push_back(DUMMY);
+	jetPrunedTCHE_.push_back(DUMMY);
+	jetPrunedJP_.push_back(DUMMY);
+	jetPrunedJBP_.push_back(DUMMY);
+	nSubPrunedJet_.push_back(0);
 
-	nSubPrunedJet_ = 0;
+	// put in dummy vectors with only 1 dummy element so to sychronize with the index of CA8jet
+
+	std::vector<Int_t>   subjetMotherIndex;
+	std::vector<Float_t> subjetPrunedPt;
+	std::vector<Float_t> subjetPrunedEta;
+	std::vector<Float_t> subjetPrunedPhi;
+	std::vector<Float_t> subjetPrunedM;
+	std::vector<Float_t> subjetPrunedEn;
+	std::vector<Int_t>   subjetPrunedCharge;
+	std::vector<Int_t>   subjetPrunedPartonFlavor;
+	std::vector<Float_t> subjetPrunedCSV; 
+
+	subjetMotherIndex.clear();
+	subjetPrunedPt.clear();
+	subjetPrunedEta.clear();
+	subjetPrunedPhi.clear();
+	subjetPrunedM.clear();
+	subjetPrunedEn.clear();
+	subjetPrunedCharge.clear();
+	subjetPrunedPartonFlavor.clear();
+	subjetPrunedCSV.clear(); 
+	
+	subjetMotherIndex.push_back(-1);
+	subjetPrunedPt.push_back(DUMMY); 
+	subjetPrunedEta.push_back(DUMMY); 
+	subjetPrunedPhi.push_back(DUMMY);
+	subjetPrunedM.push_back(DUMMY);
+	subjetPrunedEn.push_back(DUMMY);
+	subjetPrunedCharge.push_back(DUMMY);
+	subjetPrunedPartonFlavor.push_back(DUMMY);
+	subjetPrunedCSV.push_back(DUMMY);       
+
+	subjetMotherIndex_.push_back(subjetMotherIndex);
+	subjetPrunedPt_.push_back(subjetPrunedPt); 
+	subjetPrunedEta_.push_back(subjetPrunedEta); 
+	subjetPrunedPhi_.push_back(subjetPrunedPhi);
+	subjetPrunedM_.push_back(subjetPrunedM);
+	subjetPrunedEn_.push_back(subjetPrunedEn);
+	subjetPrunedCharge_.push_back(subjetPrunedCharge);
+	subjetPrunedPartonFlavor_.push_back(subjetPrunedPartonFlavor);
+	subjetPrunedCSV_.push_back(subjetPrunedCSV);       
+	
 
       }
 
@@ -327,23 +397,16 @@ jetTree::SetBranches(){
     AddBranch(&jetPrunedJP_, "jetPrunedJP");
     AddBranch(&jetPrunedJBP_, "jetPrunedJBP");
 	    
-  AddBranch(&nSubPrunedJet_,"nSubPrunedJet");
-  
-  AddBranch(&subjetPrunedPt_, "subjetPrunedPt");
-  AddBranch(&subjetPrunedEta_, "subjetPrunedEta");
-  AddBranch(&subjetPrunedPhi_, "subjetPrunedPhi");
-  AddBranch(&subjetPrunedM_, "subjetPrunedMass");
-  AddBranch(&subjetPrunedEn_, "subjetPrunedEn");
-  AddBranch(&subjetPrunedCharge_, "subjetPrunedCharge");
-  AddBranch(&subjetPrunedPartonFlavor_, "subjetPrunedPartonFlavor");
-
-
-  // AddBranch(&subjetPrunedSSV_, "subjetPrunedSSV");
-  AddBranch(&subjetPrunedCSV_, "subjetPrunedCSV");        
-  // AddBranch(&subjetPrunedTCHP_, "subjetPrunedTCHP");
-  // AddBranch(&subjetPrunedTCHE_, "subjetPrunedTCHE");
-  // AddBranch(&subjetPrunedJP_, "subjetPrunedJP");
-  // AddBranch(&subjetPrunedJBP_, "subjetPrunedJBP");
+    AddBranch(&nSubPrunedJet_,"nSubPrunedJet");
+    AddBranch(&subjetMotherIndex_,"subjetMotherIndex");
+    AddBranch(&subjetPrunedPt_, "subjetPrunedPt");
+    AddBranch(&subjetPrunedEta_, "subjetPrunedEta");
+    AddBranch(&subjetPrunedPhi_, "subjetPrunedPhi");
+    AddBranch(&subjetPrunedM_, "subjetPrunedMass");
+    AddBranch(&subjetPrunedEn_, "subjetPrunedEn");
+    AddBranch(&subjetPrunedCharge_, "subjetPrunedCharge");
+    AddBranch(&subjetPrunedPartonFlavor_, "subjetPrunedPartonFlavor");
+    AddBranch(&subjetPrunedCSV_, "subjetPrunedCSV");        
   
   }
 
@@ -404,8 +467,8 @@ jetTree::Clear(){
   jetPrunedJBP_.clear();
 
 
-  nSubPrunedJet_ = 0;
-  
+  nSubPrunedJet_.clear();  
+  subjetMotherIndex_.clear();
   subjetPrunedPt_.clear();
   subjetPrunedEta_.clear();
   subjetPrunedPhi_.clear();
@@ -413,15 +476,8 @@ jetTree::Clear(){
   subjetPrunedEn_.clear();
   subjetPrunedCharge_.clear();
   subjetPrunedPartonFlavor_.clear();
-
-
-  // subjetPrunedSSV_.clear();
   subjetPrunedCSV_.clear();        
-  // subjetPrunedTCHP_.clear();
-  // subjetPrunedTCHE_.clear();
-  // subjetPrunedJP_.clear();
-  // subjetPrunedJBP_.clear();
-  
+
 
 
 }

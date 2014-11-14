@@ -35,6 +35,9 @@ class baseTree{
   void AddBranch(std::vector<Float_t>* vec, std::string name);
   void AddBranch(std::vector<Int_t>* vec, std::string name);
   void AddBranch(std::vector<std::string>* vec, std::string name);
+  //vectors of vectors
+  void AddBranch(std::vector<std::vector<Float_t>>* vec, std::string name);
+  void AddBranch(std::vector<std::vector<Int_t>>* vec, std::string name);
 
   };
 

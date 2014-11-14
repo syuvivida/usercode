@@ -117,23 +117,17 @@ class jetTree  : public baseTree{
   std::vector<Float_t> jetPrunedJBP_;
 
   // subjet of pruned jets
-  Int_t nSubPrunedJet_;
-  
-  std::vector<Float_t> subjetPrunedPt_;
-  std::vector<Float_t> subjetPrunedEta_;
-  std::vector<Float_t> subjetPrunedPhi_;
-  std::vector<Float_t> subjetPrunedM_;
-  std::vector<Float_t> subjetPrunedEn_;
-  std::vector<Int_t>   subjetPrunedCharge_;
-  std::vector<Int_t>   subjetPrunedPartonFlavor_;
+  std::vector<Int_t>   nSubPrunedJet_;
+  std::vector<std::vector<Int_t>>   subjetMotherIndex_;
+  std::vector<std::vector<Float_t>> subjetPrunedPt_;
+  std::vector<std::vector<Float_t>> subjetPrunedEta_;
+  std::vector<std::vector<Float_t>> subjetPrunedPhi_;
+  std::vector<std::vector<Float_t>> subjetPrunedM_;
+  std::vector<std::vector<Float_t>> subjetPrunedEn_;
+  std::vector<std::vector<Int_t>>   subjetPrunedCharge_;
+  std::vector<std::vector<Int_t>>   subjetPrunedPartonFlavor_;
+  std::vector<std::vector<Float_t>> subjetPrunedCSV_;        
 
-
-  //  std::vector<Float_t> subjetPrunedSSV_;
-  std::vector<Float_t> subjetPrunedCSV_;        
-  //  std::vector<Float_t> subjetPrunedTCHP_;
-  //  std::vector<Float_t> subjetPrunedTCHE_;
-  //  std::vector<Float_t> subjetPrunedJP_;
-  //  std::vector<Float_t> subjetPrunedJBP_;
   
 
 };
