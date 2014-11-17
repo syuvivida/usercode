@@ -29,7 +29,7 @@ def _getsplitting(configC2, sectionC2, parameterC2):
         return 'LumiBased'
     if configC2.has_option('CMSSW', 'events_per_job') or \
         configC2.has_option('CMSSW', 'total_number_of_events') and configC2.has_option('CMSSW', 'number_of_jobs'):
-        return 'EventBased'
+        return 'FileBased'
     return 'Please define here the splitting mode as either LumiBased, EventBased or FileBased.'
 
 def _getunits(configC2, sectionC2, parameterC2):
@@ -40,11 +40,8 @@ def _getunits(configC2, sectionC2, parameterC2):
             return configC2.getint('CMSSW', 'lumis_per_job')
         else:
             return configC2.getint('CMSSW', 'total_number_of_lumis') / configC2.getint('CMSSW', 'number_of_jobs')
-    if splitting == 'EventBased':
-        if configC2.has_option('CMSSW', 'events_per_job'):
-            return configC2.getint('CMSSW', 'events_per_job')
-        else:
-            return configC2.getint('CMSSW', 'total_number_of_events') / configC2.getint('CMSSW', 'number_of_jobs')
+    if splitting == 'FileBased':
+            return 1
     return DEFAULT_UNITS_PER_JOB
 
 def _getlist(configC2, sectionC2, parameterC2):
