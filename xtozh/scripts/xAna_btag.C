@@ -44,8 +44,8 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
   //histogram anoucement
   TH1F* h_mZ   = new TH1F("h_mZ","",100,0,10000);
 
-  Long64_t nDeno[3]={0};
-  Long64_t nNumr[3]={0};
+  double nDeno[3]={0};
+  double nNumr[3]={0};
   
   //Event loop
   for(Long64_t jEntry=0; jEntry<data.GetEntriesFast() ;jEntry++){
@@ -174,8 +174,8 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
     Float_t* CA8jetPrunedM  = data.GetPtrFloat("CA8jetPrunedMass");
     Float_t* CA8jetCSV  = data.GetPtrFloat("CA8jetCSV");
 
-    h_CA8jetTau21->Fill(CA8jetTau2[jetIndex]/CA8jetTau1[jetIndex]);
-    h_CA8jetPrunedM->Fill(CA8jetPrunedM[jetIndex]);
+    h_CA8jetTau21->Fill(CA8jetTau2[jetIndex]/CA8jetTau1[jetIndex],PU_weight_central);
+    h_CA8jetPrunedM->Fill(CA8jetPrunedM[jetIndex],PU_weight_central);
 
 
     TLorentzVector jet(0,0,0,0);
@@ -190,7 +190,7 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
     
     Float_t mX = X.M();
 
-    h_mX->Fill(mX);
+    h_mX->Fill(mX,PU_weight_central);
 
 
     if(mX < signalM*0.85 || mX > signalM*1.15)continue;
@@ -202,13 +202,14 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
 
     Int_t   nSubPrunedJet = data.GetPtrInt("CA8nSubPrunedJet")[jetIndex];
     
-    nDeno[2]++;
-    if(CA8jetCSV[jetIndex]>0.244)nNumr[2]++;
+    nDeno[2] += PU_weight_central;
+    if(CA8jetCSV[jetIndex]>0.244)nNumr[2] += PU_weight_central;
+
 
     if(nSubPrunedJet<=1)
       {
-	nDeno[0]++;
-	if(CA8jetCSV[jetIndex]>0.244)nNumr[0]++;
+	nDeno[0] += PU_weight_central;
+	if(CA8jetCSV[jetIndex]>0.244)nNumr[0] += PU_weight_central;
       }
     else {
 
@@ -245,14 +246,14 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
 
       if(drj1j2 < 0.3)
 	{
-	  nDeno[0]++;
-	  if(CA8jetCSV[jetIndex]>0.244)nNumr[0]++;
+	  nDeno[0] += PU_weight_central;
+	  if(CA8jetCSV[jetIndex]>0.244)nNumr[0] += PU_weight_central;
 	}
       else
 	{
-	  nDeno[1]++;
+	  nDeno[1] += PU_weight_central;
 	  if(subjetPrunedCSV[jetIndex][0]>0.244 && 
-	     subjetPrunedCSV[jetIndex][1]>0.244)nNumr[1]++;
+	     subjetPrunedCSV[jetIndex][1]>0.244)nNumr[1] += PU_weight_central;
 
 	}
       
