@@ -44,8 +44,8 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
   //histogram anoucement
   TH1F* h_mZ   = new TH1F("h_mZ","",100,0,10000);
 
-  Long64_t nDeno[2]={0};
-  Long64_t nNumr[2]={0};
+  Long64_t nDeno[3]={0};
+  Long64_t nNumr[3]={0};
   
   //Event loop
   for(Long64_t jEntry=0; jEntry<data.GetEntriesFast() ;jEntry++){
@@ -172,7 +172,7 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
     Float_t* CA8jetTau1  = data.GetPtrFloat("CA8jetTau1");
     Float_t* CA8jetTau2  = data.GetPtrFloat("CA8jetTau2");
     Float_t* CA8jetPrunedM  = data.GetPtrFloat("CA8jetPrunedMass");
-    Float_t* CA8jetPrunedCSV  = data.GetPtrFloat("CA8jetPrunedCSV");
+    Float_t* CA8jetCSV  = data.GetPtrFloat("CA8jetCSV");
 
     h_CA8jetTau21->Fill(CA8jetTau2[jetIndex]/CA8jetTau1[jetIndex]);
     h_CA8jetPrunedM->Fill(CA8jetPrunedM[jetIndex]);
@@ -201,12 +201,14 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
     // if(jet.DeltaR(b_l4[0])>0.8 && jet.DeltaR(b_l4[1])>0.8)continue;
 
     Int_t   nSubPrunedJet = data.GetPtrInt("CA8nSubPrunedJet")[jetIndex];
-
+    
+    nDeno[2]++;
+    if(CA8jetCSV[jetIndex]>0.244)nNumr[2]++;
 
     if(nSubPrunedJet<=1)
       {
 	nDeno[0]++;
-	if(CA8jetPrunedCSV[jetIndex]>0.244)nNumr[0]++;
+	if(CA8jetCSV[jetIndex]>0.244)nNumr[0]++;
       }
     else {
 
@@ -244,7 +246,7 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
       if(drj1j2 < 0.3)
 	{
 	  nDeno[0]++;
-	  if(CA8jetPrunedCSV[jetIndex]>0.244)nNumr[0]++;
+	  if(CA8jetCSV[jetIndex]>0.244)nNumr[0]++;
 	}
       else
 	{
@@ -259,6 +261,7 @@ void xAna_btag(std::string inputFile, Float_t signalM=-1){
 
   } // end of loop over entries
 
+  cout << "Merged jet = " << nNumr[2] << " / " << nDeno[2] << endl;
   cout << "Merged jet = " << nNumr[0] << " / " << nDeno[0] << endl;
   cout << "Separate sub jet = " << nNumr[1] << " / " << nDeno[1] << endl;
 
