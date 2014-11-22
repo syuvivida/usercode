@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Oct 10 10:06:51 2014 by ROOT version 5.34/00
+// Sat Nov 22 16:48:17 2014 by ROOT version 5.34/00
 // from TTree tree/tree
-// found on file: /data1/delpanjNtuples/delpanj_v3_WW_pythia.root
+// found on file: /data1/delpanjNtuples/delpanj_v4_WW_pythia_filtered.root
 //////////////////////////////////////////////////////////
 
 #ifndef skimTree_h
@@ -11,14 +11,11 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-
-// Header file for the classes stored in the TTree if any.
-#include <vector>
-#include <string>
 #include <iostream>
 #include <fstream>
+// Header file for the classes stored in the TTree if any.
+#include <vector>
 using namespace std;
-
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
 class skimTree {
@@ -29,6 +26,7 @@ public :
    // Declaration of leaf types
    Float_t         pu_nTrueInt;
    Int_t           pu_nPUVert;
+   Int_t           info_isData;
    Int_t           info_eventId;
    Int_t           info_runId;
    Int_t           info_lumiSection;
@@ -172,15 +170,16 @@ public :
    vector<float>   *CA8jetPrunedTCHE;
    vector<float>   *CA8jetPrunedJP;
    vector<float>   *CA8jetPrunedJBP;
-   Int_t           CA8nSubPrunedJet;
-   vector<float>   *CA8subjetPrunedPt;
-   vector<float>   *CA8subjetPrunedEta;
-   vector<float>   *CA8subjetPrunedPhi;
-   vector<float>   *CA8subjetPrunedMass;
-   vector<float>   *CA8subjetPrunedEn;
-   vector<int>     *CA8subjetPrunedCharge;
-   vector<int>     *CA8subjetPrunedPartonFlavor;
-   vector<float>   *CA8subjetPrunedCSV;
+   vector<int>     *CA8nSubPrunedJet;
+   vector<vector<int> > *CA8subjetMotherIndex;
+   vector<vector<float> > *CA8subjetPrunedPt;
+   vector<vector<float> > *CA8subjetPrunedEta;
+   vector<vector<float> > *CA8subjetPrunedPhi;
+   vector<vector<float> > *CA8subjetPrunedMass;
+   vector<vector<float> > *CA8subjetPrunedEn;
+   vector<vector<int> > *CA8subjetPrunedCharge;
+   vector<vector<int> > *CA8subjetPrunedPartonFlavor;
+   vector<vector<float> > *CA8subjetPrunedCSV;
    Int_t           AK5nJet;
    vector<float>   *AK5jetPt;
    vector<float>   *AK5jetEta;
@@ -216,6 +215,7 @@ public :
    // List of branches
    TBranch        *b_pu_nTrueInt;   //!
    TBranch        *b_pu_nPUVert;   //!
+   TBranch        *b_info_isData;   //!
    TBranch        *b_info_eventId;   //!
    TBranch        *b_info_runId;   //!
    TBranch        *b_info_lumiSection;   //!
@@ -360,6 +360,7 @@ public :
    TBranch        *b_CA8jetPrunedJP;   //!
    TBranch        *b_CA8jetPrunedJBP;   //!
    TBranch        *b_CA8nSubPrunedJet;   //!
+   TBranch        *b_CA8subjetMotherIndex;   //!
    TBranch        *b_CA8subjetPrunedPt;   //!
    TBranch        *b_CA8subjetPrunedEta;   //!
    TBranch        *b_CA8subjetPrunedPhi;   //!
@@ -409,6 +410,7 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    string inputFile_;
+
 };
 
 #endif
@@ -416,20 +418,21 @@ public :
 #ifdef skimTree_cxx
 skimTree::skimTree(std::string inputFile, TTree *tree) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
+  // if parameter tree is not specified (or zero), connect the file
+  // used to generate this class and read the Tree.
   inputFile_= inputFile;
-   if (tree == 0) {
-     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(inputFile.data());
-      if (!f || !f->IsOpen()) {
-	f = new TFile(inputFile.data());
-      }
-     TDirectory * dir = (TDirectory*)f->Get(Form("%s:/tree",inputFile.data()));
-      dir->GetObject("tree",tree);
+  if (tree == 0) {
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(inputFile.data());
+    if (!f || !f->IsOpen()) {
+      f = new TFile(inputFile.data());
+    }
+    TDirectory * dir = (TDirectory*)f->Get(Form("%s:/tree",inputFile.data()));
+    dir->GetObject("tree",tree);
 
-   }
-   Init(tree);
+  }
+  Init(tree);
 }
+
 
 skimTree::~skimTree()
 {
@@ -586,6 +589,8 @@ void skimTree::Init(TTree *tree)
    CA8jetPrunedTCHE = 0;
    CA8jetPrunedJP = 0;
    CA8jetPrunedJBP = 0;
+   CA8nSubPrunedJet = 0;
+   CA8subjetMotherIndex = 0;
    CA8subjetPrunedPt = 0;
    CA8subjetPrunedEta = 0;
    CA8subjetPrunedPhi = 0;
@@ -631,6 +636,7 @@ void skimTree::Init(TTree *tree)
 
    fChain->SetBranchAddress("pu_nTrueInt", &pu_nTrueInt, &b_pu_nTrueInt);
    fChain->SetBranchAddress("pu_nPUVert", &pu_nPUVert, &b_pu_nPUVert);
+   fChain->SetBranchAddress("info_isData", &info_isData, &b_info_isData);
    fChain->SetBranchAddress("info_eventId", &info_eventId, &b_info_eventId);
    fChain->SetBranchAddress("info_runId", &info_runId, &b_info_runId);
    fChain->SetBranchAddress("info_lumiSection", &info_lumiSection, &b_info_lumiSection);
@@ -775,6 +781,7 @@ void skimTree::Init(TTree *tree)
    fChain->SetBranchAddress("CA8jetPrunedJP", &CA8jetPrunedJP, &b_CA8jetPrunedJP);
    fChain->SetBranchAddress("CA8jetPrunedJBP", &CA8jetPrunedJBP, &b_CA8jetPrunedJBP);
    fChain->SetBranchAddress("CA8nSubPrunedJet", &CA8nSubPrunedJet, &b_CA8nSubPrunedJet);
+   fChain->SetBranchAddress("CA8subjetMotherIndex", &CA8subjetMotherIndex, &b_CA8subjetMotherIndex);
    fChain->SetBranchAddress("CA8subjetPrunedPt", &CA8subjetPrunedPt, &b_CA8subjetPrunedPt);
    fChain->SetBranchAddress("CA8subjetPrunedEta", &CA8subjetPrunedEta, &b_CA8subjetPrunedEta);
    fChain->SetBranchAddress("CA8subjetPrunedPhi", &CA8subjetPrunedPhi, &b_CA8subjetPrunedPhi);
