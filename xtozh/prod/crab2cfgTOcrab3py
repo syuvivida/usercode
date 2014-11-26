@@ -58,7 +58,8 @@ def getInteger(configC2, sectionC2, parameterC2):
 #For each Crab3 parameter give the corresponding crab2 parameter
 paramsMap = [
     ('General'  , 'requestName'          , False, 'USER'   , 'ui_working_dir'           , RawConfigParser.get),
-    ('General'  , 'transferOutputs'       , False, 'USER'   , 'copy_data'                , RawConfigParser.getboolean),
+    ('General'  , 'workArea'             , False, 'USER'   , 'user_remote_dir'          , RawConfigParser.get),
+    ('General'  , 'transferOutputs'      , False, 'USER'   , 'copy_data'                , RawConfigParser.getboolean),
     ('JobType'  , 'psetName'             , True , 'CMSSW'  , 'pset'                     , RawConfigParser.get),
     ('JobType'  , 'pyCfgParams'          , False, 'CMSSW'  , 'pycfg_params'             , _getSpacedList),
     ('JobType'  , 'inputFiles'           , False, 'USER'  , 'additional_input_files'   , _getlist),
@@ -86,7 +87,7 @@ notYetSuppParams = ['script_arguments',
                     'outputdir',
                     'logdir',
                     'check_user_remote_dir',
-                    'user_remote_dir',
+#                    'user_remote_dir',
                     'generator',
                     'thresholdLevel',
                     'requirements',
