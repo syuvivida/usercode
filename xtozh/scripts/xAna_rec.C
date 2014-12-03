@@ -14,18 +14,20 @@
 #include <TGraphAsymmErrors.h>
 
 using namespace std;
-void xAna_trig(std::string inputFile){
+void xAna_rec(std::string inputFile){
 
   //get TTree from file ...
   TreeReader data(inputFile.data());
 
   //histogram anoucement
-  Float_t xmin[12]={0, 0.05,0.1,
-		  0.15,0.2,
-		  0.25,0.3,
-		  0.35,0.4,
-		  0.45,0.5,
-		  1.5};
+  Float_t xmin[13]={0, 0.05,
+		    0.1,0.15,
+		    0.2,0.25,
+		    0.3,0.35,
+		    0.4,0.45,
+		    0.5,
+		    1.0,
+		    1.5};
   TH1F* h_mZ   = new TH1F("h_mZ","",100,50,150);
   TH1F* h_dphi = new TH1F("h_dphi","",30,0,TMath::Pi());
   h_dphi->SetMarkerStyle(8);
@@ -41,18 +43,15 @@ void xAna_trig(std::string inputFile){
   TH1F* h_deta_deno = (TH1F*)h_deta->Clone("h_deta_deno");
   TH1F* h_deta_numr_muonReco[3];
 
-  TH1F* h_dR   = new TH1F("h_dR","",15,0,1.5);
+  TH1F* h_dR   = new TH1F("h_dR","",12,xmin);
+  //  TH1F* h_dR   = new TH1F("h_dR","",15,0,1.5);
   h_dR  ->SetMarkerStyle(8);
   h_dR  ->SetMarkerSize(1);
   h_dR->SetXTitle("#Delta R between generator-level muons");
   TH1F* h_dR_deno = (TH1F*)h_dR->Clone("h_dR_deno");
   TH1F* h_dR_numr_muonReco[3];
-  TH1F* h_dR_numr_muonTrig[3];
 
-  std::string title[3]={"Two Global muon", "1 Global + 1 Trk", "2 Trks"};
-  std::string muTrigNames[3]={"HLT_Mu17_Mu8",
-			      "HLT_Mu17_TkMu8",
-			      "HLT_Mu30_TkMu11"};
+  std::string title[3]={"Two Global muon", "inclusive 1 Global + 1 Trk", "2 Trks"};
 
   for(int i=0; i < 3; i++)
     { 
@@ -62,9 +61,7 @@ void xAna_trig(std::string inputFile){
       h_dphi_numr_muonReco[i] -> SetTitle(title[i].data());
       h_deta_numr_muonReco[i] = (TH1F*)h_deta->Clone(Form("h_deta_numr_muonReco%d",i));
       h_deta_numr_muonReco[i] -> SetTitle(title[i].data());
-
-      h_dR_numr_muonTrig[i] = (TH1F*)h_dR->Clone(Form("h_dR_numr_muonTrig%d",i));
-      h_dR_numr_muonTrig[i] -> SetTitle(muTrigNames[i].data());
+      
     }
   
   //Event loop
@@ -76,8 +73,6 @@ void xAna_trig(std::string inputFile){
     data.GetEntry(jEntry);
 
 
-    std::string* trigName = data.GetPtrString("trigName");
-    Int_t* trigResult = data.GetPtrInt("hlt_trigResult");
 
     Int_t nGenPar        = data.GetInt("nGenPar");
     Int_t* genParId      = data.GetPtrInt("genParId");
@@ -146,7 +141,7 @@ void xAna_trig(std::string inputFile){
     // gg, gt, tt
     bool findPair[3]={false,false,false};
 
-    const float dRMin = 0.4;
+    const float dRMin = 0.1;
     
     // loop over two reco muons and see if they are matched to generator-level muons
     for(int i=0; i < nMu; i++){
@@ -196,6 +191,7 @@ void xAna_trig(std::string inputFile){
 	   (dR1_gen1 < dRMin && dR2_gen0 < dRMin) )
 	 )
 	findPair[0]=true;
+
       if(isTrack1 && isTrack2  && 
 	 ( (dR1_gen0 < dRMin && dR2_gen1 < dRMin) || 
 	   (dR1_gen1 < dRMin && dR2_gen0 < dRMin) )
@@ -208,7 +204,7 @@ void xAna_trig(std::string inputFile){
 	   (dR1_gen1 < dRMin && dR2_gen0 < dRMin) )
 	 )
 	findPair[1]=true;
-	
+
 
       } // end loop of muon j
 
@@ -238,41 +234,18 @@ void xAna_trig(std::string inputFile){
 	h_deta_numr_muonReco[2]->Fill(gendEta);
       }
 
-    if( findPair[0] || findPair[1] || findPair[2]){
 
-      const Int_t nsize = data.GetPtrStringSize();
-      bool passTrigger[3]={false,false,false};
-      for(int it=0; it< nsize; it++)
-	{
-	  std::string thisTrig= trigName[it];
-	  int results = trigResult[it];
-	  
-	  for(int i=0;i<3;i++){
-	    if(thisTrig.find(muTrigNames[i].data())!= std::string::npos 
-	       && results==1)
-	      passTrigger[i]=true;
-	  }
-	}
-
-      for(int i=0;i<3;i++)
-	{
-	  if(passTrigger[i])
-	    h_dR_numr_muonTrig[i]->Fill(gendR);
-	
-	}
-    }  
 
   } // end of loop over entries
 
 
-  TGraphAsymmErrors* htrigeff[3];
   TGraphAsymmErrors* hrecoeff[3];
   TGraphAsymmErrors* hrecoeffPhi[3];
   TGraphAsymmErrors* hrecoeffEta[3];
 
   //save output
   TString endfix=gSystem->GetFromPipe(Form("file=%s; echo \"${file##*/}\"",inputFile.data()));
-  TString outputFile = "trigHisto_" + endfix;
+  TString outputFile = "recHisto_" + endfix;
   TFile* outFile = new TFile(outputFile.Data(),"recreate");
   h_mZ->Write();
 
@@ -281,45 +254,44 @@ void xAna_trig(std::string inputFile){
   h_deta_deno ->Write();
 
   for(int i=0; i<3; i++){
-  h_dR_numr_muonReco[i]->Write();
-  h_dR_numr_muonTrig[i]->Write();
-  h_dphi_numr_muonReco[i]->Write();
-  h_deta_numr_muonReco[i]->Write();
+    
 
-  htrigeff[i]=new TGraphAsymmErrors(h_dR_numr_muonTrig[i], h_dR_deno);
-				    // "cl=0.683 b(1,1) mode");
-  htrigeff[i]->SetMarkerStyle(8);
-  htrigeff[i]->SetMarkerSize(1);
-  htrigeff[i]->SetName(Form("htrigeff%02i",i));
-  htrigeff[i]->GetXaxis()->SetTitle("#Delta R between generator-level muons");
-  htrigeff[i]->GetYaxis()->SetTitle("Efficiency");
-
-  hrecoeff[i]=new TGraphAsymmErrors(h_dR_numr_muonReco[i], h_dR_deno);
-  hrecoeff[i]->SetMarkerStyle(8);
-  hrecoeff[i]->SetMarkerSize(1);
-  hrecoeff[i]->SetName(Form("hrecoeff%02i",i));
-  hrecoeff[i]->GetXaxis()->SetTitle("#Delta R between generator-level muons");
-  hrecoeff[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
-
-  hrecoeffPhi[i]=new TGraphAsymmErrors(h_dphi_numr_muonReco[i], h_dphi_deno);
-  hrecoeffPhi[i]->SetMarkerStyle(8);
-  hrecoeffPhi[i]->SetMarkerSize(1);
-  hrecoeffPhi[i]->SetName(Form("hrecoeffPhi%02i",i));
-  hrecoeffPhi[i]->GetXaxis()->SetTitle("|#Delta #phi| between generator-level muons");
-  hrecoeffPhi[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
-
-  hrecoeffEta[i]=new TGraphAsymmErrors(h_deta_numr_muonReco[i], h_deta_deno);
-  hrecoeffEta[i]->SetMarkerStyle(8);
-  hrecoeffEta[i]->SetMarkerSize(1);
-  hrecoeffEta[i]->SetName(Form("hrecoeffEta%02i",i));
-  hrecoeffEta[i]->GetXaxis()->SetTitle("|#Delta #eta| between generator-level muons");
-  hrecoeffEta[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+    h_dR_numr_muonReco[i]->Write();
+    h_dphi_numr_muonReco[i]->Write();
+    h_deta_numr_muonReco[i]->Write();
 
 
-  htrigeff[i]->Write();
-  hrecoeff[i]->Write();
-  hrecoeffPhi[i]->Write();
-  hrecoeffEta[i]->Write();
+    hrecoeff[i]=new TGraphAsymmErrors(h_dR_numr_muonReco[i], h_dR_deno);
+    hrecoeff[i]->SetMarkerStyle(8);
+    hrecoeff[i]->SetMarkerSize(1);
+    hrecoeff[i]->SetMinimum(0);
+    hrecoeff[i]->SetMaximum(1.1);
+    hrecoeff[i]->SetName(Form("hrecoeff%02i",i));
+    hrecoeff[i]->GetXaxis()->SetTitle("#Delta R between generator-level muons");
+    hrecoeff[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+
+    hrecoeffPhi[i]=new TGraphAsymmErrors(h_dphi_numr_muonReco[i], h_dphi_deno);
+    hrecoeffPhi[i]->SetMarkerStyle(8);
+    hrecoeffPhi[i]->SetMarkerSize(1);
+    hrecoeffPhi[i]->SetMinimum(0);
+    hrecoeffPhi[i]->SetMaximum(1.1);
+    hrecoeffPhi[i]->SetName(Form("hrecoeffPhi%02i",i));
+    hrecoeffPhi[i]->GetXaxis()->SetTitle("|#Delta #phi| between generator-level muons");
+    hrecoeffPhi[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+
+    hrecoeffEta[i]=new TGraphAsymmErrors(h_deta_numr_muonReco[i], h_deta_deno);
+    hrecoeffEta[i]->SetMarkerStyle(8);
+    hrecoeffEta[i]->SetMarkerSize(1);
+    hrecoeffEta[i]->SetMinimum(0);
+    hrecoeffEta[i]->SetMaximum(1.1);
+    hrecoeffEta[i]->SetName(Form("hrecoeffEta%02i",i));
+    hrecoeffEta[i]->GetXaxis()->SetTitle("|#Delta #eta| between generator-level muons");
+    hrecoeffEta[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+
+
+    hrecoeff[i]->Write();
+    hrecoeffPhi[i]->Write();
+    hrecoeffEta[i]->Write();
   }
   outFile->Close();
 }
