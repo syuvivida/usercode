@@ -125,7 +125,8 @@ void xAna_rec(std::string inputFile){
 
     h_mZ->Fill((l4_mu[0]+l4_mu[1]).M());
 
-    
+    if(gendR > 0.4 && gendEta < 0.4)
+      cout << "gendR = " << gendR << " and gendEta = " << gendEta << endl;
 
 
 
@@ -135,6 +136,9 @@ void xAna_rec(std::string inputFile){
     Float_t* muM         = data.GetPtrFloat("muM");
     Int_t*   isGlobalMuon = data.GetPtrInt("isGlobalMuon");
     Int_t*   isTrackerMuon = data.GetPtrInt("isTrackerMuon");
+    Int_t*   isGood        = data.GetPtrInt("muGood");
+    Int_t*   ITrkID        = data.GetPtrInt("muITrkID");
+    Int_t*   SegID         = data.GetPtrInt("muSegID");
     Int_t    nMu   = data.GetInt("nMu"); 
 
 
@@ -149,7 +153,10 @@ void xAna_rec(std::string inputFile){
       bool isGlobal1 = isGlobalMuon[i];
       bool isTrack1  = isTrackerMuon[i];
       if(!isGlobal1 && !isTrack1)continue;
-     
+      if(muPt[i]<10)continue;
+      if(fabs(muEta[i])>2.4)continue;
+      if(isGood[i]==0)continue;
+ 
       TLorentzVector thisMu(0,0,0,0);
       thisMu.SetPtEtaPhiM
 	(
@@ -171,6 +178,11 @@ void xAna_rec(std::string inputFile){
 	bool isTrack2  = isTrackerMuon[j];
 
 	if(!isGlobal2 && !isTrack2)continue;
+	if(muPt[j]<10)continue;
+	if(fabs(muEta[j])>2.4)continue;
+	if(isGood[j]==0)continue;
+
+	if(ITrkID[i]!=-1 && ITrkID[i]==ITrkID[j])continue;
 
 	TLorentzVector thatMu(0,0,0,0);
 	thatMu.SetPtEtaPhiM
@@ -268,7 +280,9 @@ void xAna_rec(std::string inputFile){
     hrecoeff[i]->SetMaximum(1.1);
     hrecoeff[i]->SetName(Form("hrecoeff%02i",i));
     hrecoeff[i]->GetXaxis()->SetTitle("#Delta R between generator-level muons");
+    hrecoeff[i]->GetXaxis()->SetTitleSize(0.045);
     hrecoeff[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+    hrecoeff[i]->GetYaxis()->SetTitleSize(0.045);
 
     hrecoeffPhi[i]=new TGraphAsymmErrors(h_dphi_numr_muonReco[i], h_dphi_deno);
     hrecoeffPhi[i]->SetMarkerStyle(8);
@@ -277,7 +291,9 @@ void xAna_rec(std::string inputFile){
     hrecoeffPhi[i]->SetMaximum(1.1);
     hrecoeffPhi[i]->SetName(Form("hrecoeffPhi%02i",i));
     hrecoeffPhi[i]->GetXaxis()->SetTitle("|#Delta #phi| between generator-level muons");
+    hrecoeffPhi[i]->GetXaxis()->SetTitleSize(0.045);
     hrecoeffPhi[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+    hrecoeffPhi[i]->GetYaxis()->SetTitleSize(0.045);
 
     hrecoeffEta[i]=new TGraphAsymmErrors(h_deta_numr_muonReco[i], h_deta_deno);
     hrecoeffEta[i]->SetMarkerStyle(8);
@@ -286,7 +302,9 @@ void xAna_rec(std::string inputFile){
     hrecoeffEta[i]->SetMaximum(1.1);
     hrecoeffEta[i]->SetName(Form("hrecoeffEta%02i",i));
     hrecoeffEta[i]->GetXaxis()->SetTitle("|#Delta #eta| between generator-level muons");
+    hrecoeffEta[i]->GetXaxis()->SetTitleSize(0.045);
     hrecoeffEta[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+    hrecoeffEta[i]->GetYaxis()->SetTitleSize(0.045);
 
 
     hrecoeff[i]->Write();
