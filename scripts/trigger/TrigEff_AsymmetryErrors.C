@@ -1,4 +1,3 @@
-#include </home/syu/Photon_Code/CMSSW_3_1_2/src/syu/MyObjectCounter/test/triggerscripts/beta_asymmetry.C>
 #include <TGraphAsymmErrors.h>
 #include <TH1.h>
 

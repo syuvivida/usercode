@@ -1,0 +1,6 @@
+#!/bin/sh
+
+string=$1
+file=$2
+
+awk '/'$string'/ { count++ } END { print count }' $file
