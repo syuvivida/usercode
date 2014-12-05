@@ -29,6 +29,14 @@ void xAna_rec(std::string inputFile){
 		    1.0,
 		    1.5};
   TH1F* h_mZ   = new TH1F("h_mZ","",100,50,150);
+  TH1F* h_dR   = new TH1F("h_dR","",12,xmin);
+  //  TH1F* h_dR   = new TH1F("h_dR","",15,0,1.5);
+  h_dR  ->SetMarkerStyle(8);
+  h_dR  ->SetMarkerSize(1);
+  h_dR   ->SetXTitle("#Delta R between generator-level muons");
+  TH1F* h_dR_deno = (TH1F*)h_dR->Clone("h_dR_deno");
+  TH1F* h_dR_numr_muonReco[3];
+
   TH1F* h_dphi = new TH1F("h_dphi","",30,0,TMath::Pi());
   h_dphi->SetMarkerStyle(8);
   h_dphi->SetMarkerSize(1);
@@ -43,13 +51,13 @@ void xAna_rec(std::string inputFile){
   TH1F* h_deta_deno = (TH1F*)h_deta->Clone("h_deta_deno");
   TH1F* h_deta_numr_muonReco[3];
 
-  TH1F* h_dR   = new TH1F("h_dR","",12,xmin);
-  //  TH1F* h_dR   = new TH1F("h_dR","",15,0,1.5);
-  h_dR  ->SetMarkerStyle(8);
-  h_dR  ->SetMarkerSize(1);
-  h_dR->SetXTitle("#Delta R between generator-level muons");
-  TH1F* h_dR_deno = (TH1F*)h_dR->Clone("h_dR_deno");
-  TH1F* h_dR_numr_muonReco[3];
+
+  TH1F* h_ptZ   = new TH1F("h_ptZ","",15,0,3000);
+  h_ptZ ->SetMarkerStyle(8);
+  h_ptZ ->SetMarkerSize(1);
+  h_ptZ ->SetXTitle("generator-level p_{T}(ll) [GeV]");
+  TH1F* h_ptZ_deno = (TH1F*)h_ptZ->Clone("h_ptZ_deno");
+  TH1F* h_ptZ_numr_muonReco[3];
 
   std::string title[3]={"Two Global muon", "inclusive 1 Global + 1 Trk", "2 Trks"};
 
@@ -61,6 +69,8 @@ void xAna_rec(std::string inputFile){
       h_dphi_numr_muonReco[i] -> SetTitle(title[i].data());
       h_deta_numr_muonReco[i] = (TH1F*)h_deta->Clone(Form("h_deta_numr_muonReco%d",i));
       h_deta_numr_muonReco[i] -> SetTitle(title[i].data());
+      h_ptZ_numr_muonReco[i] = (TH1F*)h_ptZ->Clone(Form("h_ptZ_numr_muonReco%d",i));
+      h_ptZ_numr_muonReco[i] -> SetTitle(title[i].data());
       
     }
   
@@ -123,10 +133,13 @@ void xAna_rec(std::string inputFile){
     Float_t gendEta = fabs(l4_mu[0].Eta()-l4_mu[1].Eta());
     h_deta_deno->Fill(gendEta);
 
+    Float_t genptll = (l4_mu[0]+l4_mu[1]).Pt();
+    h_ptZ_deno->Fill(genptll);
+
     h_mZ->Fill((l4_mu[0]+l4_mu[1]).M());
 
-    if(gendR > 0.4 && gendEta < 0.4)
-      cout << "gendR = " << gendR << " and gendEta = " << gendEta << endl;
+    // if(gendR > 0.4 && gendEta < 0.4)
+    //   cout << "gendR = " << gendR << " and gendEta = " << gendEta << endl;
 
 
 
@@ -229,6 +242,7 @@ void xAna_rec(std::string inputFile){
 	h_dR_numr_muonReco[0]->Fill(gendR);
 	h_dphi_numr_muonReco[0]->Fill(gendPhi);
 	h_deta_numr_muonReco[0]->Fill(gendEta);
+	h_ptZ_numr_muonReco[0]->Fill(genptll);
       }
 
     if(findPair[1])
@@ -236,6 +250,7 @@ void xAna_rec(std::string inputFile){
 	h_dR_numr_muonReco[1]->Fill(gendR);
 	h_dphi_numr_muonReco[1]->Fill(gendPhi);
 	h_deta_numr_muonReco[1]->Fill(gendEta);
+	h_ptZ_numr_muonReco[1]->Fill(genptll);
       }
      
 
@@ -244,6 +259,7 @@ void xAna_rec(std::string inputFile){
 	h_dR_numr_muonReco[2]->Fill(gendR); 
 	h_dphi_numr_muonReco[2]->Fill(gendPhi);
 	h_deta_numr_muonReco[2]->Fill(gendEta);
+	h_ptZ_numr_muonReco[2]->Fill(genptll);
       }
 
 
@@ -254,6 +270,7 @@ void xAna_rec(std::string inputFile){
   TGraphAsymmErrors* hrecoeff[3];
   TGraphAsymmErrors* hrecoeffPhi[3];
   TGraphAsymmErrors* hrecoeffEta[3];
+  TGraphAsymmErrors* hrecoeffPtZ[3];
 
   //save output
   TString endfix=gSystem->GetFromPipe(Form("file=%s; echo \"${file##*/}\"",inputFile.data()));
@@ -264,6 +281,7 @@ void xAna_rec(std::string inputFile){
   h_dR_deno ->Write();
   h_dphi_deno ->Write();
   h_deta_deno ->Write();
+  h_ptZ_deno->Write();
 
   for(int i=0; i<3; i++){
     
@@ -271,6 +289,7 @@ void xAna_rec(std::string inputFile){
     h_dR_numr_muonReco[i]->Write();
     h_dphi_numr_muonReco[i]->Write();
     h_deta_numr_muonReco[i]->Write();
+    h_ptZ_numr_muonReco[i]->Write();
 
 
     hrecoeff[i]=new TGraphAsymmErrors(h_dR_numr_muonReco[i], h_dR_deno);
@@ -306,10 +325,21 @@ void xAna_rec(std::string inputFile){
     hrecoeffEta[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
     hrecoeffEta[i]->GetYaxis()->SetTitleSize(0.045);
 
+    hrecoeffPtZ[i]=new TGraphAsymmErrors(h_ptZ_numr_muonReco[i], h_ptZ_deno);
+    hrecoeffPtZ[i]->SetMarkerStyle(8);
+    hrecoeffPtZ[i]->SetMarkerSize(1);
+    hrecoeffPtZ[i]->SetMinimum(0);
+    hrecoeffPtZ[i]->SetMaximum(1.1);
+    hrecoeffPtZ[i]->SetName(Form("hrecoeffPtZ%02i",i));
+    hrecoeffPtZ[i]->GetXaxis()->SetTitle("generator-level p_{T}(ll) [GeV]");
+    hrecoeffPtZ[i]->GetXaxis()->SetTitleSize(0.045);
+    hrecoeffPtZ[i]->GetYaxis()->SetTitle("Reconstruction Efficiency");
+    hrecoeffPtZ[i]->GetYaxis()->SetTitleSize(0.045);
 
     hrecoeff[i]->Write();
     hrecoeffPhi[i]->Write();
     hrecoeffEta[i]->Write();
+    hrecoeffPtZ[i]->Write();
   }
   outFile->Close();
 }
