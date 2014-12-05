@@ -151,7 +151,7 @@ void xAna_rec(std::string inputFile){
     Int_t*   isTrackerMuon = data.GetPtrInt("isTrackerMuon");
     Int_t*   isGood        = data.GetPtrInt("muGood");
     Int_t*   ITrkID        = data.GetPtrInt("muITrkID");
-    Int_t*   SegID         = data.GetPtrInt("muSegID");
+    // Int_t*   SegID         = data.GetPtrInt("muSegID");
     Int_t    nMu   = data.GetInt("nMu"); 
 
 
