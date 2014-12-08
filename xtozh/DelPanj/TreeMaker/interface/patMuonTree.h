@@ -34,20 +34,20 @@ class patMuonTree : public baseTree {
 //TTree* tree_;
   //Dont Allow User to Call the Default Constructor.
   patMuonTree();
-
+  friend class bestMuonPtGreater;
   muSelector globalMuonID_;
   muSelector trackerMuonID_;
   edm::InputTag patMuonLabel_;
 
 
 
-  std::vector<Int_t> patMuonType;
  //pt, eta, phi, M : Enough to caluclate
   //px,py,pz etc.==>No need to store later
 
   Int_t nMu_;
-  std::vector<std::string> patMuonType_; 
+  std::vector<Int_t>   patMuonType_; 
   std::vector<Float_t> patMuonPt_;
+  std::vector<Float_t> patMuonSimplePt_;
   std::vector<Float_t> patMuonEta_;
   std::vector<Float_t> patMuonPhi_;
   std::vector<Float_t> patMuonM_;
@@ -77,6 +77,20 @@ class patMuonTree : public baseTree {
   std::vector<Int_t>   patMuonMatches_;
 
 };
+
+
+class bestMuonPtGreater {
+  public:
+  bestMuonPtGreater(patMuonTree* a){a_=a;}
+  patMuonTree* a_;
+  bool operator () (const pat::Muon& i, const pat::Muon& j) {
+    Float_t pti = a_->globalMuonID_.GetBestMuonPt(i);
+    Float_t ptj = a_->globalMuonID_.GetBestMuonPt(j);
+    return (pti>ptj);
+  }
+};
+
+
 
 #endif
 

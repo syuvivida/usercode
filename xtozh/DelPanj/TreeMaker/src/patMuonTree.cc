@@ -58,7 +58,8 @@ patMuonTree::Fill(const edm::Event& iEvent){
 	     <<patMuonLabel_<<std::endl; exit(0);}
 
   pat::MuonCollection muColl(*(patMuonHandle.product()));
-  std::sort(muColl.begin(),muColl.end(),PtGreater());
+  bestMuonPtGreater tempComp(this);
+  std::sort(muColl.begin(),muColl.end(), tempComp);
 
 
   pat::MuonCollection::const_iterator mu;
@@ -66,8 +67,10 @@ patMuonTree::Fill(const edm::Event& iEvent){
   for(mu=muColl.begin(); mu!=muColl.end(); mu++){
     
     nMu_++;
+    patMuonType_.push_back(mu->type());
     Float_t pt = globalMuonID_.GetBestMuonPt(*mu); // if it's hightPtID and a global muon, returns muon::tevOptimized                                                                             // else returns mu->pt()   
     patMuonPt_.push_back(pt);
+    patMuonSimplePt_.push_back(mu->pt());
     patMuonEta_.push_back(mu->eta());
     patMuonPhi_.push_back(mu->phi());
     patMuonM_.push_back(mu->mass());
@@ -170,7 +173,9 @@ void
 patMuonTree::SetBranches(){
 
   AddBranch(&nMu_,"nMu");
+  AddBranch(&patMuonType_,"muType");
   AddBranch(&patMuonPt_, "muPt");
+  AddBranch(&patMuonSimplePt_, "muSimplePt");
   AddBranch(&patMuonEta_, "muEta");
   AddBranch(&patMuonPhi_, "muPhi");
   AddBranch(&patMuonM_, "muM");
@@ -205,7 +210,9 @@ void
 patMuonTree::Clear(){
 
   nMu_ =0;
+  patMuonType_.clear();
   patMuonPt_.clear();
+  patMuonSimplePt_.clear();
   patMuonEta_.clear();
   patMuonPhi_.clear();
   patMuonM_.clear();
