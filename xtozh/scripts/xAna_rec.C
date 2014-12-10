@@ -209,26 +209,23 @@ void xAna_rec(std::string inputFile){
 	float dR2_gen0= thatMu.DeltaR(l4_mu[0]);
 	float dR2_gen1= thatMu.DeltaR(l4_mu[1]);
 	
-      if(dR2_gen0 > dRMin && dR2_gen1 > dRMin)continue;
+	if(dR2_gen0 > dRMin && dR2_gen1 > dRMin)continue;
 
-      if(isGlobal1 && isGlobal2 && 
-	 ( (dR1_gen0 < dRMin && dR2_gen1 < dRMin) || 
-	   (dR1_gen1 < dRMin && dR2_gen0 < dRMin) )
-	 )
+	bool matched = 
+	  (dR1_gen0 < dRMin && dR2_gen1 < dRMin) || 
+	  (dR1_gen1 < dRMin && dR2_gen0 < dRMin);
+
+	if(!matched)continue;
+
+      if(isGlobal1 && isGlobal2)
 	findPair[0]=true;
 
-      if(isTrack1 && isTrack2  && 
-	 ( (dR1_gen0 < dRMin && dR2_gen1 < dRMin) || 
-	   (dR1_gen1 < dRMin && dR2_gen0 < dRMin) )
-	 )
-	findPair[2]=true;
-
-      if(( (isGlobal1 && isTrack2)  || (isGlobal2 && isTrack1) || 
-	   (isGlobal1 && isGlobal2)) && 
-	 ( (dR1_gen0 < dRMin && dR2_gen1 < dRMin) || 
-	   (dR1_gen1 < dRMin && dR2_gen0 < dRMin) )
-	 )
+      if((isGlobal1 && isTrack2)  || (isGlobal2 && isTrack1) || 
+	 (isGlobal1 && isGlobal2))
 	findPair[1]=true;
+
+      if(isTrack1 && isTrack2)
+	findPair[2]=true;
 
 
       } // end loop of muon j
