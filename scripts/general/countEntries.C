@@ -5,17 +5,16 @@
 #include <TSystemDirectory.h>
 #include <TList.h>
 
-void countEntries(std::string dirname, std::string rootname="MultiPhotonAnalyzer",
-		  std::string treename="NTuples/Analysis")
+void countEntries(std::string dirname, std::string rootname="NCU",
+		  std::string treename="tree/treeMaker")
 {
 
   // chain in all the ncu ntuples in the same directory
   TChain* pho = new TChain(treename.data());
 
   TSystemDirectory *base = new TSystemDirectory("root","root");
-  std::string filename =  dirname;
 
-  base->SetDirectory(filename.data());
+  base->SetDirectory(dirname.data());
   TList *listOfFiles = base->GetListOfFiles();
   TIter fileIt(listOfFiles);
   TFile *fileH = new TFile();
