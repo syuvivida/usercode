@@ -29,7 +29,7 @@ void dumpPDF(std::string inputFile_)
   // loop over all keys in this directory
   TIter nextkey( current_sourcedir->GetListOfKeys() );
   TKey *key;
-  while (key = (TKey*)nextkey() ) {
+  while ((key = (TKey*)nextkey()) ) {
 
     TObject *obj = key->ReadObj();
     if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
