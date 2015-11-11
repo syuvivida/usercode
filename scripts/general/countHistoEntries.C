@@ -11,6 +11,8 @@
 #include <TList.h>
 using namespace std;
 
+
+/// note you need to give full path of the directory name
 void countHistoEntries(string dirname, string rootname="NCU", string id="data7")
 {
   string inputTextFile = "inputdir.txt";
@@ -26,6 +28,7 @@ void countHistoEntries(string dirname, string rootname="NCU", string id="data7")
   ifstream fin;
   fin.open(inputTextFile.data());
   fin >> tempdir;
+
   TString realDirName = gSystem->GetFromPipe(Form("a=%s; echo ${a%%:*}",tempdir.data()));
   while(!fin.eof()){
     if(realDirName.Contains("fail")){
