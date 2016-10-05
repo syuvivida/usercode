@@ -5,7 +5,7 @@
 void displayMultipleFiles(std::string inputTextFile, 
 			  std::string var, 
 			  std::string xtitle="", std::string ytitle="",
-			  std::string output="test", bool logScale=false)
+			  std::string output="test", float factor=1.2,bool logScale=false)
 {
   
   setTDRStyle();
@@ -63,13 +63,15 @@ void displayMultipleFiles(std::string inputTextFile,
     h[i] = (TH1F*)(f[i]->Get(var.data()));
     h[i]->SetXTitle(xtitle.data());  
     h[i]->SetYTitle(ytitle.data());  
+    h[i]->SetTitleOffset(1.4,"Y");  
     h[i]->GetYaxis()->SetDecimals();
     h[i]->GetYaxis()->SetNdivisions(5);
     h[i]->GetXaxis()->SetNdivisions(5);
     h[i]->SetLineColor(1+i);
+    h[i]->SetLineWidth(3);
     h[i]->SetMarkerColor(1+i);
-    h[i]->SetMarkerSize(1);
-    h[i]->SetMarkerStyle(21);
+    // h[i]->SetMarkerSize(1);
+    // h[i]->SetMarkerStyle(21);
     h[i]->Rebin(2);
 
     cout << "h[" << i << "] mean = " << h[i]->GetMean() << " and width = " << h[i]->GetRMS() << 
@@ -86,18 +88,17 @@ void displayMultipleFiles(std::string inputTextFile,
     if(max1>max){max = max1; maxHisto=i;}
   }
 
-//   h[maxHisto]->SetMaximum(0.15);
-  h[maxHisto]->SetMaximum(0.1);
-  h[maxHisto]->Draw("histe");
+  for(int i=0; i<nfile; i++)h[i]->SetMaximum(factor*max);  
+  h[0]->Draw("hist");
   for(int i=0; i<nfile; i++)h[i]->Draw("histesame");
     
 
-  TLegend* leg = new TLegend(0.31,0.425,0.51,0.85);
+  TLegend* leg = new TLegend(0.415,0.516,0.614,0.939);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetTextSize(0.04);
   leg->SetBorderSize(0);
-  leg->SetHeader("|y_{B}| < 0.5");
+  // leg->SetHeader("|y_{B}| < 0.5");
   for(int i=0; i< nfile; i++)
     leg->AddEntry(h[i], legendName[i].data());
   leg->Draw("same");
